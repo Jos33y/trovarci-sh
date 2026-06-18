@@ -2,10 +2,15 @@
   "name": "trovarci-sh",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
+    "migrate": "node-pg-migrate up -m migrations",
+    "migrate:down": "node-pg-migrate down -m migrations",
     "db:migrate": "dotenv -e .env -- node-pg-migrate up -m migrations",
     "db:migrate:down": "dotenv -e .env -- node-pg-migrate down -m migrations",
     "db:migrate:new": "dotenv -e .env -- node-pg-migrate create -m migrations --migration-file-language js",
