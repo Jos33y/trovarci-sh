@@ -1,0 +1,192 @@
+/* ═══════════════════════════════════════════
+   PAYMENT PENDING / STATUS PAGE
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: calc(100vh - 64px);
+  padding: var(--space-4xl) var(--space-md);
+  background: var(--trov-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ─── Card ───────────────────────────────── */
+
+.card {
+  padding: var(--space-2xl);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.cardSuccess {
+  border-color: var(--trov-success);
+  box-shadow: 0 0 40px rgba(52, 211, 153, 0.08);
+}
+
+.cardFail {
+  border-color: var(--trov-error);
+}
+
+/* ─── Icon ───────────────────────────────── */
+
+.iconWrap {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--trov-accent);
+}
+
+.iconSuccess {
+  color: var(--trov-success);
+}
+
+.iconFail {
+  color: var(--trov-error);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Title + subtitle ───────────────────── */
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--trov-text);
+  margin-bottom: var(--space-sm);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.9375rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-xl);
+}
+
+.highlight {
+  color: var(--trov-accent);
+  font-weight: 600;
+}
+
+/* ─── Details table ──────────────────────── */
+
+.details {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+}
+
+.detailValue {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.detailValueMono {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+/* ─── Footnote ───────────────────────────── */
+
+.footnote {
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* ─── Actions ───────────────────────────── */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 var(--space-lg);
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.primaryBtn:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 var(--space-lg);
+  background: transparent;
+  color: var(--trov-text);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.secondaryBtn:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}

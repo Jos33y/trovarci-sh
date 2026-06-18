@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════
+   USER MENU - avatar trigger + dropdown panel
+   ═══════════════════════════════════════════ */
+
+.root {
+  position: relative;
+  display: inline-block;
+}
+
+/* ─── Trigger (avatar button) ─────────────── */
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid var(--trov-border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.trigger:hover {
+  border-color: var(--trov-accent);
+}
+
+.trigger:active {
+  transform: scale(0.96);
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--trov-gradient);
+  color: var(--trov-text-on-accent);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Panel ───────────────────────────────── */
+.panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 260px;
+  padding: 6px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  animation: userMenuIn 0.15s ease;
+}
+
+@keyframes userMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── User info block ─────────────────────── */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 8px;
+}
+
+.userInitial {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--trov-gradient);
+  color: var(--trov-text-on-accent);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userDetails {
+  min-width: 0;
+  flex: 1;
+}
+
+.userEmail {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userMeta {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── Divider ─────────────────────────────── */
+.divider {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--trov-border);
+}
+
+/* ─── Menu items ──────────────────────────── */
+.item,
+.itemDanger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--trov-text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--trov-surface-light);
+  color: var(--trov-text);
+  outline: none;
+}
+
+.itemDanger:hover,
+.itemDanger:focus-visible {
+  background: var(--trov-error-bg);
+  color: var(--trov-error);
+  outline: none;
+}

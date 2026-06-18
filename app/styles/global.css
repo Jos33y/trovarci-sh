@@ -1,0 +1,172 @@
+@import './variables.css';
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--trov-text);
+  background-color: var(--trov-bg);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); font-weight: 700; }
+
+a {
+  color: var(--trov-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover { color: var(--trov-accent-hover); }
+
+code, pre { font-family: var(--font-mono); }
+
+img { max-width: 100%; height: auto; display: block; }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* iOS zoom prevention - all interactive inputs 16px minimum */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* ——— LAYOUT UTILITIES ——— */
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container--narrow { max-width: var(--max-width-narrow); }
+.container--blog { max-width: var(--max-width-blog); }
+
+.section {
+  padding: var(--space-4xl) 0;
+}
+
+/* ——— ACCESSIBILITY ——— */
+
+:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ——— PAGE ENTRANCE LOADER ——— */
+/* Server-rendered. Visible immediately. Fades after JS hydrates. */
+
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background-color: #09090B;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+#page-loader svg {
+  animation: loaderPulse 1.6s ease-in-out infinite;
+}
+
+#page-loader-bar {
+  width: 120px;
+  height: 2px;
+  background: #27272A;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#page-loader-fill {
+  height: 100%;
+  background: #D4A843;
+  border-radius: 2px;
+  animation: loaderFill 1.2s ease-out forwards;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes loaderFill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* After hydration — fade loader out */
+body[data-hydrated] #page-loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Safety net — if JS fails, loader auto-fades after 3s */
+@keyframes loaderSafetyFade {
+  0%, 80% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+#page-loader {
+  animation: loaderSafetyFade 3s ease forwards;
+}
+
+/* Hydrated body overrides the safety animation */
+body[data-hydrated] #page-loader {
+  animation: none;
+}
+
+/* ——— REDUCED MOTION ——— */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+  /* Still hide loader immediately */
+  body[data-hydrated] #page-loader {
+    display: none;
+  }
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section { padding: var(--space-3xl) 0; }
+  .container { padding: 0 var(--space-md); }
+}

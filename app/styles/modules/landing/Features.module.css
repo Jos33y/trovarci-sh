@@ -1,0 +1,113 @@
+/* ——— FEATURES SECTION ——— */
+
+.section {
+  position: relative;
+  padding: calc(var(--space-4xl) + var(--space-lg)) 0;
+}
+
+/* Subtle separator line at top */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, 60%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+/* ——— CARD GRID ——— */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.card {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition:
+    border-color var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.card:hover {
+  border-color: rgba(212, 168, 67, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Icon — larger in feature cards for visual weight */
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  color: var(--trov-accent);
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+}
+
+.desc {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.65;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .heading {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,355 @@
+/* ══════════════════════════════════════════════
+   Score Page
+   No separate hero. Tool IS the hero.
+
+   FIX B3-B6: ctaSection now has proper bottom padding and is wrapped
+   in .container so the CTA card never overlaps the Footer.
+   Apply the same fix to domain.module.css, verify.module.css,
+   smtp-test.module.css, records.module.css, verify-number.module.css.
+   ══════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+}
+
+.toolSection {
+  padding: var(--space-4xl) 0 var(--space-2xl);
+}
+
+/* ══════════════════════════════════════════════
+   SEO Content - Category Explainer Cards
+   ══════════════════════════════════════════════ */
+
+.contentSection {
+  padding: var(--space-3xl) 0;
+  border-top: 1px solid var(--trov-border);
+}
+
+.contentTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-xl);
+}
+
+.contentIntro {
+  font-size: 16px;
+  color: var(--trov-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+}
+
+.contentOutro {
+  font-size: 16px;
+  color: var(--trov-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Explainer cards - flexbox grid, centers orphan row */
+
+.explainerGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-2xl) 0;
+}
+
+.explainerCard {
+  flex: 0 1 calc(33.333% - var(--space-md));
+  min-width: 240px;
+  padding: var(--space-lg);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.explainerCard:hover {
+  border-color: rgba(212, 168, 67, 0.15);
+}
+
+.explainerTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-md);
+}
+
+.explainerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.explainerLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.explainerTitle {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.explainerText {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════
+   FAQ
+   ══════════════════════════════════════════════ */
+
+.faqSection {
+  padding: var(--space-4xl) 0;
+  border-top: 1px solid var(--trov-border);
+}
+
+.faqTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-xl);
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--trov-border);
+  transition: border-color var(--transition-fast);
+}
+
+.faqItem:first-child {
+  border-top: 1px solid var(--trov-border);
+}
+
+.faqItemOpen {
+  background: var(--trov-surface);
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--trov-text);
+  transition: color var(--transition-fast);
+}
+
+.faqItemOpen .faqQuestion {
+  padding: var(--space-lg);
+}
+
+.faqQuestion:hover {
+  color: var(--trov-accent);
+}
+
+.faqChevron {
+  flex-shrink: 0;
+  color: var(--trov-text-muted);
+  transition: transform var(--transition-normal);
+}
+
+.faqChevronOpen {
+  transform: rotate(180deg);
+  color: var(--trov-accent);
+}
+
+.faqAnswer {
+  padding: 0 0 var(--space-lg);
+}
+
+.faqItemOpen .faqAnswer {
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.faqAnswer p {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════
+   CTA - Banner card
+   FIX B3-B6: generous bottom padding + extra space
+   so the CTA never collides with the Footer.
+   ══════════════════════════════════════════════ */
+
+.ctaSection {
+  padding: var(--space-2xl) 0 var(--space-4xl);
+}
+
+.ctaCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  padding: var(--space-xl) var(--space-2xl);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  position: relative;
+  z-index: 1;
+}
+
+.ctaContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.ctaTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.ctaDesc {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ctaActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 22px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.ctaPrimary:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+  transform: translateY(-1px);
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 22px;
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.ctaSecondary:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .explainerCard {
+    flex: 0 1 calc(50% - var(--space-md));
+  }
+}
+
+@media (max-width: 768px) {
+  .toolSection {
+    padding: var(--space-2xl) 0 var(--space-xl);
+  }
+
+  .contentSection,
+  .faqSection {
+    padding: var(--space-3xl) 0;
+  }
+
+  .explainerCard {
+    flex: 0 1 100%;
+  }
+
+  .faqQuestion {
+    font-size: 14px;
+  }
+
+  .faqItemOpen .faqQuestion {
+    padding: var(--space-md);
+  }
+
+  .faqItemOpen .faqAnswer {
+    padding: 0 var(--space-md) var(--space-md);
+  }
+
+  .ctaSection {
+    padding: var(--space-xl) 0 var(--space-3xl);
+  }
+
+  .ctaCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-xl);
+  }
+
+  .ctaActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .ctaPrimary,
+  .ctaSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+}

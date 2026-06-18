@@ -1,0 +1,234 @@
+/* --- LEGAL PAGES --- */
+/*
+ * Shared styles for Privacy, Terms, Refund.
+ * Narrow width, clean typography, easy to scan.
+ * Professional but not sterile.
+ *
+ * FIX: Previous version allowed the .toc to stretch full-width
+ * when the JSX placed it outside the .inner wrapper. Now every
+ * direct child of .page (header, toc, content, contactBox) is
+ * constrained to the same max-width and centered. The .inner
+ * wrapper becomes optional.
+ */
+
+.page {
+  padding: var(--space-4xl) 0 calc(var(--space-4xl) + var(--space-lg));
+}
+
+/* All direct children of .page get the same centered narrow column */
+.page > * {
+  max-width: var(--max-width-blog);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Optional wrapper - still works if the JSX uses it */
+.inner {
+  /* max-width and centering already applied via .page > * above */
+  width: 100%;
+}
+
+/* --- HEADER --- */
+
+.header {
+  margin-bottom: var(--space-3xl);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: var(--space-md);
+}
+
+.updated {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, var(--trov-accent), transparent 60%);
+  opacity: 0.3;
+  margin: 0 0 var(--space-3xl);
+}
+
+/* --- TABLE OF CONTENTS --- */
+
+.toc {
+  margin-bottom: var(--space-3xl);
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+}
+
+.tocLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.tocLink {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  padding: 2px 0;
+}
+
+.tocLink:hover {
+  color: var(--trov-accent);
+}
+
+/* --- CONTENT --- */
+
+.content {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.8;
+}
+
+.content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: var(--space-4xl);
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--trov-accent);
+}
+
+.content h3 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: var(--space-3xl);
+  margin-bottom: var(--space-md);
+}
+
+.content p {
+  margin-bottom: var(--space-lg);
+}
+
+.content a {
+  color: var(--trov-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(212, 168, 67, 0.3);
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.content a:hover {
+  text-decoration-color: var(--trov-accent);
+}
+
+.content ul,
+.content ol {
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.content li {
+  margin-bottom: var(--space-sm);
+  line-height: 1.7;
+}
+
+.content li::marker {
+  color: var(--trov-text-muted);
+}
+
+.content strong {
+  color: var(--trov-text);
+  font-weight: 600;
+}
+
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-xl);
+  font-size: 0.875rem;
+}
+
+.content th {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.content td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--trov-border);
+  color: var(--trov-text-secondary);
+}
+
+/* --- CONTACT BOX --- */
+
+.contactBox {
+  margin-top: var(--space-3xl);
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+}
+
+.contactBox p {
+  margin-bottom: var(--space-sm);
+}
+
+.contactBox p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- RESPONSIVE --- */
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--space-3xl) 0;
+  }
+
+  .page > * {
+    /* On mobile let content use side padding from the container */
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  .toc {
+    padding: var(--space-md);
+  }
+
+  .content h2 {
+    margin-top: var(--space-3xl);
+  }
+}

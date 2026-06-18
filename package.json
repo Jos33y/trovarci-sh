@@ -1,0 +1,42 @@
+{
+  "name": "trovarci-sh",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "build": "react-router build",
+    "start": "react-router-serve ./build/server/index.js",
+    "db:migrate": "dotenv -e .env -- node-pg-migrate up -m migrations",
+    "db:migrate:down": "dotenv -e .env -- node-pg-migrate down -m migrations",
+    "db:migrate:new": "dotenv -e .env -- node-pg-migrate create -m migrations --migration-file-language js",
+    "worker:dev": "node --env-file=.env --watch worker/index.js",
+    "worker:start": "node worker/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.0",
+    "@aws-sdk/client-s3": "^3.1037.0",
+    "@aws-sdk/s3-request-presigner": "^3.1037.0",
+    "@react-router/node": "^7",
+    "@react-router/serve": "^7",
+    "argon2": "^0.44.0",
+    "gray-matter": "^4.0.3",
+    "isbot": "^5",
+    "libphonenumber-js": "^1.12.42",
+    "marked": "^17.0.3",
+    "nodemailer": "^8.0.6",
+    "postgres": "^3.4.9",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-router": "^7",
+    "resend": "^6.12.2",
+    "socks": "^2.8.7",
+    "twilio": "^6.0.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7",
+    "@react-router/fs-routes": "^7",
+    "dotenv-cli": "^11.0.0",
+    "node-pg-migrate": "^8.0.4",
+    "vite": "^6"
+  }
+}

@@ -1,0 +1,130 @@
+/* ——— COMPARISON SECTION ——— */
+
+.section {
+  padding: calc(var(--space-4xl) + var(--space-lg)) 0;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+/* ——— TABLE ——— */
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+}
+
+/* ——— HEADER ——— */
+
+.labelHead {
+  width: 160px;
+}
+
+.colHead {
+  padding: var(--space-md) var(--space-md) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  text-align: center;
+  border-bottom: 1px solid var(--trov-border);
+}
+
+/* ——— ROWS ——— */
+
+.rowLabel {
+  padding: var(--space-md);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--trov-border);
+  transition: background var(--transition-fast);
+}
+
+.cell {
+  padding: var(--space-md);
+  text-align: center;
+  color: var(--trov-text-secondary);
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--trov-border);
+  transition: background var(--transition-fast);
+}
+
+/* Row hover — subtle lift of the entire row */
+.table tbody tr:hover .rowLabel,
+.table tbody tr:hover .cell {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.table tbody tr:hover .cellHighlight {
+  background: rgba(212, 168, 67, 0.07);
+}
+
+/*
+ * Trovarcis column: subtle gold-tinted background
+ * so the eye naturally gravitates to our column.
+ * Not heavy-handed, just "this one's different."
+ */
+.cellHighlight {
+  background: rgba(212, 168, 67, 0.04);
+}
+
+.colHighlight {
+  color: var(--trov-accent);
+  font-weight: 600;
+  background: rgba(212, 168, 67, 0.04);
+}
+
+.yes {
+  color: var(--trov-success);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.no {
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .heading {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .labelHead {
+    width: 120px;
+  }
+}

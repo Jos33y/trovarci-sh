@@ -1,0 +1,12 @@
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.empty {
+  display: block;
+  background: var(--trov-border);
+  opacity: 0.4;
+  border-radius: 2px;
+}

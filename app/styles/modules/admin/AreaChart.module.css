@@ -1,0 +1,140 @@
+.wrap {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--trov-text);
+  margin: 0;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin-top: 2px;
+}
+
+.totals {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.totalConfirmed {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--trov-accent);
+  letter-spacing: -0.02em;
+}
+
+.totalFailed {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--trov-error);
+}
+
+.chartWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 760 / 240;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--trov-text-muted);
+}
+
+.zeroLabel {
+  font-family: var(--font-body);
+  font-size: 13px;
+  fill: var(--trov-text-muted);
+}
+
+.tooltip {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  min-width: 140px;
+  box-shadow: var(--shadow-md);
+  z-index: 2;
+}
+
+.tipDay {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--trov-text-muted);
+  margin-bottom: 4px;
+}
+
+.tipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--trov-text);
+}
+
+.tipRow span:first-child { color: var(--trov-text-secondary); }
+
+.tipMeta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--trov-text-muted);
+  margin-top: 2px;
+}
+
+.empty {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--trov-text);
+  margin: 0 0 4px 0;
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .wrap { padding: var(--space-md); }
+  .totalConfirmed { font-size: 18px; }
+  .axisLabel { font-size: 9px; }
+}

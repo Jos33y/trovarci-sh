@@ -1,0 +1,278 @@
+/* ——— PRICING SECTION ——— */
+
+.section {
+  position: relative;
+  padding: calc(var(--space-4xl) + var(--space-lg)) 0;
+}
+
+/* Subtle separator line */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, 60%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.sub {
+  color: var(--trov-text-secondary);
+  font-size: 1rem;
+  text-align: center;
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.earlyBird {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--trov-warning);
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-3xl);
+}
+
+/* ——— CARD GRID ——— */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+  align-items: start;
+}
+
+.card {
+  position: relative;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/*
+ * Pro card: gold accent border.
+ * This is the card we want them to pick.
+ * Not screaming, just clearly "the one."
+ */
+.cardHighlight {
+  border-color: rgba(212, 168, 67, 0.3);
+}
+
+/* ——— BADGE ——— */
+
+.badge {
+  position: absolute;
+  top: calc(var(--space-md) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-xs) 12px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.badgeAccent {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+}
+
+.badgeMuted {
+  background: var(--trov-surface-light);
+  color: var(--trov-text-secondary);
+  border: 1px solid var(--trov-border);
+}
+
+/* ——— PLAN HEADER ——— */
+
+.planName {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin-top: var(--space-sm);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.originalPrice {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--trov-text-muted);
+  text-decoration: line-through;
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.period {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+}
+
+.planDesc {
+  color: var(--trov-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-top: var(--space-sm);
+}
+
+/* ——— CTA BUTTON ——— */
+
+.planCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: var(--space-lg);
+  min-height: 44px;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.planCtaPrimary {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+}
+
+.planCtaPrimary:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+  color: var(--trov-text-on-accent);
+}
+
+.planCtaSecondary {
+  background: transparent;
+  color: var(--trov-accent);
+  border: 1.5px solid var(--trov-border);
+}
+
+.planCtaSecondary:hover {
+  border-color: var(--trov-accent);
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+}
+
+/* ——— FEATURE LIST ——— */
+
+.features {
+  list-style: none;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--trov-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.4;
+}
+
+.featureDisabled {
+  color: var(--trov-text-muted);
+}
+
+.checkIcon {
+  color: var(--trov-success);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.crossIcon {
+  color: var(--trov-text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.5;
+}
+
+/* ——— GUARANTEE ——— */
+
+.guarantee {
+  margin-top: var(--space-2xl);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  text-align: center;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /*
+   * On mobile, reorder so Pro card is first.
+   * The best option should be the first thing they see.
+   */
+  .card:nth-child(1) { order: 2; }
+  .card:nth-child(2) { order: 1; }
+  .card:nth-child(3) { order: 3; }
+}

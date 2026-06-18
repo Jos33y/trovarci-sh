@@ -1,0 +1,132 @@
+/* ——— HOW IT WORKS ——— */
+
+.section {
+  padding: var(--space-4xl) 0 calc(var(--space-4xl) + var(--space-lg));
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+/* ——— STEPS GRID ——— */
+
+.steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-xl);
+  width: 100%;
+}
+
+/* Horizontal connector line — flows through all 4 step numbers */
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--trov-border) 15%, var(--trov-border) 85%, transparent);
+  pointer-events: none;
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/*
+ * Step number — large, display font, dim.
+ * This is the visual anchor. Eye goes here first,
+ * establishing "there's a sequence."
+ */
+.number {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--trov-border);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: var(--space-md);
+}
+
+/* Icon container */
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  color: var(--trov-accent);
+  margin-bottom: var(--space-md);
+}
+
+/* Step title */
+.title {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+}
+
+/* Step description */
+.desc {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.6;
+  max-width: 260px;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .heading {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2xl) var(--space-xl);
+  }
+
+  /* Hide horizontal connector on non-4-column layouts */
+  .steps::before {
+    display: none;
+  }
+
+  .number {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .steps {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+}

@@ -1,0 +1,61 @@
+# ===== Dependencies =====
+node_modules
+.pnp
+.pnp.js
+
+# ===== Environment =====
+.env
+.env.local
+.env.dev
+.env.production
+.env.*.local
+!.env.example
+
+# ===== Build output =====
+build
+dist
+.cache
+public/build
+
+# ===== React Router generated types =====
+.react-router
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Runtime / coverage =====
+*.pid
+*.seed
+coverage
+.nyc_output
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Editor =====
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# ===== Misc =====
+trovarci-sh-tree.txt
+*.local
+
+# ===== Private notes (kept outside repo) =====
+docs
+notes
+HANDOFF-*.md
+SESSION-*.md
+
+# ===== Local installer / bundler artifacts =====
+*.zip
+install_*.ps1

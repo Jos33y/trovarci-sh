@@ -1,0 +1,527 @@
+/* ——— HERO SECTION ——— */
+
+.hero {
+  padding: var(--space-3xl) 0 var(--space-2xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+ * BACKGROUND SYSTEM — 2 structural layers:
+ *
+ *   .heroGrid  (z-index: 0) — fine coordinate grid lines
+ *   .heroNoise (z-index: 1) — SVG grain texture
+ *   .inner     (z-index: 2) — content
+ *
+ * No radial gradients. No linear gradients. No glow.
+ * The grid creates structure. The noise prevents flatness.
+ * The mockup and typography carry everything else.
+ */
+
+/* ——— LAYER 1: GRID LINES ——— */
+/*
+ * Fine 1px lines at 64px intervals — like graph paper
+ * or a coordinate system. Feels technical, engineered.
+ * Masked so lines are visible center and fade to nothing
+ * at edges. Gold-tinted at very low opacity.
+ *
+ * Cloudflare and Vercel both use this pattern.
+ * The grid says "precision" without saying anything.
+ */
+.heroGrid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(212, 168, 67, 0.06) 0px,
+      rgba(212, 168, 67, 0.06) 1px,
+      transparent 1px,
+      transparent 64px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(212, 168, 67, 0.06) 0px,
+      rgba(212, 168, 67, 0.06) 1px,
+      transparent 1px,
+      transparent 64px
+    );
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 70% at 50% 50%,
+    black 0%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 70% at 50% 50%,
+    black 0%,
+    transparent 70%
+  );
+}
+
+/* ——— LAYER 2: NOISE GRAIN ——— */
+/*
+ * SVG feTurbulence noise. Organic texture that prevents
+ * the perfectly-smooth digital feel. At 3% opacity
+ * it's felt, not seen. Keeps surfaces from feeling flat.
+ */
+.heroNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+}
+
+/* ——— CONTENT LAYER ——— */
+
+.inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  align-items: center;
+  gap: var(--space-2xl);
+}
+
+/* ——— LEFT COLUMN ——— */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--trov-text);
+}
+
+.sub {
+  margin-top: var(--space-lg);
+  max-width: 420px;
+  color: var(--trov-text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.ctas {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.launch {
+  margin-top: var(--space-lg);
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ——— RIGHT COLUMN ——— */
+
+.visual {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ——— MOCKUP WRAPPER ——— */
+
+.mockupWrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ——— MOCKUP WINDOW ——— */
+
+.mockup {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Title bar */
+.mockupBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+}
+
+.mockupDots {
+  display: flex;
+  gap: 6px;
+}
+
+.dotRed,
+.dotYellow,
+.dotGreen {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.dotRed { background: #F87171; }
+.dotYellow { background: #FB923C; }
+.dotGreen { background: #34D399; }
+
+.mockupTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Body */
+.mockupBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ——— CAMPAIGN HEADER ——— */
+
+.campaignHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.campaignName {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  line-height: 1.2;
+}
+
+.campaignMeta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* Status badge with live pulsing dot */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--trov-accent);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(212, 168, 67, 0); }
+}
+
+/* ——— PROGRESS BAR ——— */
+
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--trov-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  width: 67%;
+  height: 100%;
+  background: var(--trov-accent);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  animation: progressGrow 1.2s ease-out forwards;
+}
+
+/* Shimmer that sweeps across the progress bar */
+.progressShimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2.5s ease-in-out infinite;
+  animation-delay: 1.4s;
+}
+
+@keyframes progressGrow {
+  from { width: 0%; }
+  to { width: 67%; }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressCount {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+}
+
+.progressCurrent {
+  color: var(--trov-text);
+  font-weight: 600;
+}
+
+.progressPercent {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+}
+
+/* ——— SMTP PROVIDERS ——— */
+
+.smtpSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.smtpCard {
+  padding: 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color var(--transition-normal);
+}
+
+.smtpActive {
+  border-color: rgba(212, 168, 67, 0.2);
+}
+
+.smtpStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.smtpDotActive {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--trov-accent);
+  animation: smtpPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes smtpPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(212, 168, 67, 0);
+  }
+}
+
+.smtpDotStandby {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--trov-text-muted);
+}
+
+.smtpName {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.smtpSpeed {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+}
+
+/* ——— DELIVERY STATS ——— */
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statSuccess { color: var(--trov-success); }
+.statWarning { color: var(--trov-warning); }
+.statError { color: var(--trov-error); }
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 1024px) {
+  .inner {
+    gap: var(--space-xl);
+  }
+
+  .mockupWrap {
+    max-width: 460px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--space-2xl) 0;
+  }
+
+  .inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .sub {
+    max-width: 480px;
+  }
+
+  .ctas {
+    justify-content: center;
+  }
+
+  .launch {
+    align-self: center;
+  }
+
+  .visual {
+    justify-content: center;
+  }
+
+  .mockupWrap {
+    max-width: 440px;
+  }
+
+  .heroGrid {
+    -webkit-mask-image: radial-gradient(
+      ellipse 90% 50% at 50% 30%,
+      black 0%,
+      transparent 70%
+    );
+    mask-image: radial-gradient(
+      ellipse 90% 50% at 50% 30%,
+      black 0%,
+      transparent 70%
+    );
+  }
+}
+
+@media (max-width: 480px) {
+  .ctas {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .mockupWrap {
+    max-width: 100%;
+  }
+}
+
+/* ——— REDUCED MOTION ——— */
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot,
+  .smtpDotActive,
+  .progressFill,
+  .progressShimmer {
+    animation: none;
+  }
+
+  .progressFill {
+    width: 67%;
+  }
+}

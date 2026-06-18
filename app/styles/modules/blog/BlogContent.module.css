@@ -1,0 +1,208 @@
+/* ——— BLOG CONTENT ——— */
+/*
+ * Styles for rendered markdown HTML. Uses :global() scoping
+ * because marked outputs raw HTML elements (h2, p, etc.)
+ * that can't have CSS module class names.
+ *
+ * Typography follows the design system:
+ * - Headings: Anybody 700
+ * - Body: DM Sans 400
+ * - Code: JetBrains Mono 400
+ */
+
+.content {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.8;
+}
+
+/* ——— HEADINGS ——— */
+
+.content :global(h2) {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: var(--space-4xl);
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--trov-accent);
+}
+
+.content :global(h3) {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: var(--space-3xl);
+  margin-bottom: var(--space-md);
+}
+
+/* ——— PARAGRAPHS ——— */
+
+.content :global(p) {
+  margin-bottom: var(--space-lg);
+}
+
+/* ——— LINKS ——— */
+
+.content :global(a) {
+  color: var(--trov-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(212, 168, 67, 0.3);
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.content :global(a:hover) {
+  text-decoration-color: var(--trov-accent);
+}
+
+/* ——— STRONG / EM ——— */
+
+.content :global(strong) {
+  color: var(--trov-text);
+  font-weight: 600;
+}
+
+.content :global(em) {
+  font-style: italic;
+}
+
+/* ——— LISTS ——— */
+
+.content :global(ul),
+.content :global(ol) {
+  margin-bottom: var(--space-lg);
+  padding-left: var(--space-lg);
+}
+
+.content :global(li) {
+  margin-bottom: var(--space-sm);
+}
+
+.content :global(ul li) {
+  list-style-type: disc;
+}
+
+.content :global(ul li)::marker {
+  color: var(--trov-text-muted);
+}
+
+.content :global(ol li) {
+  list-style-type: decimal;
+}
+
+.content :global(ol li)::marker {
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* ——— INLINE CODE ——— */
+
+.content :global(code) {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--trov-accent);
+  background: var(--trov-surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ——— CODE BLOCKS ——— */
+
+.content :global(pre) {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content :global(pre code) {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: var(--trov-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+/* ——— BLOCKQUOTES ——— */
+
+.content :global(blockquote) {
+  border-left: 3px solid var(--trov-accent);
+  padding-left: var(--space-lg);
+  margin: var(--space-lg) 0;
+  color: var(--trov-text);
+  font-style: italic;
+}
+
+.content :global(blockquote p) {
+  margin-bottom: 0;
+}
+
+/* ——— TABLES ——— */
+
+.content :global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-lg);
+  font-size: 0.875rem;
+}
+
+.content :global(thead th) {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--trov-border);
+  letter-spacing: 0.04em;
+}
+
+.content :global(tbody td) {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--trov-border);
+  color: var(--trov-text-secondary);
+}
+
+.content :global(tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+/* ——— HORIZONTAL RULE ——— */
+
+.content :global(hr) {
+  border: none;
+  height: 1px;
+  background: var(--trov-border);
+  margin: var(--space-3xl) 0;
+}
+
+/* ——— IMAGES ——— */
+
+.content :global(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: var(--space-lg) 0;
+}
+
+/* ——— FIRST PARAGRAPH ——— */
+/* Slightly larger for the opening hook */
+
+.content > :global(p:first-child) {
+  font-size: 1.0625rem;
+  color: var(--trov-text);
+  line-height: 1.7;
+}

@@ -1,0 +1,550 @@
+/* ═══════════════════════════════════════════
+   DOWNLOAD PAGE
+   app/styles/modules/routes/download.module.css
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  background: var(--trov-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+}
+
+/* ─── HERO ─── */
+
+.hero {
+  position: relative;
+  padding: 96px 0 72px;
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212, 168, 67, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--trov-warning);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--trov-text);
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.headlineAccent {
+  color: var(--trov-accent);
+}
+
+.sub {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--trov-text-secondary);
+  max-width: 560px;
+  margin-bottom: 40px;
+}
+
+.platforms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.platform {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  color: var(--trov-text-secondary);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.platform:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.platformText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.platformName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-text);
+  line-height: 1.2;
+}
+
+.platformSub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--trov-text-muted);
+}
+
+/* ─── WAITLIST ─── */
+
+.waitlist {
+  padding: 0 0 64px;
+}
+
+.waitlistCard {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.waitlistTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  color: var(--trov-text);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.waitlistSub {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.input:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.submitBtn {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.submitBtn:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active {
+  background: var(--trov-accent-pressed);
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.successState {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.successIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--trov-success-bg);
+  border: 1px solid var(--trov-success);
+  color: var(--trov-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.successTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--trov-text);
+  margin-bottom: 2px;
+}
+
+.successSub {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── MOCKUP ─── */
+
+.mockupSection {
+  padding: 0 0 80px;
+}
+
+.mockupFrame {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.mockupBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--trov-bg);
+  border-bottom: 1px solid var(--trov-border);
+  padding: 12px 16px;
+}
+
+.mockupDots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.mockupTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+}
+
+.mockupBody {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  min-height: 240px;
+}
+
+.mockupSidebar {
+  border-right: 1px solid var(--trov-border);
+  padding: 16px 0;
+}
+
+.mockupSideItem {
+  padding: 8px 20px;
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  cursor: default;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mockupSideItem:first-child {
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.mockupContent {
+  padding: 24px 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.mockupStat {
+  min-width: 120px;
+}
+
+.mockupStatValue {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--trov-text);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.mockupStatLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.mockupProgressLabel {
+  width: 100%;
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.mockupProgressTrack {
+  width: 100%;
+  height: 6px;
+  background: var(--trov-border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.mockupProgressFill {
+  height: 100%;
+  background: var(--trov-gradient);
+  border-radius: 100px;
+  transition: width 1s ease;
+}
+
+.mockupProgressNote {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--trov-text-muted);
+  margin-top: 6px;
+  width: 100%;
+}
+
+.mockupCaption {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  margin-top: 12px;
+}
+
+/* ─── REASONS ─── */
+
+.reasons {
+  padding: 0 0 80px;
+}
+
+.reasonsTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+}
+
+.reasonsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.reasonCard {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: border-color var(--transition-fast);
+}
+
+.reasonCard:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.reasonCheck {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--trov-success-bg);
+  border: 1px solid var(--trov-success);
+  color: var(--trov-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reasonTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--trov-text);
+  margin-bottom: 4px;
+}
+
+.reasonBody {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── PRICING TEASER ─── */
+
+.pricingTeaser {
+  padding: 0 0 96px;
+}
+
+.pricingRow {
+  display: flex;
+  align-items: stretch;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.pricingItem {
+  flex: 1;
+  padding: 32px 36px;
+  text-align: center;
+}
+
+.pricingDivider {
+  width: 1px;
+  background: var(--trov-border);
+}
+
+.pricingPrice {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2.25rem;
+  color: var(--trov-accent);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pricingPlan {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--trov-text);
+  margin-bottom: 6px;
+}
+
+.pricingNote {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.pricingClarify {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  margin-top: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 64px 0 48px;
+  }
+
+  .waitlistCard {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 28px 24px;
+  }
+
+  .form {
+    flex-direction: column;
+  }
+
+  .reasonsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricingRow {
+    flex-direction: column;
+  }
+
+  .pricingDivider {
+    width: auto;
+    height: 1px;
+  }
+
+  .mockupBody {
+    grid-template-columns: 1fr;
+  }
+
+  .mockupSidebar {
+    display: none;
+  }
+}
+
+
+/* ─── Inline error message under the waitlist form ─────────
+   Added when the form was wired to the real /api/waitlist endpoint.
+   Displays validation errors and rate-limit responses near the
+   submit button so the user does not have to hunt for context. */
+
+.errorMsg {
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  color: var(--trov-error);
+  margin-top: 4px;
+}

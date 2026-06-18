@@ -1,0 +1,1396 @@
+/* ═══════════════════════════════════════════
+   DASHBOARD PAGE
+   app/styles/modules/routes/dashboard.module.css
+
+   FIXES IN THIS VERSION:
+   - B1: Panel has min-height. tableWrap flex-grows. Pager stays pinned to bottom.
+         Empty state fills available space. No more footer-jumping on pagination.
+   - B2: Transactions use same table/pager infrastructure as jobs.
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  background: var(--trov-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding: 48px 0 96px;
+}
+
+/* ─── PAGE HEADER ─── */
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.pageTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--trov-text);
+  letter-spacing: -0.025em;
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+.pageEmail {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+}
+
+.buyBtn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  min-height: 40px;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.buyBtn:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+  transform: translateY(-1px);
+}
+
+.buyBtn:active {
+  background: var(--trov-accent-pressed);
+  transform: translateY(0);
+}
+
+/* ─── STATS GRID ─── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 20px 18px;
+  transition: border-color var(--transition-fast);
+}
+
+.statCard[data-accent="gold"] {
+  border-color: rgba(212, 168, 67, 0.25);
+  background: linear-gradient(145deg, var(--trov-surface) 60%, rgba(212, 168, 67, 0.04));
+}
+
+.statCard:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.statCard[data-accent="gold"]:hover {
+  border-color: rgba(212, 168, 67, 0.4);
+}
+
+.statTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.statIconWrap {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statIconWrap[data-color="gold"] {
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  border: 1px solid rgba(212, 168, 67, 0.2);
+}
+
+.statIconWrap[data-color="neutral"] {
+  background: var(--trov-surface-light);
+  color: var(--trov-text-secondary);
+  border: 1px solid var(--trov-border);
+}
+
+.statIconWrap[data-color="success"] {
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.statCta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  transition: color var(--transition-fast);
+}
+
+.statCta:hover {
+  color: var(--trov-accent-hover);
+}
+
+.statBadge {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+
+.statBadge[data-type="ok"] {
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+}
+
+.statBadge[data-type="warn"] {
+  background: var(--trov-warning-bg);
+  color: var(--trov-warning);
+}
+
+.statSub {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.875rem;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── MID GRID ─── */
+
+.midGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ─── DESKTOP WAITLIST PANEL ───
+   Replaces the previous license/download "appCard" treatment. The earlier
+   panel earned its gold border because it carried real content (a license
+   key + download buttons). With the desktop app still pre-launch, the
+   panel's job changed from "show installed-app state" to "drive waitlist
+   conversions". The visual hierarchy follows that reframing:
+
+     1. Subtle radial glow (gold at ~6%) anchors the panel without
+        screaming - texture over flatness, per the design principles doc.
+     2. Header: small title + "Coming soon" tag in MONO so it reads as
+        metadata, not as a competing CTA.
+     3. Headline ("Be first when it ships") in display font, weight 700.
+        First thing the eye lands on.
+     4. Sub copy 2 sentences max. Specific value prop, no filler.
+     5. Email + button as the primary action. Gold submit button is the
+        SECOND gold element on the panel (tag is the first). No third.
+     6. Platform row at the bottom in mono-muted, role of "context", not
+        "primary content".
+
+   Success state is a single-row card so the panel does not visually shrink
+   on submission - keeps the dashboard layout stable. */
+
+.desktopPanel {
+  position: relative;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+
+/* Subtle gold radial in the upper-right. Decorative. Visually present but
+   not loud enough to compete with content. */
+.desktopPanelGlow {
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 70%;
+  height: 140%;
+  background: radial-gradient(ellipse at center, rgba(212, 168, 67, 0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Anything inside the panel sits above the glow. */
+.desktopPanel > *:not(.desktopPanelGlow) {
+  position: relative;
+  z-index: 1;
+}
+
+.desktopPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.desktopPanelTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+}
+
+.desktopPanelTag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  border-radius: 100px;
+  padding: 3px 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.desktopHeadline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+  margin: 4px 0 0 0;
+}
+
+.desktopSub {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.desktopForm {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.desktopInputWrap {
+  flex: 1;
+  min-width: 200px;
+  display: block;
+}
+
+.desktopInput {
+  width: 100%;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--trov-text);
+  height: 40px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.desktopInput::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.desktopInput:focus {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.desktopInput[aria-invalid="true"] {
+  border-color: var(--trov-error);
+}
+
+.desktopSubmit {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0 18px;
+  height: 40px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  white-space: nowrap;
+}
+
+.desktopSubmit:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+}
+
+.desktopSubmit:active:not(:disabled) {
+  background: var(--trov-accent-pressed);
+}
+
+.desktopSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.desktopSubmit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--trov-glow-strong);
+}
+
+.desktopFormError {
+  font-size: 0.8125rem;
+  color: var(--trov-error);
+  margin-top: 4px;
+}
+
+.desktopSuccess {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 2px;
+}
+
+.desktopSuccessIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--trov-success);
+  color: var(--trov-text-on-accent);
+  flex-shrink: 0;
+}
+
+.desktopSuccessTitle {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--trov-text);
+  margin-bottom: 2px;
+}
+
+.desktopSuccessSub {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+.desktopPlatforms {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+
+.desktopPlatformItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.desktopPlatformDot {
+  color: var(--trov-text-muted);
+  opacity: 0.5;
+}
+
+/* Visually hidden label - keeps the input accessible without showing the
+   label since the placeholder + context make the purpose clear. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 760px) {
+  .desktopForm {
+    flex-direction: column;
+  }
+  .desktopSubmit {
+    width: 100%;
+  }
+}
+
+/* ─── TOOLS CARD ─── */
+
+.toolsCard {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.toolsTitle {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.toolCell {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+  text-decoration: none;
+  min-height: 40px;
+}
+
+.toolCell:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+  background: var(--trov-surface-light);
+}
+
+.toolCellIcon {
+  color: var(--trov-text-muted);
+  display: flex;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.toolCell:hover .toolCellIcon {
+  color: var(--trov-accent);
+}
+
+.toolCellLabel {
+  flex: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolFreeBadge {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 100px;
+  padding: 2px 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   HISTORY PANEL - The B1 pagination fix core
+   ═══════════════════════════════════════════ */
+
+.panel {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 720px;
+}
+
+.panelTabs {
+  display: flex;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.tab,
+.tabActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tab {
+  color: var(--trov-text-muted);
+}
+
+.tab:hover {
+  color: var(--trov-text-secondary);
+}
+
+.tabActive {
+  color: var(--trov-accent);
+  border-bottom-color: var(--trov-accent);
+}
+
+.tabBadge {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: 100px;
+  padding: 2px 6px;
+  color: var(--trov-text-muted);
+}
+
+.tabActive .tabBadge {
+  background: var(--trov-glow);
+  border-color: rgba(212, 168, 67, 0.3);
+  color: var(--trov-accent);
+}
+
+/* ─── TOOLBAR ─── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--trov-text-muted);
+  pointer-events: none;
+  display: flex;
+}
+
+.searchInput {
+  width: 100%;
+  background: var(--trov-surface);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 8px 36px 8px 36px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.clearBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--trov-text-muted);
+  display: flex;
+  padding: 4px;
+  transition: color var(--transition-fast);
+}
+
+.clearBtn:hover {
+  color: var(--trov-text-secondary);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statusPills {
+  display: flex;
+  gap: 4px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.pill,
+.pillOn {
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.pill {
+  background: transparent;
+  color: var(--trov-text-muted);
+}
+
+.pill:hover {
+  color: var(--trov-text-secondary);
+}
+
+.pillOn {
+  background: var(--trov-bg);
+  color: var(--trov-text);
+  border: 1px solid var(--trov-border-hover);
+}
+
+.filterSelect {
+  background: var(--trov-surface);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text-secondary);
+  padding: 7px 12px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  appearance: auto;
+}
+
+.filterSelect:focus,
+.filterSelect:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+/* ─── RESULTS BAR ─── */
+
+.resultsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: var(--trov-glow);
+  border-bottom: 1px solid rgba(212, 168, 67, 0.15);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.resetFilters {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-accent);
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast);
+}
+
+.resetFilters:hover {
+  color: var(--trov-accent-hover);
+}
+
+/* ─── TABLE ─── */
+/* FIX B1: flex:1 makes tableWrap absorb available vertical space so pager sticks to bottom */
+
+.tableWrap {
+  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead tr {
+  background: var(--trov-bg);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.table th {
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.thR {
+  text-align: right !important;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--trov-border);
+  transition: background var(--transition-fast);
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--trov-surface-light);
+}
+
+.table td {
+  padding: 12px 16px;
+  color: var(--trov-text-secondary);
+  vertical-align: middle;
+}
+
+.tdDetail {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-text);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tdR {
+  text-align: right !important;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.tdDate {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  white-space: nowrap;
+}
+
+.tdDash {
+  color: var(--trov-text-muted);
+}
+
+.typePill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--trov-border);
+  background: var(--trov-surface-light);
+  color: var(--trov-text-secondary);
+  white-space: nowrap;
+}
+
+.rateGood {
+  color: var(--trov-success);
+  font-weight: 600;
+}
+
+.rateOk {
+  color: var(--trov-warning);
+  font-weight: 600;
+}
+
+.rateBad {
+  color: var(--trov-error);
+  font-weight: 600;
+}
+
+.creditUsed {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+}
+
+.creditFree {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 100px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statusDone,
+.statusFailed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.statusDone {
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.statusFailed {
+  background: var(--trov-error-bg);
+  color: var(--trov-error);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+/* ─── EMPTY STATE ─── */
+/* FIX B1: empty state fills available space instead of collapsing */
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--trov-text-muted);
+  min-height: 400px;
+}
+
+/* ─── PAGINATION ─── */
+/* FIX B1: flex-shrink:0 pins the pager to the bottom of the panel */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+  gap: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* Left group: range info + per-page selector. Wraps on narrow viewports
+   so the pager controls on the right stay accessible. */
+.pagerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pagerInfo {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+}
+
+.pageSizeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+}
+
+.pageSizeText {
+  user-select: none;
+}
+
+.pageSizeSelect {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  height: 28px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.pageSizeSelect:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.pageSizeSelect:focus-visible {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+/* Ellipsis placeholder between non-adjacent page numbers. */
+.pageGap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 32px;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  user-select: none;
+}
+
+.pagerBtns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageArrow,
+.pageNum,
+.pageNumActive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.pageArrow {
+  color: var(--trov-text-secondary);
+  border-color: var(--trov-border);
+  background: var(--trov-surface);
+}
+
+.pageArrow:hover:not(:disabled) {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.pageArrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pageNum {
+  color: var(--trov-text-muted);
+}
+
+.pageNum:hover {
+  background: var(--trov-surface);
+  border-color: var(--trov-border);
+  color: var(--trov-text-secondary);
+}
+
+.pageNumActive {
+  background: var(--trov-glow);
+  border-color: rgba(212, 168, 67, 0.35);
+  color: var(--trov-accent);
+  font-weight: 600;
+  cursor: default;
+}
+
+/* ─── TRANSACTIONS ─── */
+/* FIX B2: transaction list now shares the flex/scroll plumbing with job table */
+
+.txList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.txRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--trov-border);
+  transition: background var(--transition-fast);
+}
+
+.txRow:last-child {
+  border-bottom: none;
+}
+
+.txRow:hover {
+  background: var(--trov-surface-light);
+}
+
+.txInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.txLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  margin-bottom: 2px;
+}
+
+.txMeta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-muted);
+}
+
+.txRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.txType {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+/* ── Per-type pill colours ──
+   Each transaction type gets a visually distinct pill. The colour choice
+   answers "what kind of event is this", separate from the amount colour
+   which answers "did credits go in or out".
+
+   Palette logic:
+     PURCHASE   - green        : real money in. Most positive of the five.
+     REFUND     - orange/warn  : a correction reversing a prior charge. The
+                                 warning palette signals "ledger event,
+                                 needs attention" without screaming error.
+     GRANT      - gold         : a gift. The brand accent earns its slot
+                                 here because grants are uncommon and a
+                                 gold pill on a row genuinely is
+                                 promotional/positive context.
+     ADJUSTMENT - neutral gray : admin-only action, infrequent. Keeps the
+                                 row visually quiet.
+     USAGE      - neutral gray : the most common type. Loud styling on a
+                                 type that fills 90% of rows would shout.
+
+   Why USAGE is not red: the AMOUNT (-1 cr) is already red. Doubling up the
+   negative signal on the pill plus the amount makes ordinary tool runs
+   look like errors. Reserve red for things that genuinely need attention. */
+
+.txTypePurchase {
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.txTypeUsage {
+  background: var(--trov-surface-light);
+  color: var(--trov-text-muted);
+  border: 1px solid var(--trov-border);
+}
+
+.txTypeRefund {
+  background: var(--trov-warning-bg);
+  color: var(--trov-warning);
+  border: 1px solid rgba(251, 146, 60, 0.22);
+}
+
+.txTypeGrant {
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+}
+
+.txTypeAdjustment {
+  background: var(--trov-surface-light);
+  color: var(--trov-text-secondary);
+  border: 1px solid var(--trov-border);
+}
+
+.txAmount {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.txIn {
+  color: var(--trov-success);
+}
+
+.txOut {
+  color: var(--trov-text-muted);
+}
+
+.txPrice {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 1100px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .midGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 32px 0 64px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pageHeader {
+    flex-direction: column;
+  }
+
+  .buyBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .searchBox {
+    min-width: unset;
+  }
+
+  .filters {
+    justify-content: flex-start;
+  }
+
+  .pager {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .panel {
+    min-height: 600px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   APPEND TO: app/styles/modules/routes/dashboard.module.css
+
+   Adds:
+     .exportForm   - zero-chrome wrapper around the export form
+     .exportBtn    - CSV export action button in the transactions toolbar
+
+   Also refines:
+     .txRow        - now a <Link> element. Strip link underline + inherit
+                     color, add gold-tinted focus ring for keyboard nav.
+   ═══════════════════════════════════════════ */
+
+
+/* ─── Export CSV button ──────────────────── */
+
+.exportForm {
+  display: inline-flex;
+  margin: 0;
+}
+
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  color: var(--trov-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.exportBtn:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.exportBtn:active {
+  background: var(--trov-glow-strong);
+}
+
+.exportBtn:focus-visible {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+
+/* ─── Transaction row as Link (receipt navigation) ─────────
+   Overrides default anchor styling (underline, inherited gold
+   color from the global a { color: var(--trov-accent) } rule).
+   Preserves the existing .txRow visual; the hover state already
+   defined on .txRow in the base file continues to apply.
+   Adds an accessible focus ring for keyboard navigation. */
+
+a.txRow,
+a.txRow:hover,
+a.txRow:focus,
+a.txRow:active {
+  text-decoration: none;
+  color: inherit;
+}
+
+a.txRow:focus-visible {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+/* ─── Bulk-jobs wiring additions ──────────────────────────
+   Two classes added when the dashboard switched from MOCK_JOBS
+   to listJobsForUser():
+     1. .appComingSoonCopy   - replacement copy in the desktop card
+                               while the app waits to ship.
+     2. .statusRunning       - third status badge alongside .statusDone
+                               and .statusFailed, for jobs in
+                               'pending' or 'processing' state. Uses
+                               the gold accent because it is brand-
+                               coherent and unambiguous against the
+                               green/red of the terminal states. */
+
+.appComingSoonCopy {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+  margin: 0;
+}
+
+.statusRunning {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+}

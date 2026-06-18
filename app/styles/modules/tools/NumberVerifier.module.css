@@ -1,0 +1,1821 @@
+/* ================================================
+   NumberVerifier Component - Rebuilt with visual identity
+   ================================================ */
+
+.tool {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+}
+
+/* ================================================
+   Header
+   ================================================ */
+
+.toolHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.toolHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.toolIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.toolTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--trov-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.toolSubtitle {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin: 2px 0 0;
+}
+
+.freeBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ================================================
+   Country Picker - custom, not native select
+   ================================================ */
+
+.singleInput {
+  margin-bottom: var(--space-md);
+  position: relative;
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.countryButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast);
+  min-width: 100px;
+}
+
+.countryButton:hover:not(:disabled) {
+  border-color: var(--trov-border-hover);
+}
+
+.countryButton:disabled { opacity: 0.6; }
+
+.countryFlag {
+  display: block;
+  flex-shrink: 0;
+}
+
+.countryDial {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.countryChevron {
+  color: var(--trov-text-muted);
+  margin-left: 2px;
+}
+
+.countryDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 300px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  padding: 4px;
+  animation: fadeIn 0.15s ease;
+}
+
+.countryOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.countryOption:hover { background: var(--trov-surface-light); }
+.countryOptionActive { background: var(--trov-glow); }
+.optionFlag { display: block; flex-shrink: 0; }
+.optionName { font-size: 13px; color: var(--trov-text); flex: 1; }
+.optionDial { font-family: var(--font-mono); font-size: 12px; color: var(--trov-text-muted); }
+
+.numberInput {
+  flex: 1;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.numberInput:focus { border-color: var(--trov-accent); box-shadow: 0 0 0 3px var(--trov-glow); }
+.numberInput::placeholder { color: var(--trov-text-muted); }
+.numberInput:disabled { opacity: 0.6; }
+
+.verifyButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.verifyButton:hover:not(:disabled) { background: var(--trov-accent-hover); transform: translateY(-1px); }
+.verifyButton:disabled { opacity: 0.7; cursor: default; }
+
+.verifyingState { display: flex; align-items: center; gap: 6px; }
+
+.spinnerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1s ease infinite;
+}
+
+.errorText { font-size: 13px; color: var(--trov-error); margin: var(--space-sm) 0 0; }
+
+/* ================================================
+   Number Hero Display - the formatted number, large
+   ================================================ */
+
+.resultSection { margin-bottom: var(--space-md); }
+
+.numberHero {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.numberHeroTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.heroFlag {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+.heroNumber {
+  font-family: var(--font-mono);
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 600;
+  color: var(--trov-text);
+  letter-spacing: 0.02em;
+}
+
+.heroMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-left: 48px;
+}
+
+.heroCountry { font-size: 13px; color: var(--trov-text-secondary); }
+.heroDot { color: var(--trov-text-muted); }
+.heroRegion { font-size: 13px; color: var(--trov-text-secondary); }
+
+/* Invalid hero */
+
+.numberHeroInvalid {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.invalidX { font-size: 24px; color: var(--trov-error); flex-shrink: 0; line-height: 1.2; }
+.invalidTitle { font-size: 15px; font-weight: 600; color: var(--trov-error); margin: 0 0 4px; }
+.invalidReason { font-size: 13px; color: var(--trov-text-secondary); line-height: 1.5; margin: 0; }
+
+/* ================================================
+   Info Cards - Line Type + Format side by side
+   ================================================ */
+
+.infoCards {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  animation: fadeSlideIn 0.35s ease;
+}
+
+/* Line type card with colored accent */
+
+.typeCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--trov-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--trov-border);
+  border-left: 3px solid transparent;
+}
+
+.typeMobile { border-left-color: var(--trov-success); }
+.typeMobile .typeIconWrap { background: var(--trov-success-bg); color: var(--trov-success); }
+.typeMobile .typeLabel { color: var(--trov-success); }
+
+.typeLandline { border-left-color: var(--trov-error); }
+.typeLandline .typeIconWrap { background: var(--trov-error-bg); color: var(--trov-error); }
+.typeLandline .typeLabel { color: var(--trov-error); }
+
+.typeVoip { border-left-color: var(--trov-warning); }
+.typeVoip .typeIconWrap { background: var(--trov-warning-bg); color: var(--trov-warning); }
+.typeVoip .typeLabel { color: var(--trov-warning); }
+
+.typeUnknown { border-left-color: var(--trov-text-muted); }
+.typeUnknown .typeIconWrap { background: var(--trov-surface-light); color: var(--trov-text-muted); }
+
+.typeIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.typeLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.typeNote {
+  display: block;
+  font-size: 11px;
+  color: var(--trov-text-muted);
+  margin-top: 1px;
+}
+
+/* Format details */
+
+.formatCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+}
+
+.formatRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.formatLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  min-width: 60px;
+}
+
+.formatValue {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--trov-text);
+}
+
+/* ================================================
+   Tier 2 Unlock Prompt
+   ================================================ */
+
+.tier2Unlock {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  animation: fadeSlideIn 0.4s ease;
+}
+
+.tier2Header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--trov-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-sm);
+}
+
+.tier2Desc {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.55;
+  margin: 0 0 var(--space-md);
+}
+
+.tier2Button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.tier2Button:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
+
+.tier2Cost {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.tier2Free {
+  font-size: 11px;
+  color: var(--trov-text-muted);
+  margin: var(--space-sm) 0 0;
+}
+
+/* Tier 2 loading */
+
+.tier2LoadingBar {
+  padding: var(--space-lg);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+}
+
+.tier2LoadingLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.loadingTrack {
+  width: 100%;
+  height: 3px;
+  background: var(--trov-surface-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loadingFill {
+  width: 40%;
+  height: 100%;
+  background: var(--trov-accent);
+  border-radius: 2px;
+  animation: loadingSlide 1.5s ease infinite;
+}
+
+/* ================================================
+   Carrier Result Card
+   ================================================ */
+
+.carrierResult {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.carrierIdentity {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.carrierNameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.carrierName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+}
+
+.confirmedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.confirmedBadge.typeMobile { background: var(--trov-success-bg); color: var(--trov-success); }
+.confirmedBadge.typeLandline { background: var(--trov-error-bg); color: var(--trov-error); }
+.confirmedBadge.typeVoip { background: var(--trov-warning-bg); color: var(--trov-warning); }
+
+.carrierCnam {
+  display: block;
+  font-size: 13px;
+  color: var(--trov-text-muted);
+  margin-top: 4px;
+}
+
+.carrierDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.carrierDetail {
+  padding: var(--space-md) var(--space-lg);
+}
+
+.carrierDetail:first-child {
+  border-right: 1px solid var(--trov-border);
+}
+
+.carrierDetailLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.carrierDetailValue {
+  font-size: 13px;
+  color: var(--trov-text);
+}
+
+/* SMS Verdict - the hero moment */
+
+.smsVerdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+}
+
+
+.smsIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+
+.smsTitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.smsDetail {
+  display: block;
+  font-size: 12px;
+  color: var(--trov-text-secondary);
+  margin-top: 2px;
+}
+
+/* ================================================
+   Shared Actions
+   ================================================ */
+
+.resultActions { display: flex; gap: var(--space-sm); margin-bottom: var(--space-md); }
+
+.retryButton {
+  background: var(--trov-accent); color: var(--trov-text-on-accent); border: none; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600; padding: 10px 20px;
+  cursor: pointer; transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.retryButton:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
+
+.resetButton {
+  background: transparent; color: var(--trov-text-secondary); border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 10px 20px;
+  cursor: pointer; transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.resetButton:hover { border-color: var(--trov-accent); color: var(--trov-accent); }
+
+.modeSwitch { padding-top: var(--space-md); border-top: 1px solid var(--trov-border); }
+
+.modeSwitchLink {
+  background: none; border: none; color: var(--trov-accent); font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  cursor: pointer; padding: 0; transition: color var(--transition-fast);
+}
+.modeSwitchLink:hover { color: var(--trov-accent-hover); }
+.arrow { display: inline-block; margin-left: 4px; }
+
+/* ================================================
+   Bulk - Upload
+   ================================================ */
+
+.bulkUpload { margin-bottom: var(--space-md); }
+
+.dropZone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-sm); padding: var(--space-2xl) var(--space-lg);
+  border: 2px dashed var(--trov-border); border-radius: var(--radius-lg); background: var(--trov-bg);
+  transition: border-color var(--transition-fast), background var(--transition-fast); margin-bottom: var(--space-md);
+}
+.dropZoneActive { border-color: var(--trov-accent); background: var(--trov-glow); }
+.dropIcon { color: var(--trov-text-muted); }
+.dropText { font-size: 14px; color: var(--trov-text-secondary); margin: 0; }
+.dropOr { font-size: 12px; color: var(--trov-text-muted); margin: 0; }
+
+.browseButton {
+  background: transparent; color: var(--trov-accent); border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 8px 20px; cursor: pointer; transition: border-color var(--transition-fast);
+}
+.browseButton:hover { border-color: var(--trov-accent); }
+.hiddenFileInput { display: none; }
+
+.pasteSection { margin-bottom: var(--space-md); }
+.pasteLabel { font-size: 13px; color: var(--trov-text-secondary); margin: 0 0 var(--space-sm); }
+
+.pasteArea {
+  width: 100%; background: var(--trov-bg); border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md); color: var(--trov-text); font-family: var(--font-mono); font-size: 13px;
+  padding: 12px 16px; outline: none; resize: vertical; min-height: 80px; transition: border-color var(--transition-fast);
+}
+.pasteArea:focus { border-color: var(--trov-accent); box-shadow: 0 0 0 3px var(--trov-glow); }
+.pasteArea::placeholder { color: var(--trov-text-muted); }
+
+.pasteSubmit {
+  margin-top: var(--space-sm); background: transparent; color: var(--trov-accent); border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 8px 20px; cursor: pointer; transition: border-color var(--transition-fast);
+}
+.pasteSubmit:hover { border-color: var(--trov-accent); }
+
+.uploadMeta { margin-top: var(--space-sm); }
+.uploadHint { font-size: 12px; color: var(--trov-text-muted); margin: 0 0 var(--space-md); }
+
+/* Step preview - visual two-step indicator */
+
+.stepsPreview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.stepNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stepNumPaid {
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+}
+
+.stepTitle { display: block; font-size: 12px; font-weight: 600; color: var(--trov-text); }
+.stepCost { display: block; font-size: 11px; color: var(--trov-text-muted); }
+.stepArrow { color: var(--trov-text-muted); font-size: 14px; }
+
+/* ================================================
+   Bulk - Preview
+   ================================================ */
+
+.previewSection { margin-bottom: var(--space-md); }
+
+.previewCard {
+  background: var(--trov-bg); border: 1px solid var(--trov-border); border-radius: var(--radius-lg);
+  padding: var(--space-lg); margin-bottom: var(--space-md);
+}
+.previewStats { display: flex; align-items: baseline; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.previewCount { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--trov-text); letter-spacing: -0.02em; }
+.previewLabel { font-size: 14px; color: var(--trov-text-secondary); }
+.previewDupes { font-size: 12px; color: var(--trov-text-muted); margin: 0 0 4px; }
+.previewSource { font-size: 12px; color: var(--trov-text-muted); font-family: var(--font-mono); margin: 0; }
+
+.previewActions { display: flex; gap: var(--space-sm); }
+
+.verifyBulkButton {
+  background: var(--trov-accent); color: var(--trov-text-on-accent); border: none;
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  padding: 12px 24px; cursor: pointer; transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.verifyBulkButton:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
+
+/* ================================================
+   Bulk - Progress
+   ================================================ */
+
+.progressSection { margin-bottom: var(--space-lg); }
+
+.progressStepIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.activeStep {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.completedMini {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-success);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stepDivider { color: var(--trov-text-muted); font-size: 12px; }
+
+.progressHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; color: var(--trov-text); margin-bottom: var(--space-sm);
+}
+
+.progressPct { font-family: var(--font-mono); font-weight: 600; color: var(--trov-accent); }
+
+.progressBar {
+  width: 100%; height: 6px; background: var(--trov-bg); border-radius: 3px;
+  overflow: hidden; margin-bottom: var(--space-sm);
+}
+.progressFill { height: 100%; background: var(--trov-accent); border-radius: 3px; transition: width 0.4s ease; }
+
+.progressDetails { font-size: 12px; color: var(--trov-text-muted); font-family: var(--font-mono); }
+
+/* ================================================
+   Bulk - Format Results
+   ================================================ */
+
+.formatResultsSection { margin-bottom: var(--space-md); }
+
+.completedStepRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.completedStepCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.completedStepLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-success);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.formatStatRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.formatStat {
+  text-align: center;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--trov-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--trov-border);
+}
+
+.formatStatCount { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
+.formatValid .formatStatCount { color: var(--trov-success); }
+.formatInvalid .formatStatCount { color: var(--trov-error); }
+.formatCountries .formatStatCount { color: var(--trov-accent); }
+
+.formatStatLabel { font-size: 11px; font-weight: 600; color: var(--trov-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Carrier prompt card */
+
+.carrierPrompt {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.carrierPromptIcon { color: var(--trov-accent); margin-bottom: var(--space-sm); }
+.carrierPromptContent { margin-bottom: var(--space-md); }
+.carrierPromptTitle { font-size: 14px; font-weight: 600; color: var(--trov-text); margin: 0 0 4px; }
+.carrierPromptDesc { font-size: 13px; color: var(--trov-text-secondary); margin: 0; }
+
+.carrierPromptCost { display: flex; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); }
+.costValue { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--trov-accent); }
+.costCalc { font-size: 12px; color: var(--trov-text-muted); }
+
+.carrierLookupButton {
+  background: var(--trov-accent); color: var(--trov-text-on-accent); border: none;
+  border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 10px 24px; cursor: pointer; transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.carrierLookupButton:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
+
+.skipOption { margin-bottom: var(--space-md); }
+
+/* ================================================
+   Bulk - Final Results
+   ================================================ */
+
+.bulkResultsSection { margin-bottom: var(--space-md); }
+.bulkResultsSubhead { font-size: 14px; color: var(--trov-text-secondary); margin: 0 0 var(--space-lg); }
+
+/* Carrier breakdown bar - the signature visual */
+
+.carrierBreakdown {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.breakdownBar {
+  display: flex;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.barMobile { background: var(--trov-success); transition: width 0.6s ease; }
+.barLandline { background: var(--trov-error); transition: width 0.6s ease 0.1s; }
+.barVoip { background: var(--trov-warning); transition: width 0.6s ease 0.2s; }
+.barUnknown { background: var(--trov-text-muted); transition: width 0.6s ease 0.3s; }
+
+.breakdownLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--trov-text-secondary);
+  font-family: var(--font-mono);
+}
+
+.legendDot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.dotMobile { background: var(--trov-success); }
+.dotLandline { background: var(--trov-error); }
+.dotVoip { background: var(--trov-warning); }
+.dotUnknown { background: var(--trov-text-muted); }
+
+/* SMS-capable summary - hero verdict for bulk */
+
+.smsSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+}
+
+.smsSummaryLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.smsSummaryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.smsSummaryCount {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--trov-success);
+  letter-spacing: -0.02em;
+}
+
+.smsSummaryLabel { display: block; font-size: 12px; color: var(--trov-text-secondary); }
+.smsSummaryBreakdown { font-size: 12px; color: var(--trov-text-muted); font-family: var(--font-mono); }
+
+/* Landline warning */
+
+.landlineWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.15);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.warningIcon { color: var(--trov-error); flex-shrink: 0; }
+
+.invalidNote {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+/* Downloads */
+
+.downloadRow { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+
+.downloadButton {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--trov-accent); color: var(--trov-text-on-accent);
+  border: none; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  padding: 10px 18px; cursor: pointer; transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.downloadButton:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
+
+.downloadButtonSecondary {
+  display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px;
+  font-weight: 500; padding: 10px 18px; cursor: pointer; transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.downloadButtonSecondary:hover { border-color: var(--trov-accent); color: var(--trov-accent); }
+
+.expiryNote { font-size: 12px; color: var(--trov-text-muted); margin: 0 0 var(--space-lg); }
+
+/* Tool chain */
+
+.toolChain { padding-top: var(--space-md); border-top: 1px solid var(--trov-border); }
+
+.chainLink {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;
+  color: var(--trov-accent); text-decoration: none; transition: color var(--transition-fast);
+}
+.chainLink:hover { color: var(--trov-accent-hover); }
+
+.chainBadge {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--trov-text-muted);
+  background: var(--trov-bg); padding: 2px 6px; border-radius: 4px; margin-left: 4px;
+}
+
+/* ================================================
+   Animations
+   ================================================ */
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes loadingSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+
+@media (max-width: 640px) {
+  .tool { padding: var(--space-lg) var(--space-md); border-radius: var(--radius-lg); }
+  .inputRow { flex-direction: column; }
+  .countryButton { width: 100%; justify-content: center; padding: 12px 14px; }
+  .verifyButton { width: 100%; }
+  .countryDropdown { width: 100%; }
+  .infoCards { grid-template-columns: 1fr; }
+  .numberHeroTop { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
+  .heroMeta { padding-left: 0; }
+  .carrierDetails { grid-template-columns: 1fr; }
+  .carrierDetail:first-child { border-right: none; border-bottom: 1px solid var(--trov-border); }
+  .formatStatRow { grid-template-columns: 1fr; }
+  .downloadRow { flex-direction: column; }
+  .downloadButton, .downloadButtonSecondary { width: 100%; justify-content: center; }
+  .resultActions { flex-direction: column; }
+  .retryButton, .resetButton { width: 100%; text-align: center; }
+  .previewActions { flex-direction: column; }
+  .verifyBulkButton { width: 100%; }
+  .smsSummary { flex-direction: column; gap: var(--space-sm); align-items: flex-start; }
+  .stepsPreview { flex-direction: column; align-items: flex-start; }
+  .stepArrow { transform: rotate(90deg); }
+  .breakdownLegend { gap: var(--space-sm); }
+}
+
+@media (max-width: 480px) {
+  .toolTitle { font-size: 16px; }
+  .heroNumber { font-size: 18px; }
+  .heroFlag { width: 26px; height: 20px; }
+  .previewCount { font-size: 24px; }
+  .formatStatCount { font-size: 18px; }
+  .carrierName { font-size: 16px; }
+}
+/* ─────────────────────────────────────────────────────────────────────
+   Inline signup prompt
+   Mirrors the gold-bordered prompt from EmailScorer. Triggered when an
+   anonymous user clicks 'Get Carrier Info', or when their session
+   expires mid-flow. The wrapper sits above the result actions.
+   ───────────────────────────────────────────────────────────────────── */
+
+.authPrompt {
+  margin-top: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--trov-glow);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.authPromptHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.authPromptTitle {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+}
+
+.authPromptBonus {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  background: rgba(212, 168, 67, 0.10);
+  border: 1px solid rgba(212, 168, 67, 0.22);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.authPromptBody {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.authPromptActions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.authPromptPrimary {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.authPromptPrimary:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+  transform: translateY(-1px);
+}
+
+.authPromptSecondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--trov-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.authPromptSecondary:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-text);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   Invalid-number partial parse hint
+   Shown under the 'Invalid number' card when libphonenumber returned
+   enough data to suggest what the user might have meant.
+   ───────────────────────────────────────────────────────────────────── */
+
+.invalidPartial {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+}
+
+.invalidPartial code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  background: var(--trov-surface-light);
+  color: var(--trov-text-secondary);
+  border: 1px solid var(--trov-border);
+  border-radius: 3px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   Bulk-mode 'coming soon' marker
+   The bulk JSX is parked behind BULK_AVAILABLE=false until the Email
+   Verifier ships the shared job-queue infrastructure. This pill replaces
+   the old 'Have a list?' switch link with an honest roadmap signal.
+   ───────────────────────────────────────────────────────────────────── */
+
+.bulkComingSoon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.bulkComingSoonLink {
+  color: var(--trov-accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.bulkComingSoonLink:hover {
+  color: var(--trov-accent-hover);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   Four-state SMS verdict palette
+   Replaces the binary .smsYes / .smsNo with four buckets that reflect
+   real-world deliverability:
+
+     .smsConfident  Mobile / personal. Green. Send.
+     .smsFlaky      VoIP. Orange. Works but unreliable.
+     .smsUncertain  Partial Twilio response. Orange. Test first.
+     .smsNone       Landline / toll-free / pager / etc. Red. Don't send.
+
+   Old .smsYes and .smsNo classes from the original CSS are no longer
+   referenced by NumberVerifier.jsx after this patch and can be deleted
+   from NumberVerifier.module.css when convenient. They cause no harm
+   if left in place.
+   ───────────────────────────────────────────────────────────────────── */
+
+.smsConfident { background: rgba(52, 211, 153, 0.06); }
+.smsFlaky     { background: rgba(251, 146, 60, 0.06); }
+.smsUncertain { background: rgba(251, 146, 60, 0.06); }
+.smsNone      { background: rgba(248, 113, 113, 0.06); }
+
+.smsConfident .smsIcon { background: var(--trov-success-bg); color: var(--trov-success); }
+.smsFlaky     .smsIcon { background: var(--trov-warning-bg); color: var(--trov-warning); font-weight: 800; }
+.smsUncertain .smsIcon { background: var(--trov-warning-bg); color: var(--trov-warning); font-weight: 800; }
+.smsNone      .smsIcon { background: var(--trov-error-bg);   color: var(--trov-error); }
+
+.smsConfident .smsTitle { color: var(--trov-success); }
+.smsFlaky     .smsTitle { color: var(--trov-warning); }
+.smsUncertain .smsTitle { color: var(--trov-warning); }
+.smsNone      .smsTitle { color: var(--trov-error); }
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   Lookup error banner
+   Surfaces server-side errors (insufficient credits, rate limit, API
+   failure) when they land on the result section. Without this, the
+   click on 'Get Carrier Info' silently failed - errors only had a
+   render slot inside the input block, which was already unmounted.
+
+   Sits ABOVE the unlock card so the user reads the problem first,
+   then sees what to do about it. If balance hit zero, an inline
+   'Buy credits' link saves a navigation hop.
+   ───────────────────────────────────────────────────────────────────── */
+
+.lookupError {
+  margin-top: var(--space-md);
+  padding: 14px var(--space-lg);
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.lookupErrorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--trov-error-bg);
+  color: var(--trov-error);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.lookupErrorContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.lookupErrorMessage {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-error);
+  line-height: 1.5;
+}
+
+.lookupErrorAction {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.lookupErrorAction:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+}
+
+/* Disabled state for the unlock button when balance is zero. The
+   button stays visible so the user understands the lookup exists,
+   but cannot be clicked - the error banner above tells them why. */
+.tier2Button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--trov-surface-light);
+  color: var(--trov-text-muted);
+}
+
+.tier2Button:disabled:hover {
+  background: var(--trov-surface-light);
+  transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BULK MODE - appended for sub-batch 7C.
+   All classes prefixed `bulk*` to avoid collisions. Reuses tokens from
+   the existing single-mode rules (border-radius, spacing, accent, status).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Upload (paste) ── */
+
+.bulkUpload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.bulkCountryRow {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.bulkCountryAnchor {
+  position: relative;
+  align-self: flex-start;
+}
+
+.bulkCountryLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.bulkPasteSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bulkPasteLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  margin: 0;
+}
+
+.bulkPasteArea {
+  width: 100%;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--trov-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 140px;
+  transition: border-color var(--transition-fast);
+}
+
+.bulkPasteArea::placeholder {
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+}
+
+.bulkPasteArea:focus {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.bulkPasteArea::-webkit-scrollbar {
+  width: 10px;
+}
+.bulkPasteArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bulkPasteArea::-webkit-scrollbar-thumb {
+  background: var(--trov-border-hover);
+  border-radius: 5px;
+  border: 2px solid var(--trov-bg);
+}
+.bulkPasteArea::-webkit-scrollbar-thumb:hover {
+  background: var(--trov-text-muted);
+}
+
+.bulkPasteSubmit {
+  align-self: flex-start;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.bulkPasteSubmit:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.bulkPasteSubmit:disabled {
+  background: var(--trov-surface-light);
+  color: var(--trov-text-muted);
+  cursor: not-allowed;
+}
+
+.bulkUploadHint {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+.bulkErrorText {
+  color: var(--trov-error);
+  font-size: 13px;
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--trov-error-bg);
+  border-radius: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+/* ── Preview ── */
+
+.bulkPreviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.bulkPreviewCard {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bulkPreviewStats {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.bulkPreviewCount {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: -0.02em;
+}
+
+.bulkPreviewLabel {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+}
+
+.bulkPreviewDupes {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+.bulkPreviewCost {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--trov-glow);
+  border: 1px solid rgba(212, 168, 67, 0.3);
+  border-radius: 8px;
+}
+
+.bulkCostLabel {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+}
+
+.bulkCostValue {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--trov-accent);
+}
+
+.bulkCostCalc {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+.bulkPreviewCountry {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulkPreviewCountry strong {
+  color: var(--trov-text);
+  font-weight: 500;
+}
+
+.bulkPreviewActions {
+  display: flex;
+  gap: 10px;
+}
+
+.bulkVerifyButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  flex: 1;
+  min-height: 44px;
+}
+
+.bulkVerifyButton:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.bulkBackButton {
+  background: transparent;
+  color: var(--trov-text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  border: 1.5px solid var(--trov-border);
+  border-radius: 8px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.bulkBackButton:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+/* ── Verifying (live progress) ── */
+
+.bulkProgressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 12px;
+}
+
+.bulkProgressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bulkProgressLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.bulkProgressCount {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bulkProgressTrack {
+  height: 8px;
+  background: var(--trov-surface-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bulkProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--trov-accent), var(--trov-accent-hover));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.bulkLiveStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.bulkStatValid   { color: var(--trov-success); }
+.bulkStatRisky   { color: var(--trov-warning); }
+.bulkStatInvalid { color: var(--trov-error); }
+.bulkStatError   { color: var(--trov-error); font-weight: 600; }
+
+.bulkCancelButton {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulkCancelButton:hover {
+  border-color: var(--trov-error);
+  color: var(--trov-error);
+}
+
+/* ── Result ── */
+
+.bulkResultSection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bulkResultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.bulkResultTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--trov-text);
+  margin: 0;
+}
+
+.bulkResultDuration {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+.bulkResultStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 160px));
+  gap: 12px;
+  justify-content: start;
+}
+
+.bulkResultStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 8px;
+}
+
+.bulkResultStatNum {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.bulkResultStatLabel {
+  font-size: 11px;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValid   { color: var(--trov-success); }
+.statRisky   { color: var(--trov-warning); }
+.statInvalid { color: var(--trov-error); }
+.statError   { color: var(--trov-error); }
+
+.bulkResultRefund {
+  font-size: 13px;
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.bulkResultActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bulkDownloadButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.bulkDownloadButton:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.bulkDownloadButtonAlt {
+  background: transparent;
+  color: var(--trov-accent);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1.5px solid var(--trov-accent);
+  border-radius: 8px;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.bulkDownloadButtonAlt:hover {
+  background: var(--trov-glow);
+}
+
+.bulkResetButton,
+.bulkBackToSingleButton {
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulkResetButton:hover,
+.bulkBackToSingleButton:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+@media (max-width: 640px) {
+  .bulkPreviewActions,
+  .bulkResultActions {
+    flex-direction: column;
+  }
+  .bulkVerifyButton,
+  .bulkBackButton,
+  .bulkDownloadButton,
+  .bulkDownloadButtonAlt,
+  .bulkResetButton,
+  .bulkBackToSingleButton {
+    width: 100%;
+  }
+  .bulkProgressHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

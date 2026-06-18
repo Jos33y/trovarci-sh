@@ -1,0 +1,991 @@
+/* ================================================
+   EmailVerifier Component
+   ================================================ */
+
+.tool {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+}
+
+/* Header */
+
+.toolHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.toolHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.toolIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--trov-bg);
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.toolTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--trov-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.toolSubtitle {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin: 2px 0 0;
+}
+
+.freeBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ================================================
+   Single Mode - Input
+   ================================================ */
+
+.singleInput {
+  margin-bottom: var(--space-md);
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.emailInput {
+  flex: 1;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.emailInput:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.emailInput::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.emailInput:disabled {
+  opacity: 0.6;
+}
+
+.verifyButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.verifyButton:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.verifyButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.errorText {
+  font-size: 13px;
+  color: var(--trov-error);
+  margin: var(--space-sm) 0 0;
+}
+
+/* ================================================
+   5-Step Verification Ladder
+   ================================================ */
+
+.ladderSection {
+  margin-bottom: var(--space-md);
+}
+
+/* Verdict banner */
+
+.verdictBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  animation: fadeIn 0.3s ease;
+}
+
+.verdict_valid {
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.verdict_invalid {
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.verdict_risky {
+  background: var(--trov-warning-bg);
+  border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.verdictIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.verdict_valid .verdictIcon { color: var(--trov-success); }
+.verdict_invalid .verdictIcon { color: var(--trov-error); }
+.verdict_risky .verdictIcon { color: var(--trov-warning); }
+
+.verdictText {
+  font-size: 14px;
+  color: var(--trov-text);
+}
+
+.verdictText strong {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Steps */
+
+.stepsLadder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-md);
+}
+
+.stepRow {
+  display: grid;
+  grid-template-columns: 24px 72px 1fr;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 10px var(--space-md);
+  background: var(--trov-bg);
+  border-radius: var(--radius-sm);
+  transition: opacity 0.3s ease;
+}
+
+.stepHidden {
+  opacity: 0.25;
+}
+
+.stepVisible {
+  opacity: 1;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.stepCurrent {
+  background: var(--trov-surface-light);
+}
+
+.stepStatus {
+  font-size: 14px;
+  text-align: center;
+  width: 24px;
+}
+
+.stepStatus_pass { color: var(--trov-success); }
+.stepStatus_fail { color: var(--trov-error); }
+.stepStatus_warn { color: var(--trov-warning); }
+
+.stepLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.stepDetail {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+}
+
+/* Result meta */
+
+.resultMeta {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+  animation: fadeIn 0.3s ease;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+
+.metaLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  min-width: 72px;
+}
+
+.metaValue {
+  font-size: 13px;
+  color: var(--trov-text);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.resultMessage {
+  font-size: 14px;
+  font-weight: 500;
+  margin: var(--space-md) 0 0;
+  line-height: 1.5;
+}
+
+/* ================================================
+   Shared Actions
+   ================================================ */
+
+.resultActions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.retryButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.retryButton:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.resetButton {
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.resetButton:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+/* Mode switch */
+
+.modeSwitch {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+}
+
+.modeSwitchLink {
+  background: none;
+  border: none;
+  color: var(--trov-accent);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.modeSwitchLink:hover {
+  color: var(--trov-accent-hover);
+}
+
+.arrow {
+  display: inline-block;
+  margin-left: 4px;
+}
+
+/* ================================================
+   Bulk Mode - Upload
+   ================================================ */
+
+.bulkUpload {
+  margin-bottom: var(--space-md);
+}
+
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) var(--space-lg);
+  border: 2px dashed var(--trov-border);
+  border-radius: var(--radius-lg);
+  background: var(--trov-bg);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  margin-bottom: var(--space-md);
+}
+
+.dropZoneActive {
+  border-color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.dropIcon {
+  color: var(--trov-text-muted);
+}
+
+.dropText {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+  margin: 0;
+}
+
+.dropOr {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+.browseButton {
+  background: transparent;
+  color: var(--trov-accent);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.browseButton:hover {
+  border-color: var(--trov-accent);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.pasteSection {
+  margin-bottom: var(--space-md);
+}
+
+.pasteLabel {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin: 0 0 var(--space-sm);
+}
+
+.pasteArea {
+  width: 100%;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 12px 16px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-fast);
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--trov-border-hover) var(--trov-bg);
+}
+
+/* WebKit / Blink scrollbar - matches the dark theme */
+.pasteArea::-webkit-scrollbar {
+  width: 10px;
+}
+.pasteArea::-webkit-scrollbar-track {
+  background: var(--trov-bg);
+  border-radius: var(--radius-sm);
+}
+.pasteArea::-webkit-scrollbar-thumb {
+  background: var(--trov-border-hover);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--trov-bg);
+}
+.pasteArea::-webkit-scrollbar-thumb:hover {
+  background: var(--trov-text-muted);
+}
+
+.pasteArea:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.pasteArea::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.pasteSubmit {
+  margin-top: var(--space-sm);
+  background: transparent;
+  color: var(--trov-accent);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.pasteSubmit:hover {
+  border-color: var(--trov-accent);
+}
+
+.uploadHint {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+/* ================================================
+   Bulk - Preview
+   ================================================ */
+
+.previewSection {
+  margin-bottom: var(--space-md);
+}
+
+.previewCard {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.previewStats {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.previewCount {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+}
+
+.previewLabel {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+}
+
+.previewDupes {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0 0 4px;
+}
+
+.previewSource {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  margin: 0 0 var(--space-md);
+}
+
+.previewCost {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+}
+
+.costLabel {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+}
+
+.costValue {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-accent);
+}
+
+.costCalc {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+.previewActions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.verifyBulkButton {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.verifyBulkButton:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ================================================
+   Bulk - Progress
+   ================================================ */
+
+.progressSection {
+  margin-bottom: var(--space-md);
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--trov-text);
+  margin-bottom: var(--space-sm);
+}
+
+.progressPct {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--trov-accent);
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--trov-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--space-sm);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--trov-accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.progressDetails {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: var(--space-lg);
+}
+
+.liveStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.liveStat {
+  text-align: center;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--trov-bg);
+  border-radius: var(--radius-md);
+}
+
+.liveCount {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.liveValid .liveCount { color: var(--trov-success); }
+.liveInvalid .liveCount { color: var(--trov-error); }
+.liveRisky .liveCount { color: var(--trov-warning); }
+.liveUnknown .liveCount { color: var(--trov-text-muted); }
+
+.liveLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.progressNote {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+}
+
+/* ================================================
+   Bulk - Results
+   ================================================ */
+
+.bulkResultsSection {
+  margin-bottom: var(--space-md);
+}
+
+.bulkResultsSubhead {
+  font-size: 14px;
+  color: var(--trov-text-secondary);
+  margin: 0 0 var(--space-lg);
+}
+
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.statCard {
+  text-align: center;
+  padding: var(--space-lg) var(--space-sm);
+  background: var(--trov-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--trov-border);
+}
+
+.statCount {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+
+.statValid .statCount { color: var(--trov-success); }
+.statInvalid .statCount { color: var(--trov-error); }
+.statRisky .statCount { color: var(--trov-warning); }
+.statUnknown .statCount { color: var(--trov-text-muted); }
+
+.statLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.statPct {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+/* ================================================
+   Error info row - rendered below liveStats / statCards
+   only when bulkStats.error > 0. Errors are infra
+   failures, not verdicts, so they get a separate
+   honest banner rather than a 5th cell that would
+   pretend they belong with the classification grid.
+   ================================================ */
+
+.errorInfoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 14px;
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.errorInfoCount {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-error);
+  padding: 2px 8px;
+  background: rgba(248, 113, 113, 0.12);
+  border-radius: var(--radius-sm);
+}
+
+.errorInfoText {
+  font-size: 12px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+}
+
+/* Health card */
+
+.healthCard {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-left: 4px solid;
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.healthVerdict {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.healthMessage {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Downloads */
+
+.downloadRow {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.downloadButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.downloadButton:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.downloadButtonSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.downloadButtonSecondary:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+.expiryNote {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0 0 var(--space-lg);
+}
+
+/* Tool chain */
+
+.toolChain {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+}
+
+.chainLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.chainLink:hover {
+  color: var(--trov-accent-hover);
+}
+
+.chainBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  background: var(--trov-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* ================================================
+   Animations
+   ================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================
+   Responsive
+   ================================================ */
+
+@media (max-width: 640px) {
+  .tool {
+    padding: var(--space-lg) var(--space-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .verifyButton {
+    width: 100%;
+  }
+
+  .stepRow {
+    grid-template-columns: 20px 56px 1fr;
+    padding: 8px var(--space-sm);
+  }
+
+  .stepLabel { font-size: 12px; }
+  .stepDetail { font-size: 12px; }
+
+  .liveStats,
+  .statCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .downloadRow {
+    flex-direction: column;
+  }
+
+  .downloadButton,
+  .downloadButtonSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .resultActions {
+    flex-direction: column;
+  }
+
+  .retryButton,
+  .resetButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .previewActions {
+    flex-direction: column;
+  }
+
+  .verifyBulkButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolTitle { font-size: 16px; }
+  .previewCount { font-size: 24px; }
+  .statCount { font-size: 20px; }
+  .liveCount { font-size: 16px; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Unknown verdict
+   Added to support the lib's 4-category output (valid/invalid/risky/unknown).
+   Uses muted gray for the neutral "we couldn't get a definitive answer" tone -
+   distinct from risky (orange = deliverable but flagged) and from the brand
+   gold accent (which is reserved for interactive elements).
+   ───────────────────────────────────────────────────────────────────── */
+
+.verdict_unknown {
+  background: rgba(82, 82, 91, 0.10);
+  border: 1px solid rgba(82, 82, 91, 0.20);
+}
+
+.verdict_unknown .verdictIcon { color: var(--trov-text-muted); }

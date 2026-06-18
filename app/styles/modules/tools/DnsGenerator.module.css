@@ -1,0 +1,1680 @@
+/* ══════════════════════════════════════════════
+   DNS Record Generator - App-panel design
+   The tool IS the hero. No marketing wrapper.
+   ══════════════════════════════════════════════ */
+
+/* ── Tool Card: the entire tool lives in one panel ── */
+
+.toolCard {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+/* ── Card Header: app-like, not marketing-like ── */
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.cardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: var(--trov-text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.freeBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-success);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Tab Bar: replaces step circles ── */
+
+.tabBar {
+  display: flex;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-bg);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--trov-text-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  position: relative;
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--trov-text-secondary);
+  background: rgba(212, 168, 67, 0.02);
+}
+
+.tab:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.tabActive {
+  color: var(--trov-accent);
+  border-bottom-color: var(--trov-accent);
+  font-weight: 600;
+}
+
+.tabDone {
+  color: var(--trov-text-secondary);
+}
+
+.tabDone:hover:not(:disabled) {
+  color: var(--trov-accent);
+}
+
+/* ── Tool Body ── */
+
+.toolBody {
+  padding: var(--space-xl);
+}
+
+/* ── Step Content ── */
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* ── Field Groups ── */
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.labelHint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--trov-text-muted);
+}
+
+/* ── Inputs: 16px minimum for iOS zoom prevention ── */
+
+.domainInput {
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.domainInput::placeholder {
+  color: var(--trov-text-muted);
+  font-weight: 400;
+}
+
+.domainInput:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.input {
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 400;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.input:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+/* ── Option Grid (providers / registrars) ── */
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+.optionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 14px 16px;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.optionCard:hover {
+  border-color: rgba(212, 168, 67, 0.25);
+}
+
+.optionSelected {
+  border-color: var(--trov-accent);
+  background: rgba(212, 168, 67, 0.03);
+}
+
+.optionSelected:hover {
+  border-color: var(--trov-accent);
+}
+
+/* Left accent bar on selected */
+.optionSelected::before {
+  content: '';
+  position: absolute;
+  left: -1.5px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  background: var(--trov-accent);
+  border-radius: 2px;
+}
+
+.optionName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.optionDesc {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+.spfContrib {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--trov-accent);
+  opacity: 0.7;
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+}
+
+/* ── Chips ── */
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 20px;
+  color: var(--trov-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chip:hover {
+  border-color: rgba(212, 168, 67, 0.3);
+  color: var(--trov-text);
+}
+
+.chipActive {
+  border-color: var(--trov-accent);
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+}
+
+/* ── Live Preview (real-time record building) ── */
+
+.livePreview {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-normal);
+}
+
+.livePreview:hover {
+  border-color: rgba(212, 168, 67, 0.12);
+}
+
+.livePreviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.livePreviewDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--trov-success);
+  flex-shrink: 0;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.livePreviewLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.livePreviewCount {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--trov-text-muted);
+  margin-left: auto;
+}
+
+.livePreviewCode {
+  display: block;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--trov-accent);
+  line-height: 1.5;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+/* ── DMARC Policy ── */
+
+.policyOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.policyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 16px;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.policyCard:hover {
+  border-color: rgba(212, 168, 67, 0.25);
+}
+
+.policySelected {
+  border-color: var(--trov-accent);
+  background: rgba(212, 168, 67, 0.03);
+}
+
+.policySelected::before {
+  content: '';
+  position: absolute;
+  left: -1.5px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--trov-accent);
+  border-radius: 2px;
+}
+
+.policyLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.policyDesc {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  line-height: 1.4;
+}
+
+/* ── Step Footer (navigation) ── */
+
+.stepFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--trov-border);
+}
+
+.nextBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 22px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.nextBtn:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.nextBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 20px;
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.backBtn:hover {
+  border-color: var(--trov-text-muted);
+  color: var(--trov-text);
+}
+
+/* ═══════════════════════════════════════════
+   STEP 3: Generated Records
+   ═══════════════════════════════════════════ */
+
+/* Completion banner - reward moment */
+.healthBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--trov-success-bg);
+  border: 1px solid rgba(52, 211, 153, 0.12);
+  border-radius: var(--radius-md);
+}
+
+.healthChecks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.healthItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--trov-success);
+  letter-spacing: 0.03em;
+}
+
+.healthText {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+}
+
+.resultHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.resultTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.resultMeta {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+
+.copyAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  color: var(--trov-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.copyAllBtn:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+/* ── Registrar Instructions (collapsible) ── */
+
+.instructions {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.instructionsSummary {
+  padding: var(--space-md) var(--space-lg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color var(--transition-fast);
+}
+
+.instructionsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.instructionsSummary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.instructions[open] .instructionsSummary::before {
+  transform: rotate(90deg);
+}
+
+.instructionsSummary:hover {
+  color: var(--trov-text);
+}
+
+.instructionsList {
+  margin: 0;
+  padding: 0 var(--space-lg) var(--space-md) calc(var(--space-lg) + 13px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.instructionsList li {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+}
+
+.instructionsList li::marker {
+  color: var(--trov-text-muted);
+}
+
+/* ── Record Cards ── */
+
+.recordCard {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: border-color var(--transition-fast);
+}
+
+.recordCard:hover {
+  border-color: rgba(212, 168, 67, 0.12);
+}
+
+.recordTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.recordBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recordLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background: var(--trov-glow);
+  border-radius: 4px;
+}
+
+.recordType {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.recordCopy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.recordCopy:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+/* ── Record Fields ── */
+
+.recordFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.recordField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recordFieldLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.recordFieldValue {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--trov-surface-light);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+}
+
+.recordFieldValue code {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--trov-text);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.fieldCopyBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  color: var(--trov-text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  margin-top: -2px;
+}
+
+.fieldCopyBtn:hover {
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.recordNote {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--trov-border);
+}
+
+/* ── DKIM ── */
+
+.dkimHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recordSectionTitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--trov-text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dkimNote {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.manualNote {
+  padding: var(--space-lg);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Result Footer ── */
+
+.resultActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--trov-border);
+}
+
+.verifyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.verifyLink:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .toolCard {
+    border-radius: var(--radius-lg);
+  }
+
+  .cardHeader {
+    padding: var(--space-md) var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+
+  .toolBody {
+    padding: var(--space-lg);
+  }
+
+  .optionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab {
+    font-size: 12px;
+    padding: 12px 8px;
+  }
+
+  .resultHeader {
+    flex-direction: column;
+  }
+
+  .healthBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .healthChecks {
+    gap: var(--space-sm);
+  }
+
+  .livePreviewCode {
+    font-size: 12px;
+  }
+
+  .resultActions {
+    flex-direction: column;
+  }
+
+  .stepFooter {
+    flex-direction: column-reverse;
+  }
+
+  .backBtn,
+  .nextBtn,
+  .verifyLink {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION 04 ADDITIONS
+   New selectors introduced by the rebuilt DnsGenerator component.
+   Everything above this line is preserved verbatim from the original module.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Inline error (validation feedback under inputs) ── */
+
+.inlineError {
+  font-size: 12px;
+  color: var(--trov-error, #f87171);
+  font-family: var(--font-body);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ── Inline accordion (DKIM key paste + DMARC advanced tags) ── */
+
+.inlineAccordion {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.inlineAccordion[open] {
+  border-color: rgba(212, 168, 67, 0.18);
+}
+
+.inlineAccordionSummary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--transition-fast);
+}
+
+.inlineAccordionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.inlineAccordionSummary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.inlineAccordion[open] .inlineAccordionSummary::before {
+  transform: rotate(90deg);
+}
+
+.inlineAccordionSummary:hover {
+  color: var(--trov-text);
+}
+
+.inlineAccordionBody {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  border-top: 1px solid var(--trov-border);
+  padding-top: 14px;
+}
+
+.inlineAccordionNote {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.inlineAccordionNote a {
+  color: var(--trov-accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(212, 168, 67, 0.3);
+  transition: border-color var(--transition-fast);
+}
+
+.inlineAccordionNote a:hover {
+  border-bottom-color: var(--trov-accent);
+}
+
+/* ── DKIM key textarea ── */
+
+.keyInput {
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 72px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+  word-break: break-all;
+}
+
+.keyInput::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.keyInput:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.keyInput[aria-invalid='true'] {
+  border-color: var(--trov-error, #f87171);
+}
+
+/* ── Advanced grid (two-column fields inside accordions) ── */
+
+.advancedGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+@media (max-width: 640px) {
+  .advancedGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Live preview tonal states ── */
+
+.livePreviewError {
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.livePreviewWarning {
+  border-color: rgba(251, 146, 60, 0.28);
+}
+
+.livePreviewDotError {
+  background: var(--trov-error, #f87171);
+  animation: livePulseError 2s ease-in-out infinite;
+}
+
+.livePreviewDotWarning {
+  background: var(--trov-warning, #fb923c);
+  animation: livePulseWarning 2s ease-in-out infinite;
+}
+
+@keyframes livePulseError {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes livePulseWarning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .livePreviewDotError,
+  .livePreviewDotWarning {
+    animation: none;
+  }
+}
+
+/* ── SPF source breakdown ── */
+
+.spfBreakdown {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px dashed var(--trov-border);
+}
+
+.spfBreakdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: 10px;
+}
+
+.spfBreakdownTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.spfBreakdownTotal {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--trov-surface-light);
+  border-top: 1px solid var(--trov-border);
+}
+
+.livePreview .sourceList {
+  border-top: none;
+}
+
+.spfBreakdown .sourceList {
+  background: transparent;
+  padding: 0;
+  border-top: none;
+}
+
+.sourceItem {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) 2fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+}
+
+.sourceLabel {
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.sourceMechanism {
+  font-family: var(--font-mono);
+  color: var(--trov-text-muted);
+  word-break: break-all;
+}
+
+.sourceCost {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .sourceItem {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .sourceCost {
+    font-size: 10px;
+  }
+}
+
+/* ── Warning list (inline under previews and record cards) ── */
+
+.warningList {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.livePreview .warningList,
+.recordCard .warningList {
+  margin: var(--space-sm) 0 0;
+}
+
+.warning {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid currentColor;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.warning-info {
+  color: var(--trov-text-secondary);
+  background: var(--trov-surface-light);
+}
+
+.warning-warning {
+  color: var(--trov-warning, #fb923c);
+  background: rgba(251, 146, 60, 0.06);
+}
+
+.warning-critical {
+  color: var(--trov-error, #f87171);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.warningMessage {
+  color: var(--trov-text);
+  font-weight: 500;
+}
+
+.warningFix {
+  color: var(--trov-text-muted);
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* ── Health item overrides + dot ── */
+
+/* Override the original green-locked healthItem color so dot + label + detail
+   can each carry their own tonal meaning. */
+.healthItem {
+  color: inherit;
+  font-weight: 500;
+  gap: 6px;
+}
+
+.healthDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.healthDotOk {
+  background: var(--trov-success);
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.18);
+}
+
+.healthDotWarning {
+  background: var(--trov-warning, #fb923c);
+  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.18);
+}
+
+.healthDotError {
+  background: var(--trov-error, #f87171);
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.18);
+}
+
+.healthItemLabel {
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.healthItemDetail {
+  color: var(--trov-text-muted);
+  font-weight: 400;
+  font-size: 11px;
+}
+
+/* ── Status badge (e.g. "Needs admin action" on a DKIM record) ── */
+
+.statusBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.statusBadge-warning {
+  color: var(--trov-warning, #fb923c);
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+}
+
+/* ── Registrar quoting hint ── */
+
+.registrarHint {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-style: italic;
+  padding: 0 var(--space-lg) var(--space-md) calc(var(--space-lg) + 13px);
+  line-height: 1.5;
+  margin: 0;
+  border-top: 1px dashed var(--trov-border);
+  padding-top: 10px;
+}
+
+/* ── MX record group spacing ── */
+
+.mxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── DKIM deep link to provider setup ── */
+
+.dkimLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--trov-accent);
+  text-decoration: none;
+  padding: 6px 10px;
+  border: 1px solid rgba(212, 168, 67, 0.2);
+  border-radius: var(--radius-sm);
+  background: var(--trov-glow);
+  align-self: flex-start;
+  margin-top: 4px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.dkimLink:hover {
+  border-color: var(--trov-accent);
+  background: rgba(212, 168, 67, 0.08);
+}
+
+/* ══════════════════════════════════════════════
+   ADVANCED SECTION (BIMI + MTA-STS)
+   ══════════════════════════════════════════════ */
+
+.advancedSection {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.advancedSection[open] {
+  border-color: rgba(212, 168, 67, 0.18);
+}
+
+.advancedSectionSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-text);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--transition-fast);
+}
+
+.advancedSectionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedSectionSummary::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid var(--trov-text-muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+  margin-left: auto;
+  order: 3;
+}
+
+.advancedSection[open] .advancedSectionSummary::after {
+  transform: rotate(90deg);
+}
+
+.advancedSectionSummary > span:first-child {
+  order: 1;
+}
+
+.advancedMeta {
+  order: 2;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  background: var(--trov-surface-light);
+  border-radius: 4px;
+}
+
+.advancedSectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  border-top: 1px solid var(--trov-border);
+}
+
+/* Individual block inside the advanced section */
+
+.advancedBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--trov-surface-light);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+}
+
+.advancedBlockHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.advancedBlockDesc {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 26px;
+}
+
+.advancedBlockFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-top: 8px;
+  border-top: 1px dashed var(--trov-border);
+}
+
+/* Toggle row (checkbox + label) */
+
+.toggleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleRow input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--trov-border);
+  border-radius: 4px;
+  background: var(--trov-bg);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.toggleRow input[type='checkbox']:hover {
+  border-color: rgba(212, 168, 67, 0.4);
+}
+
+.toggleRow input[type='checkbox']:checked {
+  background: var(--trov-accent);
+  border-color: var(--trov-accent);
+}
+
+.toggleRow input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--trov-text-on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.toggleRow input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.toggleLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+/* MTA-STS policy file display */
+
+.policyFile {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.policyFileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-surface-light);
+}
+
+.policyFileLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.policyFileHint {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin: 0;
+  padding: 10px 14px 0;
+  line-height: 1.5;
+}
+
+.policyFileHint code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--trov-text-secondary);
+  background: var(--trov-surface-light);
+  padding: 2px 6px;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+.policyFileBody {
+  margin: 10px 14px 14px;
+  padding: 12px 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text);
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.policyFileBody code {
+  font-family: inherit;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE (additions)
+   ══════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .advancedSectionBody,
+  .advancedBlock {
+    padding: var(--space-md);
+  }
+  .advancedBlockDesc {
+    padding-left: 0;
+  }
+  .advancedSectionSummary {
+    padding: var(--space-md) var(--space-lg);
+  }
+  .advancedMeta {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION 04 VISUAL POLISH (post-test fixes)
+   Surgical overrides based on the scenario walkthrough screenshots.
+   Sits at the end of the file so CSS last-wins resolves these rules.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Health banner ───────────────────────────────────────────────────────
+   Was: green-tinted success background, assuming all three dots are OK.
+   That lied when the SPF dot was amber (at 9-10 lookups) or red (over 10).
+   Now: neutral surface. Individual dots carry the tonal signal. */
+
+.healthBanner {
+  background: var(--trov-surface-light);
+  border: 1px solid var(--trov-border);
+}
+
+/* Items should wrap as whole units (dot + label + detail together) instead
+   of their inner text breaking across lines. */
+
+.healthChecks {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.healthItem {
+  white-space: nowrap;
+}
+
+.healthItemDetail {
+  white-space: nowrap;
+}
+
+.healthText {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .healthText {
+    text-align: left;
+  }
+}
+
+/* ── Advanced grid column overflow ───────────────────────────────────────
+   `repeat(2, 1fr)` is secretly `repeat(2, minmax(auto, 1fr))` in CSS Grid,
+   which lets a cell's content push the column wider than its share. The
+   max_age hint "604800 = 1 week, 2592000 = 30 days" was forcing the right
+   column to expand. minmax(0, 1fr) pins each column to a true half and lets
+   cell content shrink or wrap within. */
+
+.advancedGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.advancedGrid > .fieldGroup {
+  min-width: 0;
+}
+
+/* ── Option card SPF contribution text ───────────────────────────────────
+   Provider names + include mechanisms + lookup counts can run long
+   (e.g. "include:_spf.google.com (3 lookups)"). Let it wrap within the
+   card rather than pushing layout. */
+
+.spfContrib {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── Warning border colours, explicit ────────────────────────────────────
+   Using `currentColor` for the 3px left border was resolving to the text
+   colour (gray #A1A1AA for info). Some browsers antialias thin borders
+   slightly warm, making them read as tinted gold on dark backgrounds.
+   Explicit colours remove the ambiguity. */
+
+.warning-info {
+  border-left-color: var(--trov-text-muted);
+}
+
+.warning-warning {
+  border-left-color: var(--trov-warning, #fb923c);
+}
+
+.warning-critical {
+  border-left-color: var(--trov-error, #f87171);
+}
+
+/* ── Desktop input size ──────────────────────────────────────────────────
+   16px font stays on mobile to prevent iOS from zooming the viewport when
+   a field is focused. On desktop it feels oversized for a compact tool.
+   Drop to 14px above the mobile breakpoint. */
+
+@media (min-width: 641px) {
+  .domainInput,
+  .input {
+    font-size: 14px;
+  }
+}

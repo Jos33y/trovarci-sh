@@ -1,0 +1,67 @@
+Trovarcis Reach Source License
+
+Copyright (c) 2026 Trovarcis LLC (Wyoming, USA). All Rights Reserved.
+
+This source code is made publicly viewable for transparency, security review,
+and reference. It is not open source. Possession of or access to this code
+does not grant any license to use, copy, modify, distribute, sublicense, or
+create derivative works.
+
+1. Permitted Use
+
+You may:
+  (a) View, read, and study the source code.
+  (b) Run the code locally for the sole purpose of personal evaluation,
+      security review, or non-commercial educational study.
+  (c) Submit issues, bug reports, and suggestions to the official
+      repository, subject to the contribution terms in section 4.
+
+2. Prohibited Use
+
+You may not, without prior written permission from Trovarcis LLC:
+  (a) Use the code or any portion of it in a commercial product or service.
+  (b) Deploy the code, in original or modified form, to provide a service to
+      any third party.
+  (c) Redistribute the code, in original or modified form, in source or
+      compiled form.
+  (d) Remove, alter, or obscure this license, any copyright notice, or any
+      attribution.
+  (e) Use Trovarcis Reach trademarks, brand names, logos, or trade dress in
+      any derivative work or third-party product.
+
+3. No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL
+TROVARCIS REACH LLC, ITS OFFICERS, OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT,
+OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+4. Contributions
+
+By submitting any contribution (code, documentation, issue text, or other
+material) to this repository, you grant Trovarcis LLC a perpetual,
+worldwide, royalty-free, irrevocable license to use, modify, sublicense, and
+distribute that contribution under any terms, including incorporation into
+proprietary products. You represent that you own the contribution or have
+the right to grant this license.
+
+5. Licensing Inquiries
+
+For commercial licensing, redistribution rights, or other use beyond the
+permissions in section 1, contact: hello@trovarcis.com.
+
+6. Governing Law
+
+This license is governed by the laws of the State of Wyoming, United States,
+without regard to its conflict of law provisions. Any dispute arising under
+this license shall be resolved in the state or federal courts located in
+Wyoming.
+
+7. Termination
+
+Any breach of this license terminates your rights under it automatically.
+Upon termination, you must cease all use and destroy all copies of the code
+in your possession.

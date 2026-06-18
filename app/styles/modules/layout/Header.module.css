@@ -1,0 +1,579 @@
+/* ——— HEADER BAR ——— */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--trov-bg);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+/* ——— LOGO ——— */
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* ——— DESKTOP NAV ——— */
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 0;
+  color: var(--trov-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  letter-spacing: 0;
+}
+
+.navLink:hover {
+  color: var(--trov-text);
+}
+
+.navLinkActive {
+  color: var(--trov-text);
+}
+
+/* ——— DROPDOWN ——— */
+
+.dropdown {
+  position: relative;
+}
+
+.chevron {
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.dropdown:hover .chevron {
+  transform: rotate(180deg);
+}
+
+/*
+ * Dropdown panel: always in DOM, hidden by default.
+ * CSS-only show/hide via parent :hover.
+ * No JS needed for desktop.
+ */
+.dropdownPanel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+  padding-top: 8px; /* hover bridge gap */
+}
+
+/*
+ * Hover bridge: invisible zone that connects
+ * the trigger button to the dropdown panel.
+ * Prevents the menu from closing when moving
+ * the mouse from trigger to panel.
+ */
+.dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: -16px;
+  right: -16px;
+  height: 12px;
+  display: none;
+}
+
+.dropdown:hover::after {
+  display: block;
+}
+
+.dropdown:hover .dropdownPanel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dropdownGrid {
+  min-width: 300px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.dropdownItem:hover {
+  background: var(--trov-surface-light);
+}
+
+.dropdownItem:hover .dropdownIcon {
+  color: var(--trov-accent);
+}
+
+.dropdownIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  color: var(--trov-text-secondary);
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.dropdownText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dropdownLabel {
+  color: var(--trov-text);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.dropdownDesc {
+  color: var(--trov-text-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* ——— DOWNLOAD BUTTON ——— */
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.downloadBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 22px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  background: transparent;
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.downloadBtn:hover {
+  border-color: var(--trov-accent);
+  background: var(--trov-glow);
+  color: var(--trov-accent-hover);
+}
+
+.downloadBtn:active {
+  background: var(--trov-glow-strong);
+}
+
+/* ——— MOBILE TOGGLE ——— */
+
+.mobileToggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--trov-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.mobileToggle:hover {
+  color: var(--trov-text);
+}
+
+/* ——— MOBILE OVERLAY ——— */
+
+.mobileOverlay {
+  display: none;
+}
+
+/* ——— MOBILE NAV ——— */
+
+.mobileNav {
+  display: none;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .desktopNav {
+    display: none;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .mobileToggle {
+    display: flex;
+  }
+
+  .mobileOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    top: 64px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 90;
+  }
+
+  .mobileNav {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: var(--trov-surface);
+    border-bottom: 1px solid var(--trov-border);
+    padding: 8px 0;
+    z-index: 95;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .mobileNavOpen {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobileLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 24px;
+    color: var(--trov-text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    text-align: left;
+  }
+
+  .mobileLink:hover {
+    color: var(--trov-text);
+    background: var(--trov-surface-light);
+  }
+
+  .mobileChevron {
+    transition: transform var(--transition-fast);
+  }
+
+  .mobileChevronOpen {
+    transform: rotate(180deg);
+  }
+
+  .mobileToolsList {
+    display: flex;
+    flex-direction: column;
+    padding: 0 12px 4px;
+  }
+
+  .mobileToolItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px 11px 24px;
+    color: var(--trov-text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .mobileToolItem:hover {
+    color: var(--trov-text);
+    background: var(--trov-bg);
+  }
+
+  .mobileViewAll {
+    color: var(--trov-accent);
+    margin-top: 4px;
+  }
+
+  .mobileCta {
+    padding: 12px 24px 16px;
+    border-top: 1px solid var(--trov-border);
+    margin-top: 4px;
+  }
+
+  .mobileDownload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--trov-accent);
+    background: transparent;
+    border: 1.5px solid var(--trov-border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition:
+      border-color var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  .mobileDownload:hover {
+    border-color: var(--trov-accent);
+    background: var(--trov-glow);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   APPEND TO: app/styles/modules/layout/Header.module.css
+
+   Paste this entire block at the bottom of your existing
+   Header.module.css. No existing rules are removed; the
+   .actions and .mobileCta overrides below only ADD missing
+   gap/flex properties to support the new multi-item layouts.
+   ═══════════════════════════════════════════ */
+
+
+/* ──────────────────────────────────────────────
+   DESKTOP: auth-aware action area
+   ────────────────────────────────────────────── */
+
+/* Add gap to existing .actions for multi-item layouts
+   (Sign in + Try Free, or Dashboard + UserMenu).
+   Original rule had no gap. */
+.actions {
+  gap: 16px;
+}
+
+/* Ghost "Sign in" link styled to match .navLink weight/tone */
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0;
+  color: var(--trov-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.signIn:hover {
+  color: var(--trov-text);
+}
+
+
+/* ──────────────────────────────────────────────
+   MOBILE: auth-aware bottom section
+   ────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+
+  /* Logged-out mobileCta now holds two buttons (Try Free + Sign in).
+     Add flex column so they stack; original rule only had padding/border. */
+  .mobileCta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobileSignIn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--trov-text);
+    background: transparent;
+    border: 1.5px solid var(--trov-border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+  }
+
+  .mobileSignIn:hover {
+    border-color: var(--trov-border-hover);
+  }
+
+
+  /* ─── Logged-in section (replaces mobileCta) ─── */
+
+  .mobileUserSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 24px 16px;
+    border-top: 1px solid var(--trov-border);
+    margin-top: 4px;
+  }
+
+  .mobileUserCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--trov-bg);
+    border: 1px solid var(--trov-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 4px;
+  }
+
+  .mobileAvatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--trov-gradient);
+    color: var(--trov-text-on-accent);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .mobileUserText {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mobileUserEmail {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--trov-text);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileUserMeta {
+    margin-top: 3px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    color: var(--trov-text-secondary);
+  }
+
+  .mobileAuthLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--trov-text);
+    background: transparent;
+    border: 1.5px solid var(--trov-border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+  }
+
+  .mobileAuthLink:hover {
+    border-color: var(--trov-accent);
+    color: var(--trov-accent);
+  }
+
+  .mobileSignOut {
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--trov-text-secondary);
+    background: transparent;
+    border: 1.5px solid var(--trov-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  .mobileSignOut:hover {
+    border-color: var(--trov-error);
+    color: var(--trov-error);
+    background: var(--trov-error-bg);
+  }
+}

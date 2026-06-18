@@ -1,0 +1,27 @@
+.bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tone_success {
+  background: var(--trov-success-bg);
+  color: var(--trov-success);
+}
+
+.tone_accent {
+  background: var(--trov-glow);
+  color: var(--trov-accent);
+}
+
+.tone_warning {
+  background: var(--trov-warning-bg);
+  color: var(--trov-warning);
+}
+
+.tone_error {
+  background: var(--trov-error-bg);
+  color: var(--trov-error);
+}

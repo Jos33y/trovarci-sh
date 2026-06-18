@@ -1,0 +1,343 @@
+/* ═══════════════════════════════════════════
+   LOGIN PAGE
+   app/styles/modules/routes/login.module.css
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  background: var(--trov-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 20%, rgba(212, 168, 67, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 70% 80%, rgba(212, 168, 67, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+}
+
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--trov-text);
+  letter-spacing: -0.025em;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.errorBanner {
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  color: var(--trov-error);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+}
+
+.forgotLink {
+  font-size: 0.8125rem;
+  color: var(--trov-accent);
+  transition: color var(--transition-fast);
+}
+
+.forgotLink:hover {
+  color: var(--trov-accent-hover);
+}
+
+.input {
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  color: var(--trov-text);
+  padding: 11px 14px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  outline: none;
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.input:focus {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+.passwordWrap .input {
+  padding-right: 44px;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--trov-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color var(--transition-fast);
+}
+
+.eyeBtn:hover {
+  color: var(--trov-text-secondary);
+}
+
+/* ── Remember-me checkbox ──
+   Sits between the password field and the submit button. Custom-styled
+   checkbox using a hidden native input + a styled span (the gold-accent
+   chevron lives in the :checked sibling). No icon library; inline SVG
+   via background-image data-uri keeps the bundle lean. */
+
+.rememberRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-md);
+  cursor: pointer;
+  user-select: none;
+}
+
+.rememberCheckbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid var(--trov-border);
+  border-radius: 4px;
+  background: var(--trov-surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.rememberCheckbox:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.rememberCheckbox:focus-visible {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
+.rememberCheckbox:checked {
+  border-color: var(--trov-accent);
+  background: var(--trov-accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 6.5L4.5 9L10 3' stroke='%2309090B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.rememberLabel {
+  color: var(--trov-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.submitBtn {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+  min-height: 44px;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.submitBtn:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active {
+  background: var(--trov-accent-pressed);
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  color: var(--trov-text-muted);
+  font-size: 0.8125rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--trov-border);
+}
+
+.signupLink {
+  display: block;
+  text-align: center;
+  background: transparent;
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 11px 24px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--trov-text);
+  min-height: 44px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.signupLink:hover {
+  border-color: var(--trov-border-hover);
+  background: var(--trov-surface-light);
+  color: var(--trov-text);
+}
+
+/* ─── PAGE FOOTER ─── */
+
+.footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.footerLink {
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.footerLink:hover {
+  color: var(--trov-text-secondary);
+}
+
+.footerDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--trov-text-muted);
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 28px 20px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   APPEND TO: app/styles/modules/routes/login.module.css
+
+   Adds:
+     .successBanner - post-password-reset success flash
+     .fieldError    - inline errors under input fields
+   ═══════════════════════════════════════════ */
+
+.successBanner {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: var(--trov-success-bg);
+  border: 1px solid var(--trov-success);
+  border-radius: var(--radius-md);
+  color: var(--trov-success);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.fieldError {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-error);
+  line-height: 1.4;
+}

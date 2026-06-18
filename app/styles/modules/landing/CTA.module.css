@@ -1,0 +1,220 @@
+/* ——— FINAL CTA SECTION ——— */
+/*
+ * Grand finale. Mirrors the hero's grid+noise treatment
+ * to bookend the page. Grid lines + grain = engineered,
+ * not atmospheric. No radial glows, no breathing animations.
+ */
+
+.section {
+  position: relative;
+  padding: calc(var(--space-4xl) + var(--space-2xl)) 0;
+  overflow: hidden;
+}
+
+/* ——— GRID LINES (mirrors hero) ——— */
+.ctaGrid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(212, 168, 67, 0.06) 0px,
+      rgba(212, 168, 67, 0.06) 1px,
+      transparent 1px,
+      transparent 64px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(212, 168, 67, 0.06) 0px,
+      rgba(212, 168, 67, 0.06) 1px,
+      transparent 1px,
+      transparent 64px
+    );
+  -webkit-mask-image: radial-gradient(
+    ellipse 60% 70% at 50% 50%,
+    black 0%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    ellipse 60% 70% at 50% 50%,
+    black 0%,
+    transparent 70%
+  );
+}
+
+/* ——— NOISE GRAIN (mirrors hero) ——— */
+.ctaNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+}
+
+/* Gradient accent line at top — structural, not decorative */
+.section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, 80%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
+  z-index: 2;
+}
+
+.inner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: var(--max-width-narrow);
+  margin: 0 auto;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.sub {
+  color: var(--trov-text-secondary);
+  font-size: 1rem;
+  text-align: center;
+  margin-top: var(--space-sm);
+  line-height: 1.6;
+}
+
+/* ——— FORM ——— */
+
+.formWrap {
+  margin-top: var(--space-xl);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inputRow {
+  display: flex;
+  width: 100%;
+  gap: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--trov-border);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.inputRow:focus-within {
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+}
+
+.input {
+  flex: 1;
+  background: var(--trov-surface);
+  border: none;
+  padding: 14px var(--space-md);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--trov-text);
+  outline: none;
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: var(--trov-text-muted);
+}
+
+.button {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  padding: 14px var(--space-lg);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note {
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  text-align: center;
+}
+
+/* ——— SUCCESS STATE ——— */
+
+.success {
+  margin-top: var(--space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--trov-success);
+}
+
+.successIcon {
+  flex-shrink: 0;
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .ctaGrid {
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 50%,
+      black 0%,
+      transparent 70%
+    );
+    mask-image: radial-gradient(
+      ellipse 80% 60% at 50% 50%,
+      black 0%,
+      transparent 70%
+    );
+  }
+}
+
+@media (max-width: 480px) {
+  .inputRow {
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+  }
+
+  .input {
+    border-radius: 0;
+  }
+
+  .button {
+    padding: 14px;
+  }
+}

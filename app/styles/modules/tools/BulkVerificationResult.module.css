@@ -1,0 +1,1064 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NumberVerifierBulkResult.module.css
+
+   Dedicated module for the bulk results panel. All classes are scoped
+   to this module - no global CSS, no class-name collisions with the
+   parent NumberVerifier.module.css.
+
+   Tokens used:
+     --trov-bg, --trov-surface, --trov-surface-light, --trov-border,
+     --trov-border-hover, --trov-text, --trov-text-secondary,
+     --trov-text-muted, --trov-accent, --trov-accent-hover, --trov-glow,
+     --trov-success, --trov-success-bg, --trov-warning, --trov-warning-bg,
+     --trov-error, --trov-error-bg, --space-*, --radius-*, --transition-*
+
+   Mobile rules: under 640px, .tableWrap is hidden and .cardList becomes
+   visible. Above 640px, .cardList is hidden. This avoids duplicate DOM
+   work since both render the same data.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   HERO
+   ───────────────────────────────────────────────────────────────────────── */
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.heroLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.heroMeta {
+  font-size: 13px;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.statusComplete  { background: var(--trov-success-bg); color: var(--trov-success); border: 1px solid rgba(52, 211, 153, 0.3); }
+.statusPartial   { background: var(--trov-warning-bg); color: var(--trov-warning); border: 1px solid rgba(251, 146, 60, 0.3); }
+.statusCancelled { background: var(--trov-surface-light); color: var(--trov-text-secondary); border: 1px solid var(--trov-border); }
+.statusFailed    { background: var(--trov-error-bg); color: var(--trov-error); border: 1px solid rgba(248, 113, 113, 0.3); }
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+  margin: 4px 0 0;
+  line-height: 1.15;
+}
+
+.carriers {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin: 6px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.carriersLabel {
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.carrierChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--trov-text);
+}
+
+.carrierCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.carrierSep {
+  color: var(--trov-text-muted);
+  margin: 0 4px;
+}
+
+.refundNote {
+  font-size: 13px;
+  color: var(--trov-success);
+  margin: 4px 0 0;
+}
+
+.errorNote {
+  font-size: 13px;
+  color: var(--trov-error);
+  margin: 4px 0 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PRIMARY ACTION (clipboard-first)
+   The hero CTA. Big, gold, unambiguous. Mirrors what Stripe's "View
+   payment" or Linear's "Open issue" do post-action: one obvious thing
+   to do next.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.primaryAction {
+  display: flex;
+}
+
+.copyPrimaryBtn {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: center;
+  width: 100%;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-normal);
+  box-shadow: 0 0 0 0 var(--trov-glow);
+}
+
+.copyPrimaryBtn:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--trov-glow);
+}
+
+.copyPrimaryBtn:active {
+  transform: translateY(0);
+}
+
+.copyPrimaryBtnSuccess {
+  background: var(--trov-success);
+  color: #052e1f;
+}
+
+.copyPrimaryBtnSuccess:hover {
+  background: var(--trov-success);
+}
+
+.copyPrimaryIcon {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+}
+
+.copyPrimaryText {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.copyPrimaryHint {
+  font-size: 12px;
+  opacity: 0.78;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FILTER TABS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: relative;
+  /* Fade-mask the right edge so users see content is cut off and can scroll.
+     mask-image is supported in all current browsers; the -webkit- prefix
+     covers iOS Safari which is otherwise good. */
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+          mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  color: var(--trov-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.tab:hover {
+  background: var(--trov-surface);
+  color: var(--trov-text);
+}
+
+.tabActive {
+  background: var(--trov-surface);
+  color: var(--trov-text);
+  box-shadow: 0 1px 0 0 var(--trov-border-hover) inset;
+}
+
+.tabDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tabLabel {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tabCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  font-variant-numeric: tabular-nums;
+  padding: 0 6px;
+  background: var(--trov-bg);
+  border-radius: 4px;
+}
+
+.tabActive .tabCount {
+  color: var(--trov-text);
+  background: var(--trov-surface-light);
+}
+
+/* Status dots (also reused in table) */
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotMobile  { background: var(--trov-success); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15); }
+.dotRisky   { background: var(--trov-warning); box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15); }
+.dotInvalid { background: var(--trov-error);   box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TABLE (desktop)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background: var(--trov-surface);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--trov-text-muted);
+  padding: 10px 14px;
+  white-space: nowrap;
+}
+
+.thStatus  { width: 28px; padding-right: 0; }
+.thNumber  { min-width: 180px; }
+.thType    { width: 130px; }
+.thCarrier { min-width: 160px; }
+.thSms     { width: 60px; text-align: center; }
+.thAction  { width: 44px; padding-right: 14px; }
+
+.thSortable {
+  cursor: pointer;
+  user-select: none;
+  display: table-cell;
+  align-items: center;
+}
+
+.thSortable:hover {
+  color: var(--trov-text);
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--trov-border);
+  transition: background var(--transition-fast);
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--trov-surface);
+}
+
+.table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  color: var(--trov-text);
+}
+
+.tdStatus  { padding-right: 0; }
+.tdNumber  { display: flex; align-items: center; gap: 8px; }
+.tdAction  { text-align: right; padding-right: 14px; }
+.tdSms     { text-align: center; }
+
+.numberText {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.rowFlag {
+  width: 18px;
+  height: 13px;
+  border-radius: 2px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--trov-border);
+}
+
+.dim {
+  color: var(--trov-text-muted);
+}
+
+.smsYes {
+  color: var(--trov-success);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.smsNo {
+  color: var(--trov-text-muted);
+  font-size: 12px;
+}
+
+/* Type badges */
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.typeMobile  { background: var(--trov-success-bg); color: var(--trov-success); }
+.typeRisky   { background: var(--trov-warning-bg); color: var(--trov-warning); }
+.typeInvalid { background: var(--trov-error-bg);   color: var(--trov-error); }
+
+/* Per-row copy button */
+.rowCopyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--trov-border);
+  border-radius: 6px;
+  color: var(--trov-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rowCopyBtn:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.rowCopyBtnSuccess {
+  border-color: var(--trov-success);
+  color: var(--trov-success);
+  background: var(--trov-success-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CARD LIST (mobile)
+   Hidden by default; shown under 640px via media query at the bottom.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.cardList {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardNumber {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--trov-text);
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.cardBody {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  padding-left: 18px;
+  border-left: 1px solid var(--trov-border);
+}
+
+.cardField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cardFieldLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--trov-text-muted);
+}
+
+.cardFieldValue {
+  font-size: 13px;
+  color: var(--trov-text);
+  word-break: break-word;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SHOW MORE / EMPTY
+   ───────────────────────────────────────────────────────────────────────── */
+
+.showMoreRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  gap: 12px;
+}
+
+.showMoreText {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+}
+
+.showMoreBtn {
+  background: transparent;
+  border: 1px solid var(--trov-border);
+  color: var(--trov-text-secondary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.showMoreBtn:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  background: var(--trov-bg);
+  border: 1px dashed var(--trov-border);
+  border-radius: 10px;
+}
+
+.emptyText {
+  margin: 0;
+  color: var(--trov-text-secondary);
+  font-size: 14px;
+}
+
+.emptyCta {
+  background: transparent;
+  color: var(--trov-accent);
+  border: 1px solid var(--trov-accent);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.emptyCta:hover {
+  background: var(--trov-glow);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   EXPORT PANEL
+   Secondary actions. Information-dense without being overwhelming.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.exportPanel {
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.exportTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--trov-text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.exportSubtitle {
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  margin: 0;
+}
+
+.exportGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.exportBtn {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.exportBtn:hover {
+  border-color: var(--trov-accent);
+  background: var(--trov-surface-light);
+  transform: translateY(-1px);
+}
+
+.exportBtnIcon {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 8px;
+  color: var(--trov-accent);
+}
+
+.exportBtnLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.exportBtnHint {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FOOTER ACTIONS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.footerActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.newJobBtn,
+.backBtn {
+  background: transparent;
+  border: 1.5px solid var(--trov-border);
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.newJobBtn {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+}
+
+.newJobBtn:hover {
+  background: var(--trov-glow);
+}
+
+.backBtn:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SKELETON (loading state)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@keyframes skelPulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.8; }
+}
+
+.skeletonHeadline,
+.skeletonStat,
+.skeletonTable {
+  background: var(--trov-surface);
+  border-radius: 10px;
+  animation: skelPulse 1.6s ease-in-out infinite;
+}
+
+.skeletonHeadline { height: 30px; width: 60%; }
+
+.skeletonStats { display: flex; gap: 12px; }
+.skeletonStat  { flex: 1; height: 80px; }
+
+.skeletonTable { height: 240px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonHeadline,
+  .skeletonStat,
+  .skeletonTable {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   Below 640px: hide table, show cards. Tabs scroll horizontally.
+   Below 480px: stack export grid into single column.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .tableWrap {
+    display: none;
+  }
+  .cardList {
+    display: flex;
+  }
+  .copyPrimaryBtn {
+    padding: 14px 16px;
+  }
+  .copyPrimaryText {
+    font-size: 15px;
+  }
+  .footerActions {
+    flex-direction: column;
+  }
+  .newJobBtn,
+  .backBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .exportGrid {
+    grid-template-columns: 1fr;
+  }
+  .hero {
+    flex-direction: column;
+  }
+  .headline {
+    font-size: 22px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADDITIONS FOR GENERIC TYPE SUPPORT (email + phone)
+   - dotValid / dotUnknown / dotError variants
+   - typeUnknown / typeError variants
+   - emailSubcategoryBadge (sub-category label for emails)
+   - allErrorsBanner (the big "100% errored" warning)
+   - partialErrorsNotice (smaller notice when only some errored)
+   - healthCard variants per verdict severity
+   - toolChain (post-verification upsell link)
+   - smtpResp / errCode (reason column rendering)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dot variants ── */
+.dotValid   { background: var(--trov-success); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15); }
+.dotError   { background: var(--trov-text-muted); box-shadow: 0 0 0 3px rgba(82, 82, 91, 0.2); }
+.dotUnknown { background: var(--trov-text-muted); box-shadow: 0 0 0 3px rgba(82, 82, 91, 0.15); }
+
+.typeUnknown {
+  background: rgba(82, 82, 91, 0.15);
+  color: var(--trov-text-secondary);
+}
+.typeError {
+  background: rgba(82, 82, 91, 0.20);
+  color: var(--trov-text-secondary);
+}
+
+/* Sub-category badge inside email type cell. Sits next to TypeBadge. */
+.subBadge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 1px 7px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  background: var(--trov-surface-light);
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* SMTP response / error code inline in the reason column. */
+.smtpResp {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+  display: inline-block;
+}
+
+.errCode {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--trov-error);
+  background: var(--trov-error-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* ─── ALL-ERRORED BANNER ─── */
+.allErrorsBanner {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 12px;
+  align-items: flex-start;
+}
+
+.allErrorsIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--trov-error);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.allErrorsBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.allErrorsTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.01em;
+}
+
+.allErrorsText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.allErrorsActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.allErrorsCopyBtn,
+.allErrorsRetryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+}
+
+.allErrorsCopyBtn {
+  background: transparent;
+  color: var(--trov-text);
+  border: 1px solid var(--trov-border-hover);
+}
+
+.allErrorsCopyBtn:hover {
+  border-color: var(--trov-accent);
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.allErrorsRetryBtn {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+}
+
+.allErrorsRetryBtn:hover {
+  background: var(--trov-accent-hover);
+}
+
+/* ─── PARTIAL ERRORS NOTICE ─── */
+.partialErrorsNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--trov-warning-bg);
+  border: 1px solid rgba(251, 146, 60, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+}
+
+.partialErrorsIcon {
+  display: inline-flex;
+  color: var(--trov-warning);
+  flex-shrink: 0;
+}
+
+.partialErrorsText {
+  flex: 1;
+  line-height: 1.45;
+}
+
+/* ─── HEALTH CARD (email only) ─── */
+.healthCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-left-width: 4px;
+  border-radius: 8px;
+}
+
+.healthVerdict {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.healthMessage {
+  margin: 0;
+  font-size: 13px;
+  color: var(--trov-text-secondary);
+  line-height: 1.5;
+}
+
+.healthHealthy    { border-left-color: var(--trov-success); }
+.healthHealthy    .healthVerdict { color: var(--trov-success); }
+
+.healthAcceptable { border-left-color: var(--trov-success); }
+.healthAcceptable .healthVerdict { color: var(--trov-success); }
+
+.healthWarning    { border-left-color: var(--trov-warning); }
+.healthWarning    .healthVerdict { color: var(--trov-warning); }
+
+.healthDanger     { border-left-color: var(--trov-error); }
+.healthDanger     .healthVerdict { color: var(--trov-error); }
+
+/* ─── TOOL CHAIN UPSELL ─── */
+.toolChain {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--trov-text);
+  font-size: 14px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  align-self: flex-start;
+}
+
+.toolChain:hover {
+  border-color: var(--trov-accent);
+  background: var(--trov-glow);
+}
+
+.toolChainText {
+  font-weight: 500;
+}
+
+.toolChainArrow {
+  color: var(--trov-accent);
+  font-size: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.toolChain:hover .toolChainArrow {
+  transform: translateX(2px);
+}
+
+.toolChainBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--trov-accent);
+  background: var(--trov-glow);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+@media (max-width: 640px) {
+  .allErrorsBanner {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .allErrorsActions {
+    flex-direction: column;
+  }
+  .allErrorsCopyBtn,
+  .allErrorsRetryBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .toolChain {
+    align-self: stretch;
+    flex-wrap: wrap;
+  }
+}

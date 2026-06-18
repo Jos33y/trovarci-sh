@@ -1,0 +1,438 @@
+/* ═══════════════════════════════════════════
+   RECEIPT PAGE
+   Screen: Studio Black + gold accent (matches the rest of the app)
+   Print:  Clean white with navy text, no nav chrome
+   ═══════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding: var(--space-2xl) var(--space-md);
+  background: var(--trov-bg);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ─── Toolbar (hidden on print) ─────────── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.backLink {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--trov-text);
+}
+
+.printBtn {
+  padding: 10px 20px;
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.printBtn:hover {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ─── Receipt document ───────────────────── */
+
+.receipt {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+}
+
+/* ─── Header ─────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--trov-border);
+  margin-bottom: var(--space-xl);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.docLabel {
+  text-align: right;
+}
+
+.docType {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+  margin-bottom: 4px;
+}
+
+.docId {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Parties ────────────────────────────── */
+
+.parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.partyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.partyLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+  margin-bottom: 4px;
+}
+
+.partyName {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.partyDetail {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── Meta ───────────────────────────────── */
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metaLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+}
+
+.metaValue {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.metaValueMono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  word-break: break-all;
+}
+
+/* ─── Line item ──────────────────────────── */
+
+.lineItem {
+  margin-bottom: var(--space-lg);
+}
+
+.lineItemHeader,
+.lineItemRow {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.lineItemHeader {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--trov-border);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+}
+
+.lineColCredits,
+.lineColAmount {
+  text-align: right;
+}
+
+.lineItemRow {
+  padding: var(--space-md) 0;
+  font-family: var(--font-body);
+}
+
+.lineDesc {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.lineCredits {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.lineAmount {
+  text-align: right;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+/* ─── Totals ─────────────────────────────── */
+
+.totals {
+  padding: var(--space-md) 0;
+  border-top: 2px solid var(--trov-border);
+  margin-bottom: var(--space-xl);
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.totalLabel {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+}
+
+.totalValue {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--trov-accent);
+  letter-spacing: -0.02em;
+}
+
+.totalValueMuted {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text-secondary);
+}
+
+/* ─── Blockchain details ─────────────────── */
+
+.bcDetails {
+  padding: var(--space-md);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+}
+
+.bcHeader {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+  margin-bottom: 12px;
+}
+
+.bcRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 6px 0;
+}
+
+.bcLabel {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  flex-shrink: 0;
+}
+
+.bcValue {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--trov-text);
+}
+
+.bcValueMono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  word-break: break-all;
+  text-align: right;
+}
+
+/* ─── Footer ─────────────────────────────── */
+
+.footer {
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--trov-border);
+  text-align: center;
+}
+
+.footerNote {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+}
+
+.footerFine {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════════
+   PRINT STYLES
+   Adopt clean paper: white bg, navy text, no nav, no buttons.
+   ═══════════════════════════════════════════ */
+
+@media print {
+  /* Belt and suspenders: hide every known nav/chrome element from the rest
+     of the app just in case something creeps onto the page. */
+  header,
+  nav,
+  .toolbar {
+    display: none !important;
+  }
+
+  body,
+  .page {
+    background: #ffffff !important;
+    color: #09090B !important;
+  }
+
+  .page {
+    padding: 0 !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+  }
+
+  .receipt {
+    background: #ffffff !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #09090B !important;
+  }
+
+  .header,
+  .lineItemHeader,
+  .totals,
+  .footer {
+    border-color: #E4E4E7 !important;
+  }
+
+  .meta,
+  .bcDetails {
+    background: #FAFAFA !important;
+    border-color: #E4E4E7 !important;
+  }
+
+  .docType,
+  .partyLabel,
+  .metaLabel,
+  .bcHeader,
+  .lineItemHeader,
+  .footerFine {
+    color: #52525B !important;
+  }
+
+  .docId,
+  .partyName,
+  .metaValue,
+  .metaValueMono,
+  .lineDesc,
+  .lineCredits,
+  .lineAmount,
+  .bcValue,
+  .bcValueMono {
+    color: #09090B !important;
+  }
+
+  .partyDetail,
+  .totalLabel,
+  .totalValueMuted,
+  .bcLabel,
+  .footerNote {
+    color: #27272A !important;
+  }
+
+  .totalValue {
+    color: #9E7B28 !important;  /* darker gold for print WCAG */
+  }
+
+  /* Don't let the receipt break across pages if it fits */
+  .receipt {
+    page-break-inside: avoid;
+  }
+}

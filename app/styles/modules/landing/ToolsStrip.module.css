@@ -1,0 +1,142 @@
+/* ——— TOOLS STRIP ——— */
+/*
+ * 6 mini-cards in a row. Each tool has its own space.
+ * Icon stacked above label — reads as a toolbar, not a list.
+ * Hover brings gold border + icon color + lift.
+ * This is the lead gen engine — it needs to look clickable.
+ */
+
+.strip {
+  padding: var(--space-2xl) 0;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ——— CARD GRID ——— */
+
+.tools {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+}
+
+/* ——— INDIVIDUAL CARD ——— */
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--trov-border);
+  text-decoration: none;
+  text-align: center;
+  transition:
+    border-color var(--transition-normal),
+    transform var(--transition-fast),
+    background var(--transition-normal);
+}
+
+.tool:hover {
+  border-color: rgba(212, 168, 67, 0.25);
+  transform: translateY(-2px);
+  background: rgba(212, 168, 67, 0.03);
+}
+
+/* ——— ICON CONTAINER ——— */
+
+.toolIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  color: var(--trov-text-muted);
+  flex-shrink: 0;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.tool:hover .toolIcon {
+  color: var(--trov-accent);
+  border-color: rgba(212, 168, 67, 0.3);
+  background: rgba(212, 168, 67, 0.06);
+}
+
+/* ——— TEXT ——— */
+
+.toolLabel {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.tool:hover .toolLabel {
+  color: var(--trov-text);
+}
+
+.toolDesc {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.01em;
+  transition: color var(--transition-fast);
+}
+
+.tool:hover .toolDesc {
+  color: var(--trov-text-secondary);
+}
+
+/* ——— RESPONSIVE ——— */
+
+@media (max-width: 1024px) {
+  .tools {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .tools {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .tool {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .toolIcon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tools {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

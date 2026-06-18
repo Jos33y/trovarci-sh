@@ -1,0 +1,148 @@
+.wrap {
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.head {
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--trov-text);
+  margin: 0;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--trov-text-muted);
+  margin-top: 2px;
+}
+
+.readout {
+  height: 22px;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--trov-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.readoutDay { color: var(--trov-text); }
+.readoutN { color: var(--trov-accent); }
+.readoutHint { color: var(--trov-text-muted); }
+
+/* ─── Desktop (>= 641px) ─────────────────────────────────────────────── */
+
+.desktopGrid {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dayCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.dayLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--trov-text-muted);
+  height: 18px;
+  line-height: 18px;
+  width: 28px;
+  text-align: right;
+}
+
+.cellsWrap { flex: 1; }
+
+.cellsGrid {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  grid-auto-rows: 18px;
+  gap: 2px;
+}
+
+.cell {
+  border: none;
+  padding: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  background: rgba(212, 168, 67, 0);
+  transition: outline-color var(--transition-fast);
+  outline: 1px solid transparent;
+}
+
+.cell:hover, .cell:focus-visible {
+  outline-color: var(--trov-accent);
+  outline-offset: 1px;
+}
+
+.hourAxis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--trov-text-muted);
+}
+
+.mobileGrid { display: none; }
+
+/* ─── Mobile (<= 640px) ──────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .desktopGrid { display: none; }
+  .mobileGrid { display: block; }
+
+  .wrap { padding: var(--space-md); }
+
+  .mobileDayRow {
+    display: grid;
+    grid-template-columns: 28px repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 4px;
+    align-items: center;
+  }
+
+  .mobileSpacer { display: block; }
+
+  .mobileDayLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--trov-text-muted);
+    text-align: center;
+  }
+
+  .mobileHourRow {
+    display: grid;
+    grid-template-columns: 28px repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 3px;
+    align-items: center;
+  }
+
+  .mobileHourLabel {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--trov-text-muted);
+    text-align: right;
+    padding-right: 4px;
+  }
+
+  .mobileCell {
+    border: none;
+    padding: 0;
+    height: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+}

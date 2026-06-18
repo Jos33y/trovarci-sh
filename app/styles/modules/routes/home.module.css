@@ -1,0 +1,59 @@
+/* Page-level styles for home route — sections use their own modules */
+/*
+ * Page-level rhythm for the home route.
+ *
+ * The biggest visual problem: every section sits on the same
+ * flat --trov-bg. Scrolling feels like one continuous dark slab.
+ * Brand foundation says: "sections alternate between page
+ * background and surface to create rhythm and depth."
+ *
+ * Sections on --trov-surface (elevated):
+ *   ToolsStrip, Features, Pricing, LatestPosts
+ *
+ * Sections on --trov-bg (page level):
+ *   Hero, HowItWorks, Comparison, FAQ, CTA
+ *
+ * This creates ABAB rhythm. Every scroll position has
+ * a clear visual break between "where I am" and "where
+ * the next section starts."
+ */
+
+/* ——— SURFACE BAND ——— */
+/* Wraps sections that should sit on elevated surface */
+
+.surfaceSection {
+  background: var(--trov-surface);
+  position: relative;
+}
+
+/*
+ * Top edge — faint gradient line.
+ * Creates a soft transition instead of a hard color cut.
+ * Centered, narrow, fades at edges.
+ */
+.surfaceSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, 50%);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--trov-border-hover) 30%,
+    var(--trov-border-hover) 70%,
+    transparent
+  );
+}
+
+/* ——— PAGE-LEVEL SEPARATOR ——— */
+/* Thin gradient line between same-bg sections when needed */
+
+.separator {
+  width: min(300px, 40%);
+  height: 1px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, var(--trov-border), transparent);
+}
