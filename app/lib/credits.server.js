@@ -315,3 +315,17 @@ export async function listTransactions(userId, { type = null, search = null, lim
 
   return { rows, total: count.total };
 }
+
+/**
+ * Current credit balance for a user. Reads users.credits_balance directly -
+ * the canonical source maintained atomically by spend/grant/refund.
+ */
+export async function getCreditBalance(userId) {
+  const [user] = await sql`
+    SELECT credits_balance
+    FROM users
+    WHERE id = ${userId} AND deleted_at IS NULL
+    LIMIT 1
+  `;
+  return user ? user.credits_balance : 0;
+}
