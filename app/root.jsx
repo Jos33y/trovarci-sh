@@ -30,11 +30,20 @@ export const links = () => [
   { rel: "manifest", href: "/site.webmanifest" },
 ];
 
-export const meta = () => [
-  { charSet: "utf-8" },
-  { name: "viewport", content: "width=device-width, initial-scale=1" },
-  { name: "theme-color", content: "#09090B" },
-];
+/**
+ * Root meta is intentionally empty for charSet/viewport/theme-color.
+ *
+ * In React Router v7, child routes that export their own `meta` REPLACE
+ * the parent's meta entirely - they do not merge by default. Putting
+ * viewport here meant any route with its own meta export (Email Scorer,
+ * Verifier, credits pending, etc.) silently dropped the viewport tag,
+ * which is why mobile rendered at the 980px synthetic-desktop fallback.
+ *
+ * Those three tags now live as STATIC markup in <head> below (in the
+ * Layout component). They can never be overridden by route-level meta
+ * and apply uniformly across the entire app.
+ */
+export const meta = () => [];
 
 /**
  * Root loader. Runs on every request, on every route.
@@ -70,6 +79,11 @@ export function Layout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* Static head tags - never overridden by route meta exports. */}
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#09090B" />
+
         <Meta />
         <Links />
       </head>
