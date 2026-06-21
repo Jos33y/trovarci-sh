@@ -92,10 +92,14 @@
   vertical-align: middle;
 }
 
+/* Tablet and mobile: brand on top spanning both columns,
+   four link sections in a 2x2 grid below. Holds all the way
+   down to very narrow widths - the four columns of short link
+   labels fit comfortably in 50% width at 375px and above. */
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-xl);
+    gap: var(--space-xl) var(--space-lg);
   }
 
   .brand {
@@ -103,7 +107,9 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Ultra-narrow only (older iPhone SE / Galaxy Fold).
+   At 320px even 2x2 starts to feel cramped. */
+@media (max-width: 340px) {
   .grid {
     grid-template-columns: 1fr;
   }
