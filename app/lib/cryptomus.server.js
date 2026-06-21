@@ -81,13 +81,20 @@ async function cryptomusPost(path, payload) {
 export async function createInvoice({ orderId, amountUsd, customerEmail }) {
   const publicUrl = getPublicUrl();
 
+  // Both url_return (manual "back to merchant") and url_success (auto on
+  // successful payment) point at the same status-aware pending page. The
+  // pending route's loader inspects the payment row and forwards to the
+  // receipt on confirmed, the credits page on failed/expired, or renders
+  // the spinner while still awaiting.
+  const pendingUrl = `${publicUrl}/credits/pending/${orderId}`;
+
   const payload = {
     amount: String(amountUsd),
     currency: 'USD',
     order_id: orderId,
     url_callback: `${publicUrl}/api/webhooks/cryptomus`,
-    url_return:   `${publicUrl}/credits`,
-    url_success:  `${publicUrl}/credits/pending/${orderId}`,
+    url_return:   pendingUrl,
+    url_success:  pendingUrl,
     lifetime: CRYPTOMUS_INVOICE_LIFETIME_SEC,
     is_payment_multiple: false,
     ...(customerEmail ? { additional_data: JSON.stringify({ customer_email: customerEmail }) } : {}),
