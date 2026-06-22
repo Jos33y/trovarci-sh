@@ -9,6 +9,7 @@ node_modules
 .env.dev
 .env.example
 .env.production
+.env.worker
 .env.*.local
 
 # ===== Build output =====
