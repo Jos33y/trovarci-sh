@@ -1,3 +1,5 @@
+// /receipts/:transactionId - paid receipt or usage statement. Keyed by credit_transactions.id.
+
 import { Link, useLoaderData } from 'react-router';
 import { TrovarcisReachLogo } from '~/components/shared/Logo';
 import { requireUser } from '~/utils/session.server';
@@ -11,14 +13,6 @@ export const meta = ({ data }) => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/**
- * Loader gates by ownership. Admins can view any receipt (reserved for
- * Section 08 when admin role is used; non-admins cannot see other users'
- * receipts regardless of URL knowledge).
- *
- * For usage transactions this renders as a usage statement rather than a
- * paid receipt - still useful for the user's records.
- */
 export async function loader({ request, params }) {
   const user = await requireUser(request);
   const transactionId = params.transactionId;
@@ -33,15 +27,11 @@ export async function loader({ request, params }) {
     throw new Response('Receipt not found', { status: 404 });
   }
 
-  // Ownership gate. Returns 404 (not 403) on cross-user access so this
-  // endpoint cannot be used to enumerate which transaction IDs exist - a
-  // 403 would tell an attacker "this UUID is real, just not yours" while
-  // a 404 reveals nothing. Admins are allowed through and see the receipt.
+  // 404 (not 403) on cross-user access so this endpoint cannot be used to probe which UUIDs exist.
   if (tx.user_id !== user.id && user.role !== 'admin') {
     throw new Response('Receipt not found', { status: 404 });
   }
 
-  // If this is a purchase, also pull the payment row for txid and gateway details
   let payment = null;
   if (tx.type === 'purchase' && tx.reference_id) {
     const [p] = await sql`
@@ -53,7 +43,6 @@ export async function loader({ request, params }) {
     payment = p || null;
   }
 
-  // Compact identifier for the UI (first 8 chars of transaction UUID).
   const shortId = tx.id.slice(0, 8).toUpperCase();
 
   return {
@@ -123,6 +112,8 @@ export default function ReceiptPage() {
     return meta.reason || 'Account transaction';
   })();
 
+  const isUsage = receipt.type === 'usage';
+
   return (
     <main className={styles.page}>
       <div className={styles.container}>
@@ -142,7 +133,6 @@ export default function ReceiptPage() {
 
         <div className={styles.receipt}>
 
-          {/* Header */}
           <div className={styles.header}>
             <div className={styles.brand}>
               <TrovarcisReachLogo size={32} />
@@ -153,7 +143,6 @@ export default function ReceiptPage() {
             </div>
           </div>
 
-          {/* From / To */}
           <div className={styles.parties}>
             <div className={styles.partyBlock}>
               <div className={styles.partyLabel}>From</div>
@@ -169,7 +158,6 @@ export default function ReceiptPage() {
             </div>
           </div>
 
-          {/* Meta */}
           <div className={styles.meta}>
             <div className={styles.metaItem}>
               <div className={styles.metaLabel}>Issued</div>
@@ -187,7 +175,6 @@ export default function ReceiptPage() {
             )}
           </div>
 
-          {/* Line item */}
           <div className={styles.lineItem}>
             <div className={styles.lineItemHeader}>
               <span className={styles.lineColDesc}>Description</span>
@@ -205,7 +192,6 @@ export default function ReceiptPage() {
             </div>
           </div>
 
-          {/* Totals */}
           {amountUsd && (
             <div className={styles.totals}>
               <div className={styles.totalRow}>
@@ -221,7 +207,6 @@ export default function ReceiptPage() {
             </div>
           )}
 
-          {/* Blockchain details for crypto payments */}
           {payment?.txid && (
             <div className={styles.bcDetails}>
               <div className={styles.bcHeader}>Blockchain transaction</div>
@@ -240,10 +225,10 @@ export default function ReceiptPage() {
             </div>
           )}
 
-          {/* Footer */}
           <div className={styles.footer}>
             <p className={styles.footerNote}>
-              Credits never expire. Questions about this {receipt.type === 'usage' ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
+              {!isUsage && 'Credits expire 12 months from purchase date. '}
+              Questions about this {isUsage ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
             </p>
             <p className={styles.footerFine}>
               Trovarcis LLC &middot; Wyoming, USA &middot; {formatDateShort(receipt.createdAt)}

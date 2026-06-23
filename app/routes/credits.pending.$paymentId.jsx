@@ -1,3 +1,5 @@
+// /credits/pending/:paymentId - waiting room for crypto invoice confirmation. Redirects out once terminal.
+
 import { useEffect, useState } from 'react';
 import { Link, useLoaderData, useRevalidator, redirect } from 'react-router';
 import Header from '~/components/layout/Header';
@@ -5,6 +7,7 @@ import Footer from '~/components/layout/Footer';
 import { requireUser } from '~/utils/session.server';
 import { getPaymentForUser } from '~/lib/payments.server';
 import { getPaymentInfo, mapCryptomusStatus } from '~/lib/cryptomus.server';
+import { sql } from '~/utils/db.server';
 import styles from '~/styles/modules/routes/paymentPending.module.css';
 
 export const meta = () => [
@@ -12,19 +15,10 @@ export const meta = () => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/**
- * Loader fetches the payment row.
- *
- * Three terminal cases short-circuit to a redirect so the user never sits
- * on the pending page once the outcome is known:
- *   - confirmed  -> receipt page (the celebration)
- *   - failed     -> credits page (try again, no charge taken)
- *   - expired    -> credits page (invoice timed out)
- *
- * For the still-awaiting case we optionally poll Cryptomus to shorten
- * perceived latency. The webhook remains the source of truth that writes
- * to our DB. This component just revalidates every 4s until status moves.
- */
+// Loader fetches the payment row and redirects out on terminal states:
+//   confirmed -> receipt page (resolved via credit_transactions.reference_id)
+//   failed/expired -> credits page
+// Non-terminal -> render pending UI which polls via revalidator every 4s.
 export async function loader({ request, params }) {
   const user = await requireUser(request);
   const paymentId = params.paymentId;
@@ -34,24 +28,29 @@ export async function loader({ request, params }) {
     throw new Response('Payment not found', { status: 404 });
   }
 
-  // Terminal states: redirect out so the pending page is never a dead end.
   if (payment.status === 'confirmed') {
-    throw redirect(`/receipts/${payment.id}`);
+    // Receipt route is keyed by credit_transactions.id, not payment.id. Look up the purchase tx.
+    const [tx] = await sql`
+      SELECT id FROM credit_transactions
+      WHERE reference_id = ${payment.id} AND type = 'purchase' AND user_id = ${user.id}
+      LIMIT 1
+    `;
+    if (tx) throw redirect(`/receipts/${tx.id}`);
+    // Defensive fallback - confirmed but no tx row yet (race). Dashboard will show balance.
+    throw redirect('/dashboard?payment=confirmed');
   }
   if (payment.status === 'failed' || payment.status === 'expired') {
     throw redirect(`/credits?payment=${payment.status}`);
   }
 
-  // If not yet terminal, try to pull fresh info from Cryptomus. We only
-  // READ status here - the webhook is still the source of truth that writes
-  // to our DB. This just helps UX by shortening perceived latency.
+  // Optional read-only Cryptomus poll to shorten perceived latency. Webhook is still source of truth.
   let remoteStatus = null;
   if (payment.gateway === 'cryptomus' && payment.status === 'awaiting_payment') {
     try {
       const info = await getPaymentInfo({ orderId: payment.id });
       remoteStatus = mapCryptomusStatus(info.status, info.is_final);
     } catch {
-      // Non-fatal. User sees current DB status.
+      // Non-fatal.
     }
   }
 
@@ -71,11 +70,7 @@ export default function PaymentPendingPage() {
   const { payment } = useLoaderData();
   const revalidator = useRevalidator();
 
-  // After the loader's terminal-state redirects, the only status that ever
-  // renders here is 'awaiting_payment' (or the much rarer 'pending' before
-  // Cryptomus has acknowledged the invoice). Poll every 4s until either
-  // changes - the next revalidation that returns a terminal state will
-  // trigger the loader redirect, replacing this view.
+  // Poll every 4s until status moves to terminal - next loader run redirects out.
   useEffect(() => {
     const iv = setInterval(() => {
       revalidator.revalidate();
