@@ -1,4 +1,4 @@
-import { Link, Form, useLoaderData } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminListPayments } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -47,6 +47,7 @@ function formatDate(iso) {
 
 export default function AdminPayments() {
   const { payments, gateway, status, page } = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -95,17 +96,28 @@ export default function AdminPayments() {
             </thead>
             <tbody>
               {payments.map((p) => (
-                <tr key={p.id}>
+                <tr
+                  key={p.id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/admin/payments/${p.id}`)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault();
+                      navigate(`/admin/payments/${p.id}`);
+                    }
+                  }}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open payment ${p.id}`}
+                >
                   <td data-label="When" className={styles['td--mono']}>{formatDate(p.created_at)}</td>
-                  <td data-label="User">
+                  <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
                     {p.user_id
                       ? <Link to={`/admin/users/${p.user_id}`} className={styles.rowLink}>{p.user_email || '-'}</Link>
                       : <span className={styles['td--muted']}>-</span>}
                   </td>
                   <td data-label="Gateway">{p.gateway}</td>
-                  <td data-label="Package">
-                    <Link to={`/admin/payments/${p.id}`} className={styles.rowLink}>{p.package_key || '-'}</Link>
-                  </td>
+                  <td data-label="Package">{p.package_key || '-'}</td>
                   <td data-label="Credits" className={styles['td--num']}>{p.credits.toLocaleString()}</td>
                   <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
                   <td data-label="Status">

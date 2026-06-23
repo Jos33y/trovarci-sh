@@ -1,4 +1,4 @@
-import { Link, Form, useLoaderData } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminSearchUsers } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -29,6 +29,7 @@ function timeAgo(iso) {
 
 export default function AdminUsers() {
   const { users, q } = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -75,10 +76,21 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id}>
-                  <td data-label="Email">
-                    <Link to={`/admin/users/${u.id}`} className={styles.rowLink}>{u.email}</Link>
-                  </td>
+                <tr
+                  key={u.id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/admin/users/${u.id}`)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault();
+                      navigate(`/admin/users/${u.id}`);
+                    }
+                  }}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open user ${u.email}`}
+                >
+                  <td data-label="Email">{u.email}</td>
                   <td data-label="Role">
                     {u.role === 'admin'
                       ? <span className={`${styles.badge} ${styles.badgeAccent}`}>Admin</span>

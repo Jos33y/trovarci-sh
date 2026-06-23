@@ -1,4 +1,4 @@
-import { Link, Form, useLoaderData } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminListJobs } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -50,6 +50,7 @@ function progressPct(processed, total) {
 
 export default function AdminJobs() {
   const { jobs, status, kind, page } = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -99,16 +100,27 @@ export default function AdminJobs() {
               {jobs.map((j) => {
                 const pct = progressPct(j.processed_items, j.total_items);
                 return (
-                  <tr key={j.id}>
+                  <tr
+                    key={j.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/admin/jobs/${j.id}`)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        navigate(`/admin/jobs/${j.id}`);
+                      }
+                    }}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={`Open job ${j.id}`}
+                  >
                     <td data-label="When" className={styles['td--mono']}>{formatDate(j.created_at)}</td>
-                    <td data-label="User">
+                    <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
                       {j.user_id
                         ? <Link to={`/admin/users/${j.user_id}`} className={styles.rowLink}>{j.user_email || '-'}</Link>
                         : <span className={styles['td--muted']}>-</span>}
                     </td>
-                    <td data-label="Kind">
-                      <Link to={`/admin/jobs/${j.id}`} className={styles.rowLink}>{j.kind}</Link>
-                    </td>
+                    <td data-label="Kind">{j.kind}</td>
                     <td data-label="Progress" className={styles['td--mono']}>
                       {j.processed_items.toLocaleString()} / {j.total_items.toLocaleString()}
                       <span style={{ color: 'var(--trov-text-muted)', marginLeft: 6 }}>· {pct}%</span>

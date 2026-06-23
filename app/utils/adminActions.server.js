@@ -37,10 +37,11 @@ const VALID_ACTION_TYPES = new Set([
   'payment_mark_failed',
   'error_mark_resolved',
   'user_role_change',
+  'contact_message_status_change',
 ]);
 
 const VALID_TARGET_KINDS = new Set([
-  'user', 'payment', 'job', 'transaction', 'error_event',
+  'user', 'payment', 'job', 'transaction', 'error_event', 'contact_message',
 ]);
 
 /**

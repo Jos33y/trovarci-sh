@@ -794,3 +794,55 @@ export async function adminSystemStatus() {
     worker:    { status: 'ok' },
   };
 }
+
+// ─── Contact messages ───
+
+export async function adminListContactMessages({ status = null, subject = null, q = null, limit = 50, offset = 0 } = {}) {
+  const statusFilter  = status  ? sql`AND status = ${status}`   : sql``;
+  const subjectFilter = subject ? sql`AND subject = ${subject}` : sql``;
+  const qFilter = q
+    ? sql`AND (email ILIKE ${'%' + q + '%'} OR name ILIKE ${'%' + q + '%'} OR message ILIKE ${'%' + q + '%'})`
+    : sql``;
+
+  return sql`
+    SELECT id, created_at, subject, name, email, source, status, user_id,
+           substring(message from 1 for 120) AS message_preview,
+           length(message) AS message_length
+    FROM contact_messages
+    WHERE 1=1
+      ${statusFilter}
+      ${subjectFilter}
+      ${qFilter}
+    ORDER BY created_at DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+}
+
+export async function adminGetContactMessage(id) {
+  const [row] = await sql`
+    SELECT cm.id, cm.created_at, cm.subject, cm.name, cm.email, cm.message,
+           cm.source, cm.status, cm.notes, cm.user_id, cm.ip_address, cm.user_agent,
+           u.email AS linked_user_email
+    FROM contact_messages cm
+    LEFT JOIN users u ON u.id = cm.user_id
+    WHERE cm.id = ${id}
+    LIMIT 1
+  `;
+  return row || null;
+}
+
+const CONTACT_VALID_STATUSES = new Set(['new', 'read', 'replied', 'spam']);
+
+export async function adminUpdateContactMessageStatus(id, { status, notes = null }) {
+  if (!CONTACT_VALID_STATUSES.has(status)) {
+    throw new Error(`Invalid contact status: ${status}`);
+  }
+  const [updated] = await sql`
+    UPDATE contact_messages
+    SET status = ${status}, notes = ${notes}
+    WHERE id = ${id}
+    RETURNING id, status
+  `;
+  if (!updated) throw new Error(`Contact message not found: ${id}`);
+  return updated;
+}
