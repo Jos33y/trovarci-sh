@@ -1,7 +1,12 @@
-import { Link, Form, useLoaderData, useNavigate } from 'react-router';
+// /admin/errors - list view with inline drawer for triage. Click row to view + mark resolved without navigation.
+
+import { useEffect, useState } from 'react';
+import { Link, Form, useLoaderData, useRevalidator } from 'react-router';
 import { requireAdmin, adminListErrors } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
+import CloseIcon from '~/components/icons/CloseIcon';
 import styles from '~/styles/modules/routes/admin.module.css';
+import drawer from '~/styles/modules/admin/ErrorDrawer.module.css';
 
 export const meta = () => [
   { title: 'Errors | Trovarcis Admin' },
@@ -39,13 +44,12 @@ const SEV_BADGE = {
   info:    'badgeNeutral',
 };
 
-// Renders message safely. Upstream non-string captures occasionally land as '[object Object]' - flag them.
-function safeMessage(msg) {
-  if (!msg) return '-';
-  const s = String(msg);
-  if (s === '[object Object]') return '(non-string error - open to inspect)';
-  return s.length > 120 ? s.slice(0, 120) + '...' : s;
-}
+const DRAWER_SEV_BADGE = {
+  fatal:   drawer.badgeError,
+  error:   drawer.badgeError,
+  warning: drawer.badgeWarning,
+  info:    drawer.badgeNeutral,
+};
 
 function timeAgo(iso) {
   const ms = Date.now() - new Date(iso).getTime();
@@ -57,11 +61,107 @@ function timeAgo(iso) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+function formatDate(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+}
+
+// Renders message safely. Upstream non-string captures occasionally land as '[object Object]' - flag them.
+function safeMessage(msg) {
+  if (!msg) return '-';
+  const s = String(msg);
+  if (s === '[object Object]') return '(non-string error - open to inspect)';
+  return s.length > 120 ? s.slice(0, 120) + '...' : s;
+}
+
 const RESOLVED_LABEL = { '': 'all', 'false': 'unresolved', 'true': 'resolved' };
 
 export default function AdminErrors() {
   const { errors, kind, severity, resolved, page } = useLoaderData();
-  const navigate = useNavigate();
+  const revalidator = useRevalidator();
+
+  const [openId,    setOpenId]    = useState(null);
+  const [detail,    setDetail]    = useState(null);
+  const [loading,   setLoading]   = useState(false);
+  const [note,      setNote]      = useState('');
+  const [resolving, setResolving] = useState(false);
+  const [drawerErr, setDrawerErr] = useState('');
+
+  // Esc to close drawer.
+  useEffect(() => {
+    if (openId == null) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') closeDrawer(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId]);
+
+  // Lock body scroll while drawer open.
+  useEffect(() => {
+    if (openId == null) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [openId]);
+
+  const openDrawer = async (id) => {
+    setOpenId(id);
+    setDetail(null);
+    setNote('');
+    setDrawerErr('');
+    setLoading(true);
+    try {
+      // RR v7 exposes loader JSON at <route>.data. The detail route's loader already enforces admin auth.
+      const res = await fetch(`/admin/errors/${id}.data`, { headers: { Accept: 'application/json' } });
+      if (!res.ok) {
+        setDrawerErr(`Could not load error (${res.status})`);
+      } else {
+        const data = await res.json();
+        setDetail(data?.error || null);
+      }
+    } catch (err) {
+      setDrawerErr(err?.message || 'Could not load error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeDrawer = () => {
+    setOpenId(null);
+    setDetail(null);
+    setNote('');
+    setDrawerErr('');
+    setResolving(false);
+  };
+
+  const markResolved = async () => {
+    if (!openId || resolving) return;
+    setResolving(true);
+    setDrawerErr('');
+    try {
+      const res = await fetch(`/api/admin/errors/${openId}/resolve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: note.trim() || null }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.ok) {
+        setDrawerErr(body.error || `Could not mark resolved (${res.status})`);
+        setResolving(false);
+        return;
+      }
+      // Success - revalidate the list and close.
+      revalidator.revalidate();
+      closeDrawer();
+    } catch (err) {
+      setDrawerErr(err?.message || 'Could not mark resolved');
+      setResolving(false);
+    }
+  };
+
+  const ctx = detail?.redacted_context && typeof detail.redacted_context === 'object'
+    ? detail.redacted_context
+    : {};
 
   return (
     <>
@@ -119,14 +219,14 @@ export default function AdminErrors() {
                 <tr
                   key={e.id}
                   style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/admin/errors/${e.id}`)}
+                  onClick={() => openDrawer(e.id)}
                   onKeyDown={(ev) => {
                     if (ev.key === 'Enter' || ev.key === ' ') {
                       ev.preventDefault();
-                      navigate(`/admin/errors/${e.id}`);
+                      openDrawer(e.id);
                     }
                   }}
-                  role="link"
+                  role="button"
                   tabIndex={0}
                   aria-label={`Open error ${e.id}`}
                 >
@@ -167,6 +267,166 @@ export default function AdminErrors() {
           ) : null}
         </div>
       </div>
+
+      {/* ─── Drawer ─── */}
+
+      <div
+        className={`${drawer.backdrop} ${openId != null ? drawer.backdropOpen : ''}`}
+        onClick={closeDrawer}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`${drawer.drawer} ${openId != null ? drawer.drawerOpen : ''}`}
+        role="dialog"
+        aria-label="Error details"
+        aria-hidden={openId == null}
+      >
+        <header className={drawer.head}>
+          <div className={drawer.headLeft}>
+            <div className={drawer.headTitle}>{detail ? `Error #${detail.id}` : 'Error'}</div>
+            <div className={drawer.headSub}>{detail ? formatDate(detail.created_at) : ''}</div>
+          </div>
+          <button
+            type="button"
+            onClick={closeDrawer}
+            className={drawer.closeBtn}
+            aria-label="Close drawer"
+          >
+            <CloseIcon size={18} />
+          </button>
+        </header>
+
+        <div className={drawer.body}>
+          {loading && <div className={drawer.loading}>Loading...</div>}
+
+          {!loading && drawerErr && (
+            <div className={drawer.error}>{drawerErr}</div>
+          )}
+
+          {!loading && detail && (
+            <>
+              <div className={drawer.badgeRow}>
+                <span className={`${drawer.badge} ${DRAWER_SEV_BADGE[detail.severity] || drawer.badgeNeutral}`}>
+                  {detail.severity}
+                </span>
+                <span className={`${drawer.badge} ${drawer.badgeNeutral}`}>{detail.kind}</span>
+                {detail.resolved_at
+                  ? <span className={`${drawer.badge} ${drawer.badgeSuccess}`}>resolved</span>
+                  : <span className={`${drawer.badge} ${drawer.badgeWarning}`}>open</span>}
+              </div>
+
+              <section className={drawer.section}>
+                <h3 className={drawer.sectionTitle}>Message</h3>
+                <pre className={`${drawer.pre} ${drawer.preMessage}`}>{detail.message || '-'}</pre>
+              </section>
+
+              {detail.stack && (
+                <section className={drawer.section}>
+                  <h3 className={drawer.sectionTitle}>Stack trace</h3>
+                  <pre className={`${drawer.pre} ${drawer.preStack}`}>{detail.stack}</pre>
+                </section>
+              )}
+
+              {Object.keys(ctx).length > 0 && (
+                <section className={drawer.section}>
+                  <h3 className={drawer.sectionTitle}>Redacted context</h3>
+                  <pre className={`${drawer.pre} ${drawer.preContext}`}>{JSON.stringify(ctx, null, 2)}</pre>
+                </section>
+              )}
+
+              <section className={drawer.section}>
+                <h3 className={drawer.sectionTitle}>Details</h3>
+                <div className={drawer.kv}>
+                  <div className={drawer.kvKey}>Path</div>
+                  <div className={drawer.kvValMono}>{detail.path || '-'}</div>
+
+                  <div className={drawer.kvKey}>Method</div>
+                  <div className={drawer.kvValMono}>{detail.method || '-'}</div>
+
+                  <div className={drawer.kvKey}>Status</div>
+                  <div className={drawer.kvValMono}>{detail.status_code || '-'}</div>
+
+                  <div className={drawer.kvKey}>Country</div>
+                  <div className={drawer.kvValMono}>{detail.country || '-'}</div>
+
+                  {detail.user_agent && (
+                    <>
+                      <div className={drawer.kvKey}>User agent</div>
+                      <div className={drawer.kvValMono} style={{ fontSize: 11 }}>{detail.user_agent}</div>
+                    </>
+                  )}
+
+                  {detail.user_id && (
+                    <>
+                      <div className={drawer.kvKey}>User</div>
+                      <div className={drawer.kvVal}>
+                        <Link to={`/admin/users/${detail.user_id}`} className={drawer.kvLink}>
+                          {detail.user_email || detail.user_id.slice(0, 8)}
+                        </Link>
+                      </div>
+                    </>
+                  )}
+
+                  {detail.resolved_at && (
+                    <>
+                      <div className={drawer.kvKey}>Resolved</div>
+                      <div className={drawer.kvValMono}>{formatDate(detail.resolved_at)}</div>
+
+                      <div className={drawer.kvKey}>By</div>
+                      <div className={drawer.kvVal}>{detail.resolved_by_email || detail.resolved_by?.slice(0, 8) || '-'}</div>
+
+                      {detail.resolution_note && (
+                        <>
+                          <div className={drawer.kvKey}>Note</div>
+                          <div className={drawer.kvVal}>{detail.resolution_note}</div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+
+        {!loading && detail && !detail.resolved_at && (
+          <footer className={drawer.foot}>
+            <div className={drawer.resolveForm}>
+              <label htmlFor="drawer-note" className={drawer.formLabel}>Resolution note (optional)</label>
+              <textarea
+                id="drawer-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className={drawer.formTextarea}
+                maxLength={500}
+                placeholder="Optional. Up to 500 chars."
+              />
+              {drawerErr && <div className={drawer.error}>{drawerErr}</div>}
+              <div className={drawer.actions}>
+                <button type="button" onClick={closeDrawer} className={drawer.btnGhost} disabled={resolving}>
+                  Cancel
+                </button>
+                <button type="button" onClick={markResolved} className={drawer.btnPrimary} disabled={resolving}>
+                  {resolving ? 'Resolving...' : 'Mark resolved'}
+                </button>
+              </div>
+            </div>
+          </footer>
+        )}
+
+        {!loading && detail?.resolved_at && (
+          <footer className={drawer.foot}>
+            <div className={drawer.resolvedNote}>
+              <div className={drawer.resolvedTitle}>Resolved</div>
+              <div className={drawer.resolvedDetail}>
+                {formatDate(detail.resolved_at)}
+                {detail.resolved_by_email ? ` by ${detail.resolved_by_email}` : ''}
+              </div>
+            </div>
+          </footer>
+        )}
+      </aside>
     </>
   );
 }

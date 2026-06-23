@@ -1,47 +1,22 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   GET /api/jobs/:jobId/status
-
-   Polling fallback for job progress. Returns a snapshot of where the
-   job is right now: status, processed rows, per-category counts, and
-   how many items are scheduled for retry.
-
-   Pair with the SSE endpoint at /api/jobs/:jobId/stream which is the
-   primary push channel. Polling is the fallback for environments where
-   SSE breaks (some corporate proxies buffer aggressively, EventSource
-   reconnect storms, etc).
-
-   Auth: required, ownership enforced via getJobForUser.
-
-   Response (200):
-     {
-       ok: true,
-       progress: {
-         id, status, totalRows, processedRows, completedAt,
-         counts: { valid, invalid, risky, unknown, error },
-         retrying
-       }
-     }
-
-   Response (404): job not found OR not owned by this user (we don't
-                   distinguish - returning 403 would leak job-id existence)
-   ═══════════════════════════════════════════════════════════════════════════ */
+// GET /api/jobs/:jobId/status - polling snapshot. Pair with /stream SSE for the push channel.
 
 import { requireUser }                  from '~/utils/session.server';
 import { getJobForUser, getJobProgress } from '~/lib/jobQueue.server';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function loader({ request, params }) {
   const user = await requireUser(request);
   const jobId = params.jobId;
 
-  if (!jobId) {
+  if (!jobId || !UUID_RE.test(jobId)) {
     return Response.json(
-      { ok: false, code: 'BAD_JOB_ID', error: 'jobId is required' },
+      { ok: false, code: 'BAD_JOB_ID', error: 'jobId must be a UUID' },
       { status: 400 },
     );
   }
 
-  // Ownership check first - getJobProgress doesn't enforce ownership,
-  // so without this any logged-in user could poll any job by id.
+  // getJobProgress doesn't enforce ownership - check first.
   const owned = await getJobForUser(jobId, user.id);
   if (!owned) {
     return Response.json(
