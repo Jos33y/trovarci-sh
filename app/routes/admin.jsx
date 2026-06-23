@@ -29,6 +29,7 @@ const NAV = [
   { to: '/admin/users',             label: 'Users' },
   { to: '/admin/payments',          label: 'Payments' },
   { to: '/admin/jobs',              label: 'Jobs' },
+  { to: '/admin/messages',          label: 'Messages' },
   { to: '/admin/analytics',         label: 'Analytics' },
   { to: '/admin/analytics/funnel',  label: 'Funnel',  indent: true },
   { to: '/admin/analytics/journeys', label: 'Journeys', indent: true },
