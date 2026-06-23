@@ -111,13 +111,12 @@ export default function AdminErrors() {
     setDrawerErr('');
     setLoading(true);
     try {
-      // RR v7 exposes loader JSON at <route>.data. The detail route's loader already enforces admin auth.
-      const res = await fetch(`/admin/errors/${id}.data`, { headers: { Accept: 'application/json' } });
-      if (!res.ok) {
-        setDrawerErr(`Could not load error (${res.status})`);
+      const res = await fetch(`/api/admin/errors/${id}`, { headers: { Accept: 'application/json' } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        setDrawerErr(data.error || `Could not load error (${res.status})`);
       } else {
-        const data = await res.json();
-        setDetail(data?.error || null);
+        setDetail(data.error || null);
       }
     } catch (err) {
       setDrawerErr(err?.message || 'Could not load error');
