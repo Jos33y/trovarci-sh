@@ -15,8 +15,14 @@ const SUBJECTS = [
   { value: 'press',       label: 'Press / Media' },
 ];
 
-// Routes that should never show the widget (avoid double surface on the contact page itself).
+// Routes that should never show the widget (avoid double surface on the contact page, hide on admin).
 const HIDDEN_PATHS = new Set(['/contact']);
+
+function shouldHide(pathname) {
+  if (HIDDEN_PATHS.has(pathname)) return true;
+  if (pathname.startsWith('/admin')) return true;
+  return false;
+}
 
 export default function ContactWidget() {
   const location = useLocation();
@@ -60,7 +66,7 @@ export default function ContactWidget() {
     return undefined;
   }, [open, sent]);
 
-  if (HIDDEN_PATHS.has(location.pathname)) return null;
+  if (shouldHide(location.pathname)) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
