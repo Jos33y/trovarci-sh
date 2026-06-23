@@ -64,7 +64,8 @@ function formatDateLong(date) {
   return new Date(date).toLocaleString('en-US', {
     dateStyle: 'long',
     timeStyle: 'short',
-  });
+    timeZone:  'UTC',
+  }) + ' UTC';
 }
 
 function formatDateShort(date) {

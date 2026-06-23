@@ -1,38 +1,10 @@
-/**
- * Client telemetry IIFE source.
- *
- * Inlined into root.jsx as a <script dangerouslySetInnerHTML>. Stays
- * outside the React bundle so:
- *   1. It runs before hydration completes (catches early errors).
- *   2. It survives a React render crash (the React tree may be broken
- *      but window.onerror still fires; we still want the event).
- *   3. No bundler involvement; the source here matches what ships.
- *
- * Capabilities:
- *   - One pageview beacon per route, sent on first paint OR on
- *     visibilitychange→hidden (whichever fires first). Ensures we
- *     always get the beacon even if the user closes the tab fast.
- *   - window.error and unhandledrejection capture, debounced to
- *     dedupe repeated errors of the same shape within 5s.
- *   - SPA route changes detected via the History API hook so RR v7
- *     client-side navigations also get a pageview beacon.
- *
- * Privacy:
- *   - We collect path, referrer (cross-origin only), UTM params, and
- *     for errors the message + stack + filename + line. No emails,
- *     no clipboard, no form values.
- *
- * Constraints:
- *   - Must be valid JS in a browser. No template literals with
- *     ${...} expressions when read by a server (inline is fine).
- *   - Must work without optional-chaining? Modern browsers support it.
- *     We target evergreens; IE is dead.
- */
+// Client telemetry source. Inlined as a <script> in root.jsx so it runs pre-hydration and survives render crashes.
 
 export const TELEMETRY_CLIENT_SOURCE = `
 (function(){
   var BEACON='/api/telemetry/beacon';
   var sent=false; var errSeen={};
+
   function send(body){
     try{
       var blob=new Blob([JSON.stringify(body)],{type:'application/json'});
@@ -40,6 +12,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
       else { fetch(BEACON,{method:'POST',body:blob,keepalive:true,credentials:'same-origin'}).catch(function(){}); }
     }catch(e){}
   }
+
   function ref(){
     try{
       if(!document.referrer) return null;
@@ -48,13 +21,22 @@ export const TELEMETRY_CLIENT_SOURCE = `
       return document.referrer;
     }catch(e){ return null; }
   }
+
+  // Serializes anything to a readable string. Prevents [object Object] in the error pipeline.
+  function safeStr(v, fallback){
+    if (v === null || v === undefined) return fallback || 'Unknown';
+    if (typeof v === 'string') return v;
+    if (v instanceof Error) return v.message || String(v);
+    if (typeof v === 'object') {
+      if (v.message) return String(v.message);
+      try { return JSON.stringify(v).slice(0, 1024); } catch(e) { return fallback || 'Unknown'; }
+    }
+    return String(v);
+  }
+
   function pageview(){
     if(sent) return;
-    // Skip framework / browser probe paths that aren't real pageviews:
-    //   /.well-known/*           - Chrome devtools, ACME challenges, etc
-    //   /__*                     - convention for internal/diagnostic routes
-    //   /api/*                   - never a pageview, that's an XHR
-    //   *.data                   - RR v7 client-nav data fetch
+    // Skip non-pageview paths: well-known probes, framework internals, API XHRs, RR v7 data fetches.
     var p = location.pathname;
     if (p.indexOf('/.well-known/') === 0) return;
     if (p.indexOf('/__') === 0) return;
@@ -63,7 +45,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
     sent=true;
     send({type:'pageview',path:p+location.search,referrer:ref()});
   }
-  // Send on first paint OR earliest of visibility-hidden.
+
   if(document.readyState==='complete' || document.readyState==='interactive'){
     setTimeout(pageview,0);
   } else {
@@ -73,7 +55,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
     if(document.visibilityState==='hidden') pageview();
   });
 
-  // SPA navigation hook for React Router client-side route changes.
+  // SPA navigation hook for RR v7 client-side route changes.
   var origPush=history.pushState;
   history.pushState=function(){
     var r=origPush.apply(this,arguments);
@@ -88,7 +70,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
   };
   window.addEventListener('popstate',function(){ sent=false; setTimeout(pageview,0); });
 
-  // Error capture with 5s dedupe per (message+filename+line) signature.
+  // Dedupe per (message+filename+line) signature within 5s.
   function fp(msg,file,line){ return (msg||'?')+'|'+(file||'?')+'|'+(line||'?'); }
   function recordErr(payload){
     var k=fp(payload.message,payload.url,payload.line);
@@ -97,11 +79,13 @@ export const TELEMETRY_CLIENT_SOURCE = `
     errSeen[k]=now;
     send(payload);
   }
+
   window.addEventListener('error',function(e){
     if(!e) return;
+    var msg = e.message ? String(e.message) : safeStr(e.error, 'Script error');
     recordErr({
       type:'error', kind:'client_script', severity:'error',
-      message:(e.message||String(e.error||'Script error')).slice(0,1024),
+      message: msg.slice(0,1024),
       stack: e.error && e.error.stack ? String(e.error.stack).slice(0,8192) : null,
       url: e.filename || location.href,
       line: e.lineno || null,
@@ -110,10 +94,11 @@ export const TELEMETRY_CLIENT_SOURCE = `
       context: { type:'window.onerror' }
     });
   });
+
   window.addEventListener('unhandledrejection',function(e){
     if(!e) return;
     var reason=e.reason;
-    var msg = reason && reason.message ? reason.message : String(reason||'Unhandled rejection');
+    var msg = safeStr(reason, 'Unhandled rejection');
     var stk = reason && reason.stack ? String(reason.stack) : null;
     recordErr({
       type:'error', kind:'client_async', severity:'error',

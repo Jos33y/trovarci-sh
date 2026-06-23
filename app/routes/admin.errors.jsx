@@ -1,4 +1,4 @@
-import { Link, Form, useLoaderData } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminListErrors } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -39,6 +39,14 @@ const SEV_BADGE = {
   info:    'badgeNeutral',
 };
 
+// Renders message safely. Upstream non-string captures occasionally land as '[object Object]' - flag them.
+function safeMessage(msg) {
+  if (!msg) return '-';
+  const s = String(msg);
+  if (s === '[object Object]') return '(non-string error - open to inspect)';
+  return s.length > 120 ? s.slice(0, 120) + '...' : s;
+}
+
 function timeAgo(iso) {
   const ms = Date.now() - new Date(iso).getTime();
   const m = Math.floor(ms / 60000);
@@ -53,6 +61,7 @@ const RESOLVED_LABEL = { '': 'all', 'false': 'unresolved', 'true': 'resolved' };
 
 export default function AdminErrors() {
   const { errors, kind, severity, resolved, page } = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -107,19 +116,28 @@ export default function AdminErrors() {
             </thead>
             <tbody>
               {errors.map((e) => (
-                <tr key={e.id}>
+                <tr
+                  key={e.id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/admin/errors/${e.id}`)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault();
+                      navigate(`/admin/errors/${e.id}`);
+                    }
+                  }}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open error ${e.id}`}
+                >
                   <td data-label="When" className={styles['td--muted']}>{timeAgo(e.created_at)}</td>
                   <td data-label="Kind" className={styles['td--mono']}>{e.kind}</td>
                   <td data-label="Sev">
                     <span className={`${styles.badge} ${styles[SEV_BADGE[e.severity] || 'badgeNeutral']}`}>{e.severity}</span>
                   </td>
                   <td data-label="Path" className={styles['td--mono']}>{e.path || '-'}</td>
-                  <td data-label="Message">
-                    <Link to={`/admin/errors/${e.id}`} className={styles.rowLink}>
-                      {e.message.length > 120 ? e.message.slice(0, 120) + '...' : e.message}
-                    </Link>
-                  </td>
-                  <td data-label="User">
+                  <td data-label="Message">{safeMessage(e.message)}</td>
+                  <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
                     {e.user_id
                       ? <Link to={`/admin/users/${e.user_id}`} className={styles.rowLink}>{e.user_email || '-'}</Link>
                       : <span className={styles['td--muted']}>-</span>}
