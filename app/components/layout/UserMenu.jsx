@@ -84,6 +84,9 @@ export default function UserMenu({ user }) {
           <Link to="/credits" className={styles.item} role="menuitem">
             Buy credits
           </Link>
+          <Link to="/account/settings" className={styles.item} role="menuitem">
+            Account settings
+          </Link>
 
           {user.role === 'admin' && (
             <>

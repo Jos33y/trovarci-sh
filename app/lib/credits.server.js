@@ -27,6 +27,14 @@
  */
 
 import { sql } from '../utils/db.server.js';
+import { CREDIT_EXPIRY_MONTHS } from '../utils/creditsConfig.server.js';
+
+// Compute expiry for a new positive grant. 12-month default per receipt copy.
+function computeExpiresAt() {
+  const d = new Date();
+  d.setMonth(d.getMonth() + CREDIT_EXPIRY_MONTHS);
+  return d;
+}
 
 // ============================================================================
 // Internal helpers
@@ -108,6 +116,32 @@ export async function spendCredits(userId, amount, toolName, { referenceId = nul
       RETURNING id
     `;
 
+    // FIFO consumption of remaining_amount from oldest unexpired grants. Keeps the
+    // per-grant ledger consistent so the expiry worker only zeroes truly unused credits.
+    let toConsume = amount;
+    while (toConsume > 0) {
+      const [grant] = await tx`
+        SELECT id, remaining_amount
+        FROM credit_transactions
+        WHERE user_id = ${userId}
+          AND delta > 0
+          AND remaining_amount > 0
+          AND (expires_at IS NULL OR expires_at > now())
+        ORDER BY created_at ASC, id ASC
+        LIMIT 1
+        FOR UPDATE
+      `;
+      if (!grant) break; // Defence: balance check passed but no grants tracked. Old data, ledger stays balance-correct via the row above.
+
+      const take = Math.min(toConsume, grant.remaining_amount);
+      await tx`
+        UPDATE credit_transactions
+        SET remaining_amount = remaining_amount - ${take}
+        WHERE id = ${grant.id}
+      `;
+      toConsume -= take;
+    }
+
     return { ok: true, transactionId: row.id, newBalance };
   });
 }
@@ -176,8 +210,11 @@ export async function grantCredits(userId, amount, type, { referenceId = null, m
       `;
 
       const [row] = await tx`
-        INSERT INTO credit_transactions (user_id, delta, balance_after, type, reference_id, metadata)
-        VALUES (${userId}, ${amount}, ${newBalance}, ${type}, ${referenceId}, ${sql.json(metadata)})
+        INSERT INTO credit_transactions (user_id, delta, balance_after, type, reference_id, metadata, expires_at, remaining_amount)
+        VALUES (
+          ${userId}, ${amount}, ${newBalance}, ${type}, ${referenceId}, ${sql.json(metadata)},
+          ${computeExpiresAt()}, ${amount}
+        )
         RETURNING id
       `;
 

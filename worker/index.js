@@ -94,6 +94,7 @@ import {
   ANALYTICS_FLUSH_INTERVAL_MS,
 } from '../app/utils/analytics.server.js';
 import { cleanupOldErrorEvents, recordWorkerError } from '../app/utils/errors.server.js';
+import { expireCredits } from '../app/lib/creditExpiry.server.js';
 
 import { processItem as processEmailItem } from './emailProcessor.js';
 import { processItem as processPhoneItem } from './phoneProcessor.js';
@@ -131,6 +132,7 @@ const AUTH_CLEANUP_INTERVAL_MS      = parseInt(process.env.WORKER_AUTH_CLEANUP_I
 // skip the day entirely.
 const ROLLUP_CHECK_INTERVAL_MS      = parseInt(process.env.WORKER_ROLLUP_CHECK_INTERVAL_MS   || (60 * 60 * 1000), 10);
 const TELEMETRY_RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h
+const CREDIT_EXPIRY_INTERVAL_MS     = parseInt(process.env.WORKER_CREDIT_EXPIRY_INTERVAL_MS || (24 * 60 * 60 * 1000), 10);   // default 24h
 
 // One inflight set per type. Shutdown drains them in parallel.
 const inflightByType = {
@@ -229,6 +231,22 @@ async function expiredCleanupLoop() {
     await interruptibleSleep(EXPIRED_CLEANUP_INTERVAL_MS);
   }
   console.log('[worker] expired-cleanup loop stopped');
+}
+
+// Credit expiry. Daily tick zeroes unused remaining_amount on grants past expires_at.
+async function creditExpiryLoop() {
+  while (!shutdownState.shutting) {
+    try {
+      const r = await expireCredits();
+      if (r.expired > 0 || r.errors > 0) {
+        console.log(`[worker] credit expiry: expired=${r.expired} credits=${r.totalCreditsExpired} errors=${r.errors}`);
+      }
+    } catch (err) {
+      console.error('[worker] creditExpiryLoop error:', err);
+    }
+    await interruptibleSleep(CREDIT_EXPIRY_INTERVAL_MS);
+  }
+  console.log('[worker] credit-expiry loop stopped');
 }
 
 /**
@@ -436,6 +454,7 @@ async function main() {
     analyticsFlushLoop(),
     rollupLoop(),
     telemetryRetentionLoop(),
+    creditExpiryLoop(),
   ]);
 
   console.log('[worker] all loops stopped, exiting');

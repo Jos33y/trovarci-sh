@@ -1,0 +1,224 @@
+/* /account/settings - two stacked cards (export + danger zone). */
+
+.page {
+  padding: var(--space-2xl) 0 var(--space-4xl);
+  min-height: 70vh;
+}
+
+.head {
+  max-width: 720px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+  margin: 0 0 var(--space-sm);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--trov-text);
+  margin: 0 0 var(--space-sm);
+}
+
+.subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  margin: 0;
+}
+
+.card {
+  max-width: 720px;
+  margin: 0 auto var(--space-lg);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+
+.cardDanger {
+  border-color: rgba(248, 113, 113, 0.30);
+}
+
+.cardHead {
+  margin-bottom: var(--space-lg);
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  margin: 0 0 8px;
+}
+
+.cardDanger .cardTitle {
+  color: var(--trov-error);
+}
+
+.cardSub {
+  margin: 0;
+  color: var(--trov-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+.adminWarn {
+  margin: var(--space-md) 0 0;
+  padding: 10px 14px;
+  background: var(--trov-warning-bg);
+  border: 1px solid rgba(251, 146, 60, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--trov-warning);
+  font-size: 0.8125rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.deleteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.literal {
+  font-family: var(--font-mono);
+  background: var(--trov-bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--trov-border);
+  color: var(--trov-error);
+  letter-spacing: 0.04em;
+}
+
+.input {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background: var(--trov-bg);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  color: var(--trov-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--trov-error);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: var(--trov-error);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+}
+
+.btnPrimary {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 11px 20px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--trov-accent-hover);
+  transform: translateY(-1px);
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--trov-text-secondary);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 11px 20px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.btnGhost:hover:not(:disabled) {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.btnDanger {
+  background: var(--trov-error);
+  color: var(--trov-bg);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 11px 20px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: #ef4444;
+  transform: translateY(-1px);
+}
+
+.btnDanger:disabled,
+.btnGhost:disabled,
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: var(--space-xl) 0 var(--space-3xl);
+  }
+  .card {
+    padding: var(--space-lg);
+  }
+  .cardActions {
+    flex-direction: column-reverse;
+  }
+  .cardActions > button {
+    width: 100%;
+  }
+}

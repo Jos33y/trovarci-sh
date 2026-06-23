@@ -112,3 +112,9 @@ export const LOW_BALANCE_THRESHOLD = envInt('CREDITS_LOW_BALANCE_THRESHOLD', 100
 // because per-row cost is 10x higher and Twilio rate limits cap throughput.
 export const BULK_EMAIL_MAX_ROWS = envInt('BULK_EMAIL_MAX_ROWS', 50_000);
 export const BULK_PHONE_MAX_ROWS = envInt('BULK_PHONE_MAX_ROWS', 10_000);
+
+// Credit expiry. Grants are tracked per-row via expires_at + remaining_amount;
+// the worker zeroes unused remaining once expires_at passes. 12 months matches
+// the receipt copy. Set CREDITS_EXPIRY_MONTHS=0 to disable (grants get a
+// far-future expiry; nothing ever fires). Worker tick interval is also tunable.
+export const CREDIT_EXPIRY_MONTHS = envInt('CREDITS_EXPIRY_MONTHS', 12);
