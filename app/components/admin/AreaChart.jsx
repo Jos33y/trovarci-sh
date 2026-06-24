@@ -1,36 +1,17 @@
+// Revenue area chart. Confirmed (gold) over failed (red, low opacity). Hover crosshair + tooltip.
 import { useState, useRef, useId } from 'react';
 import styles from '~/styles/modules/admin/AreaChart.module.css';
 
-const W = 760;     // logical viewBox width
-const H = 240;     // logical viewBox height
+const W = 760;
+const H = 240;
 const PAD_L = 48;
 const PAD_R = 16;
 const PAD_T = 16;
 const PAD_B = 32;
 
-function formatCents(c) {
-  return '$' + (c / 100).toFixed(2);
-}
+function formatCents(c) { return '$' + (c / 100).toFixed(2); }
+function shortDay(iso) { return iso ? iso.slice(5) : ''; }
 
-function shortDay(iso) {
-  if (!iso) return '';
-  return iso.slice(5);  // 'MM-DD'
-}
-
-/**
- * Centerpiece revenue chart for /admin overview. Two stacked areas:
- *   - confirmed_cents (gold, primary)
- *   - failed_cents    (red, low opacity, drawn behind)
- *
- * The viewBox is fixed; the SVG scales responsively via CSS. Hover state
- * snaps to the nearest day via an absolute-positioned overlay; tap on
- * mobile shows the same tooltip until tap-outside.
- *
- * Empty state (zero non-zero days) renders an "awaiting first payment"
- * message instead of a flat zero line.
- *
- * @param {{day: string, confirmed_cents: number, failed_cents: number, count_confirmed: number, count_failed: number}[]} data
- */
 export default function AreaChart({ data = [] }) {
   const id = useId().replace(/:/g, '');
   const [hover, setHover] = useState(null);
@@ -77,7 +58,6 @@ export default function AreaChart({ data = [] }) {
     gridLines.push({ y, label: '$' + Math.round(v / 100).toLocaleString() });
   }
 
-  // Day-tick density: show every Nth label so the axis doesn't crowd.
   const tickEvery = Math.max(1, Math.ceil(data.length / 8));
 
   const onMove = (e) => {
@@ -91,7 +71,6 @@ export default function AreaChart({ data = [] }) {
   };
 
   const onLeave = () => setHover(null);
-
   const hoverDay = hover != null ? data[hover] : null;
 
   return (
@@ -126,7 +105,6 @@ export default function AreaChart({ data = [] }) {
             </linearGradient>
           </defs>
 
-          {/* Grid */}
           {gridLines.map((g, i) => (
             <g key={i}>
               <line x1={PAD_L} x2={W - PAD_R} y1={g.y} y2={g.y} stroke="var(--trov-border)" strokeWidth="1" strokeDasharray="2 4" />
@@ -134,7 +112,6 @@ export default function AreaChart({ data = [] }) {
             </g>
           ))}
 
-          {/* Failed shadow (drawn first) */}
           {totalFailed > 0 ? (
             <>
               <path d={buildPath('failed_cents')} fill={`url(#ac-failed-${id})`} />
@@ -142,16 +119,13 @@ export default function AreaChart({ data = [] }) {
             </>
           ) : null}
 
-          {/* Confirmed (drawn over) */}
           <path d={buildPath('confirmed_cents')} fill={`url(#ac-confirmed-${id})`} />
           <path d={buildLine('confirmed_cents')} fill="none" stroke="var(--trov-accent)" strokeWidth="2" />
 
-          {/* X tick labels */}
           {data.map((d, i) => i % tickEvery === 0 ? (
             <text key={i} x={xAt(i)} y={H - 8} textAnchor="middle" className={styles.axisLabel}>{shortDay(d.day)}</text>
           ) : null)}
 
-          {/* Hover crosshair */}
           {hoverDay ? (
             <g pointerEvents="none">
               <line x1={xAt(hover)} x2={xAt(hover)} y1={PAD_T} y2={H - PAD_B} stroke="var(--trov-text-muted)" strokeWidth="1" strokeDasharray="2 3" />

@@ -1,0 +1,51 @@
+/* Admin shell layout - grid, main padding, mobile backdrop. */
+
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+  background: var(--trov-bg);
+  position: relative;
+}
+
+.main {
+  padding: 24px 32px 48px;
+  min-width: 0;
+}
+
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(9, 9, 11, 0.6);
+  backdrop-filter: blur(2px);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .main { padding: 20px 24px 40px; }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 48px 1fr;
+  }
+
+  .main {
+    grid-row: 2;
+    padding: 16px;
+  }
+
+  .backdrop {
+    display: block;
+    top: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main { padding: 12px; }
+}

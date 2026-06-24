@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--space-3xl) var(--space-lg);
+  padding: 40px 20px;
   background: var(--trov-surface);
   border: 1px dashed var(--trov-border);
   border-radius: var(--radius-md);
@@ -13,17 +13,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   margin-bottom: var(--space-md);
   background: var(--trov-surface-light);
   border-radius: 50%;
   color: var(--trov-accent-muted);
 }
 
-.mark {
-  display: block;
-}
+.mark { display: block; }
 
 .title {
   font-family: var(--font-display);
@@ -41,6 +39,4 @@
   line-height: 1.5;
 }
 
-.action {
-  margin-top: var(--space-md);
-}
+.action { margin-top: var(--space-md); }

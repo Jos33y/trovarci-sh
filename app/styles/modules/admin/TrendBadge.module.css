@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
+  padding: 3px 7px;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -16,23 +16,6 @@
   line-height: 1;
 }
 
-.label {
-  margin-left: 6px;
-  color: var(--trov-text-muted);
-  font-weight: 400;
-}
-
-.good {
-  color: var(--trov-success);
-  background: var(--trov-success-bg);
-}
-
-.bad {
-  color: var(--trov-error);
-  background: var(--trov-error-bg);
-}
-
-.neutral {
-  color: var(--trov-text-muted);
-  background: var(--trov-surface-light);
-}
+.good    { color: var(--trov-success); background: var(--trov-success-bg); }
+.bad     { color: var(--trov-error);   background: var(--trov-error-bg); }
+.neutral { color: var(--trov-text-muted); background: var(--trov-surface-light); }

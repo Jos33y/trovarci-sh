@@ -6,7 +6,7 @@ export function TrovarcisIcon({ size = 48, variant = "default", className }) {
   };
   const c = fills[variant] || fills.default;
 
-  return (
+  return ( 
     <svg
       width={size}
       height={size}
@@ -87,6 +87,30 @@ export function TrovarcisReachLogo({ size = 48, className }) {
         }}
       >
         Trovarcis <span style={{ color: "var(--trov-accent)" }}>Reach</span>
+      </span>
+    </div>
+  );
+}
+
+export function TrovarcisAdminLogo({ size = 48, className }) {
+  return (
+    <div
+      className={className}
+      style={{ display: "flex", alignItems: "center", gap: size * 0.22 }}
+    >
+      <TrovarcisIcon size={size} />
+      <span
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 900,
+          fontSize: size * 0.5,
+          color: "var(--trov-text)",
+          letterSpacing: "-0.02em",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Trovarcis <span style={{ color: "var(--trov-accent)" }}>Admin</span>
       </span>
     </div>
   );

@@ -1,22 +1,11 @@
+// Empty state inside cards and panels. Variants: data | search | error.
 import styles from '~/styles/modules/admin/EmptyState.module.css';
 
-/**
- * Empty-state component used inside table wrappers and panels when no
- * rows match the current filter. Custom hand-built SVG mark - no icon
- * library. The mark is decorative (aria-hidden) so screen readers focus
- * on the title + body text.
- *
- * @param {object} props
- * @param {string} props.title
- * @param {string} [props.body]
- * @param {React.ReactNode} [props.action]   optional CTA button or link
- * @param {'search'|'data'|'error'} [props.variant='data']
- */
 export default function EmptyState({ title, body, action, variant = 'data' }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.markWrap} aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="56" height="56" fill="none" className={styles.mark}>
+        <svg viewBox="0 0 64 64" width="48" height="48" fill="none" className={styles.mark}>
           {variant === 'search' ? (
             <>
               <circle cx="26" cy="26" r="14" stroke="currentColor" strokeWidth="2" />

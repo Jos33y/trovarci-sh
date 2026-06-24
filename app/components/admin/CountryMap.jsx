@@ -1,19 +1,6 @@
+// Ranked country traffic bars with flag chips. 'XX' renders as 'unknown' fallback.
 import styles from '~/styles/modules/admin/CountryMap.module.css';
 
-/**
- * Ranked country traffic bars. The handoff calls for an SVG world dot-map
- * as the desktop ideal with ranked bars as the mobile/fallback variant.
- * Shipping the bars as the V1 surface for both: they are immediately
- * useful, scale to all viewport sizes, and don't require a 2k-vertex
- * world geography asset on the critical path. The map is a V2 enhancement
- * that can layer above this without changing the data contract.
- *
- * Country code 'XX' = unknown (no Cloudflare CF-IPCountry header). We
- * still render it so the user sees how much traffic is unattributed.
- *
- * @param {{country: string, n: number}[]} rows
- * @param {number} [limit=10]
- */
 export default function CountryMap({ rows = [], limit = 10 }) {
   if (!rows || rows.length === 0) {
     return (

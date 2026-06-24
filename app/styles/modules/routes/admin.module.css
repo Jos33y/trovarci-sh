@@ -1,242 +1,6 @@
-/* ───────────────────────────────────────────────────────────────────────
-   Admin shell
-   ─────────────────────────────────────────────────────────────────────── */
+/* Admin page-level utilities - shell chrome lives in admin/shell/* modules. */
 
-.shell {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-  background: var(--trov-bg);
-  position: relative;
-}
-
-.mobileBar {
-  display: none;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  height: 56px;
-  padding: 0 var(--space-md);
-  align-items: center;
-  justify-content: space-between;
-  background: var(--trov-bg);
-  border-bottom: 1px solid var(--trov-border);
-}
-
-.mobileBrand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  text-decoration: none;
-  color: var(--trov-text);
-}
-
-.hamburger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border: none;
-  color: var(--trov-text);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast);
-}
-
-.hamburger:hover { background: var(--trov-surface-light); }
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--trov-surface);
-  border-right: 1px solid var(--trov-border);
-  padding: var(--space-lg);
-  z-index: 60;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0 var(--space-lg) 0;
-  text-decoration: none;
-  color: var(--trov-text);
-  border-bottom: 1px solid var(--trov-border);
-}
-
-.brandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: var(--trov-accent);
-  color: var(--trov-text-on-accent);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 16px;
-  border-radius: var(--radius-sm);
-}
-
-.brandText {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-md) 0;
-  flex: 1;
-}
-
-.navLink {
-  display: flex;
-  align-items: center;
-  padding: 8px var(--space-sm);
-  color: var(--trov-text-secondary);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-fast), color var(--transition-fast);
-  position: relative;
-  min-height: 36px;
-}
-
-.navLink:hover {
-  background: var(--trov-surface-light);
-  color: var(--trov-text);
-}
-
-.navLinkActive {
-  background: var(--trov-surface-light);
-  color: var(--trov-accent);
-  font-weight: 600;
-}
-
-.navLinkActive::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  background: var(--trov-accent);
-  border-radius: 2px;
-}
-
-.navLinkIndent .navLinkText { padding-left: 12px; font-size: 13px; }
-
-.sidebarFoot {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--trov-border);
-}
-
-.sidebarUser {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sidebarUserLabel {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--trov-text-muted);
-}
-
-.sidebarUserEmail {
-  font-size: 13px;
-  color: var(--trov-text);
-  font-weight: 500;
-  word-break: break-all;
-}
-
-.exitLink {
-  display: block;
-  padding: 8px 12px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--trov-text-secondary);
-  border: 1px solid var(--trov-border);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-}
-
-.exitLink:hover {
-  border-color: var(--trov-accent);
-  color: var(--trov-accent);
-}
-
-.backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  background: rgba(9, 9, 11, 0.6);
-  backdrop-filter: blur(2px);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.main {
-  padding: var(--space-xl) var(--space-2xl);
-  min-width: 0;
-}
-
-/* ─── Mobile (<= 900px) ────────────────────────────────────────────────── */
-
-@media (max-width: 900px) {
-  .shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: 56px 1fr;
-  }
-
-  .mobileBar { display: flex; }
-
-  .sidebar {
-    position: fixed;
-    top: 56px;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    transform: translateX(-100%);
-    transition: transform var(--transition-normal);
-    height: calc(100vh - 56px);
-  }
-
-  .sidebarOpen { transform: translateX(0); box-shadow: var(--shadow-lg); }
-
-  .backdrop { display: block; top: 56px; }
-
-  .main {
-    padding: var(--space-md);
-    grid-row: 2;
-  }
-}
-
-@media (max-width: 480px) {
-  .main { padding: var(--space-sm); }
-}
-
-/* ───────────────────────────────────────────────────────────────────────
-   Page header
-   ─────────────────────────────────────────────────────────────────────── */
+/* Page header */
 
 .pageHeader {
   display: flex;
@@ -284,9 +48,7 @@
 
 .backLink:hover { color: var(--trov-accent); }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Section title
-   ─────────────────────────────────────────────────────────────────────── */
+/* Section title */
 
 .sectionTitle {
   font-family: var(--font-display);
@@ -303,23 +65,47 @@
   margin-bottom: var(--space-md);
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   KPI strip
-   ─────────────────────────────────────────────────────────────────────── */
+/* KPI cluster - section label above each KPI strip */
+
+.kpiCluster {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--trov-text-muted);
+  margin: 0 0 12px 0;
+}
+
+.kpiClusterFirst { margin-top: 4px; }
+.kpiClusterAfter { margin-top: 24px; }
+
+/* KPI strip */
 
 .kpiStrip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-md);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
-@media (max-width: 1100px) { .kpiStrip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1280px) { .kpiStrip { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px)  { .kpiStrip { grid-template-columns: 1fr; gap: var(--space-sm); } }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Overview - main + rail layout
-   ─────────────────────────────────────────────────────────────────────── */
+/* Paired grid for Heatmap + CountryMap below the main charts */
+
+.twoColInner {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .twoColInner { grid-template-columns: 1fr; }
+}
+
+/* Overview layout - main + rail */
 
 .overviewLayout {
   display: grid;
@@ -340,9 +126,7 @@
   .overviewLayout { grid-template-columns: 1fr; }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Generic section grid (e.g. analytics breakdowns)
-   ─────────────────────────────────────────────────────────────────────── */
+/* Generic section grids */
 
 .threeCol {
   display: grid;
@@ -362,9 +146,7 @@
   .twoCol   { grid-template-columns: 1fr; }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Filters bar (search, selects, date range)
-   ─────────────────────────────────────────────────────────────────────── */
+/* Filters bar */
 
 .filters {
   display: flex;
@@ -474,9 +256,7 @@
   .formButton { width: 100%; }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Table - desktop tableview, mobile card-fallback below 640px
-   ─────────────────────────────────────────────────────────────────────── */
+/* Table - desktop tableview, mobile card-fallback below 640px */
 
 .tableWrap {
   background: var(--trov-surface);
@@ -598,9 +378,7 @@
 
 .pageNote { font-family: var(--font-mono); }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Badges - status pills with colored left rail
-   ─────────────────────────────────────────────────────────────────────── */
+/* Badges - status pills with colored left rail */
 
 .badge {
   display: inline-flex;
@@ -622,9 +400,7 @@
 .badgeNeutral { color: var(--trov-text-secondary); background: var(--trov-surface-light); }
 .badgeAccent  { color: var(--trov-accent);  background: var(--trov-glow); }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Detail page layout: 2/3 + 1/3 split (collapses on mobile)
-   ─────────────────────────────────────────────────────────────────────── */
+/* Detail page - 2/3 + 1/3 split */
 
 .detailGrid {
   display: grid;
@@ -685,9 +461,7 @@
   .panel { padding: var(--space-md); }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Key-value list
-   ─────────────────────────────────────────────────────────────────────── */
+/* Key-value list */
 
 .kvList {
   display: grid;
@@ -716,9 +490,7 @@
   .kvList > div + div { margin-top: var(--space-sm); }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Forms - admin actions (grant credits, mark resolved, force cancel)
-   ─────────────────────────────────────────────────────────────────────── */
+/* Forms - admin actions */
 
 .actionForm {
   display: flex;
@@ -797,9 +569,7 @@
   .intentRow { grid-template-columns: 1fr; }
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Inline link list (e.g. recent admin actions panel)
-   ─────────────────────────────────────────────────────────────────────── */
+/* Inline link list - recent admin actions panel */
 
 .actionList {
   list-style: none;
@@ -846,9 +616,7 @@
   word-break: break-word;
 }
 
-/* ───────────────────────────────────────────────────────────────────────
-   Generic stack utilities
-   ─────────────────────────────────────────────────────────────────────── */
+/* Generic stack utilities */
 
 .stack {
   display: flex;

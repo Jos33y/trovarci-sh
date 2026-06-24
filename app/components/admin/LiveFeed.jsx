@@ -1,13 +1,14 @@
+// Right-rail timeline. SSR initial + 30s fetcher refresh while tab visible.
 import { useEffect } from 'react';
 import { Link, useFetcher } from 'react-router';
 import ActivityIcon from './ActivityIcon';
 import styles from '~/styles/modules/admin/LiveFeed.module.css';
 
 const KIND_LABEL = {
-  signup:        'New signup',
-  payment:       'Payment',
-  error:         'Error',
-  admin_action:  'Admin action',
+  signup:       'New signup',
+  payment:      'Payment',
+  error:        'Error',
+  admin_action: 'Admin action',
 };
 
 function timeAgo(iso) {
@@ -24,31 +25,15 @@ function timeAgo(iso) {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
-/**
- * Right-rail interleaved timeline. Source rows come from the loader
- * (initial server-side render); a fetcher polls /admin every 30s and
- * the parent reloads. The fetcher avoids a hard navigation - we use
- * useFetcher().load() against the current page so the loader's other
- * data refreshes too.
- *
- * Row click = drill-in via the row's Link. Whole row is the hit zone;
- * tap target is the full row height (44px+) on mobile.
- *
- * @param {object[]} initial      [{kind, created_at, summary, link, severity?}]
- * @param {string} [refreshPath]  defaults to current admin path; pass to override
- */
 export default function LiveFeed({ initial = [], refreshPath = '/admin' }) {
   const fetcher = useFetcher();
 
-  // The fetcher mirrors the route data. If the polled response carries
-  // `recentActivity`, replace the local list. Otherwise show the SSR list.
   const items = Array.isArray(fetcher.data?.recentActivity)
     ? fetcher.data.recentActivity
     : initial;
 
   useEffect(() => {
     const id = setInterval(() => {
-      // Only poll when tab is visible. Saves DB hits on backgrounded tabs.
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         fetcher.load(refreshPath);
       }

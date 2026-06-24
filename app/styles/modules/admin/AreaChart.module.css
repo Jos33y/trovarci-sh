@@ -2,7 +2,7 @@
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
+  padding: 20px;
 }
 
 .head {
@@ -115,7 +115,7 @@
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-md);
-  padding: var(--space-2xl);
+  padding: 40px 20px;
   text-align: center;
 }
 

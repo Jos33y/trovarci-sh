@@ -1,17 +1,6 @@
+// Line+area trace. Auto-scales to container; empty input renders a flat baseline strip.
 import styles from '~/styles/modules/admin/Sparkline.module.css';
 
-/**
- * Tiny line chart for KPI cards. Renders a 30-point trace with a soft
- * gradient fill underneath. Auto-scales to its container; the data array
- * is the only required prop. Empty/single-point input renders a flat line
- * at the baseline so cards don't collapse.
- *
- * @param {object} props
- * @param {{day: string, n: number}[]} props.data
- * @param {number} [props.width=120]
- * @param {number} [props.height=32]
- * @param {string} [props.tone='accent']  'accent' | 'success' | 'error'
- */
 export default function Sparkline({ data = [], width = 120, height = 32, tone = 'accent' }) {
   const pts = Array.isArray(data) ? data : [];
   const n = pts.length;
@@ -54,7 +43,7 @@ export default function Sparkline({ data = [], width = 120, height = 32, tone = 
     >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stopColor={stroke} stopOpacity="0.28" />
+          <stop offset="0%"   stopColor={stroke} stopOpacity="0.28" />
           <stop offset="100%" stopColor={stroke} stopOpacity="0" />
         </linearGradient>
       </defs>

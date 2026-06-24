@@ -12,7 +12,7 @@ import {
   TerminalIcon,
   DnsIcon,
   PhoneIcon,
-} from '~/components/icons';
+} from '~/components/icons'; 
 import styles from '~/styles/modules/layout/Header.module.css';
 
 const NAV_LINKS = [

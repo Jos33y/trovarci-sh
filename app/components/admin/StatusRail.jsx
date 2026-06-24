@@ -1,3 +1,4 @@
+// Top-of-admin health rail. Five service pills with dot + label + optional latency.
 import styles from '~/styles/modules/admin/StatusRail.module.css';
 
 const SERVICES = [
@@ -8,22 +9,6 @@ const SERVICES = [
   { key: 'worker',    label: 'Worker'    },
 ];
 
-/**
- * Top-of-admin health rail. Five service pills with a dot + label.
- *
- * Status values:
- *   ok    - green dot
- *   warn  - amber dot
- *   down  - red dot, dominates the eye
- *
- * Postgres reports real ping latency from the loader (cheap SELECT 1).
- * Resend / Cryptomus / Stripe / Worker are V2 - the loader returns 'ok'
- * placeholders today; the real probes will land in batch G3 when the
- * heartbeat tables ship. The UI is forward-compatible.
- *
- * @param {object} status
- *   { postgres: {status, latency_ms?}, resend: {status}, ... }
- */
 export default function StatusRail({ status }) {
   if (!status) return null;
 

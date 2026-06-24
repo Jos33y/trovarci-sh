@@ -1,16 +1,7 @@
+// Percent-change pill - sign-flipped arrow + tone. No inline label (caller's card label provides context).
 import styles from '~/styles/modules/admin/TrendBadge.module.css';
 
-/**
- * Small percent-change pill rendered next to the KPI value. Sign-flips
- * the arrow + colour automatically; "lower is better" metrics (e.g. errors)
- * pass `inverse` to flip success/error colours.
- *
- * @param {object} props
- * @param {number} props.deltaPct
- * @param {string} [props.label]   e.g. "vs prev 7d"
- * @param {boolean} [props.inverse]  true → negative is good (errors)
- */
-export default function TrendBadge({ deltaPct, label, inverse = false }) {
+export default function TrendBadge({ deltaPct, inverse = false }) {
   if (!Number.isFinite(deltaPct)) {
     return <span className={`${styles.badge} ${styles.neutral}`}>-</span>;
   }
@@ -28,7 +19,6 @@ export default function TrendBadge({ deltaPct, label, inverse = false }) {
     <span className={`${styles.badge} ${styles[tone]}`}>
       <span className={styles.arrow} aria-hidden="true">{arrow}</span>
       {sign}{deltaPct}%
-      {label ? <span className={styles.label}>{label}</span> : null}
     </span>
   );
 }

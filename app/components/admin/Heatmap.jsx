@@ -1,20 +1,10 @@
+// 7x24 activity heatmap. Empty cells render at baseline so the grid framework reads.
 import { useState, useMemo } from 'react';
 import styles from '~/styles/modules/admin/Heatmap.module.css';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-/**
- * 7×24 activity heatmap. Each cell colored by pageview count for that
- * day-of-week × hour combination. Postgres DOW: 0=Sun, 6=Sat.
- *
- * Desktop layout: 7 rows × 24 cols (compact horizontal).
- * Mobile layout (<640px): 24 rows × 7 cols (vertical, hours readable).
- *
- * Tap on mobile or hover on desktop shows the cell readout.
- *
- * @param {{dow: number, hour: number, n: number}[]} cells
- */
 export default function Heatmap({ cells = [] }) {
   const [active, setActive] = useState(null);
 
@@ -30,7 +20,7 @@ export default function Heatmap({ cells = [] }) {
     return { g, max: Math.max(1, max) };
   }, [cells]);
 
-  const cellOpacity = (n) => n === 0 ? 0 : 0.12 + (n / grid.max) * 0.78;
+  const cellOpacity = (n) => n === 0 ? 0 : 0.18 + (n / grid.max) * 0.72;
 
   const onCellEnter = (dow, hour, n) => setActive({ dow, hour, n });
   const onCellLeave = () => setActive(null);
@@ -48,7 +38,6 @@ export default function Heatmap({ cells = [] }) {
           : <span className={styles.readoutHint}>Hover or tap a cell</span>}
       </div>
 
-      {/* Desktop layout */}
       <div className={styles.desktopGrid}>
         <div className={styles.dayCol}>
           {DAYS.map((d) => <span key={d} className={styles.dayLabel}>{d}</span>)}
@@ -60,8 +49,8 @@ export default function Heatmap({ cells = [] }) {
                 <button
                   key={`${dow}-${hour}`}
                   type="button"
-                  className={styles.cell}
-                  style={{ background: `rgba(212, 168, 67, ${cellOpacity(n)})` }}
+                  className={`${styles.cell} ${n === 0 ? styles.cellEmpty : ''}`}
+                  style={n > 0 ? { background: `rgba(212, 168, 67, ${cellOpacity(n)})` } : undefined}
                   onMouseEnter={() => onCellEnter(dow, hour, n)}
                   onMouseLeave={onCellLeave}
                   onFocus={() => onCellEnter(dow, hour, n)}
@@ -77,7 +66,6 @@ export default function Heatmap({ cells = [] }) {
         </div>
       </div>
 
-      {/* Mobile layout (rotated: 24 rows × 7 cols) */}
       <div className={styles.mobileGrid}>
         <div className={styles.mobileDayRow}>
           <span className={styles.mobileSpacer} />
@@ -90,8 +78,8 @@ export default function Heatmap({ cells = [] }) {
               <button
                 key={`m-${dow}-${hour}`}
                 type="button"
-                className={styles.mobileCell}
-                style={{ background: `rgba(212, 168, 67, ${cellOpacity(row[hour])})` }}
+                className={`${styles.mobileCell} ${row[hour] === 0 ? styles.cellEmpty : ''}`}
+                style={row[hour] > 0 ? { background: `rgba(212, 168, 67, ${cellOpacity(row[hour])})` } : undefined}
                 onClick={() => onCellEnter(dow, hour, row[hour])}
                 aria-label={`${DAYS[dow]} ${hour}:00 - ${row[hour]} views`}
               />

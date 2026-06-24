@@ -1,3 +1,4 @@
+// Admin overview - clustered KPIs (Growth, Health & range), revenue + funnel, heatmap + countries, live feed rail.
 import { useLoaderData } from 'react-router';
 import {
   requireAdmin,
@@ -16,6 +17,10 @@ import Funnel from '~/components/admin/Funnel';
 import Heatmap from '~/components/admin/Heatmap';
 import CountryMap from '~/components/admin/CountryMap';
 import LiveFeed from '~/components/admin/LiveFeed';
+import {
+  GlobeIcon, UsersIcon, CardIcon, TagIcon,
+  AlertIcon, CheckIcon, LayersIcon,
+} from '~/components/icons';
 import styles from '~/styles/modules/routes/admin.module.css';
 
 export const meta = () => [
@@ -34,8 +39,7 @@ const FUNNEL_LABELS = {
   payment_confirmed:    'Paid',
 };
 
-// Slim the funnel to the 4 most load-bearing stages on the overview.
-// The full 8-stage funnel lives at /admin/analytics/funnel.
+// Overview shows the 4 load-bearing stages; full 8-stage view lives at /admin/analytics/funnel.
 const OVERVIEW_FUNNEL_KEYS = ['pageview', 'auth_signup_complete', 'checkout_click', 'payment_confirmed'];
 
 function formatCents(c) { return '$' + (c / 100).toFixed(2); }
@@ -43,16 +47,7 @@ function formatCents(c) { return '$' + (c / 100).toFixed(2); }
 export async function loader({ request }) {
   await requireAdmin(request);
 
-  const [
-    deltas,
-    sparks,
-    revenue,
-    overview,
-    funnel,
-    heatmap,
-    countries,
-    recentActivity,
-  ] = await Promise.all([
+  const [deltas, sparks, revenue, overview, funnel, heatmap, countries, recentActivity] = await Promise.all([
     adminKpiDeltas({ days: 7 }),
     adminKpiSparklines({ days: 30 }),
     adminRevenueSeries({ days: 30 }),
@@ -71,15 +66,16 @@ export default function AdminOverview() {
     deltas, sparks, revenue, overview, funnel, heatmap, countries, recentActivity,
   } = useLoaderData();
 
-  // Project the slim overview funnel from the full result.
   const funnelByType = new Map(funnel.map((s) => [s.event_type, s]));
-  const overviewFunnel = OVERVIEW_FUNNEL_KEYS
-    .map((k) => {
-      const row = funnelByType.get(k);
-      return row
-        ? { ...row, label: FUNNEL_LABELS[k] }
-        : { event_type: k, label: FUNNEL_LABELS[k], events: 0, sessions: 0, users: 0 };
-    });
+  const overviewFunnel = OVERVIEW_FUNNEL_KEYS.map((k) => {
+    const row = funnelByType.get(k);
+    return row
+      ? { ...row, label: FUNNEL_LABELS[k] }
+      : { event_type: k, label: FUNNEL_LABELS[k], events: 0, sessions: 0, users: 0 };
+  });
+
+  const errorsHigh = (deltas.errors?.current || 0) > 0;
+  const topCountry = overview.topCountries[0];
 
   return (
     <>
@@ -90,71 +86,85 @@ export default function AdminOverview() {
         </div>
       </header>
 
-      {/* KPI strip - 4 wide on desktop, 2 on tablet, 1 on phone */}
+      <div className={`${styles.kpiCluster} ${styles.kpiClusterFirst}`}>Growth</div>
       <div className={styles.kpiStrip}>
         <KPICard
           label="Pageviews (7d)"
           value={deltas.pageviews.current.toLocaleString()}
           hint={`${overview.totals.unique_sessions.toLocaleString()} sessions`}
+          icon={GlobeIcon}
           spark={sparks.pageviews}
-          delta={{ pct: deltas.pageviews.deltaPct, label: 'vs prev 7d' }}
+          delta={{ pct: deltas.pageviews.deltaPct }}
         />
         <KPICard
           label="Signups (7d)"
           value={deltas.signups.current.toLocaleString()}
           hint={`${overview.totals.unique_users.toLocaleString()} signed-in users`}
+          icon={UsersIcon}
           spark={sparks.signups}
-          delta={{ pct: deltas.signups.deltaPct, label: 'vs prev 7d' }}
+          delta={{ pct: deltas.signups.deltaPct }}
         />
         <KPICard
           label="Paid (7d)"
           value={deltas.payments.current.toLocaleString()}
           hint={`${deltas.payments.previous} prev period`}
+          icon={CardIcon}
           spark={sparks.payments}
-          delta={{ pct: deltas.payments.deltaPct, label: 'vs prev 7d' }}
+          delta={{ pct: deltas.payments.deltaPct }}
         />
         <KPICard
           label="Revenue (30d)"
           value={formatCents(deltas.revenue.current_cents)}
           hint={`${deltas.payments.current.toLocaleString()} confirmed payments`}
-          delta={{ pct: deltas.revenue.deltaPct, label: 'vs prev 30d' }}
-          tone="accent"
+          icon={TagIcon}
+          spark={sparks.payments}
+          delta={{ pct: deltas.revenue.deltaPct }}
+          variant="hero"
         />
       </div>
 
+      <div className={`${styles.kpiCluster} ${styles.kpiClusterAfter}`}>Health &amp; range</div>
       <div className={styles.kpiStrip}>
         <KPICard
           label="Unresolved errors"
           value={deltas.errors.current.toLocaleString()}
           hint="last 7d"
+          icon={AlertIcon}
           spark={sparks.errors}
-          delta={{ pct: deltas.errors.deltaPct, label: 'vs prev 7d', inverse: true }}
+          delta={{ pct: deltas.errors.deltaPct, inverse: true }}
           tone="error"
+          variant={errorsHigh ? 'alert' : 'default'}
         />
         <KPICard
           label="Active users"
-          value={deltas.activeUsers.current.toLocaleString()}
+          value={deltas.activeUsers?.current?.toLocaleString() || '0'}
           hint="verified, not deleted"
+          icon={CheckIcon}
+          delta={Number.isFinite(deltas.activeUsers?.deltaPct) ? { pct: deltas.activeUsers.deltaPct } : undefined}
         />
         <KPICard
           label="Open jobs"
-          value={deltas.openJobs.current.toLocaleString()}
+          value={deltas.openJobs?.current?.toLocaleString() || '0'}
           hint="pending or processing"
+          icon={LayersIcon}
+          delta={Number.isFinite(deltas.openJobs?.deltaPct) ? { pct: deltas.openJobs.deltaPct } : undefined}
         />
         <KPICard
           label="Top country (7d)"
-          value={overview.topCountries[0]?.country || '-'}
-          hint={overview.topCountries[0] ? `${overview.topCountries[0].n.toLocaleString()} pageviews` : 'no data'}
+          hint={topCountry ? `${topCountry.n.toLocaleString()} pageviews` : 'no data'}
+          variant="snapshot"
+          snapshot={topCountry?.country}
         />
       </div>
 
-      {/* Main content + live-feed rail */}
       <div className={styles.overviewLayout}>
         <div className={styles.overviewMain}>
           <AreaChart data={revenue} />
           <Funnel steps={overviewFunnel} />
-          <Heatmap cells={heatmap} />
-          <CountryMap rows={countries} limit={10} />
+          <div className={styles.twoColInner}>
+            <Heatmap cells={heatmap} />
+            <CountryMap rows={countries} limit={8} />
+          </div>
         </div>
 
         <LiveFeed initial={recentActivity} refreshPath="/admin" />

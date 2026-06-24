@@ -49,6 +49,39 @@ input, select, textarea {
   font-size: 16px;
 }
 
+/* ——— SCROLLBAR (site-wide) ——— */
+/* 10px thumb that floats inside the track via 2px transparent border. */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--trov-border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--trov-border);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background-color var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--trov-border-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* ——— LAYOUT UTILITIES ——— */
 
 .container {

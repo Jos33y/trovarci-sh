@@ -1,0 +1,45 @@
+/* Admin mobile top bar - hidden on desktop. */
+
+.topbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 48px;
+  padding: 0 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--trov-bg);
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.brand:hover { background: var(--trov-surface-light); }
+
+.hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--trov-text);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.hamburger:hover { background: var(--trov-surface-light); }
+
+@media (max-width: 900px) {
+  .topbar { display: flex; }
+}
