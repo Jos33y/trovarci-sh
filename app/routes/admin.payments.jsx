@@ -1,6 +1,8 @@
+// Admin payments list - filterable by gateway + status, click-through to detail.
 import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminListPayments } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
+import { CardIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin.module.css';
 
 export const meta = () => [
@@ -54,11 +56,11 @@ export default function AdminPayments() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Payments</h1>
-          <p className={styles.pageSubtitle}>Page {page} - {payments.length} {payments.length === 1 ? 'row' : 'rows'}</p>
+          <p className={styles.pageSubtitle}>Crypto + card transactions across both gateways</p>
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="gateway">Gateway</label>
           <select id="gateway" name="gateway" defaultValue={gateway} className={styles.filterSelect}>
@@ -76,77 +78,91 @@ export default function AdminPayments() {
 
       {payments.length === 0 ? (
         <EmptyState
-          variant="data"
+          icon={CardIcon}
           title="No payments match"
-          body="Adjust gateway or status filters, or wait for the first payment to land."
+          body="Adjust the gateway or status filters, or wait for the next payment to land."
         />
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>User</th>
-                <th>Gateway</th>
-                <th>Package</th>
-                <th className={styles['th--right']}>Credits</th>
-                <th className={styles['th--right']}>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((p) => (
-                <tr
-                  key={p.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/admin/payments/${p.id}`)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                      ev.preventDefault();
-                      navigate(`/admin/payments/${p.id}`);
-                    }
-                  }}
-                  role="link"
-                  tabIndex={0}
-                  aria-label={`Open payment ${p.id}`}
-                >
-                  <td data-label="When" className={styles['td--mono']}>{formatDate(p.created_at)}</td>
-                  <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
-                    {p.user_id
-                      ? <Link to={`/admin/users/${p.user_id}`} className={styles.rowLink}>{p.user_email || '-'}</Link>
-                      : <span className={styles['td--muted']}>-</span>}
-                  </td>
-                  <td data-label="Gateway">{p.gateway}</td>
-                  <td data-label="Package">{p.package_key || '-'}</td>
-                  <td data-label="Credits" className={styles['td--num']}>{p.credits.toLocaleString()}</td>
-                  <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
-                  <td data-label="Status">
-                    <span className={`${styles.badge} ${styles[STATUS_BADGE[p.status] || 'badgeNeutral']}`}>{p.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        <>
+          <div className={styles.tableCaption}>
+            <span><strong>{payments.length}</strong> {payments.length === 1 ? 'row' : 'rows'} · page <strong>{page}</strong></span>
+          </div>
 
-      <div className={styles.pagination}>
-        <span className={styles.pageNote}>Page {page}</span>
-        <div className={styles['stack--sm']} style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-          {page > 1 ? (
-            <Link
-              to={`?${new URLSearchParams({ gateway, status, page: String(page - 1) }).toString()}`}
-              className={`${styles.formButton} ${styles['formButton--ghost']}`}
-            >Previous</Link>
-          ) : null}
-          {payments.length === 50 ? (
-            <Link
-              to={`?${new URLSearchParams({ gateway, status, page: String(page + 1) }).toString()}`}
-              className={`${styles.formButton} ${styles['formButton--ghost']}`}
-            >Next</Link>
-          ) : null}
-        </div>
-      </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <colgroup>
+                <col style={{ width: 160 }} />
+                <col />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 90 }} />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 110 }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>User</th>
+                  <th>Gateway</th>
+                  <th>Package</th>
+                  <th className={styles['th--right']}>Credits</th>
+                  <th className={styles['th--right']}>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr
+                    key={p.id}
+                    onClick={() => navigate(`/admin/payments/${p.id}`)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        navigate(`/admin/payments/${p.id}`);
+                      }
+                    }}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={`Open payment ${p.id}`}
+                  >
+                    <td data-label="When" className={styles['td--mono']}>{formatDate(p.created_at)}</td>
+                    <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
+                      {p.user_id
+                        ? <Link to={`/admin/users/${p.user_id}`} className={styles.rowLink}>{p.user_email || '-'}</Link>
+                        : <span className={styles['td--muted']}>-</span>}
+                    </td>
+                    <td data-label="Gateway">{p.gateway}</td>
+                    <td data-label="Package">{p.package_key || '-'}</td>
+                    <td data-label="Credits" className={styles['td--num']}>{p.credits.toLocaleString()}</td>
+                    <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
+                    <td data-label="Status">
+                      <span className={`${styles.badge} ${styles[STATUS_BADGE[p.status] || 'badgeNeutral']}`}>{p.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.pagination}>
+            <span className={styles.pageNote}>Page {page}</span>
+            <div className={styles.paginationActions}>
+              {page > 1 ? (
+                <Link
+                  to={`?${new URLSearchParams({ gateway, status, page: String(page - 1) }).toString()}`}
+                  className={`${styles.formButton} ${styles['formButton--ghost']}`}
+                >Previous</Link>
+              ) : null}
+              {payments.length === 50 ? (
+                <Link
+                  to={`?${new URLSearchParams({ gateway, status, page: String(page + 1) }).toString()}`}
+                  className={`${styles.formButton} ${styles['formButton--ghost']}`}
+                >Next</Link>
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

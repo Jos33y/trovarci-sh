@@ -1,5 +1,4 @@
-// /admin/messages - contact_messages list with inline drawer for triage. Status update inline.
-
+// Admin contact messages list - filterable, click-through opens a triage drawer.
 import { useEffect, useState } from 'react';
 import { Form, useLoaderData, useRevalidator } from 'react-router';
 import { requireAdmin, adminListContactMessages } from '~/utils/admin.server';
@@ -174,11 +173,11 @@ export default function AdminMessages() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Messages</h1>
-          <p className={styles.pageSubtitle}>Page {page} - {messages.length} {messages.length === 1 ? 'message' : 'messages'}</p>
+          <p className={styles.pageSubtitle}>Contact form submissions and triage</p>
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="status">Status</label>
           <select id="status" name="status" defaultValue={status} className={styles.filterSelect}>
@@ -191,9 +190,16 @@ export default function AdminMessages() {
             {SUBJECT_OPTS.map((v) => <option key={v} value={v}>{v ? SUBJECT_LABEL[v] : 'all'}</option>)}
           </select>
         </div>
-        <div className={`${styles.filterField} ${styles['filterField--grow']}`}>
-          <label className={styles.filterLabel} htmlFor="q">Search</label>
-          <input id="q" name="q" type="text" placeholder="email, name, or content" defaultValue={q} className={styles.filterInput} />
+        <div className={styles.toolbarSearch}>
+          <input
+            id="q"
+            name="q"
+            type="search"
+            placeholder="Search email, name, or content"
+            defaultValue={q}
+            className={styles.filterInput}
+            aria-label="Search messages"
+          />
         </div>
         <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
@@ -205,61 +211,74 @@ export default function AdminMessages() {
           body="Either nobody has sent anything, or your filters are too narrow."
         />
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Subject</th>
-                <th>From</th>
-                <th>Message</th>
-                <th>Source</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {messages.map((m) => (
-                <tr
-                  key={m.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => openDrawer(m.id)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                      ev.preventDefault();
-                      openDrawer(m.id);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Open message from ${m.email}`}
-                >
-                  <td data-label="When" className={styles['td--muted']}>{timeAgo(m.created_at)}</td>
-                  <td data-label="Subject" className={styles['td--mono']}>{SUBJECT_LABEL[m.subject] || m.subject}</td>
-                  <td data-label="From">
-                    <div style={{ fontWeight: 600 }}>{m.name}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--trov-text-muted)' }}>{m.email}</div>
-                  </td>
-                  <td data-label="Message" style={{ maxWidth: 320 }}>
-                    {m.message_preview}{m.message_length > 120 ? '...' : ''}
-                  </td>
-                  <td data-label="Source" className={styles['td--mono']}>{m.source}</td>
-                  <td data-label="Status">
-                    <span className={`${styles.badge} ${styles[STATUS_TONE_LIST[m.status] || 'badgeNeutral']}`}>
-                      {m.status}
-                    </span>
-                  </td>
+        <>
+          <div className={styles.tableCaption}>
+            <span><strong>{messages.length}</strong> {messages.length === 1 ? 'message' : 'messages'} · page <strong>{page}</strong></span>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <colgroup>
+                <col style={{ width: 100 }} />
+                <col style={{ width: 110 }} />
+                <col style={{ width: 220 }} />
+                <col />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 100 }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Subject</th>
+                  <th>From</th>
+                  <th>Message</th>
+                  <th>Source</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {messages.map((m) => (
+                  <tr
+                    key={m.id}
+                    onClick={() => openDrawer(m.id)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        openDrawer(m.id);
+                      }
+                    }}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={`Open message from ${m.email}`}
+                  >
+                    <td data-label="When" className={styles['td--muted']}>{timeAgo(m.created_at)}</td>
+                    <td data-label="Subject" className={styles['td--mono']}>{SUBJECT_LABEL[m.subject] || m.subject}</td>
+                    <td data-label="From">
+                      <div className={styles.fromName}>{m.name}</div>
+                      <div className={styles.fromEmail}>{m.email}</div>
+                    </td>
+                    <td data-label="Message">
+                      <span className={styles.preview}>
+                        {m.message_preview}{m.message_length > 120 ? '...' : ''}
+                      </span>
+                    </td>
+                    <td data-label="Source" className={styles['td--mono']}>{m.source}</td>
+                    <td data-label="Status">
+                      <span className={`${styles.badge} ${styles[STATUS_TONE_LIST[m.status] || 'badgeNeutral']}`}>
+                        {m.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.pagination}>
+            <span className={styles.pageNote}>Page {page}</span>
+          </div>
+        </>
       )}
-
-      <div className={styles.pagination}>
-        <span className={styles.pageNote}>Page {page}</span>
-      </div>
-
-      {/* ─── Drawer ─── */}
 
       <div
         className={`${drawer.backdrop} ${openId != null ? drawer.backdropOpen : ''}`}
@@ -345,7 +364,7 @@ export default function AdminMessages() {
                   {detail.user_agent && (
                     <>
                       <div className={drawer.kvKey}>UA</div>
-                      <div className={drawer.kvValMono} style={{ fontSize: 11 }}>{detail.user_agent}</div>
+                      <div className={drawer.kvValMono}>{detail.user_agent}</div>
                     </>
                   )}
                 </div>
@@ -362,8 +381,7 @@ export default function AdminMessages() {
                 id="msg-status"
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className={drawer.formTextarea}
-                style={{ minHeight: 'auto', padding: '9px 12px' }}
+                className={drawer.formSelect}
               >
                 <option value="new">New</option>
                 <option value="read">Read</option>

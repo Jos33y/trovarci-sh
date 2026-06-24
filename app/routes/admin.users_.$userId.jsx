@@ -1,3 +1,4 @@
+// Admin user detail - KPI summary, nested tables, credit adjustment form, audit log.
 import { useState } from 'react';
 import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect } from 'react-router';
 import {
@@ -11,6 +12,10 @@ import {
 import { logAdminAction } from '~/utils/adminActions.server';
 import { grantCredits } from '~/lib/credits.server';
 import EmptyState from '~/components/admin/EmptyState';
+import KPICard from '~/components/admin/KPICard';
+import {
+  CardIcon, TagIcon, LayersIcon, VerifyIcon, ShieldIcon,
+} from '~/components/icons';
 import styles from '~/styles/modules/routes/admin.module.css';
 
 export const meta = ({ data }) => [
@@ -155,26 +160,31 @@ export default function AdminUserDetail() {
       </header>
 
       <div className={styles.kpiStrip}>
-        <div className={styles.panel}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--trov-text-muted)' }}>Current balance</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-accent)', marginTop: 8 }}>{user.credits_balance.toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)', marginTop: 4 }}>credits</div>
-        </div>
-        <div className={styles.panel}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--trov-text-muted)' }}>Lifetime purchased</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-text)', marginTop: 8 }}>{user.lifetime_purchased.toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)', marginTop: 4 }}>+{user.lifetime_granted.toLocaleString()} granted</div>
-        </div>
-        <div className={styles.panel}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--trov-text-muted)' }}>Lifetime used</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-text)', marginTop: 8 }}>{user.lifetime_used.toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)', marginTop: 4 }}>{user.lifetime_refunded.toLocaleString()} refunded</div>
-        </div>
-        <div className={styles.panel}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--trov-text-muted)' }}>Revenue</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-text)', marginTop: 8 }}>{formatCents(user.revenue_usd_cents)}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)', marginTop: 4 }}>{user.payments_confirmed} confirmed</div>
-        </div>
+        <KPICard
+          label="Current balance"
+          value={user.credits_balance.toLocaleString()}
+          hint="credits"
+          icon={CardIcon}
+        />
+        <KPICard
+          label="Lifetime purchased"
+          value={user.lifetime_purchased.toLocaleString()}
+          hint={`+${user.lifetime_granted.toLocaleString()} granted`}
+          icon={TagIcon}
+        />
+        <KPICard
+          label="Lifetime used"
+          value={user.lifetime_used.toLocaleString()}
+          hint={`${user.lifetime_refunded.toLocaleString()} refunded`}
+          icon={LayersIcon}
+        />
+        <KPICard
+          label="Revenue"
+          value={formatCents(user.revenue_usd_cents)}
+          hint={`${user.payments_confirmed} confirmed`}
+          icon={TagIcon}
+          variant="hero"
+        />
       </div>
 
       <div className={styles.detailGrid}>
@@ -186,9 +196,19 @@ export default function AdminUserDetail() {
               <span className={styles.panelSub}>{transactions.length} of {user.total_transactions}</span>
             </header>
             {transactions.length === 0 ? (
-              <p className={styles.muted}>No transactions yet.</p>
+              <EmptyState
+                title="No transactions yet"
+                body="Credit movements will appear here once this user buys, uses, or is granted credits."
+              />
             ) : (
               <table className={styles.table}>
+                <colgroup>
+                  <col style={{ width: 160 }} />
+                  <col style={{ width: 110 }} />
+                  <col style={{ width: 90 }} />
+                  <col style={{ width: 100 }} />
+                  <col />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>When</th>
@@ -209,8 +229,8 @@ export default function AdminUserDetail() {
                         {t.delta > 0 ? '+' : ''}{t.delta.toLocaleString()}
                       </td>
                       <td data-label="Balance" className={styles['td--num']}>{t.balance_after.toLocaleString()}</td>
-                      <td data-label="Reference" className={styles['td--mono']} style={{ color: 'var(--trov-text-muted)' }}>
-                        {t.reference_id ? t.reference_id.slice(0, 32) : '-'}
+                      <td data-label="Reference" className={styles.refCell} title={t.reference_id || ''}>
+                        {t.reference_id || '-'}
                       </td>
                     </tr>
                   ))}
@@ -226,9 +246,20 @@ export default function AdminUserDetail() {
               <span className={styles.panelSub}>{payments.length}</span>
             </header>
             {payments.length === 0 ? (
-              <p className={styles.muted}>No payments.</p>
+              <EmptyState
+                icon={CardIcon}
+                title="No payments"
+                body="Charges and refunds will appear here once this user pays."
+              />
             ) : (
               <table className={styles.table}>
+                <colgroup>
+                  <col style={{ width: 180 }} />
+                  <col style={{ width: 100 }} />
+                  <col />
+                  <col style={{ width: 100 }} />
+                  <col style={{ width: 120 }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>When</th>
@@ -264,9 +295,20 @@ export default function AdminUserDetail() {
               <span className={styles.panelSub}>{jobs.length}</span>
             </header>
             {jobs.length === 0 ? (
-              <p className={styles.muted}>No jobs.</p>
+              <EmptyState
+                icon={LayersIcon}
+                title="No jobs"
+                body="Bulk email or phone verification runs will appear here."
+              />
             ) : (
               <table className={styles.table}>
+                <colgroup>
+                  <col style={{ width: 180 }} />
+                  <col />
+                  <col style={{ width: 120 }} />
+                  <col style={{ width: 100 }} />
+                  <col style={{ width: 120 }} />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>When</th>
@@ -309,7 +351,6 @@ export default function AdminUserDetail() {
                   <button
                     key={opt}
                     type="button"
-                    name="intent"
                     onClick={() => setIntent(opt)}
                     className={`${styles.intentBtn} ${intent === opt ? styles.intentBtnActive : ''}`}
                   >
@@ -363,7 +404,11 @@ export default function AdminUserDetail() {
               <span className={styles.panelSub}>{actions.length}</span>
             </header>
             {actions.length === 0 ? (
-              <p className={styles.muted}>No admin actions on this user.</p>
+              <EmptyState
+                icon={ShieldIcon}
+                title="No admin actions"
+                body="Grants, refunds, and other admin operations on this user will appear here."
+              />
             ) : (
               <ul className={styles.actionList}>
                 {actions.map((a) => (

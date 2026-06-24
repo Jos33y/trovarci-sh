@@ -1,6 +1,8 @@
+// Admin verification jobs list - filterable by kind + status, click-through to detail.
 import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminListJobs } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
+import { LayersIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin.module.css';
 
 export const meta = () => [
@@ -57,11 +59,11 @@ export default function AdminJobs() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Verification jobs</h1>
-          <p className={styles.pageSubtitle}>Page {page} - {jobs.length} {jobs.length === 1 ? 'row' : 'rows'}</p>
+          <p className={styles.pageSubtitle}>Bulk email and phone verification runs</p>
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="kind">Kind</label>
           <select id="kind" name="kind" defaultValue={kind} className={styles.filterSelect}>
@@ -79,77 +81,90 @@ export default function AdminJobs() {
 
       {jobs.length === 0 ? (
         <EmptyState
-          variant="data"
+          icon={LayersIcon}
           title="No jobs match"
-          body="Adjust kind or status filters, or wait for the next bulk verification run."
+          body="Adjust the kind or status filters, or wait for the next bulk verification run."
         />
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>User</th>
-                <th>Kind</th>
-                <th>Progress</th>
-                <th className={styles['th--right']}>Credits</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((j) => {
-                const pct = progressPct(j.processed_items, j.total_items);
-                return (
-                  <tr
-                    key={j.id}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => navigate(`/admin/jobs/${j.id}`)}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        navigate(`/admin/jobs/${j.id}`);
-                      }
-                    }}
-                    role="link"
-                    tabIndex={0}
-                    aria-label={`Open job ${j.id}`}
-                  >
-                    <td data-label="When" className={styles['td--mono']}>{formatDate(j.created_at)}</td>
-                    <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
-                      {j.user_id
-                        ? <Link to={`/admin/users/${j.user_id}`} className={styles.rowLink}>{j.user_email || '-'}</Link>
-                        : <span className={styles['td--muted']}>-</span>}
-                    </td>
-                    <td data-label="Kind">{j.kind}</td>
-                    <td data-label="Progress" className={styles['td--mono']}>
-                      {j.processed_items.toLocaleString()} / {j.total_items.toLocaleString()}
-                      <span style={{ color: 'var(--trov-text-muted)', marginLeft: 6 }}>· {pct}%</span>
-                    </td>
-                    <td data-label="Credits" className={styles['td--num']}>{j.credits_charged.toLocaleString()}</td>
-                    <td data-label="Status">
-                      <span className={`${styles.badge} ${styles[STATUS_BADGE[j.status] || 'badgeNeutral']}`}>{j.status}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+        <>
+          <div className={styles.tableCaption}>
+            <span><strong>{jobs.length}</strong> {jobs.length === 1 ? 'row' : 'rows'} · page <strong>{page}</strong></span>
+          </div>
 
-      <div className={styles.pagination}>
-        <span className={styles.pageNote}>Page {page}</span>
-        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-          {page > 1 ? (
-            <Link to={`?${new URLSearchParams({ kind, status, page: String(page - 1) }).toString()}`}
-                  className={`${styles.formButton} ${styles['formButton--ghost']}`}>Previous</Link>
-          ) : null}
-          {jobs.length === 50 ? (
-            <Link to={`?${new URLSearchParams({ kind, status, page: String(page + 1) }).toString()}`}
-                  className={`${styles.formButton} ${styles['formButton--ghost']}`}>Next</Link>
-          ) : null}
-        </div>
-      </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <colgroup>
+                <col style={{ width: 160 }} />
+                <col />
+                <col style={{ width: 80 }} />
+                <col style={{ width: 200 }} />
+                <col style={{ width: 90 }} />
+                <col style={{ width: 110 }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>User</th>
+                  <th>Kind</th>
+                  <th>Progress</th>
+                  <th className={styles['th--right']}>Credits</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((j) => {
+                  const pct = progressPct(j.processed_items, j.total_items);
+                  return (
+                    <tr
+                      key={j.id}
+                      onClick={() => navigate(`/admin/jobs/${j.id}`)}
+                      onKeyDown={(ev) => {
+                        if (ev.key === 'Enter' || ev.key === ' ') {
+                          ev.preventDefault();
+                          navigate(`/admin/jobs/${j.id}`);
+                        }
+                      }}
+                      role="link"
+                      tabIndex={0}
+                      aria-label={`Open job ${j.id}`}
+                    >
+                      <td data-label="When" className={styles['td--mono']}>{formatDate(j.created_at)}</td>
+                      <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
+                        {j.user_id
+                          ? <Link to={`/admin/users/${j.user_id}`} className={styles.rowLink}>{j.user_email || '-'}</Link>
+                          : <span className={styles['td--muted']}>-</span>}
+                      </td>
+                      <td data-label="Kind">{j.kind}</td>
+                      <td data-label="Progress" className={styles['td--mono']}>
+                        <span>{j.processed_items.toLocaleString()} / {j.total_items.toLocaleString()}</span>
+                        <span className={styles.progressNote}>· {pct}%</span>
+                      </td>
+                      <td data-label="Credits" className={styles['td--num']}>{j.credits_charged.toLocaleString()}</td>
+                      <td data-label="Status">
+                        <span className={`${styles.badge} ${styles[STATUS_BADGE[j.status] || 'badgeNeutral']}`}>{j.status}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.pagination}>
+            <span className={styles.pageNote}>Page {page}</span>
+            <div className={styles.paginationActions}>
+              {page > 1 ? (
+                <Link to={`?${new URLSearchParams({ kind, status, page: String(page - 1) }).toString()}`}
+                      className={`${styles.formButton} ${styles['formButton--ghost']}`}>Previous</Link>
+              ) : null}
+              {jobs.length === 50 ? (
+                <Link to={`?${new URLSearchParams({ kind, status, page: String(page + 1) }).toString()}`}
+                      className={`${styles.formButton} ${styles['formButton--ghost']}`}>Next</Link>
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

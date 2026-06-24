@@ -1,3 +1,4 @@
+// Admin job detail - progress bar, kvList of run stats, force-cancel form.
 import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect } from 'react-router';
 import { requireAdmin, adminGetJobDetail } from '~/utils/admin.server';
 import { logAdminAction } from '~/utils/adminActions.server';
@@ -113,20 +114,11 @@ export default function AdminJobDetail() {
               <h2 className={styles.panelTitle}>Progress</h2>
               <span className={styles.panelSub}>{pct}%</span>
             </header>
-            <div style={{
-              height: 8,
-              background: 'var(--trov-surface-light)',
-              borderRadius: 999,
-              overflow: 'hidden',
-              marginBottom: 'var(--space-md)',
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${pct}%`,
-                background: job.status === 'failed' ? 'var(--trov-error)' : 'var(--trov-accent)',
-                borderRadius: 999,
-                transition: 'width var(--transition-normal)',
-              }} />
+            <div className={styles.progressBar}>
+              <div
+                className={`${styles.progressBarFill} ${job.status === 'failed' ? styles['progressBarFill--error'] : ''}`}
+                style={{ width: `${pct}%` }}
+              />
             </div>
             <div className={styles.kvList}>
               <div className={styles.kvKey}>Items</div>
@@ -154,18 +146,7 @@ export default function AdminJobDetail() {
               <header className={styles.panelHead}>
                 <h2 className={styles.panelTitle}>Metadata</h2>
               </header>
-              <pre style={{
-                background: 'var(--trov-bg)',
-                border: '1px solid var(--trov-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: 'var(--space-md)',
-                margin: 0,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                color: 'var(--trov-text-secondary)',
-                overflow: 'auto',
-                maxHeight: 360,
-              }}>{JSON.stringify(meta, null, 2)}</pre>
+              <pre className={styles.codeBlock}>{JSON.stringify(meta, null, 2)}</pre>
             </section>
           ) : null}
         </div>
@@ -176,13 +157,13 @@ export default function AdminJobDetail() {
               <h2 className={styles.panelTitle}>User</h2>
             </header>
             {job.user_id ? (
-              <>
-                <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: 13, color: 'var(--trov-text)' }}>{job.user_email || '-'}</p>
-                <p style={{ margin: '0 0 var(--space-md) 0', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--trov-text-muted)', wordBreak: 'break-all' }}>{job.user_id}</p>
+              <div className={styles.userCard}>
+                <p className={styles.userCardEmail}>{job.user_email || '-'}</p>
+                <p className={styles.userCardId}>{job.user_id}</p>
                 <Link to={`/admin/users/${job.user_id}`} className={`${styles.formButton} ${styles['formButton--ghost']}`}>
                   View user
                 </Link>
-              </>
+              </div>
             ) : (
               <p className={styles.muted}>User deleted.</p>
             )}

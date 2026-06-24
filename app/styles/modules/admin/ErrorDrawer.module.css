@@ -283,6 +283,30 @@
   box-shadow: 0 0 0 3px var(--trov-glow);
 }
 
+.formSelect {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  background-color: var(--trov-surface);
+  border: 1.5px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  padding: 9px 32px 9px 12px;
+  color: var(--trov-text);
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 5L6 8L9 5' stroke='%23A1A1AA' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.formSelect:focus {
+  outline: none;
+  border-color: var(--trov-accent);
+  box-shadow: 0 0 0 3px var(--trov-glow);
+}
+
 .actions {
   display: flex;
   gap: 8px;

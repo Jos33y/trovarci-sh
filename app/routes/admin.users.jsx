@@ -1,4 +1,5 @@
-import { Link, Form, useLoaderData, useNavigate } from 'react-router';
+// Admin users list - searchable, click-through to detail.
+import { Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminSearchUsers } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -12,7 +13,6 @@ export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
   const q = url.searchParams.get('q') ?? '';
-
   const users = await adminSearchUsers({ q, limit: 100 });
   return { users, q };
 }
@@ -36,20 +36,20 @@ export default function AdminUsers() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Users</h1>
-          <p className={styles.pageSubtitle}>{users.length} {users.length === 1 ? 'result' : 'results'}{q ? ` for "${q}"` : ''}</p>
+          <p className={styles.pageSubtitle}>All registered accounts</p>
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
-        <div className={`${styles.filterField} ${styles['filterField--grow']}`}>
-          <label className={styles.filterLabel} htmlFor="q">Search</label>
+      <Form method="get" className={styles.tableToolbar}>
+        <div className={styles.toolbarSearch}>
           <input
             id="q"
             name="q"
-            type="text"
-            placeholder="email or user ID"
+            type="search"
+            placeholder="Search by email or user ID"
             defaultValue={q}
             className={styles.filterInput}
+            aria-label="Search users"
           />
         </div>
         <button type="submit" className={styles.formButton}>Search</button>
@@ -62,59 +62,72 @@ export default function AdminUsers() {
           body={q ? 'Try a partial email or paste a user UUID.' : 'No accounts have been created yet.'}
         />
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Verified</th>
-                <th className={styles['th--right']}>Credits</th>
-                <th>Joined</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr
-                  key={u.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/admin/users/${u.id}`)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                      ev.preventDefault();
-                      navigate(`/admin/users/${u.id}`);
-                    }
-                  }}
-                  role="link"
-                  tabIndex={0}
-                  aria-label={`Open user ${u.email}`}
-                >
-                  <td data-label="Email">{u.email}</td>
-                  <td data-label="Role">
-                    {u.role === 'admin'
-                      ? <span className={`${styles.badge} ${styles.badgeAccent}`}>Admin</span>
-                      : <span className={`${styles.badge} ${styles.badgeNeutral}`}>User</span>}
-                  </td>
-                  <td data-label="Verified">
-                    {u.email_verified_at
-                      ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>Verified</span>
-                      : <span className={`${styles.badge} ${styles.badgeWarning}`}>Unverified</span>}
-                  </td>
-                  <td data-label="Credits" className={styles['td--num']}>
-                    {u.credits_balance.toLocaleString()}
-                  </td>
-                  <td data-label="Joined" className={styles['td--muted']}>{timeAgo(u.created_at)}</td>
-                  <td data-label="Status">
-                    {u.deleted_at
-                      ? <span className={`${styles.badge} ${styles.badgeError}`}>Deleted</span>
-                      : <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active</span>}
-                  </td>
+        <>
+          <div className={styles.tableCaption}>
+            <span><strong>{users.length}</strong> {users.length === 1 ? 'result' : 'results'}{q ? <> for <strong>"{q}"</strong></> : null}</span>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <colgroup>
+                <col />
+                <col style={{ width: 100 }} />
+                <col style={{ width: 120 }} />
+                <col style={{ width: 110 }} />
+                <col style={{ width: 140 }} />
+                <col style={{ width: 110 }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Verified</th>
+                  <th className={styles['th--right']}>Credits</th>
+                  <th>Joined</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        navigate(`/admin/users/${u.id}`);
+                      }
+                    }}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={`Open user ${u.email}`}
+                  >
+                    <td data-label="Email">{u.email}</td>
+                    <td data-label="Role">
+                      {u.role === 'admin'
+                        ? <span className={`${styles.badge} ${styles.badgeAccent}`}>Admin</span>
+                        : <span className={`${styles.badge} ${styles.badgeNeutral}`}>User</span>}
+                    </td>
+                    <td data-label="Verified">
+                      {u.email_verified_at
+                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>Verified</span>
+                        : <span className={`${styles.badge} ${styles.badgeWarning}`}>Unverified</span>}
+                    </td>
+                    <td data-label="Credits" className={styles['td--num']}>
+                      {u.credits_balance.toLocaleString()}
+                    </td>
+                    <td data-label="Joined" className={styles['td--muted']}>{timeAgo(u.created_at)}</td>
+                    <td data-label="Status">
+                      {u.deleted_at
+                        ? <span className={`${styles.badge} ${styles.badgeError}`}>Deleted</span>
+                        : <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </>
   );

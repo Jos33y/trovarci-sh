@@ -1,3 +1,4 @@
+// Admin payment detail - kvList of payment fields, metadata code block, linked user side rail.
 import { Link, useLoaderData } from 'react-router';
 import { requireAdmin, adminGetPaymentDetail } from '~/utils/admin.server';
 import styles from '~/styles/modules/routes/admin.module.css';
@@ -88,7 +89,7 @@ export default function AdminPaymentDetail() {
               <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{payment.credits.toLocaleString()}</div>
 
               <div className={styles.kvKey}>Amount</div>
-              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`} style={{ color: 'var(--trov-accent)', fontWeight: 600 }}>
+              <div className={`${styles.kvValue} ${styles['kvValue--mono']} ${styles['kvValue--accent']}`}>
                 {formatCents(payment.amount_usd_cents)}
               </div>
 
@@ -113,18 +114,7 @@ export default function AdminPaymentDetail() {
               <header className={styles.panelHead}>
                 <h2 className={styles.panelTitle}>Metadata</h2>
               </header>
-              <pre style={{
-                background: 'var(--trov-bg)',
-                border: '1px solid var(--trov-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: 'var(--space-md)',
-                margin: 0,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                color: 'var(--trov-text-secondary)',
-                overflow: 'auto',
-                maxHeight: 360,
-              }}>{JSON.stringify(meta, null, 2)}</pre>
+              <pre className={styles.codeBlock}>{JSON.stringify(meta, null, 2)}</pre>
             </section>
           ) : null}
         </div>
@@ -135,13 +125,13 @@ export default function AdminPaymentDetail() {
               <h2 className={styles.panelTitle}>User</h2>
             </header>
             {payment.user_id ? (
-              <>
-                <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: 13, color: 'var(--trov-text)' }}>{payment.user_email || '-'}</p>
-                <p style={{ margin: '0 0 var(--space-md) 0', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--trov-text-muted)', wordBreak: 'break-all' }}>{payment.user_id}</p>
+              <div className={styles.userCard}>
+                <p className={styles.userCardEmail}>{payment.user_email || '-'}</p>
+                <p className={styles.userCardId}>{payment.user_id}</p>
                 <Link to={`/admin/users/${payment.user_id}`} className={`${styles.formButton} ${styles['formButton--ghost']}`}>
                   View user
                 </Link>
-              </>
+              </div>
             ) : (
               <p className={styles.muted}>User deleted or anonymous.</p>
             )}
