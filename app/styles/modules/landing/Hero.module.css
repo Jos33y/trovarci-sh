@@ -1,33 +1,13 @@
-/* ——— HERO SECTION ——— */
+/* Hero section - landing page above-the-fold */
 
 .hero {
-  padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
+  padding: 48px 0 32px;
   overflow: hidden;
 }
 
-/*
- * BACKGROUND SYSTEM — 2 structural layers:
- *
- *   .heroGrid  (z-index: 0) — fine coordinate grid lines
- *   .heroNoise (z-index: 1) — SVG grain texture
- *   .inner     (z-index: 2) — content
- *
- * No radial gradients. No linear gradients. No glow.
- * The grid creates structure. The noise prevents flatness.
- * The mockup and typography carry everything else.
- */
+/* Background layers */
 
-/* ——— LAYER 1: GRID LINES ——— */
-/*
- * Fine 1px lines at 64px intervals — like graph paper
- * or a coordinate system. Feels technical, engineered.
- * Masked so lines are visible center and fade to nothing
- * at edges. Gold-tinted at very low opacity.
- *
- * Cloudflare and Vercel both use this pattern.
- * The grid says "precision" without saying anything.
- */
 .heroGrid {
   position: absolute;
   inset: 0;
@@ -48,24 +28,10 @@
       transparent 1px,
       transparent 64px
     );
-  -webkit-mask-image: radial-gradient(
-    ellipse 70% 70% at 50% 50%,
-    black 0%,
-    transparent 70%
-  );
-  mask-image: radial-gradient(
-    ellipse 70% 70% at 50% 50%,
-    black 0%,
-    transparent 70%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 90% 50% at 50% 30%, black 0%, transparent 70%);
+  mask-image: radial-gradient(ellipse 90% 50% at 50% 30%, black 0%, transparent 70%);
 }
 
-/* ——— LAYER 2: NOISE GRAIN ——— */
-/*
- * SVG feTurbulence noise. Organic texture that prevents
- * the perfectly-smooth digital feel. At 3% opacity
- * it's felt, not seen. Keeps surfaces from feeling flat.
- */
 .heroNoise {
   position: absolute;
   inset: 0;
@@ -77,28 +43,30 @@
   background-size: 300px 300px;
 }
 
-/* ——— CONTENT LAYER ——— */
+/* Content layer */
 
 .inner {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 5fr 7fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-2xl);
+  gap: 40px;
 }
 
-/* ——— LEFT COLUMN ——— */
+/* Left column */
 
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
 .headline {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  font-size: clamp(2rem, 9vw, 3.75rem);
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -106,45 +74,48 @@
 }
 
 .sub {
-  margin-top: var(--space-lg);
-  max-width: 420px;
+  margin-top: 16px;
+  max-width: 480px;
   color: var(--trov-text-secondary);
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   font-weight: 400;
 }
 
 .ctas {
   display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-xl);
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
 }
 
 .launch {
-  margin-top: var(--space-lg);
+  margin-top: 16px;
   color: var(--trov-text-muted);
   font-family: var(--font-mono);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* ——— RIGHT COLUMN ——— */
+/* Right column */
 
 .visual {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  width: 100%;
 }
 
-/* ——— MOCKUP WRAPPER ——— */
+/* Mockup wrapper */
 
 .mockupWrap {
   position: relative;
   width: 100%;
-  max-width: 520px;
+  max-width: 480px;
 }
-
-/* ——— MOCKUP WINDOW ——— */
 
 .mockup {
   position: relative;
@@ -157,12 +128,13 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Title bar */
+/* Mockup title bar */
+
 .mockupBar {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--trov-border);
   background: var(--trov-bg);
 }
@@ -193,26 +165,28 @@
   letter-spacing: 0.02em;
 }
 
-/* Body */
+/* Mockup body */
+
 .mockupBody {
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 16px;
 }
 
-/* ——— CAMPAIGN HEADER ——— */
+/* Campaign header */
 
 .campaignHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
 }
 
 .campaignName {
-  font-family: var(--font-display);
-  font-size: 1.0625rem;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--trov-text);
   line-height: 1.2;
 }
@@ -221,15 +195,14 @@
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--trov-text-muted);
-  margin-top: var(--space-xs);
+  margin-top: 4px;
 }
 
-/* Status badge with live pulsing dot */
 .statusBadge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 3px 8px;
   background: var(--trov-glow);
   color: var(--trov-accent);
   font-family: var(--font-mono);
@@ -238,6 +211,7 @@
   border-radius: var(--radius-sm);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .statusDot {
@@ -253,18 +227,18 @@
   50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(212, 168, 67, 0); }
 }
 
-/* ——— PROGRESS BAR ——— */
+/* Progress */
 
 .progressSection {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 8px;
 }
 
 .progressBar {
-  height: 8px;
+  height: 6px;
   background: var(--trov-bg);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -272,13 +246,12 @@
   width: 67%;
   height: 100%;
   background: var(--trov-accent);
-  border-radius: 4px;
+  border-radius: 3px;
   position: relative;
   overflow: hidden;
   animation: progressGrow 1.2s ease-out forwards;
 }
 
-/* Shimmer that sweeps across the progress bar */
 .progressShimmer {
   position: absolute;
   top: 0;
@@ -329,22 +302,22 @@
   color: var(--trov-text-secondary);
 }
 
-/* ——— SMTP PROVIDERS ——— */
+/* SMTP providers */
 
 .smtpSection {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
+  gap: 8px;
 }
 
 .smtpCard {
-  padding: 14px;
+  padding: 10px 12px;
   background: var(--trov-bg);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   transition: border-color var(--transition-normal);
 }
 
@@ -358,32 +331,28 @@
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--trov-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .smtpDotActive {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--trov-accent);
   animation: smtpPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes smtpPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 5px rgba(212, 168, 67, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(212, 168, 67, 0); }
 }
 
 .smtpDotStandby {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--trov-text-muted);
 }
@@ -401,13 +370,13 @@
   color: var(--trov-text-secondary);
 }
 
-/* ——— DELIVERY STATS ——— */
+/* Delivery stats */
 
 .statsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  padding-top: var(--space-md);
+  gap: 8px;
+  padding-top: 12px;
   border-top: 1px solid var(--trov-border);
 }
 
@@ -415,12 +384,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 4px;
 }
 
 .statValue {
   font-family: var(--font-display);
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -432,86 +401,13 @@
 .statLabel {
   font-family: var(--font-mono);
   font-size: 0.625rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--trov-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-/* ——— RESPONSIVE ——— */
-
-@media (max-width: 1024px) {
-  .inner {
-    gap: var(--space-xl);
-  }
-
-  .mockupWrap {
-    max-width: 460px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero {
-    padding: var(--space-2xl) 0;
-  }
-
-  .inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-2xl);
-  }
-
-  .content {
-    align-items: center;
-    text-align: center;
-  }
-
-  .sub {
-    max-width: 480px;
-  }
-
-  .ctas {
-    justify-content: center;
-  }
-
-  .launch {
-    align-self: center;
-  }
-
-  .visual {
-    justify-content: center;
-  }
-
-  .mockupWrap {
-    max-width: 440px;
-  }
-
-  .heroGrid {
-    -webkit-mask-image: radial-gradient(
-      ellipse 90% 50% at 50% 30%,
-      black 0%,
-      transparent 70%
-    );
-    mask-image: radial-gradient(
-      ellipse 90% 50% at 50% 30%,
-      black 0%,
-      transparent 70%
-    );
-  }
-}
-
-@media (max-width: 480px) {
-  .ctas {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .mockupWrap {
-    max-width: 100%;
-  }
-}
-
-/* ——— REDUCED MOTION ——— */
+/* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
   .statusDot,
@@ -523,5 +419,67 @@
 
   .progressFill {
     width: 67%;
+  }
+}
+
+/* Tablet and up */
+
+@media (min-width: 640px) {
+  .hero {
+    padding: 64px 0 48px;
+  }
+
+  .ctas {
+    gap: 12px;
+  }
+
+  .mockupBody {
+    padding: 20px;
+  }
+
+  .smtpCard {
+    padding: 12px 14px;
+  }
+
+  .statValue {
+    font-size: 1.375rem;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 80px 0 64px;
+  }
+
+  .inner {
+    flex-direction: row;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .content {
+    align-items: flex-start;
+    text-align: left;
+    flex: 0 0 42%;
+  }
+
+  .ctas {
+    justify-content: flex-start;
+  }
+
+  .visual {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .mockupWrap {
+    max-width: 540px;
+  }
+
+  .heroGrid {
+    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 70%);
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 70%);
   }
 }

@@ -159,16 +159,27 @@ export default function BlogPost() {
             </section>
           )}
 
-          <div ref={ctaRef} className={`${styles.bottomCta} reveal`}>
-            <p className={styles.bottomCtaHeading}>Check your email before you send it</p>
+          <aside ref={ctaRef} className={`${styles.bottomCta} reveal`}>
+            <span className={styles.bottomCtaIcon} aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M3 7l9 6 9-6M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7l2-2h14l2 2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <p className={styles.bottomCtaEyebrow}>Trovarcis Reach Desktop</p>
+            <h2 className={styles.bottomCtaHeading}>Bulk email from your own machine</h2>
             <p className={styles.bottomCtaText}>
-              Trovarcis Reach scores your email for deliverability issues before it leaves your outbox. Launching June 2026.
+              One-time purchase. Runs offline. Multi-SMTP failover, AI scoring, contacts that never leave your machine. Launching mid-July 2026.
             </p>
-            <a href="/#cta" className={styles.bottomCtaButton}>
-              Get Early Access
-              <ArrowRightIcon size={14} />
-            </a>
-          </div>
+            <div className={styles.bottomCtaActions}>
+              <a href="/#cta" className={styles.bottomCtaButton}>
+                Get Early Access
+                <ArrowRightIcon size={14} />
+              </a>
+              <Link to="/score" className={styles.bottomCtaSecondary}>
+                Try the web tools
+              </Link>
+            </div>
+          </aside>
         </div>
       </main>
       <Footer />
