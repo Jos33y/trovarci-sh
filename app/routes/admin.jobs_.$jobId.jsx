@@ -3,7 +3,7 @@ import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect
 import { requireAdmin, adminGetJobDetail } from '~/utils/admin.server';
 import { logAdminAction } from '~/utils/adminActions.server';
 import { cancelJob } from '~/lib/jobQueue.server';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = ({ data }) => [
   { title: data?.job ? `Job ${data.job.id.slice(0, 8)} | Admin` : 'Job | Admin' },

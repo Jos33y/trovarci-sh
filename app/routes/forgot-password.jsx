@@ -30,15 +30,8 @@ export async function loader({ request }) {
   return null;
 }
 
-/**
- * Security posture:
- *   - Always return the same "if an account exists, we sent an email" message.
- *     Never reveal whether the email is registered (prevents enumeration).
- *   - Rate limit by IP (prevents drive-by enumeration) AND by email
- *     (prevents targeted flooding of a known user's inbox).
- *   - Still issue a token + send the email if the account exists. The UX
- *     difference to the end user is zero.
- */
+/* Always return the same "if an account exists, we sent an email" message to prevent enumeration. */
+/* Rate limit by IP (drive-by enumeration) and by email (targeted flooding). */
 export async function action({ request }) {
   const form = await request.formData();
   const emailResult = validateEmail(form.get('email'));

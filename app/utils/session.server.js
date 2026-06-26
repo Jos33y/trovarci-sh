@@ -158,6 +158,34 @@ export async function listUserSessions(userId) {
   `;
 }
 
+// Revoke one session by id, scoped to the owning user so a leaked id from another user is a no-op.
+// Returns count of rows affected.
+export async function revokeSessionByIdForUser(userId, sessionId) {
+  const rows = await sql`
+    UPDATE sessions
+    SET revoked_at = now()
+    WHERE id = ${sessionId}
+      AND user_id = ${userId}
+      AND revoked_at IS NULL
+    RETURNING id
+  `;
+  return rows.length;
+}
+
+// Revoke every active session for a user except the one currently in use.
+// Returns count of rows affected.
+export async function revokeOtherSessionsForUser(userId, currentSessionId) {
+  const rows = await sql`
+    UPDATE sessions
+    SET revoked_at = now()
+    WHERE user_id = ${userId}
+      AND id <> ${currentSessionId}
+      AND revoked_at IS NULL
+    RETURNING id
+  `;
+  return rows.length;
+}
+
 // -----------------------------------------------------------------------
 // Cookie plumbing
 // -----------------------------------------------------------------------

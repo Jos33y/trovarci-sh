@@ -1,10 +1,10 @@
 // Admin contact messages list - filterable, click-through opens a triage drawer.
 import { useEffect, useState } from 'react';
-import { Form, useLoaderData, useRevalidator } from 'react-router';
+import { Form, useLoaderData, useRevalidator, useSubmit } from 'react-router';
 import { requireAdmin, adminListContactMessages } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import CloseIcon from '~/components/icons/CloseIcon';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 import drawer from '~/styles/modules/admin/ErrorDrawer.module.css';
 
 export const meta = () => [
@@ -87,6 +87,9 @@ function formatDate(iso) {
 export default function AdminMessages() {
   const { messages, status, subject, q, page } = useLoaderData();
   const revalidator = useRevalidator();
+  const submit = useSubmit();
+
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
   const [openId,    setOpenId]    = useState(null);
   const [detail,    setDetail]    = useState(null);
@@ -180,13 +183,13 @@ export default function AdminMessages() {
       <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="status">Status</label>
-          <select id="status" name="status" defaultValue={status} className={styles.filterSelect}>
+          <select id="status" name="status" defaultValue={status} onChange={onFilterChange} className={styles.filterSelect}>
             {STATUS_OPTS.map((v) => <option key={v} value={v}>{STATUS_LABEL[v]}</option>)}
           </select>
         </div>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="subject">Subject</label>
-          <select id="subject" name="subject" defaultValue={subject} className={styles.filterSelect}>
+          <select id="subject" name="subject" defaultValue={subject} onChange={onFilterChange} className={styles.filterSelect}>
             {SUBJECT_OPTS.map((v) => <option key={v} value={v}>{v ? SUBJECT_LABEL[v] : 'all'}</option>)}
           </select>
         </div>
@@ -201,7 +204,6 @@ export default function AdminMessages() {
             aria-label="Search messages"
           />
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       {messages.length === 0 ? (

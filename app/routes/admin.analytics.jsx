@@ -1,4 +1,5 @@
-import { Form, useLoaderData } from 'react-router';
+// Admin analytics index - traffic overview with window picker, KPI strip, daily bars, top lists, country map.
+import { Form, useLoaderData, useSubmit } from 'react-router';
 import {
   requireAdmin,
   adminAnalyticsOverview,
@@ -7,8 +8,9 @@ import {
 } from '~/utils/admin.server';
 import KPICard from '~/components/admin/KPICard';
 import CountryMap from '~/components/admin/CountryMap';
+import DailyBars from '~/components/admin/DailyBars';
 import EmptyState from '~/components/admin/EmptyState';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Analytics | Trovarcis Admin' },
@@ -31,12 +33,10 @@ export async function loader({ request }) {
 
 export default function AdminAnalytics() {
   const { overview, sparks, countries, days } = useLoaderData();
+  const submit = useSubmit();
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
-  // Daily chart geometry (inline mini-chart - reusing the design language
-  // from AreaChart but smaller and without hover, since this is one of many
-  // panels on the page).
   const series = overview.dailySeries;
-  const max = Math.max(1, ...series.map((d) => d.pageviews));
 
   return (
     <>
@@ -47,17 +47,16 @@ export default function AdminAnalytics() {
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="days">Window</label>
-          <select id="days" name="days" defaultValue={String(days)} className={styles.filterSelect}>
+          <select id="days" name="days" defaultValue={String(days)} onChange={onFilterChange} className={styles.filterSelect}>
             <option value="1">Last 24h</option>
             <option value="7">Last 7d</option>
             <option value="30">Last 30d</option>
             <option value="90">Last 90d</option>
           </select>
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       <div className={styles.kpiStrip}>
@@ -81,47 +80,22 @@ export default function AdminAnalytics() {
           label="Payments"
           value={overview.totals.payments.toLocaleString()}
           spark={sparks.payments}
-          tone="accent"
+          variant="hero"
         />
       </div>
 
-      {/* Daily pageviews mini-chart */}
-      <section className={styles.panel} style={{ marginBottom: 'var(--space-lg)' }}>
+      <section className={styles.panel}>
         <header className={styles.panelHead}>
           <h2 className={styles.panelTitle}>Daily pageviews</h2>
           <span className={styles.panelSub}>{days}d window</span>
         </header>
-
         {series.length === 0 ? (
-          <p className={styles['td--muted']}>No data in this window.</p>
+          <EmptyState
+            title="No data in this window"
+            body="Once visitors arrive, daily pageviews will show up here."
+          />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-            {series.map((d) => {
-              const pct = (d.pageviews / max) * 100;
-              return (
-                <div key={d.day} style={{
-                  display: 'grid',
-                  gridTemplateColumns: '92px 1fr 70px 50px',
-                  gap: 'var(--space-sm)',
-                  alignItems: 'center',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                }}>
-                  <span style={{ color: 'var(--trov-text-muted)' }}>{d.day}</span>
-                  <span style={{
-                    position: 'relative', height: 10, background: 'var(--trov-surface-light)', borderRadius: 999, overflow: 'hidden',
-                  }}>
-                    <span style={{
-                      display: 'block', height: '100%', width: `${pct}%`,
-                      background: 'var(--trov-accent)', borderRadius: 999, transition: 'width var(--transition-normal)',
-                    }} />
-                  </span>
-                  <span style={{ textAlign: 'right', color: 'var(--trov-text)' }}>{d.pageviews.toLocaleString()}</span>
-                  <span style={{ textAlign: 'right', color: 'var(--trov-text-muted)' }}>{d.sessions}</span>
-                </div>
-              );
-            })}
-          </div>
+          <DailyBars series={series} />
         )}
       </section>
 
@@ -131,13 +105,13 @@ export default function AdminAnalytics() {
             <h2 className={styles.panelTitle}>Top paths</h2>
           </header>
           {overview.topPaths.length === 0 ? (
-            <p className={styles['td--muted']}>No data.</p>
+            <EmptyState title="No paths yet" body="Paths visited will rank here as traffic comes in." />
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <ul className={styles.rankList}>
               {overview.topPaths.map((r) => (
-                <li key={r.path} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                  <span style={{ color: 'var(--trov-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.path}</span>
-                  <span style={{ color: 'var(--trov-text-muted)' }}>{r.n.toLocaleString()}</span>
+                <li key={r.path} className={styles.rankListItem}>
+                  <span className={styles.rankListLabel}>{r.path}</span>
+                  <span className={styles.rankListValue}>{r.n.toLocaleString()}</span>
                 </li>
               ))}
             </ul>
@@ -149,13 +123,13 @@ export default function AdminAnalytics() {
             <h2 className={styles.panelTitle}>Top referrers</h2>
           </header>
           {overview.topReferrers.length === 0 ? (
-            <p className={styles['td--muted']}>None - all direct.</p>
+            <EmptyState title="Direct traffic only" body="No external referrers in this window. All visits are direct or organic." />
           ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <ul className={styles.rankList}>
               {overview.topReferrers.map((r) => (
-                <li key={r.referrer_domain} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                  <span style={{ color: 'var(--trov-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.referrer_domain}</span>
-                  <span style={{ color: 'var(--trov-text-muted)' }}>{r.n.toLocaleString()}</span>
+                <li key={r.referrer_domain} className={styles.rankListItem}>
+                  <span className={styles.rankListLabel}>{r.referrer_domain}</span>
+                  <span className={styles.rankListValue}>{r.n.toLocaleString()}</span>
                 </li>
               ))}
             </ul>

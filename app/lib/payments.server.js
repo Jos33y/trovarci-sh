@@ -128,6 +128,8 @@ const UNDERPAYMENT_TOLERANCE_CENTS = (() => {
  *   creditsGranted: number,
  *   newBalance: number,
  *   transactionId: string,
+ *   userEmail?: string,
+ *   userName?: string,
  *   underpaid?: boolean,
  *   shortfallCents?: number,
  * }>}
@@ -241,6 +243,8 @@ export async function completePayment(paymentId, gatewayData = {}) {
       creditsGranted: payment.credits,
       newBalance: grantResult.newBalance,
       transactionId: grantResult.transactionId,
+      userEmail: grantResult.userEmail,
+      userName: grantResult.userName,
     };
   });
 }
@@ -272,7 +276,7 @@ async function grantCreditsInTx(tx, { userId, amount, referenceId, metadata }) {
   }
 
   const [user] = await tx`
-    SELECT credits_balance
+    SELECT credits_balance, email, name
     FROM users
     WHERE id = ${userId} AND deleted_at IS NULL
     FOR UPDATE
@@ -296,7 +300,7 @@ async function grantCreditsInTx(tx, { userId, amount, referenceId, metadata }) {
     RETURNING id
   `;
 
-  return { transactionId: row.id, newBalance, idempotent: false };
+  return { transactionId: row.id, newBalance, idempotent: false, userEmail: user.email, userName: user.name };
 }
 
 // -----------------------------------------------------------------------

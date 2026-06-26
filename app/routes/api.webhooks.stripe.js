@@ -48,8 +48,10 @@ import {
 import {
   getStripeCredentials,
   STRIPE_WEBHOOK_TOLERANCE_SEC,
+  getPackage,
 } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
+import { sendPaymentReceiptEmail } from '~/utils/email.server';
 
 // ── IP allowlist (optional) ──
 const ALLOWED_IPS = (process.env.STRIPE_WEBHOOK_IP_ALLOWLIST || '')
@@ -274,6 +276,20 @@ export async function action({ request }) {
               currency: (eventObject.currency || 'usd').toUpperCase(),
             },
           }).catch((err) => console.error('[stripe webhook] funnel record failed:', err.message));
+
+          // Fire-and-log receipt email. Failure must not break the 200 to Stripe.
+          if (result.userEmail && result.transactionId) {
+            const pkg = getPackage(payment.package_key);
+            sendPaymentReceiptEmail({
+              to:             result.userEmail,
+              transactionId:  result.transactionId,
+              credits:        payment.credits,
+              amountUsd:      (payment.amount_usd_cents / 100).toFixed(2),
+              paymentMethod:  'Stripe',
+              packageName:    pkg?.name || payment.package_key,
+              newBalance:     result.newBalance,
+            }).catch((err) => console.error('[stripe webhook] receipt email failed:', err.message));
+          }
         } else if (result.underpaid) {
           await recordEventSync({
             event_type: 'payment_failed',

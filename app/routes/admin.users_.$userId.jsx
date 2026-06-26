@@ -16,7 +16,7 @@ import KPICard from '~/components/admin/KPICard';
 import {
   CardIcon, TagIcon, LayersIcon, VerifyIcon, ShieldIcon,
 } from '~/components/icons';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = ({ data }) => [
   { title: data?.user ? `${data.user.email} | Admin` : 'User | Admin' },

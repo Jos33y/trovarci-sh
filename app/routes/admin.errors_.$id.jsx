@@ -1,10 +1,11 @@
+// Admin error detail - canonical detail page (drawer in list handles most triage).
 import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect } from 'react-router';
 import {
   requireAdmin,
   adminGetErrorDetail,
   adminMarkErrorResolved,
 } from '~/utils/admin.server';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = ({ data }) => [
   { title: data?.error ? `Error ${data.error.id} | Admin` : 'Error | Admin' },
@@ -90,19 +91,7 @@ export default function AdminErrorDetail() {
             <header className={styles.panelHead}>
               <h2 className={styles.panelTitle}>Message</h2>
             </header>
-            <pre style={{
-              background: 'var(--trov-bg)',
-              border: '1px solid var(--trov-border)',
-              borderLeft: '2px solid var(--trov-error)',
-              borderRadius: 'var(--radius-sm)',
-              padding: 'var(--space-md)',
-              margin: 0,
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              color: 'var(--trov-text)',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}>{error.message}</pre>
+            <pre className={`${styles.codeBlock} ${styles['codeBlock--message']}`}>{error.message}</pre>
           </section>
 
           {error.stack ? (
@@ -110,19 +99,7 @@ export default function AdminErrorDetail() {
               <header className={styles.panelHead}>
                 <h2 className={styles.panelTitle}>Stack trace</h2>
               </header>
-              <pre style={{
-                background: 'var(--trov-bg)',
-                border: '1px solid var(--trov-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: 'var(--space-md)',
-                margin: 0,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--trov-text-secondary)',
-                overflow: 'auto',
-                maxHeight: 480,
-                whiteSpace: 'pre',
-              }}>{error.stack}</pre>
+              <pre className={`${styles.codeBlock} ${styles['codeBlock--stack']}`}>{error.stack}</pre>
             </section>
           ) : null}
 
@@ -131,18 +108,7 @@ export default function AdminErrorDetail() {
               <header className={styles.panelHead}>
                 <h2 className={styles.panelTitle}>Redacted context</h2>
               </header>
-              <pre style={{
-                background: 'var(--trov-bg)',
-                border: '1px solid var(--trov-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: 'var(--space-md)',
-                margin: 0,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                color: 'var(--trov-text-secondary)',
-                overflow: 'auto',
-                maxHeight: 360,
-              }}>{JSON.stringify(ctx, null, 2)}</pre>
+              <pre className={styles.codeBlock}>{JSON.stringify(ctx, null, 2)}</pre>
             </section>
           ) : null}
         </div>
@@ -168,7 +134,7 @@ export default function AdminErrorDetail() {
               {error.user_agent ? (
                 <>
                   <div className={styles.kvKey}>User agent</div>
-                  <div className={`${styles.kvValue} ${styles['kvValue--mono']}`} style={{ fontSize: 11 }}>{error.user_agent}</div>
+                  <div className={`${styles.kvValue} ${styles['kvValue--mono']} ${styles['kvValue--small']}`}>{error.user_agent}</div>
                 </>
               ) : null}
 

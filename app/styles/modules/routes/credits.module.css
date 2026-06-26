@@ -1,7 +1,6 @@
-/* ═══════════════════════════════════════════
-   CREDITS PAGE
-   app/styles/modules/routes/credits.module.css
-   ═══════════════════════════════════════════ */
+/* /credits - hero, packages, checkout, costs, FAQ. Mobile first. */
+
+/* Page shell */
 
 .page {
   min-height: 100vh;
@@ -14,11 +13,11 @@
   flex: 1;
 }
 
-/* ─── HERO ─── */
+/* Hero */
 
 .hero {
   position: relative;
-  padding: 80px 0 48px;
+  padding: 48px 0 32px;
   overflow: hidden;
 }
 
@@ -35,36 +34,40 @@
 
 .headline {
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.05;
+  font-weight: 700;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--trov-text);
-  margin-bottom: 16px;
+  margin: 0 0 12px;
 }
 
 .sub {
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.6;
   color: var(--trov-text-secondary);
-  max-width: 560px;
+  max-width: 56ch;
+  margin: 0;
 }
 
-/* ─── BALANCE BANNER ─── */
+/* Balance banner */
 
 .balanceSection {
-  padding: 0 0 40px;
+  padding: 0 0 24px;
 }
 
 .balanceBanner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-md);
-  padding: 14px 20px;
-  font-size: 0.875rem;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.5;
   color: var(--trov-text-secondary);
 }
 
@@ -73,24 +76,19 @@
   font-weight: 600;
 }
 
-.balanceLink {
+.balanceBanner a {
   color: var(--trov-accent);
   font-weight: 600;
-  transition: color var(--transition-fast);
 }
 
-.balanceLink:hover {
+.balanceBanner a:hover {
   color: var(--trov-accent-hover);
 }
 
-.balanceSep {
-  color: var(--trov-text-muted);
-}
-
-/* ─── PACKAGES ─── */
+/* Payment method toggle */
 
 .packagesSection {
-  padding: 0 0 72px;
+  padding: 0 0 48px;
 }
 
 .paymentToggle {
@@ -100,29 +98,28 @@
   border-radius: var(--radius-md);
   padding: 4px;
   gap: 2px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .toggleBtn,
 .toggleActive {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  border-radius: 7px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-body);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   border: none;
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.toggleBtn {
+  white-space: nowrap;
   background: transparent;
   color: var(--trov-text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  min-height: 36px;
 }
 
 .toggleBtn:hover {
@@ -135,11 +132,46 @@
   border: 1px solid var(--trov-border);
 }
 
+.toggleBtn:disabled,
+.toggleActive:disabled {
+  cursor: not-allowed;
+  color: var(--trov-text-muted);
+}
+
+.toggleBtn:disabled svg,
+.toggleActive:disabled svg {
+  opacity: 0.4;
+}
+
+.toggleBtn:disabled:hover,
+.toggleActive:disabled:hover {
+  color: var(--trov-text-muted);
+  background: transparent;
+}
+
+.toggleSoonBadge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  padding: 2px 8px;
+  background: var(--trov-glow);
+  border: 1px solid rgba(212, 168, 67, 0.3);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--trov-accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Package cards: 1-up mobile, 2-up tablet, 4-up desktop */
+
 .packagesGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .packageCard {
@@ -147,13 +179,12 @@
   background: var(--trov-surface);
   border: 1.5px solid var(--trov-border);
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
+  padding: 20px 16px;
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
   font-family: var(--font-body);
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .packageCard:hover {
@@ -161,10 +192,10 @@
 }
 
 .packageSelected {
-  border-color: var(--trov-accent) !important;
+  border-color: var(--trov-accent);
   box-shadow:
     0 0 0 1px var(--trov-accent),
-    var(--shadow-glow);
+    0 0 24px var(--trov-glow);
 }
 
 .packagePopular {
@@ -173,42 +204,45 @@
 
 .popularBadge {
   position: absolute;
-  top: -12px;
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--trov-accent);
   color: var(--trov-text-on-accent);
-  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
   font-weight: 700;
-  padding: 3px 12px;
+  padding: 3px 10px;
   border-radius: 100px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .pkgName {
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
   font-weight: 600;
   color: var(--trov-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .pkgCredits {
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 2rem;
+  font-weight: 700;
+  font-size: 1.875rem;
   color: var(--trov-text);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .pkgCreditsLabel {
-  font-size: 1rem;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--trov-text-secondary);
   letter-spacing: 0;
 }
@@ -216,42 +250,55 @@
 .pkgPrice {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   color: var(--trov-accent);
-  margin-bottom: 2px;
   letter-spacing: -0.02em;
+  margin-bottom: 2px;
 }
 
 .pkgPriceUnit {
-  font-size: 0.875rem;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--trov-text-secondary);
+}
+
+.pkgPricePlaceholder {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--trov-text-muted);
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+  opacity: 0.5;
 }
 
 .pkgPerCredit {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
   color: var(--trov-text-muted);
-  margin-bottom: 20px;
   letter-spacing: 0.03em;
+  margin-bottom: 16px;
 }
 
 .pkgFeatures {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   border-top: 1px solid var(--trov-border);
-  padding-top: 16px;
+  padding: 14px 0 0;
+  margin: 0;
 }
 
 .pkgFeature {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
-  color: var(--trov-text-secondary);
   line-height: 1.4;
+  color: var(--trov-text-secondary);
 }
 
 .pkgCheck {
@@ -260,82 +307,145 @@
   margin-top: 1px;
 }
 
-/* ─── CHECKOUT ─── */
+/* Custom amount input (replaces .pkgCredits number on the Custom card) */
+
+.customCreditsInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--trov-text);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.875rem;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  -moz-appearance: textfield;
+}
+
+.customCreditsInput::-webkit-outer-spin-button,
+.customCreditsInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.customCreditsInput::placeholder {
+  color: var(--trov-text-muted);
+  opacity: 0.5;
+  font-weight: 700;
+}
+
+.customError {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--trov-error);
+  line-height: 1.4;
+}
+
+/* Checkout row */
 
 .checkoutRow {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
-  gap: 16px;
+  padding: 14px 16px;
+  gap: 14px;
 }
 
 .checkoutSummary {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .checkoutSelected {
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.9375rem;
   color: var(--trov-text);
 }
 
 .checkoutPrice {
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   color: var(--trov-text-secondary);
 }
 
 .buyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--trov-accent);
   color: var(--trov-text-on-accent);
   border: none;
   border-radius: var(--radius-md);
-  padding: 12px 28px;
+  padding: 12px 24px;
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background var(--transition-fast),
-    transform var(--transition-fast);
+  min-height: 44px;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
-.buyBtn:hover {
+.buyBtn:hover:not(:disabled) {
   background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
   transform: translateY(-1px);
 }
 
-.buyBtn:active {
+.buyBtn:active:not(:disabled) {
   background: var(--trov-accent-pressed);
   transform: translateY(0);
 }
 
-.checkoutNote {
-  text-align: center;
-  font-size: 0.8125rem;
-  color: var(--trov-text-muted);
-  margin-top: 12px;
+.buyBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* ─── COSTS TABLE ─── */
+.formError {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--trov-error-bg);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--trov-error);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.checkoutNote {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
+/* Costs table - desktop is a 3-col grid; mobile restacks each row vertically */
 
 .costsSection {
-  padding: 0 0 72px;
+  padding: 0 0 48px;
 }
 
 .costsTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-size: clamp(1.125rem, 3vw, 1.375rem);
   color: var(--trov-text);
   letter-spacing: -0.02em;
-  margin-bottom: 20px;
+  margin: 0 0 16px;
 }
 
 .costsTable {
@@ -346,27 +456,15 @@
 }
 
 .costsHeader {
-  display: grid;
-  grid-template-columns: 1fr 220px 1fr;
-  gap: 16px;
-  padding: 12px 20px;
-  background: var(--trov-bg);
-  border-bottom: 1px solid var(--trov-border);
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--trov-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: none;
 }
 
 .costsRow {
-  display: grid;
-  grid-template-columns: 1fr 220px 1fr;
-  gap: 16px;
-  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--trov-border);
-  align-items: center;
   transition: background var(--transition-fast);
 }
 
@@ -378,74 +476,71 @@
   background: var(--trov-surface-light);
 }
 
-.costsAction {
-  font-size: 0.875rem;
-  color: var(--trov-text);
-  font-weight: 500;
-}
+/* Mobile row layout: action + cost on row 1, note below */
 
-/* Costs cell - typography only, no pill chrome.
-   Number in mono+gold anchors the column; unit text in body+secondary
-   plays a supporting role. "Free" gets its own body-font success
-   treatment so typography alone signals the category change. */
+.costsAction {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  flex: 1;
+  min-width: 0;
+}
 
 .costsCost {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .costsAmount {
   font-family: var(--font-mono);
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--trov-accent);
-  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .costsUnit {
   font-family: var(--font-body);
-  font-size: 0.8125rem;
-  font-weight: 400;
+  font-size: 0.75rem;
   color: var(--trov-text-secondary);
-  letter-spacing: 0;
-  line-height: 1.3;
 }
 
 .costsFree {
   font-family: var(--font-body);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--trov-success);
-  letter-spacing: 0.01em;
 }
 
 .costsNote {
-  font-size: 0.8125rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
   color: var(--trov-text-muted);
+  line-height: 1.45;
 }
 
-/* ─── FAQ ─── */
+/* FAQ */
 
 .faqSection {
-  padding: 0 0 96px;
+  padding: 0 0 64px;
 }
 
 .faqTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-size: clamp(1.125rem, 3vw, 1.375rem);
   color: var(--trov-text);
   letter-spacing: -0.02em;
-  margin-bottom: 20px;
+  margin: 0 0 16px;
 }
 
 .faqList {
   display: flex;
   flex-direction: column;
-  gap: 0;
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -468,13 +563,14 @@
   text-align: left;
   background: transparent;
   border: none;
-  padding: 18px 24px;
+  padding: 14px 16px;
   font-family: var(--font-body);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--trov-text);
   cursor: pointer;
-  gap: 16px;
+  gap: 12px;
+  min-height: 48px;
   transition: background var(--transition-fast);
 }
 
@@ -493,180 +589,108 @@
 }
 
 .faqAnswer {
-  padding: 0 24px 18px;
-  font-size: 0.875rem;
-  line-height: 1.65;
+  padding: 0 16px 14px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.6;
   color: var(--trov-text-secondary);
 }
 
-/* ─── RESPONSIVE ─── */
+/* Tablet and up */
 
-@media (max-width: 768px) {
+@media (min-width: 640px) {
   .hero {
     padding: 56px 0 32px;
   }
 
+  .balanceSection {
+    padding: 0 0 32px;
+  }
+
+  .balanceBanner {
+    align-items: center;
+    padding: 14px 18px;
+    font-size: 0.875rem;
+  }
+
   .packagesGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
 
-  .costsHeader,
-  .costsRow {
-    grid-template-columns: 1fr 140px;
-  }
-
-  .costsNote {
-    display: none;
-  }
-
-  .costsCost {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-  }
-
-  .costsAmount {
-    font-size: 1rem;
-  }
-
-  .costsUnit {
-    font-size: 0.75rem;
-    text-align: right;
+  .packageCard {
+    padding: 24px 20px;
   }
 
   .checkoutRow {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
   }
 
   .buyBtn {
-    width: 100%;
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  /* Costs table goes 3-column grid */
+
+  .costsHeader {
+    display: grid;
+    grid-template-columns: 1fr 200px 1.4fr;
+    gap: 16px;
+    padding: 10px 20px;
+    background: var(--trov-bg);
+    border-bottom: 1px solid var(--trov-border);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--trov-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .costsRow {
+    display: grid;
+    grid-template-columns: 1fr 200px 1.4fr;
+    gap: 16px;
+    padding: 14px 20px;
+    align-items: center;
+  }
+
+  .costsAction {
+    font-size: 0.875rem;
+  }
+
+  .costsAmount {
+    font-size: 1.0625rem;
   }
 }
 
-/* ═══════════════════════════════════════════
-   APPEND TO: app/styles/modules/routes/credits.module.css
+/* Desktop */
 
-   New classes to support:
-     1. Custom credits card (4th position in grid)
-     2. Styled <input> for credit amount
-     3. Field-level error (custom amount out of range)
-     4. Form-level error banner (server errors)
-     5. Placeholder price (no amount entered yet)
-
-   Paste this entire block at the bottom of your existing credits.module.css.
-   No existing rules are modified; we only override the grid column count
-   so the 4th card fits cleanly.
-   ═══════════════════════════════════════════ */
-
-/* ─── GRID: 4 columns for 3 presets + 1 custom ──────── */
-
-.packagesGrid {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* ─── CUSTOM AMOUNT CARD ─────────────────────────────── */
-
-/* The custom card hosts an <input>; we need the credit line to behave
-   like a text input, not a pre-rendered number. */
-.customCreditsInput {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--trov-text);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 2rem;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  padding: 0;
-  margin: 0;
-  -moz-appearance: textfield; /* Firefox: hide spinner */
-}
-
-.customCreditsInput::-webkit-outer-spin-button,
-.customCreditsInput::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.customCreditsInput::placeholder {
-  color: var(--trov-text-muted);
-  opacity: 0.5;
-  font-weight: 700;
-}
-
-/* Placeholder price shown when the custom card is visible but has no amount. */
-.pkgPricePlaceholder {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.375rem;
-  color: var(--trov-text-muted);
-  margin-bottom: 2px;
-  letter-spacing: -0.02em;
-  opacity: 0.5;
-}
-
-/* ─── ERRORS ─────────────────────────────────────────── */
-
-/* Inline field error under the custom amount input */
-.customError {
-  margin-top: 8px;
-  font-family: var(--font-body);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--trov-error);
-  line-height: 1.4;
-}
-
-/* Top-of-form error banner (server-returned _form errors) */
-.formError {
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: var(--trov-error-bg);
-  border: 1px solid var(--trov-error);
-  border-radius: var(--radius-md);
-  color: var(--trov-error);
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-/* ─── "SOON" BADGE for disabled Stripe toggle ────────── */
-
-.toggleSoonBadge {
-  margin-left: 8px;
-  padding: 2px 8px;
-  background: var(--trov-bg);
-  border: 1px solid var(--trov-border);
-  border-radius: 100px;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--trov-text-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* Disabled toggle state (matches existing .toggleBtn but muted) */
-.toggleBtn:disabled,
-.toggleActive:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ─── RESPONSIVE: packages grid collapse ─────────────── */
-
-@media (max-width: 1024px) {
-  .packagesGrid {
-    grid-template-columns: repeat(2, 1fr);
+@media (min-width: 1024px) {
+  .hero {
+    padding: 80px 0 40px;
   }
-}
 
-@media (max-width: 640px) {
   .packagesGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .packageCard {
+    padding: 28px 22px;
+  }
+
+  .pkgCredits,
+  .customCreditsInput {
+    font-size: 2rem;
+  }
+
+  .pkgPrice,
+  .pkgPricePlaceholder {
+    font-size: 1.375rem;
   }
 }

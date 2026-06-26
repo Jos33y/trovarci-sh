@@ -70,14 +70,20 @@ function CardIcon({ size = 20 }) {
 function BitcoinIcon({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.75" />
       <path
-        d="M9.5 2H14c2.5 0 4 1.2 4 3.2 0 1.4-.8 2.4-2 2.8 1.6.4 2.5 1.6 2.5 3.2C18.5 13.5 17 15 14 15H9.5V2Z"
+        d="M10 7v10M10 7h3.3a2.2 2.2 0 0 1 0 4.5H10M10 11.5h4a2.4 2.4 0 0 1 0 5h-4"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="1.9"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M9.5 9h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M7 2v20M17 2v20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+      <path
+        d="M11.5 5.5v1.6M11.5 16.9v1.6M13.2 5.5v1.6M13.2 16.9v1.6"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -210,7 +216,7 @@ export default function CreditsPage() {
     return items;
   }, [stripeEnabled]);
 
-  // ─── Derived selection values ─────────────────────────────────────
+  // Derived selection values
   const selectedPackage = useMemo(() => {
     if (selected === 'custom') {
       const parsed = parseInt(customCredits, 10);
@@ -297,7 +303,7 @@ export default function CreditsPage() {
               >
                 <CardIcon size={16} />
                 Card (Stripe)
-                {!stripeEnabled && <span className={styles.toggleSoonBadge}>Soon</span>}
+                {!stripeEnabled && <span className={styles.toggleSoonBadge}>Coming soon</span>}
               </button>
             </div>
 

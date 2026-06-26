@@ -54,10 +54,10 @@ export default function Sidebar({ user, open }) {
       </nav>
 
       <div className={styles.foot}>
-        <div className={styles.footUser}>
+        <Link to="/account/settings" className={styles.footUser} title="Account settings">
           <span className={styles.footLabel}>Signed in</span>
-          <span className={styles.footEmail} title={user.email}>{user.email}</span>
-        </div>
+          <span className={styles.footEmail}>{user.email}</span>
+        </Link>
         <Link to="/dashboard" className={styles.exitLink}>
           Exit to app
         </Link>

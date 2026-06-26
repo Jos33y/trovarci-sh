@@ -1,7 +1,7 @@
 // Admin payment detail - kvList of payment fields, metadata code block, linked user side rail.
 import { Link, useLoaderData } from 'react-router';
 import { requireAdmin, adminGetPaymentDetail } from '~/utils/admin.server';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = ({ data }) => [
   { title: data?.payment ? `Payment ${data.payment.id.slice(0, 8)} | Admin` : 'Payment | Admin' },

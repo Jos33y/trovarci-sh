@@ -1,9 +1,9 @@
 // Admin payments list - filterable by gateway + status, click-through to detail.
-import { Link, Form, useLoaderData, useNavigate } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate, useSubmit } from 'react-router';
 import { requireAdmin, adminListPayments } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import { CardIcon } from '~/components/icons';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Payments | Trovarcis Admin' },
@@ -50,6 +50,9 @@ function formatDate(iso) {
 export default function AdminPayments() {
   const { payments, gateway, status, page } = useLoaderData();
   const navigate = useNavigate();
+  const submit = useSubmit();
+
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
   return (
     <>
@@ -63,17 +66,16 @@ export default function AdminPayments() {
       <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="gateway">Gateway</label>
-          <select id="gateway" name="gateway" defaultValue={gateway} className={styles.filterSelect}>
+          <select id="gateway" name="gateway" defaultValue={gateway} onChange={onFilterChange} className={styles.filterSelect}>
             {GATEWAY_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="status">Status</label>
-          <select id="status" name="status" defaultValue={status} className={styles.filterSelect}>
+          <select id="status" name="status" defaultValue={status} onChange={onFilterChange} className={styles.filterSelect}>
             {STATUS_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       {payments.length === 0 ? (

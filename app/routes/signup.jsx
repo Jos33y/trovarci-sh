@@ -169,7 +169,7 @@ export default function SignupPage() {
         )}
 
         {resentOk && !formError && (
-          <div className={styles.errorBanner} role="status" style={{ background: 'var(--trov-success-bg)', borderColor: 'var(--trov-success)', color: 'var(--trov-success)' }}>
+          <div className={styles.successBanner} role="status">
             A new code was sent. Check your inbox.
           </div>
         )}
@@ -363,7 +363,7 @@ export default function SignupPage() {
 
             <div className={styles.resendRow}>
               Didn't get it?{' '}
-              <resendFetcher.Form method="post" style={{ display: 'inline' }}>
+              <resendFetcher.Form method="post" className={styles.inlineForm}>
                 <input type="hidden" name="intent" value="resend_code" />
                 <button
                   type="submit"
@@ -374,7 +374,7 @@ export default function SignupPage() {
                 </button>
               </resendFetcher.Form>
               {' '}or{' '}
-              <Form method="post" style={{ display: 'inline' }}>
+              <Form method="post" className={styles.inlineForm}>
                 <input type="hidden" name="intent" value="change_email" />
                 <button
                   type="submit"

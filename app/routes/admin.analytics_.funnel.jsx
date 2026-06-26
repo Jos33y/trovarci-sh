@@ -1,8 +1,12 @@
-import { Form, useLoaderData } from 'react-router';
+// Admin conversion funnel. Pageview through Payment confirmed.
+// Filename uses trailing underscore on `analytics_` so this is a sibling route, not a child of admin.analytics.
+import { Form, useLoaderData, useSubmit } from 'react-router';
 import { requireAdmin, adminAnalyticsFunnel } from '~/utils/admin.server';
+import KPICard from '~/components/admin/KPICard';
 import Funnel from '~/components/admin/Funnel';
 import EmptyState from '~/components/admin/EmptyState';
-import styles from '~/styles/modules/routes/admin.module.css';
+import { FunnelIcon, TagIcon, ChartIcon, AlertIcon } from '~/components/icons';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Funnel | Trovarcis Admin' },
@@ -33,8 +37,9 @@ export async function loader({ request }) {
 
 export default function AdminFunnel() {
   const { funnel, days } = useLoaderData();
+  const submit = useSubmit();
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
-  // Project all 8 known steps in canonical order, zero-fill missing ones.
   const byType = new Map(funnel.map((s) => [s.event_type, s]));
   const steps = FUNNEL_KEYS.map((k) => {
     const row = byType.get(k);
@@ -46,6 +51,7 @@ export default function AdminFunnel() {
   const totalSessions = steps[0].sessions;
   const finalSessions = steps[steps.length - 1].sessions;
   const overallRate = totalSessions > 0 ? Math.round((finalSessions / totalSessions) * 100) : 0;
+  const dropoff = Math.max(0, totalSessions - finalSessions);
 
   return (
     <>
@@ -56,44 +62,49 @@ export default function AdminFunnel() {
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="days">Window</label>
-          <select id="days" name="days" defaultValue={String(days)} className={styles.filterSelect}>
+          <select id="days" name="days" defaultValue={String(days)} onChange={onFilterChange} className={styles.filterSelect}>
             <option value="1">Last 24h</option>
             <option value="7">Last 7d</option>
             <option value="30">Last 30d</option>
             <option value="90">Last 90d</option>
           </select>
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       <div className={styles.kpiStrip}>
-        <div className={styles.panel}>
-          <span className={styles['td--muted']} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Top of funnel</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-text)' }}>{totalSessions.toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)' }}>sessions reached pageview</div>
-        </div>
-        <div className={styles.panel}>
-          <span className={styles['td--muted']} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Bottom of funnel</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-accent)' }}>{finalSessions.toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)' }}>confirmed payments</div>
-        </div>
-        <div className={styles.panel}>
-          <span className={styles['td--muted']} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Overall rate</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-text)' }}>{overallRate}%</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)' }}>pageview to paid</div>
-        </div>
-        <div className={styles.panel}>
-          <span className={styles['td--muted']} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Drop-off</span>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--trov-error)' }}>{(totalSessions - finalSessions).toLocaleString()}</div>
-          <div style={{ fontSize: 12, color: 'var(--trov-text-muted)' }}>sessions lost across funnel</div>
-        </div>
+        <KPICard
+          label="Top of funnel"
+          value={totalSessions.toLocaleString()}
+          hint="sessions reached pageview"
+          icon={FunnelIcon}
+        />
+        <KPICard
+          label="Bottom of funnel"
+          value={finalSessions.toLocaleString()}
+          hint="confirmed payments"
+          icon={TagIcon}
+          variant="hero"
+        />
+        <KPICard
+          label="Overall rate"
+          value={`${overallRate}%`}
+          hint="pageview to paid"
+          icon={ChartIcon}
+        />
+        <KPICard
+          label="Drop-off"
+          value={dropoff.toLocaleString()}
+          hint="sessions lost across funnel"
+          icon={AlertIcon}
+        />
       </div>
 
       {totalSessions === 0 ? (
         <EmptyState
+          icon={FunnelIcon}
           title="No funnel data yet"
           body="Once users land and move through signup and payment, this view will populate."
         />

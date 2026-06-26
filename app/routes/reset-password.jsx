@@ -24,11 +24,7 @@ export const meta = () => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/**
- * Loader validates the token for display purposes only. Does not consume it;
- * consumption happens in the action on form submission. This way a user
- * visiting the link twice can still submit the form (once).
- */
+/* Loader validates the token for display only; consumption happens in the action. Visiting twice still lets the form submit once. */
 export async function loader({ request }) {
   await requireGuest(request);
 
@@ -71,15 +67,11 @@ export async function action({ request }) {
     );
   }
 
-  // Apply new password, then revoke all existing sessions for safety.
-  // Anyone currently logged in on a stolen device is kicked out immediately.
+  /* Apply new password, then revoke all sessions so any stolen device gets kicked out. */
   await updatePassword(result.userId, passwordResult.value);
   await revokeAllUserSessions(result.userId);
 
-  // Security notification. If the user did not request this change, the
-  // email is their alarm bell. Failure to send is non-fatal - never block
-  // the user from regaining access to their account because of an email
-  // service hiccup.
+  /* Security notification email - failure is non-fatal, never block account recovery on email service issues. */
   try {
     const [user] = await sql`
       SELECT email FROM users WHERE id = ${result.userId} LIMIT 1
@@ -153,11 +145,9 @@ export default function ResetPasswordPage() {
                 : 'This reset link has expired or has already been used. Request a new one.'}
             </p>
 
-            <div style={{ marginTop: 24 }}>
-              <Link to="/forgot-password" className={styles.submitBtn} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                Request new link
-              </Link>
-            </div>
+            <Link to="/forgot-password" className={`${styles.submitBtn} ${styles.linkBtn}`}>
+              Request new link
+            </Link>
           </>
         ) : (
           <>

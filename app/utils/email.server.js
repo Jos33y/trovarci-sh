@@ -167,6 +167,64 @@ export async function sendAccountCreatedEmail({ to, welcomeCredits = 10 }) {
 }
 
 // -----------------------------------------------------------------------
+// Payment receipt email (fires after credits are granted on a confirmed payment)
+// -----------------------------------------------------------------------
+
+// Sent from Cryptomus + Stripe webhook handlers after completePayment grants
+// credits, only on the non-replay, non-underpaid path. Confirms the purchase,
+// shows the new credit balance, and links to the full receipt page.
+export async function sendPaymentReceiptEmail({
+  to,
+  transactionId,
+  credits,
+  amountUsd,
+  paymentMethod,
+  packageName,
+  newBalance,
+}) {
+  const creditsStr = Number(credits).toLocaleString('en-US');
+  const balanceStr = newBalance != null ? Number(newBalance).toLocaleString('en-US') : null;
+  const shortId = String(transactionId).slice(0, 8).toUpperCase();
+  const receiptUrl = `https://trovarci.sh/receipts/${transactionId}`;
+
+  const subject = `Your Trovarcis receipt - ${creditsStr} credits added`;
+
+  const text = [
+    'Thanks for your purchase.',
+    '',
+    `Package:       ${packageName}`,
+    `Credits added: ${creditsStr}`,
+    `Amount:        $${amountUsd}`,
+    `Paid via:      ${paymentMethod}`,
+    balanceStr ? `New balance:   ${balanceStr} credits` : null,
+    '',
+    `Receipt #${shortId}`,
+    `View receipt:  ${receiptUrl}`,
+    '',
+    'Credits expire 12 months from purchase date.',
+    'Questions? Reply to this email and we will get back to you.',
+    '',
+    '-- Trovarcis',
+    'https://trovarci.sh',
+  ].filter(Boolean).join('\n');
+
+  return send({
+    to,
+    subject,
+    html: paymentReceiptHtml({
+      shortId,
+      receiptUrl,
+      packageName,
+      creditsStr,
+      amountUsd,
+      paymentMethod,
+      balanceStr,
+    }),
+    text,
+  });
+}
+
+// -----------------------------------------------------------------------
 // Password changed email (security notification)
 // -----------------------------------------------------------------------
 
@@ -557,6 +615,112 @@ function passwordChangedHtml() {
       </table>
       <div style="margin-top:24px;font-size:12px;color:#52525B;">
         Trovarcis &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
+      </div>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
+function paymentReceiptHtml({ shortId, receiptUrl, packageName, creditsStr, amountUsd, paymentMethod, balanceStr }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Trovarcis receipt</title>
+</head>
+<body style="margin:0;padding:0;background:#09090B;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#FAFAFA;-webkit-font-smoothing:antialiased;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#09090B;">
+  <tr>
+    <td align="center" style="padding:48px 24px;">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#131316;border:1px solid #27272A;border-radius:16px;">
+        <tr>
+          <td style="padding:40px 40px 8px 40px;">
+            <div style="font-family:'Anybody',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.02em;color:#FAFAFA;">
+              Trovar<span style="color:#D4A843;">cis</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 40px 0 40px;">
+            <div style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-weight:600;font-size:11px;letter-spacing:0.08em;color:#52525B;text-transform:uppercase;">
+              Receipt #${shortId}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 40px 0 40px;">
+            <h1 style="margin:0;font-family:'Anybody',sans-serif;font-weight:700;font-size:24px;line-height:1.2;letter-spacing:-0.02em;color:#FAFAFA;">
+              Payment confirmed
+            </h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 40px 0 40px;">
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#A1A1AA;">
+              Your credits are in your account and ready to use.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 40px 0 40px;">
+            <div style="background:#09090B;border:1px solid rgba(212,168,67,0.25);border-radius:10px;padding:18px;text-align:center;">
+              <div style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-weight:600;font-size:11px;letter-spacing:0.08em;color:#A1A1AA;text-transform:uppercase;">
+                ${packageName}
+              </div>
+              <div style="margin-top:6px;font-family:'Anybody',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.02em;color:#D4A843;">
+                +${creditsStr} credits
+              </div>
+              ${balanceStr ? `<div style="margin-top:6px;font-size:13px;line-height:1.5;color:#52525B;">
+                New balance: ${balanceStr} credits
+              </div>` : ''}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 40px 0 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.6;color:#A1A1AA;">
+              <tr>
+                <td style="padding:6px 0;border-bottom:1px solid #27272A;width:40%;color:#52525B;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Amount</td>
+                <td style="padding:6px 0;border-bottom:1px solid #27272A;color:#FAFAFA;text-align:right;font-weight:600;">$${amountUsd}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;border-bottom:1px solid #27272A;color:#52525B;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Paid via</td>
+                <td style="padding:6px 0;border-bottom:1px solid #27272A;color:#FAFAFA;text-align:right;">${paymentMethod}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#52525B;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Reference</td>
+                <td style="padding:6px 0;color:#FAFAFA;text-align:right;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:12px;">#${shortId}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 40px 8px 40px;">
+            <a href="${receiptUrl}" style="display:inline-block;background:#D4A843;color:#09090B;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;text-decoration:none;padding:14px 32px;border-radius:10px;">
+              View full receipt
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:8px 40px 24px 40px;">
+            <a href="https://trovarci.sh/dashboard" style="font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;color:#A1A1AA;text-decoration:underline;">
+              Open dashboard
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 40px 40px 40px;">
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#52525B;">
+              Credits expire 12 months from purchase. Questions? Reply to this email or write to support@trovarcis.com.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <div style="margin-top:24px;font-size:12px;color:#52525B;">
+        Trovarcis LLC &middot; Wyoming, USA &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
       </div>
     </td>
   </tr>

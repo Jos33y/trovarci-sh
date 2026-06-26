@@ -2,7 +2,7 @@
 import { Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminSearchUsers } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Users | Trovarcis Admin' },

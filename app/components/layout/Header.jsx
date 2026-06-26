@@ -222,6 +222,23 @@ export default function Header() {
             >
               Buy credits
             </Link>
+            <Link
+              to="/account/settings"
+              className={styles.mobileAuthLink}
+              onClick={() => setMobileOpen(false)}
+            >
+              Account settings
+            </Link>
+
+            {user.role === 'admin' && (
+              <Link
+                to="/admin"
+                className={styles.mobileAuthLink}
+                onClick={() => setMobileOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
 
             <Form method="post" action="/logout">
               <button type="submit" className={styles.mobileSignOut}>

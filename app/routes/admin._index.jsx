@@ -21,7 +21,7 @@ import {
   GlobeIcon, UsersIcon, CardIcon, TagIcon,
   AlertIcon, CheckIcon, LayersIcon,
 } from '~/components/icons';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Overview | Trovarcis Admin' },

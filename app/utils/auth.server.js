@@ -167,6 +167,25 @@ export async function updatePassword(userId, newPassword) {
   `;
 }
 
+// Authenticated password change. Verifies current password before writing the new hash.
+// Returns { ok:true } on success, { ok:false, reason } on any failure.
+// Reasons: 'user_not_found' | 'wrong_password'. Caller decides what to surface.
+export async function changePassword({ userId, currentPassword, newPassword }) {
+  const [row] = await sql`
+    SELECT password_hash
+    FROM users
+    WHERE id = ${userId} AND deleted_at IS NULL
+    LIMIT 1
+  `;
+  if (!row) return { ok: false, reason: 'user_not_found' };
+
+  const match = await verifyPassword(row.password_hash, currentPassword);
+  if (!match) return { ok: false, reason: 'wrong_password' };
+
+  await updatePassword(userId, newPassword);
+  return { ok: true };
+}
+
 // -----------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------

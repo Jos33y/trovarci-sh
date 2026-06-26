@@ -1,9 +1,9 @@
 // Admin verification jobs list - filterable by kind + status, click-through to detail.
-import { Link, Form, useLoaderData, useNavigate } from 'react-router';
+import { Link, Form, useLoaderData, useNavigate, useSubmit } from 'react-router';
 import { requireAdmin, adminListJobs } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import { LayersIcon } from '~/components/icons';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
   { title: 'Jobs | Trovarcis Admin' },
@@ -53,6 +53,9 @@ function progressPct(processed, total) {
 export default function AdminJobs() {
   const { jobs, status, kind, page } = useLoaderData();
   const navigate = useNavigate();
+  const submit = useSubmit();
+
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
   return (
     <>
@@ -66,17 +69,16 @@ export default function AdminJobs() {
       <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="kind">Kind</label>
-          <select id="kind" name="kind" defaultValue={kind} className={styles.filterSelect}>
+          <select id="kind" name="kind" defaultValue={kind} onChange={onFilterChange} className={styles.filterSelect}>
             {KIND_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="status">Status</label>
-          <select id="status" name="status" defaultValue={status} className={styles.filterSelect}>
+          <select id="status" name="status" defaultValue={status} onChange={onFilterChange} className={styles.filterSelect}>
             {STATUS_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       {jobs.length === 0 ? (

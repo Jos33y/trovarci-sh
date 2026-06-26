@@ -1,11 +1,10 @@
-// /admin/errors - list view with inline drawer for triage. Click row to view + mark resolved without navigation.
-
+// Admin errors list - inline drawer triage. Click row to view + mark resolved without navigation.
 import { useEffect, useState } from 'react';
-import { Link, Form, useLoaderData, useRevalidator } from 'react-router';
+import { Link, Form, useLoaderData, useRevalidator, useSubmit } from 'react-router';
 import { requireAdmin, adminListErrors } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import CloseIcon from '~/components/icons/CloseIcon';
-import styles from '~/styles/modules/routes/admin.module.css';
+import styles from '~/styles/modules/routes/admin';
 import drawer from '~/styles/modules/admin/ErrorDrawer.module.css';
 
 export const meta = () => [
@@ -16,6 +15,8 @@ export const meta = () => [
 const KIND_OPTS = ['', 'server_route', 'client_route', 'client_script', 'client_async', 'api_call', 'worker', 'webhook'];
 const SEV_OPTS  = ['', 'fatal', 'error', 'warning', 'info'];
 const RES_OPTS  = ['', 'false', 'true'];
+
+const RESOLVED_LABEL = { '': 'all', 'false': 'unresolved', 'true': 'resolved' };
 
 export async function loader({ request }) {
   await requireAdmin(request);
@@ -66,7 +67,7 @@ function formatDate(iso) {
   return new Date(iso).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 }
 
-// Renders message safely. Upstream non-string captures occasionally land as '[object Object]' - flag them.
+// Upstream non-string captures occasionally land as '[object Object]'. Flag them.
 function safeMessage(msg) {
   if (!msg) return '-';
   const s = String(msg);
@@ -74,11 +75,12 @@ function safeMessage(msg) {
   return s.length > 120 ? s.slice(0, 120) + '...' : s;
 }
 
-const RESOLVED_LABEL = { '': 'all', 'false': 'unresolved', 'true': 'resolved' };
-
 export default function AdminErrors() {
   const { errors, kind, severity, resolved, page } = useLoaderData();
   const revalidator = useRevalidator();
+  const submit = useSubmit();
+
+  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
   const [openId,    setOpenId]    = useState(null);
   const [detail,    setDetail]    = useState(null);
@@ -87,7 +89,6 @@ export default function AdminErrors() {
   const [resolving, setResolving] = useState(false);
   const [drawerErr, setDrawerErr] = useState('');
 
-  // Esc to close drawer.
   useEffect(() => {
     if (openId == null) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') closeDrawer(); };
@@ -96,7 +97,6 @@ export default function AdminErrors() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openId]);
 
-  // Lock body scroll while drawer open.
   useEffect(() => {
     if (openId == null) return undefined;
     const prev = document.body.style.overflow;
@@ -149,7 +149,6 @@ export default function AdminErrors() {
         setResolving(false);
         return;
       }
-      // Success - revalidate the list and close.
       revalidator.revalidate();
       closeDrawer();
     } catch (err) {
@@ -167,30 +166,29 @@ export default function AdminErrors() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Errors</h1>
-          <p className={styles.pageSubtitle}>Page {page} - {errors.length} {errors.length === 1 ? 'event' : 'events'}</p>
+          <p className={styles.pageSubtitle}>Captured client and server errors for triage</p>
         </div>
       </header>
 
-      <Form method="get" className={styles.filters}>
+      <Form method="get" className={styles.tableToolbar}>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="kind">Kind</label>
-          <select id="kind" name="kind" defaultValue={kind} className={styles.filterSelect}>
+          <select id="kind" name="kind" defaultValue={kind} onChange={onFilterChange} className={styles.filterSelect}>
             {KIND_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="severity">Severity</label>
-          <select id="severity" name="severity" defaultValue={severity} className={styles.filterSelect}>
+          <select id="severity" name="severity" defaultValue={severity} onChange={onFilterChange} className={styles.filterSelect}>
             {SEV_OPTS.map((v) => <option key={v} value={v}>{v || 'all'}</option>)}
           </select>
         </div>
         <div className={styles.filterField}>
           <label className={styles.filterLabel} htmlFor="resolved">Resolved</label>
-          <select id="resolved" name="resolved" defaultValue={resolved} className={styles.filterSelect}>
+          <select id="resolved" name="resolved" defaultValue={resolved} onChange={onFilterChange} className={styles.filterSelect}>
             {RES_OPTS.map((v) => <option key={v} value={v}>{RESOLVED_LABEL[v]}</option>)}
           </select>
         </div>
-        <button type="submit" className={styles.formButton}>Apply</button>
       </Form>
 
       {errors.length === 0 ? (
@@ -200,74 +198,86 @@ export default function AdminErrors() {
           body="Either nothing has gone wrong, or your filters are too narrow. The latter is more likely."
         />
       ) : (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Kind</th>
-                <th>Sev</th>
-                <th>Path</th>
-                <th>Message</th>
-                <th>User</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {errors.map((e) => (
-                <tr
-                  key={e.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => openDrawer(e.id)}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                      ev.preventDefault();
-                      openDrawer(e.id);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Open error ${e.id}`}
-                >
-                  <td data-label="When" className={styles['td--muted']}>{timeAgo(e.created_at)}</td>
-                  <td data-label="Kind" className={styles['td--mono']}>{e.kind}</td>
-                  <td data-label="Sev">
-                    <span className={`${styles.badge} ${styles[SEV_BADGE[e.severity] || 'badgeNeutral']}`}>{e.severity}</span>
-                  </td>
-                  <td data-label="Path" className={styles['td--mono']}>{e.path || '-'}</td>
-                  <td data-label="Message">{safeMessage(e.message)}</td>
-                  <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
-                    {e.user_id
-                      ? <Link to={`/admin/users/${e.user_id}`} className={styles.rowLink}>{e.user_email || '-'}</Link>
-                      : <span className={styles['td--muted']}>-</span>}
-                  </td>
-                  <td data-label="Status">
-                    {e.resolved_at
-                      ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>resolved</span>
-                      : <span className={`${styles.badge} ${styles.badgeNeutral}`}>open</span>}
-                  </td>
+        <>
+          <div className={styles.tableCaption}>
+            <span><strong>{errors.length}</strong> {errors.length === 1 ? 'event' : 'events'} · page <strong>{page}</strong></span>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <colgroup>
+                <col style={{ width: 110 }} />
+                <col style={{ width: 110 }} />
+                <col style={{ width: 80 }} />
+                <col style={{ width: 220 }} />
+                <col />
+                <col style={{ width: 200 }} />
+                <col style={{ width: 100 }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Kind</th>
+                  <th>Sev</th>
+                  <th>Path</th>
+                  <th>Message</th>
+                  <th>User</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {errors.map((e) => (
+                  <tr
+                    key={e.id}
+                    onClick={() => openDrawer(e.id)}
+                    onKeyDown={(ev) => {
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        openDrawer(e.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open error ${e.id}`}
+                  >
+                    <td data-label="When" className={styles['td--muted']}>{timeAgo(e.created_at)}</td>
+                    <td data-label="Kind" className={styles['td--mono']}>{e.kind}</td>
+                    <td data-label="Sev">
+                      <span className={`${styles.badge} ${styles[SEV_BADGE[e.severity] || 'badgeNeutral']}`}>{e.severity}</span>
+                    </td>
+                    <td data-label="Path" className={styles['td--mono']}>{e.path || '-'}</td>
+                    <td data-label="Message">{safeMessage(e.message)}</td>
+                    <td data-label="User" onClick={(ev) => ev.stopPropagation()}>
+                      {e.user_id
+                        ? <Link to={`/admin/users/${e.user_id}`} className={styles.rowLink}>{e.user_email || '-'}</Link>
+                        : <span className={styles['td--muted']}>-</span>}
+                    </td>
+                    <td data-label="Status">
+                      {e.resolved_at
+                        ? <span className={`${styles.badge} ${styles.badgeSuccess}`}>resolved</span>
+                        : <span className={`${styles.badge} ${styles.badgeNeutral}`}>open</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.pagination}>
+            <span className={styles.pageNote}>Page {page}</span>
+            <div className={styles.paginationActions}>
+              {page > 1 ? (
+                <Link to={`?${new URLSearchParams({ kind, severity, resolved, page: String(page - 1) }).toString()}`}
+                      className={`${styles.formButton} ${styles['formButton--ghost']}`}>Previous</Link>
+              ) : null}
+              {errors.length === 50 ? (
+                <Link to={`?${new URLSearchParams({ kind, severity, resolved, page: String(page + 1) }).toString()}`}
+                      className={`${styles.formButton} ${styles['formButton--ghost']}`}>Next</Link>
+              ) : null}
+            </div>
+          </div>
+        </>
       )}
-
-      <div className={styles.pagination}>
-        <span className={styles.pageNote}>Page {page}</span>
-        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-          {page > 1 ? (
-            <Link to={`?${new URLSearchParams({ kind, severity, resolved, page: String(page - 1) }).toString()}`}
-                  className={`${styles.formButton} ${styles['formButton--ghost']}`}>Previous</Link>
-          ) : null}
-          {errors.length === 50 ? (
-            <Link to={`?${new URLSearchParams({ kind, severity, resolved, page: String(page + 1) }).toString()}`}
-                  className={`${styles.formButton} ${styles['formButton--ghost']}`}>Next</Link>
-          ) : null}
-        </div>
-      </div>
-
-      {/* ─── Drawer ─── */}
 
       <div
         className={`${drawer.backdrop} ${openId != null ? drawer.backdropOpen : ''}`}
@@ -352,7 +362,7 @@ export default function AdminErrors() {
                   {detail.user_agent && (
                     <>
                       <div className={drawer.kvKey}>User agent</div>
-                      <div className={drawer.kvValMono} style={{ fontSize: 11 }}>{detail.user_agent}</div>
+                      <div className={drawer.kvValMono}>{detail.user_agent}</div>
                     </>
                   )}
 

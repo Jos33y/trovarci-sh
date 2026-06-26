@@ -6,7 +6,8 @@ import { requireUser } from '~/utils/session.server';
 import { listTransactions, getCreditSummary } from '~/lib/credits.server';
 import { listJobsForUser } from '~/lib/jobQueue.server';
 import { isEmailOnWaitlist } from '~/lib/waitlist.server';
-import styles from '~/styles/modules/routes/dashboard.module.css';
+import { LOW_BALANCE_THRESHOLD } from '~/utils/creditsConfig.server';
+import styles from '~/styles/modules/routes/dashboard';
 
 export const meta = () => [
   { title: 'Dashboard | Trovarcis Reach' },
@@ -14,16 +15,14 @@ export const meta = () => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/* ═══════════════════════════════════════════
-   SHAPERS - DB rows -> view models
-   ═══════════════════════════════════════════ */
+/* SHAPERS - DB rows -> view models */
 
 function shapeTransaction(row) {
   const isIncoming = row.delta > 0;
   const amount = (isIncoming ? '+' : '') + row.delta.toLocaleString();
 
   let label = 'Transaction';
-  let method = 'System';
+  let method = '';
   let price = '';
 
   const meta = row.metadata || {};
@@ -34,10 +33,8 @@ function shapeTransaction(row) {
     if (meta.amount_usd) price = `-$${Number(meta.amount_usd).toFixed(2)}`;
   } else if (row.type === 'grant') {
     label  = meta.source === 'welcome_bonus' ? 'Welcome bonus' : 'Credit grant';
-    method = 'System';
   } else if (row.type === 'refund') {
     label  = meta.reason ? `Refund: ${meta.reason}` : 'Refund';
-    method = 'System';
   } else if (row.type === 'usage') {
     const tool = meta.tool || 'usage';
     const count = meta.count;
@@ -50,7 +47,6 @@ function shapeTransaction(row) {
       dns_generate:  'DNS Generator',
     }[tool] || tool;
     label  = count ? `${prettyTool} (${count.toLocaleString()})` : prettyTool;
-    method = 'Used';
   } else if (row.type === 'adjustment') {
     label  = meta.reason || 'Admin adjustment';
     method = 'Admin';
@@ -128,12 +124,11 @@ export async function loader({ request }) {
     summary,
     jobs: jobRows.map(shapeJob),
     onWaitlist,
+    lowBalanceThreshold: LOW_BALANCE_THRESHOLD,
   };
 }
 
-/* ═══════════════════════════════════════════
-   ICONS
-   ═══════════════════════════════════════════ */
+/* ICONS */
 
 function CreditIcon({ size = 20 }) {
   return (
@@ -282,9 +277,7 @@ function MiniLinuxIcon({ size = 13 }) {
   );
 }
 
-/* ═══════════════════════════════════════════
-   STATIC CONFIG
-   ═══════════════════════════════════════════ */
+/* STATIC CONFIG */
 
 const QUICK_TOOLS = [
   { label: 'Email Scorer',    href: '/score',         icon: GaugeIcon,    free: false },
@@ -348,9 +341,7 @@ function txTypeClass(type, styles) {
   }
 }
 
-/* ═══════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════ */
+/* HELPERS */
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -359,15 +350,7 @@ function daysSince(d) {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
 }
 
-/**
- * Compact pagination window. Always shows first, last, current ± 1, with
- * '...' fillers where pages are skipped.
- *
- *   total <= 7:  [1, 2, 3, 4, 5, 6, 7]
- *   current=1, total=12:    [1, 2, 3, '...', 12]
- *   current=6, total=12:    [1, '...', 5, 6, 7, '...', 12]
- *   current=12, total=12:   [1, '...', 10, 11, 12]
- */
+/* Compact page-number window. Returns [1, 2, '...', 6, '...', 12]-style array. */
 function getPageWindow(current, total) {
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1);
@@ -383,12 +366,10 @@ function getPageWindow(current, total) {
   return result;
 }
 
-/* ═══════════════════════════════════════════
-   COMPONENT
-   ═══════════════════════════════════════════ */
+/* COMPONENT */
 
 export default function DashboardPage() {
-  const { user, transactions, jobs, onWaitlist } = useLoaderData();
+  const { user, transactions, jobs, onWaitlist, lowBalanceThreshold } = useLoaderData();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('jobs');
@@ -463,6 +444,13 @@ export default function DashboardPage() {
     return { totalJobs, cancelled, avgRate, totalVerified };
   }, [jobs]);
 
+  // Three-tier balance status: empty (red) / low (gold) / healthy (green).
+  const balanceStatus = (() => {
+    if (user.creditsBalance <= 0)               return { type: 'error',  label: 'Empty' };
+    if (user.creditsBalance < lowBalanceThreshold) return { type: 'accent', label: 'Low' };
+    return { type: 'ok', label: 'Healthy' };
+  })();
+
   const jobFiltersActive = jobSearch || jobType !== 'all' || jobStatus !== 'all' || jobDate !== 'all';
   const txFiltersActive  = txSearch || txFilter !== 'all' || txMethod !== 'all' || txDate !== 'all';
 
@@ -493,7 +481,7 @@ export default function DashboardPage() {
             <div className={styles.statCard} data-accent="gold">
               <div className={styles.statTop}>
                 <div className={styles.statIconWrap} data-color="gold"><CreditIcon size={17} /></div>
-                <Link to="/credits" className={styles.statCta}>Top up</Link>
+                <span className={styles.statBadge} data-type={balanceStatus.type}>{balanceStatus.label}</span>
               </div>
               <div className={styles.statValue}>{user.creditsBalance.toLocaleString()}</div>
               <div className={styles.statLabel}>Credits remaining</div>
@@ -569,8 +557,6 @@ export default function DashboardPage() {
                 Transactions<span className={styles.tabBadge}>{transactions.length}</span>
               </button>
             </div>
-
-            {/* ═══ JOBS TAB ═══ */}
             {activeTab === 'jobs' && (
               <div role="tabpanel" id="panel-jobs" aria-labelledby="tab-jobs">
                 <div className={styles.toolbar}>
@@ -688,10 +674,28 @@ export default function DashboardPage() {
                     </table>
                   </div>
                 ) : (
-                  <div className={styles.empty} role="status" aria-live="polite">
-                    {jobs.length === 0
-                      ? 'No bulk jobs yet. Upload a CSV on the Email Verifier or Number Verifier to get started.'
-                      : 'No jobs match your current filters.'}
+                  <div className={styles.emptyState} role="status" aria-live="polite">
+                    <div className={styles.emptyIcon} aria-hidden="true">
+                      <JobsIcon size={28} />
+                    </div>
+                    <p className={styles.emptyTitle}>
+                      {jobs.length === 0 ? 'No bulk jobs yet' : 'No jobs match your filters'}
+                    </p>
+                    <p className={styles.emptyHelper}>
+                      {jobs.length === 0
+                        ? 'Upload a CSV on the Email Verifier or Number Verifier to start a bulk job.'
+                        : 'Clear filters to see all your jobs.'}
+                    </p>
+                    {jobs.length === 0 ? (
+                      <div className={styles.emptyActions}>
+                        <Link to="/verify" className={styles.emptyAction}>Open Email Verifier</Link>
+                        <Link to="/verify-number" className={styles.emptyActionGhost}>Open Number Verifier</Link>
+                      </div>
+                    ) : (
+                      <div className={styles.emptyActions}>
+                        <button type="button" onClick={resetJobFilters} className={styles.emptyActionGhost}>Clear filters</button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -707,8 +711,6 @@ export default function DashboardPage() {
                 />
               </div>
             )}
-
-            {/* ═══ TRANSACTIONS TAB ═══ */}
             {activeTab === 'transactions' && (
               <div role="tabpanel" id="panel-transactions" aria-labelledby="tab-transactions">
                 <div className={styles.toolbar}>
@@ -789,7 +791,9 @@ export default function DashboardPage() {
                       >
                         <div className={styles.txInfo}>
                           <div className={styles.txLabel}>{tx.label}</div>
-                          <div className={styles.txMeta}>{fmtDate(tx.date)} via {tx.method}</div>
+                          <div className={styles.txMeta}>
+                            {fmtDate(tx.date)}{tx.method ? ` via ${tx.method}` : ''}
+                          </div>
                         </div>
                         <div className={styles.txRight}>
                           <span className={[styles.txType, txTypeClass(tx.type, styles)].join(' ')}>
@@ -804,7 +808,28 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className={styles.empty} role="status" aria-live="polite">No transactions match your current filters.</div>
+                  <div className={styles.emptyState} role="status" aria-live="polite">
+                    <div className={styles.emptyIcon} aria-hidden="true">
+                      <CreditIcon size={28} />
+                    </div>
+                    <p className={styles.emptyTitle}>
+                      {transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filters'}
+                    </p>
+                    <p className={styles.emptyHelper}>
+                      {transactions.length === 0
+                        ? 'Buy credits or run a verification to see activity here.'
+                        : 'Clear filters to see all activity.'}
+                    </p>
+                    {transactions.length === 0 ? (
+                      <div className={styles.emptyActions}>
+                        <Link to="/credits" className={styles.emptyAction}>Buy credits</Link>
+                      </div>
+                    ) : (
+                      <div className={styles.emptyActions}>
+                        <button type="button" onClick={resetTxFilters} className={styles.emptyActionGhost}>Clear filters</button>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <Pager
@@ -829,9 +854,7 @@ export default function DashboardPage() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   Sub-component: Pager (per-page selector + compact pagination)
-   ═══════════════════════════════════════════ */
+/* Sub-component: Pager (per-page selector + compact pagination) */
 
 function Pager({ current, totalPages, totalItems, pageSize, pageWindow, onPageChange, onPageSizeChange, itemNoun }) {
   // Empty list: nothing to count, nothing to page. Rendering "0 jobs Show 10"
@@ -905,9 +928,7 @@ function Pager({ current, totalPages, totalItems, pageSize, pageWindow, onPageCh
   );
 }
 
-/* ═══════════════════════════════════════════
-   Sub-component: DesktopWaitlistPanel
-   ═══════════════════════════════════════════ */
+/* Sub-component: DesktopWaitlistPanel */
 
 function DesktopWaitlistPanel({ userEmail, onWaitlist }) {
   const fetcher = useFetcher();
