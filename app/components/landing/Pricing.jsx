@@ -1,146 +1,110 @@
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/landing/Pricing.module.css';
 
-const PLANS = [
+// Mirrors CREDIT_PACKAGES in paymentsConfig.server.js. Flat $0.01/credit at every tier.
+const PACKS = [
   {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    desc: "Try the app. Hit the limits. Then upgrade.",
-    cta: "Download Free",
-    href: "/download",
-    highlight: false,
-    badge: null,
-    features: [
-      { text: "1 SMTP account", included: true },
-      { text: "500 contacts", included: true },
-      { text: "1,000 emails per campaign", included: true },
-      { text: "5 starter templates", included: true },
-      { text: "1 device", included: true },
-      { text: "Multi-SMTP failover", included: false },
-      { text: "Arcis AI scoring", included: false },
-      { text: "Campaign scheduling", included: false },
-    ],
+    name: "Starter",
+    price: "$5",
+    credits: "500",
+    bulkEmails: "2,500",
+    alternates: "Or 500 scores · 250 phone lookups",
+    cta: "Buy Starter",
+    href: "/credits?pkg=starter",
+    popular: false,
   },
   {
-    name: "Email Pro",
-    price: "$59",
-    originalPrice: "$79",
-    period: "one-time",
-    desc: "Everything you need to send at scale. No limits.",
-    cta: "Get Early Access",
-    href: "#cta",
-    highlight: true,
-    badge: "Most popular",
-    features: [
-      { text: "Unlimited SMTP/API accounts", included: true },
-      { text: "Unlimited contacts", included: true },
-      { text: "Unlimited emails per campaign", included: true },
-      { text: "Multi-SMTP failover, round-robin, weighted", included: true },
-      { text: "Arcis AI email scoring (5 Credits)", included: true },
-      { text: "All templates", included: true },
-      { text: "Campaign scheduling", included: true },
-      { text: "3 devices", included: true },
-    ],
+    name: "Growth",
+    price: "$25",
+    credits: "2,500",
+    bulkEmails: "12,500",
+    alternates: "Or 2,500 scores · 1,250 phone lookups",
+    cta: "Buy Growth",
+    href: "/credits?pkg=growth",
+    popular: true,
   },
   {
-    name: "Bundle",
-    price: "$89",
-    originalPrice: "$119",
-    period: "one-time",
-    desc: "Email + SMS. Both modules. One purchase.",
-    cta: "Get Early Access",
-    href: "#cta",
-    highlight: false,
-    badge: "Best value",
-    features: [
-      { text: "Everything in Email Pro", included: true },
-      { text: "SMS module included", included: true },
-      { text: "Multi-provider SMS failover", included: true },
-      { text: "SMS scheduling", included: true },
-      { text: "10 Credits included", included: true },
-      { text: "3 devices", included: true },
-    ],
+    name: "Pro",
+    price: "$100",
+    credits: "10,000",
+    bulkEmails: "50,000",
+    alternates: "Or 10,000 scores · 5,000 phone lookups",
+    cta: "Buy Pro",
+    href: "/credits?pkg=pro",
+    popular: false,
   },
 ];
-
-function CheckIcon({ included }) {
-  if (included) {
-    return (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.checkIcon}>
-        <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.crossIcon}>
-      <path d="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 export default function Pricing() {
   const headerRef = useReveal();
   const cardsRef = useReveal(0.08);
-  const guaranteeRef = useReveal();
+  const footnoteRef = useReveal();
 
   return (
     <section className={styles.section} id="pricing">
-      <div className={`container ${styles.inner}`}>
-        <div ref={headerRef} className="reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h2 className={styles.heading}>Pricing</h2>
-          <p className={styles.sub}>One price. Yours forever. No subscriptions. No renewals.</p>
+      <div className={styles.bgRadial} aria-hidden="true" />
+      <div className={styles.bgNoise} aria-hidden="true" />
 
-          <div className={styles.earlyBird}>
-            Early bird pricing for the first 100 customers
+      <div className={`container ${styles.inner}`}>
+        <div ref={headerRef} className={`${styles.header} reveal`}>
+          <div className={styles.kickerRow}>
+            <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+            <span className={styles.kicker}>One-time</span>
           </div>
+          <h2 className={styles.heading}>Pricing</h2>
+          <p className={styles.sub}>
+            Flat $0.01 per credit. Same rate at any volume. No subscription, no renewal.
+          </p>
         </div>
 
         <div ref={cardsRef} className={`${styles.cards} stagger`}>
-          {PLANS.map((plan) => (
+          {PACKS.map((pack) => (
             <div
-              key={plan.name}
-              className={`${styles.card} ${plan.highlight ? styles.cardHighlight : ''} reveal`}
+              key={pack.name}
+              className={`${styles.card} ${pack.popular ? styles.cardPopular : ''} reveal`}
             >
-              {plan.badge && (
-                <span className={`${styles.badge} ${plan.highlight ? styles.badgeAccent : styles.badgeMuted}`}>
-                  {plan.badge}
+              {pack.popular && (
+                <span className={styles.badge}>
+                  <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+                  Most popular
                 </span>
               )}
 
-              <h3 className={styles.planName}>{plan.name}</h3>
+              <h3 className={styles.packName}>{pack.name}</h3>
 
               <div className={styles.priceRow}>
-                {plan.originalPrice && (
-                  <span className={styles.originalPrice}>{plan.originalPrice}</span>
-                )}
-                <span className={styles.price}>{plan.price}</span>
-                <span className={styles.period}>{plan.period}</span>
+                <span className={styles.price}>{pack.price}</span>
+                <span className={styles.period}>one-time</span>
               </div>
 
-              <p className={styles.planDesc}>{plan.desc}</p>
+              <ul className={styles.details}>
+                <li className={styles.detailPrimary}>
+                  <span className={styles.detailValue}>{pack.credits}</span>
+                  <span className={styles.detailLabel}>credits</span>
+                </li>
+                <li className={styles.detailSecondary}>
+                  <span className={styles.detailApprox}>≈</span>
+                  <span className={styles.detailNumber}>{pack.bulkEmails}</span>
+                  <span className={styles.detailText}>emails verified in bulk</span>
+                </li>
+                <li className={styles.detailTertiary}>{pack.alternates}</li>
+                <li className={styles.detailTertiary}>All free tools included</li>
+              </ul>
 
               <a
-                href={plan.href}
-                className={`${styles.planCta} ${plan.highlight ? styles.planCtaPrimary : styles.planCtaSecondary}`}
+                href={pack.href}
+                className={`${styles.cta} ${pack.popular ? styles.ctaPrimary : styles.ctaSecondary}`}
               >
-                {plan.cta}
+                {pack.cta}
               </a>
-
-              <ul className={styles.features}>
-                {plan.features.map((f) => (
-                  <li key={f.text} className={`${styles.feature} ${!f.included ? styles.featureDisabled : ''}`}>
-                    <CheckIcon included={f.included} />
-                    <span>{f.text}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           ))}
         </div>
 
-        <div ref={guaranteeRef} className={`${styles.guarantee} reveal`}>
-          15-day money-back guarantee. No questions asked.
+        <div ref={footnoteRef} className={`${styles.footnote} reveal`}>
+          <p>Or buy any integer amount from 100 to 50,000 credits at the same rate.</p>
+          <p>Credits expire 12 months from purchase. Reminder emails before expiry.</p>
+          <p>15-day money-back guarantee on unused credits.</p>
         </div>
       </div>
     </section>

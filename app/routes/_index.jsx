@@ -5,18 +5,19 @@ import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import Hero from '~/components/landing/Hero';
 import ToolsStrip from '~/components/landing/ToolsStrip';
-import HowItWorks from '~/components/landing/HowItWorks';
 import Features from '~/components/landing/Features';
+import HowItWorks from '~/components/landing/HowItWorks';
 import Comparison from '~/components/landing/Comparison';
 import Pricing from '~/components/landing/Pricing';
+import DesktopPromo from '~/components/landing/DesktopPromo';
 import FAQ from '~/components/landing/FAQ';
 import LatestPosts from '~/components/landing/LatestPosts';
 import CTA from '~/components/landing/CTA';
 import styles from '~/styles/modules/routes/home.module.css';
 
 export const meta = () => getSeo({
-  title: null,
-  description: "Bulk email and SMS software. One-time purchase, offline-first, cross-platform. Multi-SMTP failover, AI deliverability scoring, and 6 free tools. No monthly fees.",
+  title: "The Email Deliverability Toolkit",
+  description: "Six pre-flight checks for every email you send. Verify lists, score copy, audit DNS, test SMTP. Pay as you go. 10 free credits on signup, no subscription.",
   path: "/",
 });
 
@@ -32,20 +33,20 @@ export default function Home() {
     <>
       <Header />
       <main>
-        {/* bg — with radial gold depth */}
+        {/* bg */}
         <Hero />
 
-        {/* surface — elevated strip */}
+        {/* surface */}
         <div className={styles.surfaceSection}>
           <ToolsStrip />
         </div>
 
         {/* bg */}
-        <HowItWorks />
+        <Features />
 
         {/* surface */}
         <div className={styles.surfaceSection}>
-          <Features />
+          <HowItWorks />
         </div>
 
         {/* bg */}
@@ -54,6 +55,7 @@ export default function Home() {
         {/* surface */}
         <div className={styles.surfaceSection}>
           <Pricing />
+          <DesktopPromo />
         </div>
 
         {/* bg */}
@@ -64,7 +66,7 @@ export default function Home() {
           <LatestPosts posts={posts} />
         </div>
 
-        {/* bg — with radial gold depth (mirrors hero) */}
+        {/* bg */}
         <CTA />
       </main>
       <Footer />

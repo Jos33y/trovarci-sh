@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Form, useLoaderData, useActionData, useNavigation } from 'react-router';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Form, useLoaderData, useActionData, useNavigation, useSearchParams } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import { getOptionalUser } from '~/utils/session.server';
@@ -27,14 +27,14 @@ export async function loader({ request }) {
 }
 
 export const meta = () => [
-  { title: 'Buy Verification Credits - Email and Phone Lookups | Trovarcis Reach' },
+  { title: 'Buy Verification Credits | Trovarcis Reach' },
   {
     name: 'description',
     content:
-      'Trovarcis Reach credits power email verification, phone number lookups, and AI scoring. Pay-as-you-go packages from $5. No subscription, no expiry. Crypto and card accepted.',
+      'Power the Trovarcis Reach toolkit with credits. Email verification, phone lookups, AI scoring. Pay-as-you-go from $5. Flat $0.01 per credit at any volume.',
   },
-  { property: 'og:title', content: 'Buy Verification Credits - Trovarcis Reach' },
-  { property: 'og:description', content: 'Pay-as-you-go credits for email verification and phone lookups. From $5. Credits never expire.' },
+  { property: 'og:title', content: 'Buy Verification Credits | Trovarcis Reach' },
+  { property: 'og:description', content: 'Pay-as-you-go credits for the email deliverability toolkit. Flat $0.01 per credit. No subscription.' },
   { property: 'og:url', content: 'https://trovarci.sh/credits' },
   { property: 'og:type', content: 'website' },
 ];
@@ -109,7 +109,7 @@ const PACKAGES = [
       'Email verify: 2,500 emails (bulk)',
       'Email verify: 500 emails (single)',
       'Phone lookup: 250 numbers',
-      'No expiry date',
+      '12-month credit expiry',
     ],
     popular: false,
   },
@@ -124,7 +124,7 @@ const PACKAGES = [
       'Email verify: 12,500 emails (bulk)',
       'Email verify: 2,500 emails (single)',
       'Phone lookup: 1,250 numbers',
-      'No expiry date',
+      '12-month credit expiry',
     ],
     popular: true,
   },
@@ -139,16 +139,18 @@ const PACKAGES = [
       'Email verify: 50,000 emails (bulk)',
       'Email verify: 10,000 emails (single)',
       'Phone lookup: 5,000 numbers',
-      'Priority queue processing',
+      '12-month credit expiry',
     ],
     popular: false,
   },
 ];
 
+const VALID_PKG_IDS = new Set(['starter', 'growth', 'pro', 'custom']);
+
 const CREDIT_COSTS = [
   { action: 'Email verification (single)', amount: '1', unit: 'credit',              free: false, note: 'Syntax + domain + SMTP check' },
   { action: 'Email verification (bulk)',   amount: '1', unit: 'credit per 5 emails', free: false, note: 'Bulk discount: rounds up to nearest 5' },
-  { action: 'Phone number lookup',         amount: '2', unit: 'credits',             free: false, note: 'Carrier + line type via Twilio' },
+  { action: 'Phone number lookup',         amount: '2', unit: 'credits',             free: false, note: 'Real carrier + line type' },
   { action: 'Phone verification (bulk)',   amount: '2', unit: 'credits per number',  free: false, note: 'Per number in the list' },
   { action: 'Email Scorer (Arcis)',        amount: '1', unit: 'credit',              free: false, note: 'AI analysis per email content check' },
   { action: 'DNS Generator',               free: true,  note: 'Client-side, no API cost' },
@@ -159,21 +161,24 @@ const CREDIT_COSTS = [
 const FAQ_ITEMS_BASE = [
   {
     q: 'Do credits expire?',
-    a: 'No. Credits do not currently expire. If we ever change this policy, we will notify you at least 90 days in advance and existing balances will be grandfathered under the original terms.',
+    a: 'Yes. 12 months from purchase. You will get email reminders before expiry so nothing slips away unused.',
   },
-  // Payment-method FAQ entry is built dynamically inside the component
-  // so the copy reflects whether card payments (Stripe) are enabled.
+  // Payment-method FAQ entry slotted in dynamically based on Stripe flag.
   {
     q: 'What happens if a verification fails?',
     a: 'Credits are only deducted on successful API calls. If a request errors out on our end, no credit is consumed.',
   },
   {
     q: 'Is there a free tier?',
-    a: 'Free tools (Domain Checker, DNS Generator, SMTP Tester) require no credits. Verification tools include a small free allowance on signup.',
+    a: 'Free tools (Domain Checker, DNS Generator, SMTP Tester) require no credits. New accounts also get 10 free credits to try the paid tools.',
   },
   {
     q: 'Do I need an account to see prices?',
     a: 'No. Browse packages, see costs, and read the FAQ without signing up. Account creation is required only at checkout, where you can sign in or create a new account in one step.',
+  },
+  {
+    q: "What's your refund policy?",
+    a: '15-day money-back guarantee on unused credits. Email support@trovarci.sh and we will process a full refund.',
   },
 ];
 
@@ -181,11 +186,11 @@ function buildPaymentFaq(stripeEnabled) {
   return stripeEnabled
     ? {
         q: 'What payment methods do you accept?',
-        a: 'Card payments via Stripe and crypto via Cryptomus. Stripe accepts all major cards. Cryptomus accepts Bitcoin, USDT, USDC, and other major cryptocurrencies.',
+        a: 'Card payments via Stripe and crypto via Cryptomus. Stripe accepts all major cards. Cryptomus accepts Bitcoin, USDT, USDC, Ethereum, Litecoin, and other major cryptocurrencies.',
       }
     : {
         q: 'Can I use crypto to pay?',
-        a: 'Yes. We accept Bitcoin, USDT, USDC, and other major cryptocurrencies via Cryptomus. Card payments via Stripe are coming soon.',
+        a: 'Yes. We accept Bitcoin, USDT, USDC, Ethereum, Litecoin, and other major cryptocurrencies via Cryptomus. Card payments via Stripe are coming.',
       };
 }
 
@@ -193,30 +198,45 @@ export default function CreditsPage() {
   const { user, cryptomusEnabled, stripeEnabled, customMin, customMax, customRate } = useLoaderData();
   const actionData = useActionData();
   const navigation = useNavigation();
+  const [searchParams] = useSearchParams();
 
   const formError = actionData?.errors?._form;
   const customAmountError = actionData?.errors?.creditsAmount;
   const isSubmitting = navigation.state !== 'idle' && navigation.formData != null;
 
-  // Default gateway to the only enabled one. If both enabled, prefer crypto
-  // at launch (primary rail).
+  // Read ?pkg=<id> from URL. Falls back to 'growth' when missing or invalid.
+  const initialPkg = (() => {
+    const fromQuery = searchParams.get('pkg');
+    return fromQuery && VALID_PKG_IDS.has(fromQuery) ? fromQuery : 'growth';
+  })();
+
   const defaultGateway = cryptomusEnabled ? 'crypto' : (stripeEnabled ? 'card' : 'crypto');
 
   const [paymentMethod, setPaymentMethod] = useState(defaultGateway);
-  const [selected, setSelected] = useState('growth');
+  const [selected, setSelected] = useState(initialPkg);
   const [customCredits, setCustomCredits] = useState('');
   const [openFaq, setOpenFaq] = useState(null);
 
-  // FAQ list, with the payment-method entry slotted into position 1 so it
-  // sits right after the credit-expiry question. Recomputed when the
-  // gateway flag changes (effectively never per-render, but cheap either way).
+  const packagesRef = useRef(null);
+
+  // On mount: if a preselect arrived via ?pkg=, smooth-scroll to the cards
+  // so the user lands on what they picked from home.
+  useEffect(() => {
+    const fromQuery = searchParams.get('pkg');
+    if (fromQuery && VALID_PKG_IDS.has(fromQuery) && packagesRef.current) {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const offsetTop = packagesRef.current.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: offsetTop, behavior: reduced ? 'auto' : 'smooth' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const FAQ_ITEMS = useMemo(() => {
     const items = [...FAQ_ITEMS_BASE];
     items.splice(1, 0, buildPaymentFaq(stripeEnabled));
     return items;
   }, [stripeEnabled]);
 
-  // Derived selection values
   const selectedPackage = useMemo(() => {
     if (selected === 'custom') {
       const parsed = parseInt(customCredits, 10);
@@ -251,17 +271,22 @@ export default function CreditsPage() {
 
         {/* Hero */}
         <section className={styles.hero}>
-          <div className={styles.heroBg} aria-hidden="true" />
-          <div className="container">
-            <h1 className={styles.headline}>Verification credits</h1>
+          <div className={styles.heroRadial} aria-hidden="true" />
+          <div className={styles.heroNoise} aria-hidden="true" />
+          <div className={`container ${styles.heroInner}`}>
+            <div className={styles.kickerRow}>
+              <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+              <span className={styles.kicker}>Pay as you go</span>
+            </div>
+            <h1 className={styles.headline}>Buy credits.</h1>
             <p className={styles.sub}>
-              Credits power the tools that call external APIs - email verification, phone lookups, and AI scoring.
-              Buy once, use as needed. No subscription.
+              Credits power the paid tools: email verification, AI scoring, and phone lookups.
+              Flat $0.01 per credit at any volume. No subscription.
             </p>
           </div>
         </section>
 
-        {/* Balance / Auth banner - context-aware */}
+        {/* Balance / Auth banner */}
         <section className={styles.balanceSection}>
           <div className="container">
             <div className={styles.balanceBanner}>
@@ -273,15 +298,15 @@ export default function CreditsPage() {
                 </span>
               ) : (
                 <span>
-                  Browsing as guest. <a href="/signup">Create an account</a> to claim welcome credits, or pick a package below and sign in at checkout.
+                  Browsing as guest. <a href="/signup">Create an account</a> to claim 10 welcome credits, or pick a package below and sign in at checkout.
                 </span>
               )}
             </div>
           </div>
         </section>
 
-        {/* Payment method toggle */}
-        <section className={styles.packagesSection}>
+        {/* Payment method toggle + packages */}
+        <section ref={packagesRef} className={styles.packagesSection}>
           <div className="container">
 
             <div className={styles.paymentToggle}>
@@ -322,7 +347,10 @@ export default function CreditsPage() {
                   aria-pressed={selected === pkg.id}
                 >
                   {pkg.popular && (
-                    <div className={styles.popularBadge}>Most popular</div>
+                    <div className={styles.popularBadge}>
+                      <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+                      Most popular
+                    </div>
                   )}
                   <div className={styles.pkgName}>{pkg.name}</div>
                   <div className={styles.pkgCredits}>
@@ -393,7 +421,7 @@ export default function CreditsPage() {
                   </li>
                   <li className={styles.pkgFeature}>
                     <span className={styles.pkgCheck}><CheckIcon /></span>
-                    No expiry date
+                    12-month credit expiry
                   </li>
                   <li className={styles.pkgFeature}>
                     <span className={styles.pkgCheck}><CheckIcon /></span>
@@ -419,7 +447,7 @@ export default function CreditsPage() {
               <div className={styles.checkoutSummary}>
                 <span className={styles.checkoutSelected}>
                   {selectedPackage
-                    ? `${selectedPackage.name} - ${selectedPackage.credits.toLocaleString()} credits`
+                    ? `${selectedPackage.name}: ${selectedPackage.credits.toLocaleString()} credits`
                     : 'Select a package'}
                 </span>
                 <span className={styles.checkoutPrice}>
@@ -457,8 +485,16 @@ export default function CreditsPage() {
 
         {/* Credit costs table */}
         <section className={styles.costsSection}>
+          <div className={styles.costsNoise} aria-hidden="true" />
           <div className="container">
-            <h2 className={styles.costsTitle}>What each action costs</h2>
+            <div className={styles.sectionHeader}>
+              <div className={styles.kickerRow}>
+                <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+                <span className={styles.kicker}>Tool costs</span>
+              </div>
+              <h2 className={styles.costsTitle}>What each action costs</h2>
+            </div>
+
             <div className={styles.costsTable}>
               <div className={styles.costsHeader}>
                 <span>Action</span>
@@ -487,11 +523,19 @@ export default function CreditsPage() {
 
         {/* FAQ */}
         <section className={styles.faqSection}>
+          <div className={styles.faqRadial} aria-hidden="true" />
           <div className="container">
-            <h2 className={styles.faqTitle}>Questions about credits</h2>
+            <div className={styles.sectionHeader}>
+              <div className={styles.kickerRow}>
+                <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+                <span className={styles.kicker}>Answers</span>
+              </div>
+              <h2 className={styles.faqTitle}>Questions about credits</h2>
+            </div>
+
             <div className={styles.faqList}>
               {FAQ_ITEMS.map(({ q, a }, i) => (
-                <div key={i} className={styles.faqItem}>
+                <div key={i} className={`${styles.faqItem} ${openFaq === i ? styles.faqItemOpen : ''}`}>
                   <button
                     className={styles.faqQuestion}
                     onClick={() => toggleFaq(i)}

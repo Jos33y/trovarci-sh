@@ -1,11 +1,39 @@
-/* ——— PRICING SECTION ——— */
+/* Pricing - flat-rate credit packs, three preset amounts */
 
 .section {
   position: relative;
-  padding: calc(var(--space-4xl) + var(--space-lg)) 0;
+  padding: 64px 0;
+  overflow: hidden;
 }
 
-/* Subtle separator line */
+/* Radial gold spotlight - centered, focuses attention on the Most Popular card */
+
+.bgRadial {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 50% 60% at 50% 50%,
+      rgba(212, 168, 67, 0.08) 0%,
+      transparent 65%
+    );
+}
+
+.bgNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+}
+
+/* Top hairline */
+
 .section::before {
   content: '';
   position: absolute;
@@ -15,12 +43,40 @@
   width: min(400px, 60%);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
+  z-index: 2;
 }
 
 .inner {
+  position: relative;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Header */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.kickerRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .heading {
@@ -33,29 +89,23 @@
 }
 
 .sub {
+  margin-top: 4px;
+  max-width: 540px;
   color: var(--trov-text-secondary);
-  font-size: 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   text-align: center;
-  margin-top: var(--space-sm);
-  margin-bottom: var(--space-lg);
 }
 
-.earlyBird {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--trov-warning);
-  letter-spacing: 0.02em;
-  margin-bottom: var(--space-3xl);
-}
-
-/* ——— CARD GRID ——— */
+/* Card grid - Growth first on mobile via order, 3-up on desktop */
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: 1fr;
+  gap: 16px;
   width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
   align-items: start;
 }
 
@@ -64,79 +114,82 @@
   background: var(--trov-bg);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: 20px;
   display: flex;
   flex-direction: column;
   transition:
     border-color var(--transition-normal),
-    transform var(--transition-normal);
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: rgba(212, 168, 67, 0.25);
+  box-shadow: 0 8px 32px rgba(212, 168, 67, 0.08);
 }
 
-/*
- * Pro card: gold accent border.
- * This is the card we want them to pick.
- * Not screaming, just clearly "the one."
- */
-.cardHighlight {
-  border-color: rgba(212, 168, 67, 0.3);
+.cardPopular {
+  border-color: rgba(212, 168, 67, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(212, 168, 67, 0.04) 0%,
+    var(--trov-bg) 30%
+  );
+  box-shadow: 0 4px 24px rgba(212, 168, 67, 0.08);
 }
 
-/* ——— BADGE ——— */
+.cardPopular:hover {
+  border-color: rgba(212, 168, 67, 0.5);
+  box-shadow: 0 8px 36px rgba(212, 168, 67, 0.16);
+}
+
+/* Mobile: Growth (popular) leads */
+
+.card:nth-child(1) { order: 2; }
+.card:nth-child(2) { order: 1; }
+.card:nth-child(3) { order: 3; }
+
+/* Badge */
 
 .badge {
   position: absolute;
-  top: calc(var(--space-md) * -1);
+  top: -10px;
   left: 50%;
   transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(212, 168, 67, 0.12);
+  color: var(--trov-accent);
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: var(--space-xs) 12px;
+  padding: 4px 10px;
   border-radius: var(--radius-sm);
+  border: 1px solid rgba(212, 168, 67, 0.3);
   white-space: nowrap;
+  backdrop-filter: blur(8px);
 }
 
-.badgeAccent {
-  background: var(--trov-accent);
-  color: var(--trov-text-on-accent);
-}
+/* Pack header */
 
-.badgeMuted {
-  background: var(--trov-surface-light);
-  color: var(--trov-text-secondary);
-  border: 1px solid var(--trov-border);
-}
-
-/* ——— PLAN HEADER ——— */
-
-.planName {
+.packName {
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--trov-text);
   letter-spacing: -0.02em;
-  margin-top: var(--space-sm);
+  margin-top: 4px;
 }
 
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
-.originalPrice {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--trov-text-muted);
-  text-decoration: line-through;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .price {
@@ -155,27 +208,84 @@
   color: var(--trov-text-muted);
 }
 
-.planDesc {
-  color: var(--trov-text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  margin-top: var(--space-sm);
+/* Details list */
+
+.details {
+  list-style: none;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--trov-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-/* ——— CTA BUTTON ——— */
+.detailPrimary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
 
-.planCta {
+.detailValue {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  line-height: 1;
+}
+
+.detailLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detailSecondary {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.4;
+}
+
+.detailApprox {
+  color: var(--trov-text-muted);
+  font-family: var(--font-mono);
+}
+
+.detailNumber {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.detailText {
+  color: var(--trov-text-secondary);
+}
+
+.detailTertiary {
+  font-size: 0.8125rem;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+}
+
+/* CTA */
+
+.cta {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 12px var(--space-lg);
+  padding: 12px 20px;
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
-  margin-top: var(--space-lg);
+  margin-top: 20px;
   min-height: 44px;
   transition:
     background var(--transition-fast),
@@ -183,96 +293,76 @@
     border-color var(--transition-fast);
 }
 
-.planCtaPrimary {
+.ctaPrimary {
   background: var(--trov-accent);
   color: var(--trov-text-on-accent);
 }
 
-.planCtaPrimary:hover {
+.ctaPrimary:hover {
   background: var(--trov-accent-hover);
   transform: translateY(-1px);
   color: var(--trov-text-on-accent);
 }
 
-.planCtaSecondary {
+.ctaSecondary {
   background: transparent;
   color: var(--trov-accent);
   border: 1.5px solid var(--trov-border);
 }
 
-.planCtaSecondary:hover {
+.ctaSecondary:hover {
   border-color: var(--trov-accent);
   background: var(--trov-glow);
   color: var(--trov-accent);
 }
 
-/* ——— FEATURE LIST ——— */
+/* Footnote */
 
-.features {
-  list-style: none;
-  margin-top: var(--space-lg);
-  padding-top: var(--space-lg);
-  border-top: 1px solid var(--trov-border);
+.footnote {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.feature {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  font-size: 0.8125rem;
-  color: var(--trov-text-secondary);
-  line-height: 1.4;
-}
-
-.featureDisabled {
-  color: var(--trov-text-muted);
-}
-
-.checkIcon {
-  color: var(--trov-success);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.crossIcon {
-  color: var(--trov-text-muted);
-  flex-shrink: 0;
-  margin-top: 1px;
-  opacity: 0.5;
-}
-
-/* ——— GUARANTEE ——— */
-
-.guarantee {
-  margin-top: var(--space-2xl);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--trov-text-muted);
+  gap: 6px;
   text-align: center;
 }
 
-/* ——— RESPONSIVE ——— */
+.footnote p {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-muted);
+  line-height: 1.5;
+}
 
-@media (max-width: 768px) {
+/* Tablet */
+
+@media (min-width: 640px) {
   .section {
-    padding: var(--space-3xl) 0;
+    padding: 80px 0;
   }
 
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
   .cards {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin: 0 auto;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: none;
   }
 
-  /*
-   * On mobile, reorder so Pro card is first.
-   * The best option should be the first thing they see.
-   */
-  .card:nth-child(1) { order: 2; }
-  .card:nth-child(2) { order: 1; }
+  .card:nth-child(1) { order: 1; }
+  .card:nth-child(2) { order: 2; }
   .card:nth-child(3) { order: 3; }
+
+  .footnote {
+    margin-top: 40px;
+  }
 }

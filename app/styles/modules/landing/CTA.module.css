@@ -1,17 +1,11 @@
-/* ——— FINAL CTA SECTION ——— */
-/*
- * Grand finale. Mirrors the hero's grid+noise treatment
- * to bookend the page. Grid lines + grain = engineered,
- * not atmospheric. No radial glows, no breathing animations.
- */
+/* Final CTA - signup form on grid+noise treatment, bookends the hero */
 
 .section {
   position: relative;
-  padding: calc(var(--space-4xl) + var(--space-2xl)) 0;
+  padding: 64px 0;
   overflow: hidden;
 }
 
-/* ——— GRID LINES (mirrors hero) ——— */
 .ctaGrid {
   position: absolute;
   inset: 0;
@@ -32,19 +26,10 @@
       transparent 1px,
       transparent 64px
     );
-  -webkit-mask-image: radial-gradient(
-    ellipse 60% 70% at 50% 50%,
-    black 0%,
-    transparent 70%
-  );
-  mask-image: radial-gradient(
-    ellipse 60% 70% at 50% 50%,
-    black 0%,
-    transparent 70%
-  );
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 70%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 70%);
 }
 
-/* ——— NOISE GRAIN (mirrors hero) ——— */
 .ctaNoise {
   position: absolute;
   inset: 0;
@@ -56,7 +41,8 @@
   background-size: 300px 300px;
 }
 
-/* Gradient accent line at top — structural, not decorative */
+/* Hairline at top edge */
+
 .section::after {
   content: '';
   position: absolute;
@@ -92,14 +78,14 @@
   color: var(--trov-text-secondary);
   font-size: 1rem;
   text-align: center;
-  margin-top: var(--space-sm);
+  margin-top: 8px;
   line-height: 1.6;
 }
 
-/* ——— FORM ——— */
+/* Form */
 
 .formWrap {
-  margin-top: var(--space-xl);
+  margin-top: 28px;
   width: 100%;
   max-width: 480px;
   display: flex;
@@ -109,6 +95,7 @@
 
 .inputRow {
   display: flex;
+  flex-direction: column;
   width: 100%;
   gap: 0;
   border-radius: var(--radius-sm);
@@ -126,28 +113,38 @@
   flex: 1;
   background: var(--trov-surface);
   border: none;
-  padding: 14px var(--space-md);
+  padding: 14px 16px;
   font-family: var(--font-body);
   font-size: 1rem;
   color: var(--trov-text);
   outline: none;
   min-width: 0;
+  min-height: 44px;
 }
 
 .input::placeholder {
   color: var(--trov-text-muted);
 }
 
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--trov-surface) inset;
+  -webkit-text-fill-color: var(--trov-text);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 .button {
   background: var(--trov-accent);
   color: var(--trov-text-on-accent);
   border: none;
-  padding: 14px var(--space-lg);
+  padding: 14px 24px;
   font-family: var(--font-body);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  min-height: 44px;
   transition: background var(--transition-fast);
 }
 
@@ -162,59 +159,42 @@
 
 .note {
   margin-top: 12px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--trov-text-muted);
   text-align: center;
+  line-height: 1.5;
 }
 
-/* ——— SUCCESS STATE ——— */
-
-.success {
-  margin-top: var(--space-xl);
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--trov-success);
+.noteLink {
+  color: var(--trov-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast);
 }
 
-.successIcon {
-  flex-shrink: 0;
+.noteLink:hover {
+  color: var(--trov-accent);
 }
 
-/* ——— RESPONSIVE ——— */
+/* Tablet and up - inline input + button */
 
-@media (max-width: 768px) {
+@media (min-width: 480px) {
+  .inputRow {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 640px) {
   .section {
-    padding: var(--space-4xl) 0;
+    padding: 80px 0;
   }
 
   .ctaGrid {
-    -webkit-mask-image: radial-gradient(
-      ellipse 80% 60% at 50% 50%,
-      black 0%,
-      transparent 70%
-    );
-    mask-image: radial-gradient(
-      ellipse 80% 60% at 50% 50%,
-      black 0%,
-      transparent 70%
-    );
-  }
-}
-
-@media (max-width: 480px) {
-  .inputRow {
-    flex-direction: column;
-    border-radius: var(--radius-sm);
+    -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, black 0%, transparent 70%);
+    mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, black 0%, transparent 70%);
   }
 
-  .input {
-    border-radius: 0;
-  }
-
-  .button {
-    padding: 14px;
+  .formWrap {
+    margin-top: 32px;
   }
 }

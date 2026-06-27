@@ -3,7 +3,7 @@ const BASE_URL = "https://trovarci.sh";
 export function getSeo({ title, description, path = "", image }) {
   const url = `${BASE_URL}${path}`;
   const ogImage = image || `${BASE_URL}/og-image.png`;
-const fullTitle = title ? `${title} | Trovarcis Reach` : "Trovarcis Reach | Bulk Email & SMS Software";
+  const fullTitle = title ? `${title} | Trovarcis Reach` : "Trovarcis Reach | Email Deliverability Toolkit";
 
   return [
     { title: fullTitle },
@@ -21,4 +21,3 @@ const fullTitle = title ? `${title} | Trovarcis Reach` : "Trovarcis Reach | Bulk
     { name: "twitter:image", content: ogImage },
   ];
 }
- 

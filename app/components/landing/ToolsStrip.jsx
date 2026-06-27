@@ -11,12 +11,12 @@ import {
 import styles from '~/styles/modules/landing/ToolsStrip.module.css';
 
 const TOOLS = [
-  { label: "Email Scorer", desc: "AI spam analysis", href: "/score", icon: GaugeIcon },
-  { label: "Domain Checker", desc: "Blacklist & DNS", href: "/domain", icon: GlobeIcon },
-  { label: "Email Verifier", desc: "Validate addresses", href: "/verify", icon: VerifyIcon },
-  { label: "SMTP Tester", desc: "Connection check", href: "/smtp-test", icon: TerminalIcon },
-  { label: "DNS Generator", desc: "SPF, DKIM, DMARC", href: "/records", icon: DnsIcon },
-  { label: "Number Verifier", desc: "Phone validation", href: "/verify-number", icon: PhoneIcon },
+  { label: "Email Scorer",    desc: "AI spam-trigger scoring",       href: "/score",         icon: GaugeIcon },
+  { label: "Domain Checker",  desc: "DNS + blacklist audit",         href: "/domain",        icon: GlobeIcon },
+  { label: "Email Verifier",  desc: "Single or bulk address checks", href: "/verify",        icon: VerifyIcon },
+  { label: "SMTP Tester",     desc: "Auth, TLS, MX diagnostics",     href: "/smtp-test",     icon: TerminalIcon },
+  { label: "DNS Generator",   desc: "SPF, DKIM, DMARC records",      href: "/records",       icon: DnsIcon },
+  { label: "Number Verifier", desc: "Real carrier + line type",      href: "/verify-number", icon: PhoneIcon },
 ];
 
 export default function ToolsStrip() {
@@ -24,8 +24,14 @@ export default function ToolsStrip() {
 
   return (
     <section className={styles.strip}>
+      <div className={styles.stripNoise} aria-hidden="true" />
+
       <div ref={revealRef} className={`container ${styles.inner} reveal`}>
-        <p className={styles.label}>Free tools. No account needed.</p>
+        <div className={styles.labelRow}>
+          <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+          <p className={styles.label}>Six checks. One workflow.</p>
+        </div>
+
         <div className={styles.tools}>
           {TOOLS.map((tool) => {
             const Icon = tool.icon;

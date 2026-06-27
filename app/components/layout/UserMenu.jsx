@@ -2,30 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Form, Link, useLocation } from 'react-router';
 import styles from '~/styles/modules/layout/UserMenu.module.css';
 
-/**
- * User menu.
- *
- * Trigger: circular avatar with the user's email initial.
- * Panel:   user info block, navigation items, sign out button.
- *
- * Behavior:
- *   - Closes on outside click
- *   - Closes on Escape (returns focus to trigger)
- *   - Closes on route change
- *   - aria-haspopup / aria-expanded on trigger; role="menu" on panel
- */
+// Avatar trigger + dropdown panel. Closes on outside click, Escape, or route change.
 export default function UserMenu({ user }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const triggerRef = useRef(null);
   const location = useLocation();
 
-  // Close on route change
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Close on outside click / Escape
   useEffect(() => {
     if (!open) return;
 

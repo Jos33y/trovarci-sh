@@ -5,36 +5,36 @@ import styles from '~/styles/modules/landing/FAQ.module.css';
 
 const QUESTIONS = [
   {
-    q: "Does Trovarcis Reach work offline?",
-    a: "Yes. All campaign preparation works completely offline. Contacts, templates, email composition, SMTP configuration. You only need internet when you actually hit send.",
+    q: "What does a credit get me?",
+    a: "$0.01 per credit. Email scoring costs 1 credit. Single email verification costs 1 credit. Phone lookup costs 2 credits. Bulk email verification gets a 5x discount (1 credit per 5 emails). Domain Checker, SMTP Tester, and DNS Generator cost zero credits.",
   },
   {
-    q: "What SMTP providers does it support?",
-    a: "Any standard SMTP server, plus Resend API and Amazon SES API at launch. Mailgun, SendGrid, and Postmark support coming in future updates. If it speaks SMTP, Reach works with it.",
+    q: "Do credits expire?",
+    a: "Yes. 12 months from purchase. You'll get email reminders before expiry so nothing slips away unused.",
   },
   {
-    q: "Is my data stored on your servers?",
-    a: "No. All contacts, campaigns, templates, and SMTP credentials are stored locally on your device in a SQLite database. We never see your data. Nothing is uploaded, nothing is tracked.",
+    q: "What's the difference between Email Scorer and Email Verifier?",
+    a: "Scorer grades a draft email for spam triggers, formatting issues, and missing authentication elements. Verifier checks whether an email address actually exists and accepts mail. Different jobs, different tools.",
   },
   {
-    q: "What are Credits?",
-    a: "Credits power the AI features like email scoring and bounce analysis. 1 Credit equals $0.01. Buy them when you need them. They never expire. Core features like sending, contacts, and templates work without Credits.",
+    q: "Is bulk verification faster than single?",
+    a: "Same speed, lower price. Bulk costs 1 credit per 5 emails. Single costs 1 credit per email. Use bulk for lists, single for ad-hoc checks.",
   },
   {
-    q: "Can I use Reach on multiple devices?",
-    a: "Yes. One license activates on up to 3 devices. Desktop and mobile. You can manage your activated devices in Settings and deactivate one to free up a slot anytime.",
+    q: "Do you store the data I upload?",
+    a: "Verification results are saved to your account so you can re-download them. You can delete a job to remove its data. We don't sell or share your data with third parties.",
   },
   {
-    q: "Is there a money-back guarantee?",
-    a: "Yes. 15-day no-questions-asked refund policy. If Reach is not for you, email support@trovarcis.com and we will process your refund.",
+    q: "What payment methods do you accept?",
+    a: "Crypto via Cryptomus today: BTC, ETH, USDT, USDC, LTC, and more. Card payments via Stripe are coming.",
   },
   {
-    q: "How is Trovarcis Reach different from Mailchimp?",
-    a: "Mailchimp charges monthly fees that increase with your list size. Trovarcis Reach is a one-time purchase. Send unlimited emails forever. Plus, your data stays on your device, not on their servers. No tracking pixels injected, no link wrapping, no deliverability risk from shared infrastructure.",
+    q: "What's your refund policy?",
+    a: "15-day money-back guarantee on unused credits. Email support@trovarci.sh and we'll process a full refund, no questions.",
   },
   {
-    q: "When does Trovarcis Reach launch?",
-    a: "June 2026. Join the waitlist to get early bird pricing and be notified the moment it ships.",
+    q: "Is there a free plan?",
+    a: "Three tools cost zero credits, forever: Domain Checker, SMTP Tester, and DNS Generator. New accounts also get 10 free credits to try the paid tools.",
   },
 ];
 
@@ -88,8 +88,18 @@ export default function FAQ() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
+
+      <div className={styles.bgRadial} aria-hidden="true" />
+      <div className={styles.bgNoise} aria-hidden="true" />
+
       <div className={`container ${styles.inner}`}>
-        <h2 ref={headingRef} className={`${styles.heading} reveal`}>Frequently asked questions</h2>
+        <div ref={headingRef} className={`${styles.header} reveal`}>
+          <div className={styles.kickerRow}>
+            <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+            <span className={styles.kicker}>Quick answers</span>
+          </div>
+          <h2 className={styles.heading}>Frequently asked questions</h2>
+        </div>
 
         <div ref={listRef} className={`${styles.list} stagger`}>
           {QUESTIONS.map((item, i) => (

@@ -8,7 +8,7 @@ const COLUMNS = [
     links: [
       { label: "Features", href: "/#features" },
       { label: "Pricing", href: "/#pricing" },
-      { label: "Download", href: "/download" },
+      { label: "Desktop app", href: "/#desktop" },
       { label: "Credits", href: "/credits" },
     ],
   },
@@ -38,7 +38,7 @@ const COLUMNS = [
       { label: "Contact", href: "/contact" },
       { label: "X (Twitter)", href: "https://x.com/trovarcisreach", external: true },
       { label: "GitHub", href: "https://github.com/trovarcis", external: true },
-      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com", external: true },
+      { label: "support@trovarci.sh", href: "mailto:support@trovarci.sh", external: true },
     ],
   },
 ];
@@ -46,7 +46,7 @@ const COLUMNS = [
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={`container ${styles.inner}`}>
+      <div className="container">
         <div className={styles.grid}>
           <div className={styles.brand}>
             <TrovarcisLogo size={28} />

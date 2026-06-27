@@ -1,13 +1,12 @@
-/* ═══════════════════════════════════════════
-   USER MENU - avatar trigger + dropdown panel
-   ═══════════════════════════════════════════ */
+/* User menu - avatar trigger + dropdown panel */
 
 .root {
   position: relative;
   display: inline-block;
 }
 
-/* ─── Trigger (avatar button) ─────────────── */
+/* Trigger */
+
 .trigger {
   display: flex;
   align-items: center;
@@ -51,7 +50,8 @@
   justify-content: center;
 }
 
-/* ─── Panel ───────────────────────────────── */
+/* Panel */
+
 .panel {
   position: absolute;
   top: calc(100% + 10px);
@@ -71,7 +71,8 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── User info block ─────────────────────── */
+/* User info block */
+
 .userInfo {
   display: flex;
   align-items: center;
@@ -118,14 +119,16 @@
   color: var(--trov-text-secondary);
 }
 
-/* ─── Divider ─────────────────────────────── */
+/* Divider */
+
 .divider {
   height: 1px;
   margin: 4px 2px;
   background: var(--trov-border);
 }
 
-/* ─── Menu items ──────────────────────────── */
+/* Menu items */
+
 .item,
 .itemDanger {
   display: flex;

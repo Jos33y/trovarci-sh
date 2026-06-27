@@ -11,14 +11,21 @@ export default function LatestPosts({ posts = [] }) {
 
   if (!posts || posts.length === 0) return null;
 
-  // Show max 3
   const display = posts.slice(0, 3);
 
   return (
     <section className={styles.section}>
-      <div className="container">
+      <div className={styles.bgNoise} aria-hidden="true" />
+
+      <div className={`container ${styles.inner}`}>
         <div ref={headingRef} className={`${styles.header} reveal`}>
-          <h2 className={styles.heading}>From the blog</h2>
+          <div className={styles.titleBlock}>
+            <div className={styles.kickerRow}>
+              <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+              <span className={styles.kicker}>Reading list</span>
+            </div>
+            <h2 className={styles.heading}>From the blog</h2>
+          </div>
           <Link to="/blog" className={styles.viewAll}>
             View all
             <ArrowRightIcon size={14} />

@@ -1,36 +1,36 @@
 import useReveal from '~/utils/useReveal';
 import {
-  DownloadIcon,
-  TerminalIcon,
   UsersIcon,
-  SendIcon,
+  LayersIcon,
+  BoltIcon,
+  CardIcon,
 } from '~/components/icons';
 import styles from '~/styles/modules/landing/HowItWorks.module.css';
 
 const STEPS = [
   {
     number: "01",
-    icon: DownloadIcon,
-    title: "Download the app",
-    desc: "Free for Windows, macOS, Linux, iOS, and Android.",
+    icon: UsersIcon,
+    title: "Sign up",
+    desc: "10 free credits land in your account. No card. No trial timer.",
   },
   {
     number: "02",
-    icon: TerminalIcon,
-    title: "Add your SMTPs",
-    desc: "Connect any SMTP server or API provider. Add as many as you need.",
+    icon: LayersIcon,
+    title: "Pick a tool",
+    desc: "Six checks for email, list, domain, SMTP, and DNS. Three are free.",
   },
   {
     number: "03",
-    icon: UsersIcon,
-    title: "Import contacts",
-    desc: "Drag and drop a CSV. Duplicates and invalid emails removed automatically.",
+    icon: BoltIcon,
+    title: "Run the check",
+    desc: "Results in seconds. Single inputs or CSV. Download the output.",
   },
   {
     number: "04",
-    icon: SendIcon,
-    title: "Hit send",
-    desc: "Failover, round-robin, or weighted. Reach handles the rest.",
+    icon: CardIcon,
+    title: "Top up when ready",
+    desc: "$0.01 per credit. Pay once, use when you need it. No subscription.",
   },
 ];
 
@@ -40,8 +40,17 @@ export default function HowItWorks() {
 
   return (
     <section className={styles.section}>
+      <div className={styles.bgStripe} aria-hidden="true" />
+      <div className={styles.bgNoise} aria-hidden="true" />
+
       <div className={`container ${styles.inner}`}>
-        <h2 ref={headingRef} className={`${styles.heading} reveal`}>How it works</h2>
+        <div ref={headingRef} className={`${styles.header} reveal`}>
+          <div className={styles.kickerRow}>
+            <span className="signal-dot signal-dot--sm" aria-hidden="true" />
+            <span className={styles.kicker}>Four steps</span>
+          </div>
+          <h2 className={styles.heading}>How it works</h2>
+        </div>
 
         <div ref={stepsRef} className={`${styles.steps} stagger`}>
           {STEPS.map((step) => {

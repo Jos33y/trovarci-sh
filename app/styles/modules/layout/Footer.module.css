@@ -1,30 +1,32 @@
+/* Footer - brand + 4 link columns, gradient hairline cap */
+
 .footer {
   position: relative;
-  padding: var(--space-3xl) 0 var(--space-2xl);
+  padding: 48px 0 32px;
 }
 
-/* Gradient accent line instead of flat border */
 .footer::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: min(300px, 40%);
+  width: min(300px, 50%);
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--trov-border), transparent);
+  background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1.5fr repeat(4, 1fr);
-  gap: var(--space-2xl);
+  grid-template-columns: 1fr 1fr;
+  gap: 32px 24px;
 }
 
 .brand {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 14px;
 }
 
 .tagline {
@@ -37,22 +39,23 @@
 .column {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 14px;
 }
 
 .columnTitle {
   font-family: var(--font-body);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--trov-text);
-  letter-spacing: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .columnList {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 8px;
 }
 
 .columnLink {
@@ -68,8 +71,8 @@
 }
 
 .bottom {
-  margin-top: var(--space-2xl);
-  padding-top: var(--space-lg);
+  margin-top: 40px;
+  padding-top: 20px;
   border-top: 1px solid var(--trov-border);
 }
 
@@ -92,25 +95,29 @@
   vertical-align: middle;
 }
 
-/* Tablet and mobile: brand on top spanning both columns,
-   four link sections in a 2x2 grid below. Holds all the way
-   down to very narrow widths - the four columns of short link
-   labels fit comfortably in 50% width at 375px and above. */
-@media (max-width: 768px) {
+/* Tablet - 4 columns alongside brand */
+
+@media (min-width: 640px) {
+  .footer {
+    padding: 64px 0 40px;
+  }
+
   .grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-xl) var(--space-lg);
+    grid-template-columns: 1.5fr repeat(4, 1fr);
+    gap: 40px;
   }
 
   .brand {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 }
 
-/* Ultra-narrow only (older iPhone SE / Galaxy Fold).
-   At 320px even 2x2 starts to feel cramped. */
-@media (max-width: 340px) {
+@media (min-width: 1024px) {
+  .footer {
+    padding: 80px 0 48px;
+  }
+
   .grid {
-    grid-template-columns: 1fr;
+    gap: 48px;
   }
 }

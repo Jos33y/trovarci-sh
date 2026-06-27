@@ -1,13 +1,69 @@
-/* ——— COMPARISON SECTION ——— */
+/* Comparison - deliverability toolkit vs single-purpose verifiers */
 
 .section {
-  padding: calc(var(--space-4xl) + var(--space-lg)) 0;
+  position: relative;
+  padding: 64px 0;
+  overflow: hidden;
+}
+
+/* Vertical gold beam behind the TR (winner) column */
+/* Mobile: centered horizontal radial. Desktop: vertical column tint. */
+
+.bgBeam {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 60% 30% at 50% 50%,
+      rgba(212, 168, 67, 0.06) 0%,
+      transparent 70%
+    );
+}
+
+.bgNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
 }
 
 .inner {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Header with kicker */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.kickerRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .heading {
@@ -17,10 +73,19 @@
   color: var(--trov-text);
   letter-spacing: -0.03em;
   text-align: center;
-  margin-bottom: var(--space-3xl);
 }
 
-/* ——— TABLE ——— */
+.sub {
+  margin-top: 4px;
+  margin-bottom: 32px;
+  max-width: 540px;
+  color: var(--trov-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* Table */
 
 .tableWrap {
   width: 100%;
@@ -30,20 +95,20 @@
 
 .table {
   width: 100%;
-  min-width: 700px;
+  min-width: 580px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.875rem;
 }
 
-/* ——— HEADER ——— */
+/* Header row */
 
 .labelHead {
-  width: 160px;
+  width: 180px;
 }
 
 .colHead {
-  padding: var(--space-md) var(--space-md) var(--space-lg);
+  padding: 14px 12px 18px;
   font-family: var(--font-body);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -52,10 +117,29 @@
   border-bottom: 1px solid var(--trov-border);
 }
 
-/* ——— ROWS ——— */
+.headDot {
+  display: inline-flex;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* TR column - subtle gold tint and stronger header */
+
+.cellHighlight {
+  background: rgba(212, 168, 67, 0.05);
+}
+
+.colHighlight {
+  color: var(--trov-accent);
+  font-weight: 600;
+  background: rgba(212, 168, 67, 0.06);
+  border-bottom-color: rgba(212, 168, 67, 0.3);
+}
+
+/* Body rows */
 
 .rowLabel {
-  padding: var(--space-md);
+  padding: 14px 16px;
   font-family: var(--font-body);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -66,7 +150,7 @@
 }
 
 .cell {
-  padding: var(--space-md);
+  padding: 14px 12px;
   text-align: center;
   color: var(--trov-text-secondary);
   font-size: 0.8125rem;
@@ -74,30 +158,16 @@
   transition: background var(--transition-fast);
 }
 
-/* Row hover — subtle lift of the entire row */
 .table tbody tr:hover .rowLabel,
 .table tbody tr:hover .cell {
-  background: rgba(255, 255, 255, 0.015);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .table tbody tr:hover .cellHighlight {
-  background: rgba(212, 168, 67, 0.07);
+  background: rgba(212, 168, 67, 0.10);
 }
 
-/*
- * Trovarcis column: subtle gold-tinted background
- * so the eye naturally gravitates to our column.
- * Not heavy-handed, just "this one's different."
- */
-.cellHighlight {
-  background: rgba(212, 168, 67, 0.04);
-}
-
-.colHighlight {
-  color: var(--trov-accent);
-  font-weight: 600;
-  background: rgba(212, 168, 67, 0.04);
-}
+/* Cell value variants */
 
 .yes {
   color: var(--trov-success);
@@ -113,18 +183,70 @@
   font-weight: 500;
 }
 
-/* ——— RESPONSIVE ——— */
+.free {
+  color: var(--trov-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
 
-@media (max-width: 768px) {
+.text {
+  color: var(--trov-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+}
+
+/* Bottom note */
+
+.note {
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-muted);
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* Tablet */
+
+@media (min-width: 640px) {
   .section {
-    padding: var(--space-3xl) 0;
+    padding: 80px 0;
   }
 
-  .heading {
-    margin-bottom: var(--space-2xl);
+  .header {
+    margin-bottom: 16px;
   }
 
-  .labelHead {
-    width: 120px;
+  .sub {
+    margin-bottom: 40px;
+  }
+
+  .cell,
+  .rowLabel,
+  .colHead {
+    padding: 16px;
+  }
+}
+
+/* Desktop - swap the radial beam for a vertical column tint that aligns with TR */
+
+@media (min-width: 1024px) {
+  .table {
+    min-width: 0;
+  }
+
+  .note {
+    margin-top: 20px;
+  }
+
+  .bgBeam {
+    background:
+      radial-gradient(
+        ellipse 12% 60% at 32% 55%,
+        rgba(212, 168, 67, 0.07) 0%,
+        transparent 70%
+      );
   }
 }

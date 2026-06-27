@@ -1,75 +1,96 @@
-/* ——— TOOLS STRIP ——— */
-/*
- * 6 mini-cards in a row. Each tool has its own space.
- * Icon stacked above label — reads as a toolbar, not a list.
- * Hover brings gold border + icon color + lift.
- * This is the lead gen engine — it needs to look clickable.
- */
+/* Tools strip - landing page mini-grid of the six toolkit entry points */
 
 .strip {
-  padding: var(--space-2xl) 0;
+  position: relative;
+  padding: 48px 0;
+  overflow: hidden;
+}
+
+/* Subtle noise texture - prevents flat surface band */
+
+.stripNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
 }
 
 .inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* Label with signal dot */
+
+.labelRow {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-xl);
+  gap: 8px;
 }
 
 .label {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* ——— CARD GRID ——— */
+/* Card grid */
 
 .tools {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
   width: 100%;
 }
 
-/* ——— INDIVIDUAL CARD ——— */
+/* Individual card */
 
 .tool {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-lg) var(--space-md);
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--trov-border);
+  background: var(--trov-bg);
   text-decoration: none;
-  text-align: center;
+  min-height: 44px;
   transition:
     border-color var(--transition-normal),
     transform var(--transition-fast),
-    background var(--transition-normal);
+    background var(--transition-normal),
+    box-shadow var(--transition-normal);
 }
 
 .tool:hover {
-  border-color: rgba(212, 168, 67, 0.25);
+  border-color: rgba(212, 168, 67, 0.3);
   transform: translateY(-2px);
   background: rgba(212, 168, 67, 0.03);
+  box-shadow: 0 4px 20px rgba(212, 168, 67, 0.06);
 }
-
-/* ——— ICON CONTAINER ——— */
 
 .toolIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
-  background: var(--trov-bg);
+  background: var(--trov-surface);
   border: 1px solid var(--trov-border);
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   flex-shrink: 0;
   transition:
     color var(--transition-fast),
@@ -79,23 +100,17 @@
 
 .tool:hover .toolIcon {
   color: var(--trov-accent);
-  border-color: rgba(212, 168, 67, 0.3);
-  background: rgba(212, 168, 67, 0.06);
+  border-color: rgba(212, 168, 67, 0.35);
+  background: rgba(212, 168, 67, 0.08);
 }
-
-/* ——— TEXT ——— */
 
 .toolLabel {
   font-family: var(--font-body);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--trov-text-secondary);
-  white-space: nowrap;
-  transition: color var(--transition-fast);
-}
-
-.tool:hover .toolLabel {
   color: var(--trov-text);
+  line-height: 1.2;
+  transition: color var(--transition-fast);
 }
 
 .toolDesc {
@@ -104,6 +119,7 @@
   font-weight: 400;
   color: var(--trov-text-muted);
   letter-spacing: 0.01em;
+  line-height: 1.4;
   transition: color var(--transition-fast);
 }
 
@@ -111,22 +127,20 @@
   color: var(--trov-text-secondary);
 }
 
-/* ——— RESPONSIVE ——— */
+/* Tablet */
 
-@media (max-width: 1024px) {
-  .tools {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 640px) {
+  .strip {
+    padding: 64px 0;
   }
-}
 
-@media (max-width: 768px) {
   .tools {
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-sm);
+    gap: 12px;
   }
 
   .tool {
-    padding: var(--space-md) var(--space-sm);
+    padding: 18px;
   }
 
   .toolIcon {
@@ -135,8 +149,19 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .strip {
+    padding: 80px 0;
+  }
+
   .tools {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .tool {
+    padding: 20px 16px;
   }
 }
