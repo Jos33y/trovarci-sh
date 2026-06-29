@@ -1,9 +1,6 @@
-/* ══════════════════════════════════════════════
-   DNS Record Generator - App-panel design
-   The tool IS the hero. No marketing wrapper.
-   ══════════════════════════════════════════════ */
+/* DNS Record Generator - App-panel design */
 
-/* ── Tool Card: the entire tool lives in one panel ── */
+/* Tool Card: the entire tool lives in one panel */
 
 .toolCard {
   max-width: 720px;
@@ -14,7 +11,7 @@
   overflow: hidden;
 }
 
-/* ── Card Header: app-like, not marketing-like ── */
+/* Card Header: app-like, not marketing-like */
 
 .cardHeader {
   display: flex;
@@ -75,7 +72,7 @@
   flex-shrink: 0;
 }
 
-/* ── Tab Bar: replaces step circles ── */
+/* Tab Bar: replaces step circles */
 
 .tabBar {
   display: flex;
@@ -126,13 +123,13 @@
   color: var(--trov-accent);
 }
 
-/* ── Tool Body ── */
+/* Tool Body */
 
 .toolBody {
   padding: var(--space-xl);
 }
 
-/* ── Step Content ── */
+/* Step Content */
 
 .stepContent {
   display: flex;
@@ -140,7 +137,7 @@
   gap: var(--space-xl);
 }
 
-/* ── Field Groups ── */
+/* Field Groups */
 
 .fieldGroup {
   display: flex;
@@ -163,7 +160,7 @@
   color: var(--trov-text-muted);
 }
 
-/* ── Inputs: 16px minimum for iOS zoom prevention ── */
+/* Inputs: 16px minimum for iOS zoom prevention */
 
 .domainInput {
   background: var(--trov-bg);
@@ -210,7 +207,7 @@
   box-shadow: 0 0 0 3px var(--trov-glow);
 }
 
-/* ── Option Grid (providers / registrars) ── */
+/* Option Grid (providers / registrars) */
 
 .optionGrid {
   display: grid;
@@ -279,7 +276,7 @@
   letter-spacing: 0.01em;
 }
 
-/* ── Chips ── */
+/* Chips */
 
 .chipRow {
   display: flex;
@@ -313,7 +310,7 @@
   color: var(--trov-accent);
 }
 
-/* ── Live Preview (real-time record building) ── */
+/* Live Preview (real-time record building) */
 
 .livePreview {
   background: var(--trov-bg);
@@ -376,7 +373,7 @@
   white-space: pre-wrap;
 }
 
-/* ── DMARC Policy ── */
+/* DMARC Policy */
 
 .policyOptions {
   display: flex;
@@ -431,7 +428,7 @@
   line-height: 1.4;
 }
 
-/* ── Step Footer (navigation) ── */
+/* Step Footer (navigation) */
 
 .stepFooter {
   display: flex;
@@ -488,9 +485,7 @@
   color: var(--trov-text);
 }
 
-/* ═══════════════════════════════════════════
-   STEP 3: Generated Records
-   ═══════════════════════════════════════════ */
+/* STEP 3: Generated Records */
 
 /* Completion banner - reward moment */
 .healthBanner {
@@ -575,7 +570,7 @@
   color: var(--trov-accent);
 }
 
-/* ── Registrar Instructions (collapsible) ── */
+/* Registrar Instructions (collapsible) */
 
 .instructions {
   background: var(--trov-bg);
@@ -638,7 +633,7 @@
   color: var(--trov-text-muted);
 }
 
-/* ── Record Cards ── */
+/* Record Cards */
 
 .recordCard {
   background: var(--trov-bg);
@@ -706,7 +701,7 @@
   color: var(--trov-accent);
 }
 
-/* ── Record Fields ── */
+/* Record Fields */
 
 .recordFields {
   display: flex;
@@ -777,7 +772,7 @@
   border-top: 1px solid var(--trov-border);
 }
 
-/* ── DKIM ── */
+/* DKIM */
 
 .dkimHeader {
   display: flex;
@@ -812,7 +807,7 @@
   gap: 8px;
 }
 
-/* ── Result Footer ── */
+/* Result Footer */
 
 .resultActions {
   display: flex;
@@ -843,17 +838,17 @@
   transform: translateY(-1px);
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════ */
+/* RESPONSIVE */
 
 @media (max-width: 640px) {
+  /* Mobile treats the tool as a working surface, not a floating card. */
   .toolCard {
-    border-radius: var(--radius-lg);
+    border: none;
+    border-radius: 0;
   }
 
   .cardHeader {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md);
     flex-wrap: wrap;
   }
 
@@ -862,7 +857,7 @@
   }
 
   .toolBody {
-    padding: var(--space-lg);
+    padding: var(--space-md);
   }
 
   .optionGrid {
@@ -908,13 +903,9 @@
     text-align: center;
   }
 }
-/* ═══════════════════════════════════════════════════════════════════════════
-   SECTION 04 ADDITIONS
-   New selectors introduced by the rebuilt DnsGenerator component.
-   Everything above this line is preserved verbatim from the original module.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* SECTION 04 ADDITIONS */
 
-/* ── Inline error (validation feedback under inputs) ── */
+/* Inline error (validation feedback under inputs) */
 
 .inlineError {
   font-size: 12px;
@@ -924,7 +915,7 @@
   margin-top: 2px;
 }
 
-/* ── Inline accordion (DKIM key paste + DMARC advanced tags) ── */
+/* Inline accordion (DKIM key paste + DMARC advanced tags) */
 
 .inlineAccordion {
   background: var(--trov-bg);
@@ -1001,7 +992,7 @@
   border-bottom-color: var(--trov-accent);
 }
 
-/* ── DKIM key textarea ── */
+/* DKIM key textarea */
 
 .keyInput {
   background: var(--trov-bg);
@@ -1033,7 +1024,7 @@
   border-color: var(--trov-error, #f87171);
 }
 
-/* ── Advanced grid (two-column fields inside accordions) ── */
+/* Advanced grid (two-column fields inside accordions) */
 
 .advancedGrid {
   display: grid;
@@ -1047,7 +1038,7 @@
   }
 }
 
-/* ── Live preview tonal states ── */
+/* Live preview tonal states */
 
 .livePreviewError {
   border-color: rgba(248, 113, 113, 0.25);
@@ -1084,7 +1075,7 @@
   }
 }
 
-/* ── SPF source breakdown ── */
+/* SPF source breakdown */
 
 .spfBreakdown {
   margin-top: var(--space-md);
@@ -1172,7 +1163,7 @@
   }
 }
 
-/* ── Warning list (inline under previews and record cards) ── */
+/* Warning list (inline under previews and record cards) */
 
 .warningList {
   list-style: none;
@@ -1225,7 +1216,7 @@
   font-style: italic;
 }
 
-/* ── Health item overrides + dot ── */
+/* Health item overrides + dot */
 
 /* Override the original green-locked healthItem color so dot + label + detail
    can each carry their own tonal meaning. */
@@ -1268,7 +1259,7 @@
   font-size: 11px;
 }
 
-/* ── Status badge (e.g. "Needs admin action" on a DKIM record) ── */
+/* Status badge (e.g. "Needs admin action" on a DKIM record) */
 
 .statusBadge {
   font-family: var(--font-mono);
@@ -1286,7 +1277,7 @@
   border: 1px solid rgba(251, 146, 60, 0.18);
 }
 
-/* ── Registrar quoting hint ── */
+/* Registrar quoting hint */
 
 .registrarHint {
   font-size: 12px;
@@ -1299,7 +1290,7 @@
   padding-top: 10px;
 }
 
-/* ── MX record group spacing ── */
+/* MX record group spacing */
 
 .mxGroup {
   display: flex;
@@ -1307,7 +1298,7 @@
   gap: 8px;
 }
 
-/* ── DKIM deep link to provider setup ── */
+/* DKIM deep link to provider setup */
 
 .dkimLink {
   display: inline-flex;
@@ -1332,9 +1323,7 @@
   background: rgba(212, 168, 67, 0.08);
 }
 
-/* ══════════════════════════════════════════════
-   ADVANCED SECTION (BIMI + MTA-STS)
-   ══════════════════════════════════════════════ */
+/* ADVANCED SECTION (BIMI + MTA-STS) */
 
 .advancedSection {
   background: var(--trov-bg);
@@ -1561,9 +1550,7 @@
   font-family: inherit;
 }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE (additions)
-   ══════════════════════════════════════════════ */
+/* RESPONSIVE (additions) */
 
 @media (max-width: 640px) {
   .advancedSectionBody,
@@ -1581,13 +1568,9 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SECTION 04 VISUAL POLISH (post-test fixes)
-   Surgical overrides based on the scenario walkthrough screenshots.
-   Sits at the end of the file so CSS last-wins resolves these rules.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* SECTION 04 VISUAL POLISH (post-test fixes) */
 
-/* ── Health banner ───────────────────────────────────────────────────────
+/*  Health banner 
    Was: green-tinted success background, assuming all three dots are OK.
    That lied when the SPF dot was amber (at 9-10 lookups) or red (over 10).
    Now: neutral surface. Individual dots carry the tonal signal. */
@@ -1624,7 +1607,7 @@
   }
 }
 
-/* ── Advanced grid column overflow ───────────────────────────────────────
+/*  Advanced grid column overflow 
    `repeat(2, 1fr)` is secretly `repeat(2, minmax(auto, 1fr))` in CSS Grid,
    which lets a cell's content push the column wider than its share. The
    max_age hint "604800 = 1 week, 2592000 = 30 days" was forcing the right
@@ -1639,7 +1622,7 @@
   min-width: 0;
 }
 
-/* ── Option card SPF contribution text ───────────────────────────────────
+/*  Option card SPF contribution text 
    Provider names + include mechanisms + lookup counts can run long
    (e.g. "include:_spf.google.com (3 lookups)"). Let it wrap within the
    card rather than pushing layout. */
@@ -1649,7 +1632,7 @@
   word-break: break-word;
 }
 
-/* ── Warning border colours, explicit ────────────────────────────────────
+/*  Warning border colours, explicit 
    Using `currentColor` for the 3px left border was resolving to the text
    colour (gray #A1A1AA for info). Some browsers antialias thin borders
    slightly warm, making them read as tinted gold on dark backgrounds.
@@ -1667,7 +1650,7 @@
   border-left-color: var(--trov-error, #f87171);
 }
 
-/* ── Desktop input size ──────────────────────────────────────────────────
+/*  Desktop input size 
    16px font stays on mobile to prevent iOS from zooming the viewport when
    a field is focused. On desktop it feels oversized for a compact tool.
    Drop to 14px above the mobile breakpoint. */

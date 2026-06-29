@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import DomainChecker from '~/components/tools/DomainChecker';
-import { Link } from 'react-router';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/routes/domain.module.css';
 
-export const meta = () => {
-  return getSeo({
-    title: 'Free Domain Health Checker | Email, DNS & Reputation',
-    description: 'Check your domain\'s email authentication (SPF, DKIM, DMARC), mail server health, blacklist status, SSL security, and DNS configuration. Free, instant results.',
-    path: '/domain',
-  });
-};
+// /domain - Domain Health Checker. F2.5: sticky strip + bracketless tool host + numbered labels.
 
-const faqItems = [
+export const meta = () => getSeo({
+  title: 'Free Domain Health Checker | Email, DNS & Reputation',
+  description: "Check your domain's email authentication (SPF, DKIM, DMARC), mail server health, blacklist status, SSL security, and DNS configuration. Free, instant results.",
+  path: '/domain',
+});
+
+const SECTIONS = [
+  { id: 'tool', num: '01', name: 'TOOL' },
+  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'answers', num: '03', name: 'ANSWERS' },
+];
+
+const FAQ_ITEMS = [
   {
     q: 'What does the Domain Health Checker test?',
     a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation across 15+ blacklists, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
@@ -34,7 +40,7 @@ const faqItems = [
   },
   {
     q: 'How do I fix issues found by the checker?',
-    a: 'Each issue includes a plain-language explanation and a fix link. For authentication issues (SPF, DKIM, DMARC), the fix links directly to our DNS Record Generator with your domain pre-loaded. For blacklist issues, we link to the blacklist\'s removal request page.',
+    a: "Each issue includes a plain-language explanation and a fix link. For authentication issues (SPF, DKIM, DMARC), the fix links directly to our DNS Record Generator with your domain pre-loaded. For blacklist issues, we link to the blacklist's removal request page.",
   },
   {
     q: 'Why does the blacklist check show "Healthy" when my emails still go to spam?',
@@ -46,7 +52,7 @@ const faqItems = [
   },
 ];
 
-const categoryExplainers = [
+const CATEGORIES = [
   {
     label: 'Email Auth',
     title: 'Authentication protects your domain from spoofing',
@@ -79,23 +85,78 @@ const categoryExplainers = [
   },
 ];
 
+// Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
+function SectionLabel({ num, name }) {
+  return (
+    <div className={styles.sectionLabel}>
+      <span className={styles.sectionNum}>{num}</span>
+      <span className={styles.sectionSlash}>/</span>
+      <span className={styles.sectionName}>{name}</span>
+    </div>
+  );
+}
+
+// Horizontal sticky strip (desktop only).
+function SectionStrip({ activeId }) {
+  return (
+    <div className={styles.strip} aria-hidden="true">
+      <div className={`container ${styles.stripInner}`}>
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
+          >
+            <span className={styles.stripNum}>{s.num}</span>
+            <span className={styles.stripSlash}>/</span>
+            <span className={styles.stripName}>{s.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function DomainPage() {
-  const contentRef = useReveal();
+  const toolRef = useReveal();
+  const methodRef = useReveal();
+  const gridRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
   const [openFaq, setOpenFaq] = useState(null);
+  const [activeId, setActiveId] = useState('tool');
+
+  const sectionRefs = {
+    tool: useRef(null),
+    method: useRef(null),
+    answers: useRef(null),
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+    );
+    for (const id of Object.keys(sectionRefs)) {
+      const el = sectionRefs[id].current;
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
+    mainEntity: FAQ_ITEMS.map((item) => ({
       '@type': 'Question',
       name: item.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.a,
-      },
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
     })),
   };
 
@@ -103,57 +164,49 @@ export default function DomainPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Domain Health Checker',
-    description:
-      'Check domain email authentication, mail server health, blacklist status, SSL security, and DNS configuration. Free, no account required.',
+    description: 'Check domain email authentication, mail server health, blacklist status, SSL security, and DNS configuration. Free, no account required.',
     url: 'https://trovarci.sh/domain',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    creator: {
-      '@type': 'Organization',
-      name: 'Trovarcis',
-      url: 'https://trovarcis.com',
-    },
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    creator: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
   };
 
   return (
     <>
       <Header />
+      <SectionStrip activeId={activeId} />
       <main className={styles.page}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-        {/* Tool IS the hero */}
-        <section className={styles.toolSection}>
-          <div className="container">
-            <DomainChecker />
+        {/* Tool */}
+        <section id="tool" ref={sectionRefs.tool} className={styles.toolSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="01" name="TOOL" />
+            <div ref={toolRef} className={`${styles.toolHost} reveal`}>
+              <DomainChecker />
+            </div>
           </div>
         </section>
 
-        {/* SEO Content */}
-        <section className={styles.contentSection}>
-          <div className="container container--narrow" ref={contentRef}>
-            <h2 className={styles.contentTitle}>What we check and why it matters</h2>
-            <p className={styles.contentIntro}>
-              Your domain's email deliverability depends on more than just content. Authentication records, server configuration, blacklist status, and security setup all affect whether your emails reach the inbox or get silently dropped.
-            </p>
-            <p className={styles.contentIntro}>
-              This tool runs 25+ checks across five categories in seconds. Every result includes a plain-language explanation, not just a status code, so you know exactly what's wrong and how to fix it.
-            </p>
+        {/* Method - what we check and why */}
+        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="02" name="METHOD" />
+            <div ref={methodRef} className={`${styles.methodHead} reveal`}>
+              <h2 className={styles.methodTitle}>What we check and why it matters</h2>
+              <p className={styles.methodIntro}>
+                Your domain's email deliverability depends on more than just content. Authentication records, server configuration, blacklist status, and security setup all affect whether your emails reach the inbox or get silently dropped.
+              </p>
+              <p className={styles.methodIntro}>
+                This tool runs 25+ checks across five categories in seconds. Every result includes a plain-language explanation, not just a status code, so you know exactly what's wrong and how to fix it.
+              </p>
+            </div>
 
-            <div className={styles.explainerGrid}>
-              {categoryExplainers.map((item) => (
-                <div key={item.label} className={styles.explainerCard}>
+            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
+              {CATEGORIES.map((item) => (
+                <div key={item.label} className={`${styles.explainerCard} reveal`}>
                   <div className={styles.explainerTop}>
                     <span className={styles.explainerIcon}>
                       <item.icon />
@@ -166,18 +219,21 @@ export default function DomainPage() {
               ))}
             </div>
 
-            <p className={styles.contentOutro}>
-              Issues found link directly to the tool that fixes them. Missing DMARC? The DNS Generator creates the record. Blacklisted IP? We link to the removal page. Every result is actionable.
+            <p className={styles.methodOutro}>
+              Issues found link directly to the tool that fixes them. Missing DMARC? The <Link to="/records" className={styles.inlineLink}>DNS Generator</Link> creates the record. Blacklisted IP? We link to the removal page. Every result is actionable.
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className={styles.faqSection}>
-          <div className="container container--narrow" ref={faqRef}>
-            <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+        {/* Answers - FAQ */}
+        <section id="answers" ref={sectionRefs.answers} className={styles.answersSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="ANSWERS" />
+            <div ref={faqRef} className={`${styles.faqHead} reveal`}>
+              <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+            </div>
             <div className={styles.faqList}>
-              {faqItems.map((item, i) => {
+              {FAQ_ITEMS.map((item, i) => {
                 const isOpen = openFaq === i;
                 return (
                   <div
@@ -189,7 +245,8 @@ export default function DomainPage() {
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
                     >
-                      <span>{item.q}</span>
+                      <span className={styles.faqDash} aria-hidden="true" />
+                      <span className={styles.faqQuestionText}>{item.q}</span>
                       <span className={`${styles.faqChevron} ${isOpen ? styles.faqChevronOpen : ''}`}>
                         <ChevronIcon />
                       </span>
@@ -206,23 +263,36 @@ export default function DomainPage() {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* Cross-link CTA */}
         <section className={styles.ctaSection}>
-          <div className="container" ref={ctaRef}>
-            <div className={styles.ctaCard}>
-              <div className={styles.ctaContent}>
+          <div className={`container ${styles.container}`}>
+            <div ref={ctaRef} className={`${styles.ctaCard} reveal`}>
+              <div className={styles.ctaLeft}>
                 <h2 className={styles.ctaTitle}>Domain healthy? Test your email next.</h2>
                 <p className={styles.ctaDesc}>
                   Domain checks cover infrastructure. The Email Scorer analyzes your actual email content for spam triggers.
                 </p>
+                <div className={styles.ctaActions}>
+                  <Link to="/score" className={styles.ctaPrimary}>Score your email</Link>
+                  <Link to="/records" className={styles.ctaSecondary}>Fix DNS records</Link>
+                </div>
               </div>
-              <div className={styles.ctaActions}>
-                <Link to="/score" className={styles.ctaPrimary}>
-                  Score Your Email
-                </Link>
-                <Link to="/records" className={styles.ctaSecondary}>
-                  Fix DNS Records
-                </Link>
+              <div className={styles.ctaRight} aria-hidden="true">
+                <div className={styles.ctaPanelLabel}>NEXT STEPS</div>
+                <ul className={styles.ctaSpecList}>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Score email content</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Generate missing records</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Test SMTP connection</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -233,7 +303,7 @@ export default function DomainPage() {
   );
 }
 
-/* ── Inline SVGs for explainer cards ── */
+// Inline SVGs
 
 function ChevronIcon() {
   return (

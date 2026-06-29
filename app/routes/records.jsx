@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
@@ -7,15 +7,21 @@ import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/routes/records.module.css';
 
-export const meta = () => {
-  return getSeo({
-    title: 'Free SPF, DKIM & DMARC Record Generator',
-    description: 'Generate copy-paste DNS records for email authentication. Pick your provider and registrar, get SPF, DKIM, DMARC, MX, BIMI and MTA-STS records with lookup counting and policy guidance.',
-    path: '/records',
-  });
-};
+// /records - DNS Record Generator. F2.5: sticky strip + bracketless tool host + numbered labels.
 
-const faqItems = [
+export const meta = () => getSeo({
+  title: 'Free SPF, DKIM & DMARC Record Generator',
+  description: 'Generate copy-paste DNS records for email authentication. Pick your provider and registrar, get SPF, DKIM, DMARC, MX, BIMI and MTA-STS records with lookup counting and policy guidance.',
+  path: '/records',
+});
+
+const SECTIONS = [
+  { id: 'tool', num: '01', name: 'TOOL' },
+  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'answers', num: '03', name: 'ANSWERS' },
+];
+
+const FAQ_ITEMS = [
   {
     q: 'What are SPF, DKIM, and DMARC records?',
     a: 'SPF (Sender Policy Framework) tells receiving servers which IPs can send email for your domain. DKIM (DomainKeys Identified Mail) adds a digital signature to verify emails were not tampered with in transit. DMARC (Domain-based Message Authentication, Reporting and Conformance) tells servers what to do when SPF or DKIM checks fail.',
@@ -54,7 +60,7 @@ const faqItems = [
   },
 ];
 
-const recordExplainers = [
+const RECORD_EXPLAINERS = [
   {
     label: 'SPF',
     title: 'SPF tells servers who can send for you',
@@ -75,23 +81,78 @@ const recordExplainers = [
   },
 ];
 
+// Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
+function SectionLabel({ num, name }) {
+  return (
+    <div className={styles.sectionLabel}>
+      <span className={styles.sectionNum}>{num}</span>
+      <span className={styles.sectionSlash}>/</span>
+      <span className={styles.sectionName}>{name}</span>
+    </div>
+  );
+}
+
+// Horizontal sticky strip (desktop only).
+function SectionStrip({ activeId }) {
+  return (
+    <div className={styles.strip} aria-hidden="true">
+      <div className={`container ${styles.stripInner}`}>
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
+          >
+            <span className={styles.stripNum}>{s.num}</span>
+            <span className={styles.stripSlash}>/</span>
+            <span className={styles.stripName}>{s.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function RecordsPage() {
-  const contentRef = useReveal();
+  const toolRef = useReveal();
+  const methodRef = useReveal();
+  const gridRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
   const [openFaq, setOpenFaq] = useState(null);
+  const [activeId, setActiveId] = useState('tool');
+
+  const sectionRefs = {
+    tool: useRef(null),
+    method: useRef(null),
+    answers: useRef(null),
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+    );
+    for (const id of Object.keys(sectionRefs)) {
+      const el = sectionRefs[id].current;
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
+    mainEntity: FAQ_ITEMS.map((item) => ({
       '@type': 'Question',
       name: item.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.a,
-      },
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
     })),
   };
 
@@ -99,56 +160,49 @@ export default function RecordsPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'DNS Record Generator',
-    description: 'Generate SPF, DKIM, and DMARC records for email authentication. Free, no account required.',
+    description: 'Generate SPF, DKIM, DMARC, MX, BIMI and MTA-STS records. Free, no account required.',
     url: 'https://trovarci.sh/records',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    creator: {
-      '@type': 'Organization',
-      name: 'Trovarcis',
-      url: 'https://trovarcis.com',
-    },
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    creator: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
   };
 
   return (
     <>
       <Header />
+      <SectionStrip activeId={activeId} />
       <main className={styles.page}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-        {/* Tool IS the hero. No separate hero section. */}
-        <section className={styles.toolSection}>
-          <div className="container">
-            <DnsGenerator />
+        {/* Tool */}
+        <section id="tool" ref={sectionRefs.tool} className={styles.toolSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="01" name="TOOL" />
+            <div ref={toolRef} className={`${styles.toolHost} reveal`}>
+              <DnsGenerator />
+            </div>
           </div>
         </section>
 
-        {/* SEO Content */}
-        <section className={styles.contentSection}>
-          <div className={`container container--narrow`} ref={contentRef}>
-            <h2 className={styles.contentTitle}>Why email authentication matters</h2>
-            <p className={styles.contentIntro}>
-              Every email you send is checked against your domain's DNS records before it reaches the inbox. If your domain lacks proper SPF, DKIM, and DMARC records, major providers like Gmail, Yahoo, and Microsoft will either send your emails to spam or reject them outright.
-            </p>
-            <p className={styles.contentIntro}>
-              As of February 2024, Google and Yahoo enforce strict authentication requirements for bulk senders. Domains sending more than 5,000 emails per day must have all three records configured correctly, with DMARC alignment passing.
-            </p>
+        {/* Method - why authentication matters */}
+        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="02" name="METHOD" />
+            <div ref={methodRef} className={`${styles.methodHead} reveal`}>
+              <h2 className={styles.methodTitle}>Why email authentication matters</h2>
+              <p className={styles.methodIntro}>
+                Every email you send is checked against your domain's DNS records before it reaches the inbox. If your domain lacks proper SPF, DKIM, and DMARC records, major providers like Gmail, Yahoo, and Microsoft will either send your emails to spam or reject them outright.
+              </p>
+              <p className={styles.methodIntro}>
+                As of February 2024, Google and Yahoo enforce strict authentication requirements for bulk senders. Domains sending more than 5,000 emails per day must have all three records configured correctly, with DMARC alignment passing.
+              </p>
+            </div>
 
-            <div className={styles.explainerGrid}>
-              {recordExplainers.map((item) => (
-                <div key={item.label} className={styles.explainerCard}>
+            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
+              {RECORD_EXPLAINERS.map((item) => (
+                <div key={item.label} className={`${styles.explainerCard} reveal`}>
                   <div className={styles.explainerTop}>
                     <span className={styles.explainerIcon}>
                       <item.icon />
@@ -161,18 +215,21 @@ export default function RecordsPage() {
               ))}
             </div>
 
-            <p className={styles.contentOutro}>
+            <p className={styles.methodOutro}>
               This generator creates SPF, DKIM, DMARC and MX records for every major email provider, plus optional BIMI and MTA-STS records for brand-led and security-conscious senders. Every record is formatted for your registrar's DNS panel with copy-ready values.
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className={styles.faqSection}>
-          <div className={`container container--narrow`} ref={faqRef}>
-            <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+        {/* Answers - FAQ */}
+        <section id="answers" ref={sectionRefs.answers} className={styles.answersSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="ANSWERS" />
+            <div ref={faqRef} className={`${styles.faqHead} reveal`}>
+              <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+            </div>
             <div className={styles.faqList}>
-              {faqItems.map((item, i) => {
+              {FAQ_ITEMS.map((item, i) => {
                 const isOpen = openFaq === i;
                 return (
                   <div
@@ -184,7 +241,8 @@ export default function RecordsPage() {
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
                     >
-                      <span>{item.q}</span>
+                      <span className={styles.faqDash} aria-hidden="true" />
+                      <span className={styles.faqQuestionText}>{item.q}</span>
                       <span className={`${styles.faqChevron} ${isOpen ? styles.faqChevronOpen : ''}`}>
                         <ChevronIcon />
                       </span>
@@ -201,23 +259,36 @@ export default function RecordsPage() {
           </div>
         </section>
 
-        {/* CTA - banner card, not centered hero pattern */}
+        {/* Cross-link CTA */}
         <section className={styles.ctaSection}>
-          <div className="container" ref={ctaRef}>
-            <div className={styles.ctaCard}>
-              <div className={styles.ctaContent}>
+          <div className={`container ${styles.container}`}>
+            <div ref={ctaRef} className={`${styles.ctaCard} reveal`}>
+              <div className={styles.ctaLeft}>
                 <h2 className={styles.ctaTitle}>Records set? Check if they work.</h2>
                 <p className={styles.ctaDesc}>
                   Verify your SPF, DKIM, and DMARC records are configured and passing authentication.
                 </p>
+                <div className={styles.ctaActions}>
+                  <Link to="/domain" className={styles.ctaPrimary}>Check domain health</Link>
+                  <Link to="/score" className={styles.ctaSecondary}>Score your email</Link>
+                </div>
               </div>
-              <div className={styles.ctaActions}>
-                <Link to="/domain" className={styles.ctaPrimary}>
-                  Check Domain Health
-                </Link>
-                <Link to="/score" className={styles.ctaSecondary}>
-                  Score Your Email
-                </Link>
+              <div className={styles.ctaRight} aria-hidden="true">
+                <div className={styles.ctaPanelLabel}>NEXT STEPS</div>
+                <ul className={styles.ctaSpecList}>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Verify authentication passes</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Test SMTP connection</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Score email content</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -228,11 +299,11 @@ export default function RecordsPage() {
   );
 }
 
-/* ── Inline SVGs ── */
+// Inline SVGs
 
 function ChevronIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none">
       <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -240,7 +311,7 @@ function ChevronIcon() {
 
 function SpfIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <path d="M12 3L4 7V12C4 16.4 7.4 20.5 12 21.5C16.6 20.5 20 16.4 20 12V7L12 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
       <path d="M8.5 12L11 14.5L15.5 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -249,7 +320,7 @@ function SpfIcon() {
 
 function DkimIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <circle cx="8" cy="15" r="4" stroke="currentColor" strokeWidth="1.6" />
       <path d="M11 12L20 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M17 3H20V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -260,7 +331,7 @@ function DkimIcon() {
 
 function DmarcIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <path d="M3 6H21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M6 10H18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M9 14H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />

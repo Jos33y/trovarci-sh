@@ -3,27 +3,14 @@ import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/NumberVerifier.module.css';
 import BulkVerificationResult from './BulkVerificationResult';
 
-/* ─────────────────────────────────────────────────────────────────────────
-   NumberVerifier
-
-   Single-mode (one number at a time) phone verifier with two tiers:
-     - Tier 1 (free, always): libphonenumber-js format check via the
-       /api/tools/verify-number?mode=format endpoint.
-     - Tier 2 (2 credits, signup required): Twilio Lookup v2 via the same
-       endpoint with mode=carrier.
-
-   Bulk mode is intentionally parked. The JSX is preserved at the bottom
-   of this file behind a feature flag so it can be revived once the
-   Email Verifier (Tool 6) ships the shared bulk infrastructure - job
-   queue, progress streaming, CSV export.
-   ───────────────────────────────────────────────────────────────────── */
+/* NumberVerifier */
 
 const BULK_AVAILABLE = true;
 
 const DRAFT_KEY = 'trov_verify_number_draft_v1';
 const RATE_LIMIT_HARD_FALLBACK_SECONDS = 60;
 
-/* ── Bulk-mode constants ── */
+/* Bulk-mode constants */
 const MAX_BULK_PHONES   = 10_000;
 const POLL_INTERVAL_MS  = 1500;
 const TERMINAL_STATES   = new Set(['complete', 'partial', 'cancelled', 'failed']);
@@ -247,9 +234,7 @@ function friendlyError(err) {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Component
-   ───────────────────────────────────────────────────────────────────── */
+/* Component */
 
 export default function NumberVerifier({
   isAuthed = false,
@@ -259,7 +244,7 @@ export default function NumberVerifier({
 } = {}) {
   const toolRef = useRef(null);
 
-  /* ── Single-mode state ── */
+  /* Single-mode state */
   const [phase, setPhase] = useState('input');
   // 'input' | 'verifying' | 'tier1' | 'tier2loading' | 'tier2'
   const [country, setCountry] = useState('US');
@@ -269,11 +254,11 @@ export default function NumberVerifier({
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [inputError, setInputError] = useState('');
 
-  /* ── Auth + credits ── */
+  /* Auth + credits */
   const [balance, setBalance] = useState(initialBalance);
   const [needsAuth, setNeedsAuth] = useState(false);
 
-  /* ── Bulk-mode state ── */
+  /* Bulk-mode state */
   const [mode, setMode]               = useState('single');     // 'single' | 'bulk'
   const [bulkPhase, setBulkPhase]     = useState('upload');     // 'upload' | 'preview' | 'verifying' | 'result'
   const [bulkPhones, setBulkPhones]   = useState([]);
@@ -288,7 +273,7 @@ export default function NumberVerifier({
   const eventSourceRef = useRef(null);
   const pollTimerRef   = useRef(null);
 
-  /* ── sessionStorage draft persistence ──
+  /*  sessionStorage draft persistence 
         Survives the signup round trip so the user does not retype on
         return. Cleared once a successful Tier 2 result comes back. */
 
@@ -322,7 +307,7 @@ export default function NumberVerifier({
     }
   }, [phase, tier2Result]);
 
-  /* ── Helpers ── */
+  /* Helpers */
 
   const scrollToTool = useCallback(() => {
     if (toolRef.current) {
@@ -340,7 +325,7 @@ export default function NumberVerifier({
     return err;
   };
 
-  /* ── Tier 1: format check ── */
+  /* Tier 1: format check */
 
   const handleVerify = useCallback(() => {
     const trimmed = number.trim();
@@ -388,7 +373,7 @@ export default function NumberVerifier({
       });
   }, [number, country]);
 
-  /* ── Tier 2: carrier lookup ──
+  /*  Tier 2: carrier lookup 
         Anonymous users see the inline signup CTA instead of an error.
         sessionStorage draft survives the round trip. */
 
@@ -449,7 +434,7 @@ export default function NumberVerifier({
       });
   }, [isAuthed, tier1Result, number, country, scrollToTool]);
 
-  /* ── Reset / retry ── */
+  /* Reset / retry */
 
   const handleSingleReset = useCallback(() => {
     setNumber('');
@@ -474,7 +459,7 @@ export default function NumberVerifier({
     if (e.key === 'Enter' && phase === 'input') handleVerify();
   }, [phase, handleVerify]);
 
-  /* ── Derived ── */
+  /* Derived */
 
   const selectedCountry = COUNTRIES.find((c) => c.code === country) || COUNTRIES[0];
 
@@ -488,7 +473,7 @@ export default function NumberVerifier({
         ? `${creditCost} CR / lookup · ${balance} left`
         : `${creditCost} CR / lookup`;
 
-  /* ── Bulk handlers ──
+  /*  Bulk handlers 
      Mirror EmailVerifier's bulk pattern. Phone bulk is paste-only - no
      CSV upload because phone lists are small enough to paste and pasting
      plus a textarea sidesteps the parser-and-drop-zone surface area. */
@@ -727,7 +712,7 @@ export default function NumberVerifier({
         <span className={styles.freeBadge}>{badgeText}</span>
       </div>
 
-      {/* ==== Single mode (the only mode that ships) ==== */}
+      {/* Single mode (the only mode that ships) */}
       {mode === 'single' && (
       <>
 
@@ -914,7 +899,7 @@ export default function NumberVerifier({
                 <span className={styles.authPromptBonus}>{welcomeBonus} free credits</span>
               </div>
               <p className={styles.authPromptBody}>
-                Carrier lookup uses Twilio Lookup, which costs real money to run. New
+                Carrier lookup contacts the live phone network, which costs real money to run. New
                 accounts get {welcomeBonus} free credits - enough for {Math.floor(welcomeBonus / creditCost)} carrier lookups. No card required. Your number is saved while you sign up.
               </p>
               <div className={styles.authPromptActions}>
@@ -1017,9 +1002,7 @@ export default function NumberVerifier({
       </>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════
-          BULK MODE
-          ════════════════════════════════════════════════════════════════ */}
+      {/* BULK MODE */}
       {mode === 'bulk' && (
       <>
         {/* Upload (paste) */}

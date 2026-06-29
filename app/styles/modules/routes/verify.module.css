@@ -1,60 +1,203 @@
-/* /verify route page */
+/* /verify - Email Verifier page. Bracketless tool host + sticky strip + 4 sections (tool/method/tiers/answers). */
 
 .page {
-  padding-top: var(--space-3xl);
-  padding-bottom: var(--space-4xl);
+  position: relative;
+  padding: 20px 0 28px;
+  min-height: 60vh;
 }
 
-.toolSection {
-  max-width: var(--max-width-narrow);
-  margin: 0 auto;
-  padding: 0 var(--space-lg);
-  margin-bottom: var(--space-3xl);
-}
-
-.section {
+.container {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-lg);
 }
 
-.sectionHeader {
-  max-width: 600px;
-  margin-bottom: var(--space-xl);
+/* Inline section labels (mobile + tablet). Hidden on desktop where strip takes over. */
+
+.sectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
-.sectionTitle {
+.sectionNum { color: var(--trov-accent); }
+.sectionSlash { color: var(--trov-text-muted); opacity: 0.6; }
+.sectionName { color: var(--trov-text-secondary); }
+
+/* Horizontal sticky strip (desktop only) */
+
+.strip {
+  display: none;
+}
+
+/* Tool section: hosts the EmailScorer. Bracket-only frame, no extra chrome. */
+
+.toolSection {
+  padding: 8px 0 16px;
+}
+
+.toolHost {
+  position: relative;
+  max-width: 760px;
+  margin: 0 -16px;
+}
+
+/* Method section: explainer cards */
+
+.methodSection {
+  padding: 16px 0 8px;
+}
+
+.methodHead {
+  margin-bottom: 16px;
+}
+
+.methodTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
   font-weight: 700;
   color: var(--trov-text);
-  letter-spacing: -0.02em;
-  margin: 0 0 var(--space-sm);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0 0 10px;
 }
 
-.sectionDesc {
-  font-size: 15px;
+.methodIntro {
+  font-size: 0.875rem;
   color: var(--trov-text-secondary);
-  line-height: 1.6;
+  line-height: 1.55;
+  max-width: 700px;
   margin: 0;
 }
 
-/* ================================================
-   Two-Tier Explainer - 2 cards side by side
-   (Mirrors verify-number for visual consistency)
-   ================================================ */
+.explainerGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.explainerCard {
+  position: relative;
+  padding: 14px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.explainerCard::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--trov-accent-muted);
+  border-left: 1.5px solid var(--trov-accent-muted);
+  transition: border-color var(--transition-fast);
+}
+
+.explainerCard:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.explainerCard:hover::before {
+  border-top-color: var(--trov-accent);
+  border-left-color: var(--trov-accent);
+}
+
+.explainerTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.explainerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--trov-bg);
+  color: var(--trov-accent);
+  flex-shrink: 0;
+}
+
+.explainerLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.explainerTitle {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 8px;
+}
+
+.explainerText {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Tiers section: pricing comparison cards. Corner brackets + gold badge + check list. */
+
+.tiersSection {
+  padding: 16px 0 8px;
+}
+
+.tiersHead {
+  margin-bottom: 16px;
+}
+
+.tiersTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+
+.tiersIntro {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.55;
+  max-width: 700px;
+  margin: 0;
+}
 
 .tiersGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .tierCard {
-  padding: var(--space-lg);
+  position: relative;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
+  padding: 16px;
   transition: border-color var(--transition-fast);
 }
 
@@ -62,191 +205,298 @@
   border-color: var(--trov-border-hover);
 }
 
+/* Corner brackets on tier cards - sharp corners earn brackets */
+
+.tierCard::before,
+.tierCard::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.tierCard::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--trov-accent);
+  border-left: 1.5px solid var(--trov-accent);
+}
+
+.tierCard::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid var(--trov-accent);
+  border-right: 1.5px solid var(--trov-accent);
+}
+
 .tierTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-md);
+  margin-bottom: 12px;
 }
 
 .tierIcon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background: var(--trov-glow);
   color: var(--trov-accent);
+  flex-shrink: 0;
 }
 
 .tierBadge {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.6875rem;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.04em;
-}
-
-.tierBadgeFree {
-  color: var(--trov-success);
-  background: var(--trov-success-bg);
-}
-
-.tierBadgePaid {
   color: var(--trov-accent);
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
   background: var(--trov-glow);
+  border: 1px solid var(--trov-accent-muted);
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .tierTitle {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--trov-text);
-  margin: 0 0 var(--space-sm);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 8px;
 }
 
 .tierDesc {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--trov-text-secondary);
-  line-height: 1.6;
-  margin: 0 0 var(--space-md);
+  line-height: 1.55;
+  margin: 0 0 14px;
 }
 
 .tierChecks {
   list-style: none;
-  padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
+  padding: 0;
+  display: grid;
   gap: 6px;
 }
 
 .tierCheck {
   display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 13px;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8125rem;
   color: var(--trov-text);
+  line-height: 1.45;
 }
 
-.checkMark {
-  color: var(--trov-success);
-  font-size: 12px;
+.tierCheckMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--trov-accent);
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
-/* ================================================
-   FAQ
-   ================================================ */
+/* Answers section: FAQ */
+
+.answersSection {
+  padding: 16px 0 8px;
+}
+
+.faqHead {
+  margin-bottom: 14px;
+}
+
+.faqTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  font-weight: 700;
+  color: var(--trov-text);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+}
 
 .faqList {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .faqItem {
-  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
 }
 
-.faqItem:first-child {
-  border-top: 1px solid var(--trov-border);
+.faqItem:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.faqItemOpen {
+  border-color: var(--trov-accent-muted);
 }
 
 .faqQuestion {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-lg);
+  gap: 10px;
   width: 100%;
-  padding: 18px 0;
-  background: none;
+  padding: 12px 14px;
+  background: transparent;
   border: none;
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--trov-text);
+  letter-spacing: -0.01em;
+  min-height: 44px;
   transition: color var(--transition-fast);
 }
 
-.faqQuestion:hover {
-  color: var(--trov-accent);
+.faqDash {
+  display: inline-block;
+  width: 12px;
+  height: 1.5px;
+  background: var(--trov-accent-muted);
+  border-radius: 1px;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), width var(--transition-fast);
+}
+
+.faqItemOpen .faqDash {
+  background: var(--trov-accent);
+  width: 18px;
+}
+
+.faqQuestionText {
+  flex: 1;
 }
 
 .faqChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--trov-text-muted);
   flex-shrink: 0;
-  color: var(--trov-text-secondary);
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
 .faqChevronOpen {
   transform: rotate(180deg);
+  color: var(--trov-accent);
 }
 
 .faqAnswer {
-  padding: 0 0 var(--space-lg);
-  font-size: 14px;
+  padding: 0 14px 14px 36px;
+  font-size: 0.8125rem;
   color: var(--trov-text-secondary);
-  line-height: 1.7;
+  line-height: 1.65;
 }
 
-/* ================================================
-   CTA
-   ================================================ */
+.faqAnswer p {
+  margin: 0;
+}
+
+/* CTA section: cross-link to other tools */
+
+.ctaSection {
+  padding: 16px 0 8px;
+}
 
 .ctaCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xl);
-  padding: var(--space-xl) var(--space-2xl);
+  position: relative;
+  padding: 20px 16px;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.ctaContent {
-  flex: 1;
+.ctaCard::before,
+.ctaCard::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.ctaCard::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--trov-accent);
+  border-left: 1.5px solid var(--trov-accent);
+}
+
+.ctaCard::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid var(--trov-accent);
+  border-right: 1.5px solid var(--trov-accent);
+}
+
+.ctaLeft {
   min-width: 0;
 }
 
 .ctaTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  font-size: clamp(1.25rem, 4vw, 1.625rem);
   font-weight: 700;
   color: var(--trov-text);
   letter-spacing: -0.02em;
-  margin: 0 0 var(--space-sm);
+  line-height: 1.15;
+  margin: 0 0 10px;
 }
 
 .ctaDesc {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--trov-text-secondary);
   line-height: 1.55;
-  margin: 0;
+  max-width: 500px;
+  margin: 0 0 16px;
 }
 
 .ctaActions {
   display: flex;
-  gap: var(--space-sm);
-  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .ctaPrimary {
   display: inline-flex;
   align-items: center;
-  padding: 10px 20px;
-  background: var(--trov-accent);
-  color: var(--trov-text-on-accent);
-  font-size: 13px;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  color: var(--trov-text-on-accent);
+  background: var(--trov-accent);
+  border: none;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  white-space: nowrap;
+  cursor: pointer;
   transition: background var(--transition-fast), transform var(--transition-fast);
+  min-height: 44px;
 }
 
 .ctaPrimary:hover {
@@ -258,72 +508,277 @@
 .ctaSecondary {
   display: inline-flex;
   align-items: center;
-  padding: 10px 20px;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--trov-accent);
   background: transparent;
-  color: var(--trov-text-secondary);
-  font-size: 13px;
-  font-weight: 500;
   border: 1.5px solid var(--trov-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  white-space: nowrap;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  min-height: 44px;
 }
 
 .ctaSecondary:hover {
   border-color: var(--trov-accent);
-  color: var(--trov-accent);
+  background: var(--trov-glow);
 }
 
-/* ================================================
-   Responsive
-   ================================================ */
+/* CTA right panel */
 
-@media (max-width: 768px) {
+.ctaRight {
+  position: relative;
+  padding: 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+}
+
+.ctaPanelLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.1em;
+  margin: 0 0 10px;
+}
+
+.ctaSpecList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ctaSpecItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  letter-spacing: 0.02em;
+}
+
+.ctaSpecMark {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-left: 1.5px solid var(--trov-accent);
+  border-top: 1.5px solid var(--trov-accent);
+  flex-shrink: 0;
+}
+
+/* Breakpoints (mobile-first, min-width only) */
+
+/* 416px+ : more room */
+@media (min-width: 416px) {
   .page {
-    padding-top: var(--space-2xl);
-  }
-
-  .toolSection {
-    padding: 0 var(--space-md);
-    margin-bottom: var(--space-2xl);
-  }
-
-  .section {
-    padding: var(--space-2xl) var(--space-md);
-  }
-
-  .tiersGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-sm);
+    padding: 24px 0 32px;
   }
 
   .ctaCard {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--space-lg);
-  }
-
-  .ctaActions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .ctaPrimary,
-  .ctaSecondary {
-    width: 100%;
-    justify-content: center;
-    text-align: center;
+    padding: 24px 20px;
   }
 }
 
-@media (max-width: 480px) {
-  .sectionTitle {
-    font-size: 1.125rem;
+/* 640px+ : tablet - 2 col explainer grid */
+@media (min-width: 640px) {
+  .page {
+    padding: 32px 0 48px;
+  }
+
+  .toolSection {
+    padding: 12px 0 24px;
+  }
+
+  .methodSection,
+  .tiersSection,
+  .answersSection,
+  .ctaSection {
+    padding: 24px 0 12px;
+  }
+
+  .toolHost {
+    margin: 0 auto;
+  }
+
+  .ctaCard::before,
+  .ctaCard::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ctaCard {
+    padding: 32px 28px;
+    gap: 28px;
+  }
+
+  .methodIntro {
+    font-size: 0.9375rem;
+  }
+
+  .explainerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .explainerCard {
+    padding: 16px;
   }
 
   .faqQuestion {
-    font-size: 14px;
-    padding: 14px 0;
+    padding: 14px 16px;
+    font-size: 0.9375rem;
+  }
+
+  .faqAnswer {
+    padding: 0 16px 16px 38px;
+    font-size: 0.875rem;
+  }
+
+  .ctaRight {
+    padding: 18px;
   }
 }
+
+/* 1024px+ : desktop - sticky strip, 3-col explainer, two-pane CTA */
+@media (min-width: 1024px) {
+  .page {
+    padding: 32px 0 64px;
+  }
+
+  /* Inline labels hidden, strip takes over */
+  .sectionLabel {
+    display: none;
+  }
+
+  .strip {
+    display: block;
+    position: sticky;
+    top: 64px;
+    z-index: 5;
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--trov-border);
+  }
+
+  .stripInner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 10px var(--space-lg);
+  }
+
+  .stripItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--trov-text-muted);
+    padding: 6px 0;
+    border-bottom: 1.5px solid transparent;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .stripItem:hover {
+    color: var(--trov-text-secondary);
+  }
+
+  .stripNum { color: inherit; }
+  .stripSlash { opacity: 0.5; color: var(--trov-text-muted); }
+  .stripName { color: inherit; }
+
+  .stripItemActive {
+    color: var(--trov-text);
+    border-bottom-color: var(--trov-accent);
+  }
+
+  .stripItemActive .stripNum {
+    color: var(--trov-accent);
+  }
+
+  .toolSection {
+    padding: 24px 0 32px;
+  }
+
+  .methodSection,
+  .tiersSection,
+  .answersSection,
+  .ctaSection {
+    padding: 28px 0 16px;
+  }
+
+  .methodHead,
+  .tiersHead {
+    margin-bottom: 20px;
+  }
+
+  .explainerGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+
+  .tiersGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .tierCard {
+    padding: 20px;
+  }
+
+  .explainerCard {
+    padding: 18px;
+  }
+
+  /* CTA becomes two-pane */
+  .ctaCard {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 32px;
+    gap: 32px;
+  }
+
+  .ctaLeft {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ctaRight {
+    flex: 0.9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ctaSpecList {
+    gap: 10px;
+  }
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaPrimary:hover { transform: none; }
+  .explainerCard { transition: none; }
+  .faqItem { transition: none; }
+  .stripItem { transition: none; }
+  .faqDash { transition: none; }
+  }

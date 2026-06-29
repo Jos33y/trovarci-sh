@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLoaderData } from 'react-router';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import Header from '~/components/layout/Header';
@@ -16,7 +16,10 @@ import {
   CheckIcon,
   ShareIcon,
 } from '~/components/icons';
+import { CREDIT_COSTS, WELCOME_BONUS_AMOUNT } from '~/utils/creditsConfig.server';
 import styles from '~/styles/modules/routes/tools.module.css';
+
+// /tools - tool-page chrome: cycling hero demo + horizontal sticky strip + corner brackets.
 
 export const meta = () => getSeo({
   title: 'Free Email Tools',
@@ -24,11 +27,66 @@ export const meta = () => getSeo({
   path: '/tools',
 });
 
-/* ═══════════════════════════════════════════
-   MINI DEMOS — animated previews per tool
-   Each shows the tool's actual output.
-   CSS animations only. No libraries.
-   ═══════════════════════════════════════════ */
+// Loader: expose credit config to the page so the footnote stays in sync with server truth.
+export async function loader() {
+  return {
+    welcomeBonus: WELCOME_BONUS_AMOUNT,
+    costs: {
+      score: CREDIT_COSTS.email_score,
+      verify: CREDIT_COSTS.email_verify,
+      verifyBulkPer5: CREDIT_COSTS.email_verify_bulk_per_5,
+      phone: CREDIT_COSTS.phone_verify,
+    },
+  };
+}
+
+const SECTIONS = [
+  { id: 'toolkit', num: '01', name: 'TOOLKIT' },
+  { id: 'workflow', num: '02', name: 'WORKFLOW' },
+  { id: 'more', num: '03', name: 'MORE POWER' },
+];
+
+const DESKTOP_SPECS = [
+  'Multi-SMTP failover',
+  'AI email scoring',
+  'Unlimited contacts',
+  'One-time purchase',
+  'Works offline',
+];
+
+// Inline section label (numbered mono). Shown on mobile + tablet, hidden on desktop where strip takes over.
+function SectionLabel({ num, name }) {
+  return (
+    <div className={styles.sectionLabel}>
+      <span className={styles.sectionNum}>{num}</span>
+      <span className={styles.sectionSlash}>/</span>
+      <span className={styles.sectionName}>{name}</span>
+    </div>
+  );
+}
+
+// Horizontal sticky strip (desktop only). Sits under header, tracks active section.
+function SectionStrip({ activeId }) {
+  return (
+    <div className={styles.strip} aria-hidden="true">
+      <div className={`container ${styles.stripInner}`}>
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
+          >
+            <span className={styles.stripNum}>{s.num}</span>
+            <span className={styles.stripSlash}>/</span>
+            <span className={styles.stripName}>{s.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Mini demos
 
 function ScoreDemo() {
   return (
@@ -260,76 +318,180 @@ function PhoneDemo() {
   );
 }
 
-/* ═══════════════════════════════════════════
-   TOOL DATA
-   ═══════════════════════════════════════════ */
+// Tool data
 
 const TOOLS = [
   {
     name: 'Email Scorer',
+    short: 'SCORER',
     href: '/score',
     icon: GaugeIcon,
     demo: ScoreDemo,
     description: 'Get a 0-100 deliverability score with specific issues and one-line fixes before you hit send.',
-    tag: '3 free/day',
+    tag: '1 credit',
+    tagKind: 'credit',
   },
   {
     name: 'Domain Checker',
+    short: 'CHECKER',
     href: '/domain',
     icon: GlobeIcon,
     demo: DomainDemo,
     description: 'Full health report on MX, SPF, DKIM, DMARC, SSL, and blacklist status. Instant results.',
-    tag: 'Unlimited',
+    tag: 'Free',
+    tagKind: 'free',
   },
   {
     name: 'Email Verifier',
+    short: 'VERIFIER',
     href: '/verify',
     icon: VerifyIcon,
     demo: VerifyDemo,
     description: 'Single or bulk CSV. Cleans, validates, and verifies mailboxes all in one pass.',
-    tag: '5 free/day',
+    tag: '1 credit',
+    tagKind: 'credit',
   },
   {
     name: 'SMTP Tester',
+    short: 'SMTP',
     href: '/smtp-test',
     icon: TerminalIcon,
     demo: SmtpDemo,
     description: 'Test connectivity, TLS, auth, and response time. Credentials never stored or logged.',
-    tag: '5 free/day',
+    tag: 'Free',
+    tagKind: 'free',
   },
   {
     name: 'DNS Generator',
+    short: 'DNS',
     href: '/records',
     icon: DnsIcon,
     demo: DnsDemo,
     description: 'Pick your email provider and registrar. Get copy-paste-ready SPF, DKIM, and DMARC records.',
-    tag: 'Unlimited',
+    tag: 'Free',
+    tagKind: 'free',
   },
   {
     name: 'Number Verifier',
+    short: 'NUMBER',
     href: '/verify-number',
     icon: PhoneIcon,
     demo: PhoneDemo,
     description: 'Validate phone numbers. Format check, active status, carrier, and line type.',
-    tag: '3 free/day',
+    tag: '2 credits',
+    tagKind: 'credit',
   },
 ];
 
-/* ═══════════════════════════════════════════
-   PAGE
-   ═══════════════════════════════════════════ */
+const CYCLE_MS = 4000;
+
+// HeroDemo: cycles through the 6 demos. Pauses on hover. Only animates when in viewport. Static on prefers-reduced-motion.
+function HeroDemo() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
+  const [animKey, setAnimKey] = useState(0);
+  const stageRef = useRef(null);
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) setInView(e.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const prefersReduced = typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced || paused || !inView) return;
+
+    const id = setTimeout(() => {
+      setIndex((i) => (i + 1) % TOOLS.length);
+      setAnimKey((k) => k + 1);
+    }, CYCLE_MS);
+    return () => clearTimeout(id);
+  }, [index, paused, inView]);
+
+  const current = TOOLS[index];
+  const Demo = current.demo;
+
+  return (
+    <div
+      ref={stageRef}
+      className={styles.heroDemoStage}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* keyed wrapper forces a fresh mount on cycle so the demo's internal animations replay */}
+      <div key={animKey} className={styles.heroDemoFrame}>
+        <Demo />
+      </div>
+
+      <div className={styles.heroDemoMeta}>
+        <div className={styles.heroDemoLabel}>
+          <span className={styles.heroDemoNum}>
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <span className={styles.heroDemoSlash}>/</span>
+          <span className={styles.heroDemoName}>{current.short}</span>
+        </div>
+        <div className={styles.heroDemoDots}>
+          {TOOLS.map((t, i) => (
+            <button
+              key={t.href}
+              type="button"
+              onClick={() => { setIndex(i); setAnimKey((k) => k + 1); }}
+              className={`${styles.heroDemoDot} ${i === index ? styles.heroDemoDotActive : ''}`}
+              aria-label={`Show ${t.name} demo`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Page
 
 export default function Tools() {
-  const headerRef = useReveal();
+  const { welcomeBonus, costs } = useLoaderData();
+  const heroRef = useReveal();
   const gridRef = useReveal(0.02);
   const ctaRef = useReveal();
   const [copied, setCopied] = useState(false);
+  const [activeId, setActiveId] = useState('toolkit');
+  const sectionRefs = {
+    toolkit: useRef(null),
+    workflow: useRef(null),
+    more: useRef(null),
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+    );
+    for (const id of Object.keys(sectionRefs)) {
+      const el = sectionRefs[id].current;
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleCopy() {
     const url = 'https://trovarci.sh/tools';
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url);
-    }
+    if (navigator.clipboard) navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -347,81 +509,121 @@ export default function Tools() {
   return (
     <>
       <Header />
+      <SectionStrip activeId={activeId} />
       <main className={styles.page}>
 
-        <div className={`container ${styles.inner}`}>
-          <header ref={headerRef} className={`${styles.header} reveal`}>
-            <p className={styles.eyebrow}>Free tools. No account needed.</p>
-            <h1 className={styles.title}>Email deliverability toolkit</h1>
-            <p className={styles.subtitle}>
-              Six tools that help you send email that actually arrives. Check
-              your domain, verify addresses, test connections, generate records.
-            </p>
-            <div className={styles.shareBar}>
-              <button
-                onClick={handleCopy}
-                className={`${styles.shareButton} ${copied ? styles.shareButtonCopied : ''}`}
-                type="button"
-              >
-                {copied ? (
-                  <><CheckIcon size={14} /><span>Copied</span></>
-                ) : (
-                  <><CopyIcon size={14} /><span>Copy link</span></>
-                )}
-              </button>
-              <button onClick={handleShareX} className={styles.shareButton} type="button">
-                <ShareIcon size={14} />
-                <span>Share on X</span>
-              </button>
-            </div>
-          </header>
-        </div>
+        {/* Hero */}
+        <section id="toolkit" ref={sectionRefs.toolkit} className={styles.heroSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="01" name="TOOLKIT" />
+            <div ref={heroRef} className={`${styles.heroCard} reveal`}>
+              <div className={styles.heroLeft}>
+                <h1 className={styles.title}>Email deliverability toolkit</h1>
+                <p className={styles.subtitle}>
+                  Six tools that help you send email that actually arrives.
+                </p>
+                <p className={styles.subtitleMicro}>Free. No account needed.</p>
+                <div className={styles.shareBar}>
+                  <button
+                    onClick={handleCopy}
+                    className={`${styles.shareButton} ${copied ? styles.shareButtonCopied : ''}`}
+                    type="button"
+                  >
+                    {copied ? (
+                      <><CheckIcon size={13} /><span>Copied</span></>
+                    ) : (
+                      <><CopyIcon size={13} /><span>Copy link</span></>
+                    )}
+                  </button>
+                  <button onClick={handleShareX} className={styles.shareButton} type="button">
+                    <ShareIcon size={13} />
+                    <span>Share on X</span>
+                  </button>
+                </div>
+              </div>
 
-        <div className={`container ${styles.inner}`}>
-          <div ref={gridRef} className={`${styles.grid} stagger`}>
-            {TOOLS.map((tool) => {
-              const Icon = tool.icon;
-              const Demo = tool.demo;
-              return (
-                <Link key={tool.href} to={tool.href} className={`${styles.card} reveal`}>
-                  <div className={styles.cardDemo}>
-                    <Demo />
-                  </div>
-                  <div className={styles.cardBody}>
-                    <div className={styles.cardTop}>
-                      <div className={styles.cardNameRow}>
-                        <span className={styles.cardIcon}><Icon size={15} /></span>
-                        <h2 className={styles.cardName}>{tool.name}</h2>
-                      </div>
-                      <span className={styles.cardTag}>{tool.tag}</span>
+              <div className={styles.heroRight}>
+                <HeroDemo />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tool grid */}
+        <section id="workflow" ref={sectionRefs.workflow} className={styles.gridSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="02" name="WORKFLOW" />
+            <div ref={gridRef} className={`${styles.grid} stagger`}>
+              {TOOLS.map((tool) => {
+                const Icon = tool.icon;
+                const Demo = tool.demo;
+                return (
+                  <Link key={tool.href} to={tool.href} className={`${styles.card} reveal`}>
+                    <div className={styles.cardDemo}>
+                      <Demo />
                     </div>
-                    <p className={styles.cardDescription}>{tool.description}</p>
-                    <span className={styles.cardCta}>
-                      Try it free <ArrowRightIcon size={14} />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+                    <div className={styles.cardBody}>
+                      <div className={styles.cardTop}>
+                        <div className={styles.cardNameRow}>
+                          <span className={styles.cardIcon}><Icon size={15} /></span>
+                          <h2 className={styles.cardName}>{tool.name}</h2>
+                        </div>
+                        <span className={`${styles.cardTag} ${tool.tagKind === 'credit' ? styles.cardTagCredit : styles.cardTagFree}`}>{tool.tag}</span>
+                      </div>
+                      <p className={styles.cardDescription}>{tool.description}</p>
+                      <span className={styles.cardCta}>
+                        <span className={styles.cardCtaDash} aria-hidden="true" />
+                        <span>Try it free</span>
+                        <ArrowRightIcon size={13} />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
 
-        <div className={`container ${styles.inner}`}>
-          <div ref={ctaRef} className={`${styles.bottomCta} reveal`}>
-            <p className={styles.bottomCtaLabel}>Want more than tools?</p>
-            <h3 className={styles.bottomCtaTitle}>
-              Download Trovarcis Reach and send campaigns from your desktop.
-            </h3>
-            <p className={styles.bottomCtaText}>
-              Multi-SMTP failover, AI email scoring, unlimited contacts. One-time
-              purchase. Works offline.
-            </p>
-            <div className={styles.bottomCtaButtons}>
-              <a href="/#cta" className={styles.bottomCtaButtonPrimary}>Get Early Access</a>
-              <a href="/#pricing" className={styles.bottomCtaButtonSecondary}>See Pricing</a>
+            <div className={styles.gridFootnote}>
+              <span className={styles.gridFootnoteDash} aria-hidden="true" />
+              <span>
+                <strong className={styles.gridFootnoteStrong}>{welcomeBonus} free credits on signup.</strong>
+                {' '}No card. Enough for {Math.floor(welcomeBonus / costs.score)} scores, {Math.floor(welcomeBonus / costs.verifyBulkPer5) * 5} bulk verifications, or {Math.floor(welcomeBonus / costs.phone)} carrier lookups. Three tools above need no account at all.
+              </span>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Bottom CTA: desktop app */}
+        <section id="more" ref={sectionRefs.more} className={styles.ctaSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="MORE POWER" />
+            <div ref={ctaRef} className={`${styles.ctaCard} reveal`}>
+              <div className={styles.ctaLeft}>
+                <h3 className={styles.ctaTitle}>
+                  Want more than tools?
+                </h3>
+                <p className={styles.ctaText}>
+                  Trovarcis Reach desktop app. One-time purchase. Works offline.
+                </p>
+                <div className={styles.ctaButtons}>
+                  <a href="/#desktop" className={styles.ctaButtonPrimary}>Get early access</a>
+                  <Link to="/credits" className={styles.ctaButtonSecondary}>See pricing</Link>
+                </div>
+              </div>
+
+              <div className={styles.ctaRight} aria-hidden="true">
+                <div className={styles.ctaPanelLabel}>WHAT YOU GET</div>
+                <ul className={styles.ctaSpecList}>
+                  {DESKTOP_SPECS.map((spec) => (
+                    <li key={spec} className={styles.ctaSpecItem}>
+                      <span className={styles.ctaSpecMark} aria-hidden="true" />
+                      <span>{spec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </>

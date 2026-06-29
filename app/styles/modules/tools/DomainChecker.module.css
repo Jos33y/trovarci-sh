@@ -1,7 +1,4 @@
-/* ══════════════════════════════════════════════
-   Domain Health Checker - App-panel design
-   Same visual language as DNS Generator.
-   ══════════════════════════════════════════════ */
+/* Domain Health Checker - App-panel design */
 
 /* ── Tool Card ── */
 
@@ -75,9 +72,7 @@
   flex-shrink: 0;
 }
 
-/* ══════════════════════════════════════════════
-   Input Section
-   ══════════════════════════════════════════════ */
+/* Input Section */
 
 .inputSection {
   padding: var(--space-xl);
@@ -179,9 +174,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ══════════════════════════════════════════════
-   Scan Animation
-   ══════════════════════════════════════════════ */
+/* Scan Animation */
 
 .scanSection {
   padding: var(--space-lg) var(--space-xl) var(--space-xl);
@@ -312,9 +305,7 @@
   color: var(--trov-accent);
 }
 
-/* ══════════════════════════════════════════════
-   Results Section
-   ══════════════════════════════════════════════ */
+/* Results Section */
 
 .resultsSection {
   padding: var(--space-xl);
@@ -563,9 +554,7 @@
   word-break: break-all;
 }
 
-/* ══════════════════════════════════════════════
-   Issue Cards - severity-coded
-   ══════════════════════════════════════════════ */
+/* Issue Cards - severity-coded */
 
 .issueCard {
   margin-top: var(--space-sm);
@@ -629,9 +618,7 @@
   color: var(--trov-accent-hover);
 }
 
-/* ══════════════════════════════════════════════
-   Status Icons - color classes
-   ══════════════════════════════════════════════ */
+/* Status Icons - color classes */
 
 .iconPass {
   color: var(--trov-success);
@@ -649,9 +636,7 @@
   color: var(--trov-text-muted);
 }
 
-/* ══════════════════════════════════════════════
-   Tool Chain Links (contextual next-tool)
-   ══════════════════════════════════════════════ */
+/* Tool Chain Links (contextual next-tool) */
 
 .toolChain {
   display: flex;
@@ -709,17 +694,18 @@
   color: var(--trov-accent);
 }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-   ══════════════════════════════════════════════ */
+/* RESPONSIVE */
 
 @media (max-width: 768px) {
+  /* Mobile treats the tool as a working surface, not a floating card.
+     Drop the panel border + radius so the tool extends edge-to-edge cleanly. */
   .tool {
-    border-radius: var(--radius-lg);
+    border: none;
+    border-radius: 0;
   }
 
   .toolHeader {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md);
   }
 
   .toolTitle {
@@ -731,7 +717,7 @@
   }
 
   .inputSection {
-    padding: var(--space-lg);
+    padding: var(--space-md);
   }
 
   .inputRow {
@@ -744,7 +730,7 @@
   }
 
   .scanSection {
-    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    padding: var(--space-md);
   }
 
   .resultsSection {

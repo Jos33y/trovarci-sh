@@ -1,6 +1,4 @@
-/* ================================================
-   EmailVerifier Component
-   ================================================ */
+/* EmailVerifier Component */
 
 .tool {
   max-width: 680px;
@@ -67,9 +65,7 @@
   flex-shrink: 0;
 }
 
-/* ================================================
-   Single Mode - Input
-   ================================================ */
+/* Single Mode - Input */
 
 .singleInput {
   margin-bottom: var(--space-md);
@@ -136,9 +132,7 @@
   margin: var(--space-sm) 0 0;
 }
 
-/* ================================================
-   5-Step Verification Ladder
-   ================================================ */
+/* 5-Step Verification Ladder */
 
 .ladderSection {
   margin-bottom: var(--space-md);
@@ -284,9 +278,7 @@
   line-height: 1.5;
 }
 
-/* ================================================
-   Shared Actions
-   ================================================ */
+/* Shared Actions */
 
 .resultActions {
   display: flex;
@@ -358,9 +350,7 @@
   margin-left: 4px;
 }
 
-/* ================================================
-   Bulk Mode - Upload
-   ================================================ */
+/* Bulk Mode - Upload */
 
 .bulkUpload {
   margin-bottom: var(--space-md);
@@ -500,9 +490,7 @@
   margin: 0;
 }
 
-/* ================================================
-   Bulk - Preview
-   ================================================ */
+/* Bulk - Preview */
 
 .previewSection {
   margin-bottom: var(--space-md);
@@ -597,9 +585,7 @@
   transform: translateY(-1px);
 }
 
-/* ================================================
-   Bulk - Progress
-   ================================================ */
+/* Bulk - Progress */
 
 .progressSection {
   margin-bottom: var(--space-md);
@@ -684,9 +670,7 @@
   margin: 0;
 }
 
-/* ================================================
-   Bulk - Results
-   ================================================ */
+/* Bulk - Results */
 
 .bulkResultsSection {
   margin-bottom: var(--space-md);
@@ -744,13 +728,7 @@
   color: var(--trov-text-muted);
 }
 
-/* ================================================
-   Error info row - rendered below liveStats / statCards
-   only when bulkStats.error > 0. Errors are infra
-   failures, not verdicts, so they get a separate
-   honest banner rather than a 5th cell that would
-   pretend they belong with the classification grid.
-   ================================================ */
+/* Error info row - infra failures, not verdicts, get a separate banner. */
 
 .errorInfoRow {
   display: flex;
@@ -894,9 +872,7 @@
   margin-left: 4px;
 }
 
-/* ================================================
-   Animations
-   ================================================ */
+/* Animations */
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -908,14 +884,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ================================================
-   Responsive
-   ================================================ */
+/* Responsive */
 
 @media (max-width: 640px) {
+  /* Mobile treats the tool as a working surface, not a floating card. */
   .tool {
-    padding: var(--space-lg) var(--space-md);
-    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    border: none;
+    border-radius: 0;
   }
 
   .inputRow {
@@ -975,13 +951,7 @@
   .liveCount { font-size: 16px; }
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Unknown verdict
-   Added to support the lib's 4-category output (valid/invalid/risky/unknown).
-   Uses muted gray for the neutral "we couldn't get a definitive answer" tone -
-   distinct from risky (orange = deliverable but flagged) and from the brand
-   gold accent (which is reserved for interactive elements).
-   ───────────────────────────────────────────────────────────────────── */
+/* Unknown verdict */
 
 .verdict_unknown {
   background: rgba(82, 82, 91, 0.10);

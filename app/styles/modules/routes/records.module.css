@@ -1,182 +1,257 @@
-/* ══════════════════════════════════════════════
-   Records Page
-   No separate hero. Tool IS the hero.
-   ══════════════════════════════════════════════ */
+/* /records - DNS Record Generator page. Bracketless tool host + sticky strip + compact sections. */
 
 .page {
-  min-height: 100vh;
+  position: relative;
+  padding: 20px 0 28px;
+  min-height: 60vh;
 }
 
-/* ── Tool Section: opens the page directly ── */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* Inline section labels (mobile + tablet). Hidden on desktop where strip takes over. */
+
+.sectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.sectionNum { color: var(--trov-accent); }
+.sectionSlash { color: var(--trov-text-muted); opacity: 0.6; }
+.sectionName { color: var(--trov-text-secondary); }
+
+/* Horizontal sticky strip (desktop only) */
+
+.strip {
+  display: none;
+}
+
+/* Tool section: hosts the EmailScorer. Bracket-only frame, no extra chrome. */
 
 .toolSection {
-  padding: var(--space-4xl) 0 var(--space-3xl);
+  padding: 8px 0 16px;
 }
 
-/* ══════════════════════════════════════════════
-   SEO Content — Explainer Cards
-   ══════════════════════════════════════════════ */
-
-.contentSection {
-  padding: var(--space-4xl) 0;
-  border-top: 1px solid var(--trov-border);
+.toolHost {
+  position: relative;
+  max-width: 760px;
+  margin: 0 -16px;
 }
 
-.contentTitle {
+/* Method section: explainer cards */
+
+.methodSection {
+  padding: 16px 0 8px;
+}
+
+.methodHead {
+  margin-bottom: 16px;
+}
+
+.methodTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
   font-weight: 700;
   color: var(--trov-text);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-xl);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0 0 10px;
 }
 
-.contentIntro {
-  font-size: 16px;
+.methodIntro {
+  font-size: 0.875rem;
   color: var(--trov-text-secondary);
-  line-height: 1.7;
-  margin-bottom: var(--space-lg);
-}
-
-.contentOutro {
-  font-size: 16px;
-  color: var(--trov-text-secondary);
-  line-height: 1.7;
+  line-height: 1.55;
+  max-width: 700px;
   margin: 0;
 }
 
-/* ── Explainer Cards ── */
-
 .explainerGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
-  margin: var(--space-2xl) 0;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .explainerCard {
-  padding: var(--space-lg);
+  position: relative;
+  padding: 14px;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.explainerCard::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--trov-accent-muted);
+  border-left: 1.5px solid var(--trov-accent-muted);
   transition: border-color var(--transition-fast);
 }
 
 .explainerCard:hover {
-  border-color: rgba(212, 168, 67, 0.15);
+  border-color: var(--trov-border-hover);
+}
+
+.explainerCard:hover::before {
+  border-top-color: var(--trov-accent);
+  border-left-color: var(--trov-accent);
 }
 
 .explainerTop {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: var(--space-md);
+  margin-bottom: 10px;
 }
 
 .explainerIcon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
-  background: var(--trov-glow);
+  background: var(--trov-bg);
   color: var(--trov-accent);
   flex-shrink: 0;
 }
 
 .explainerLabel {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.625rem;
   font-weight: 600;
-  color: var(--trov-accent);
-  letter-spacing: 0.06em;
+  color: var(--trov-text-secondary);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .explainerTitle {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--trov-text);
-  letter-spacing: -0.01em;
-  margin-bottom: 8px;
-  line-height: 1.3;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 8px;
 }
 
 .explainerText {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--trov-text-secondary);
-  line-height: 1.6;
+  line-height: 1.55;
   margin: 0;
 }
 
-/* ══════════════════════════════════════════════
-   FAQ
-   ══════════════════════════════════════════════ */
+.methodOutro {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
 
-.faqSection {
-  padding: var(--space-4xl) 0;
-  border-top: 1px solid var(--trov-border);
+/* Answers section: FAQ */
+
+.answersSection {
+  padding: 16px 0 8px;
+}
+
+.faqHead {
+  margin-bottom: 14px;
 }
 
 .faqTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
   font-weight: 700;
   color: var(--trov-text);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-xl);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
 }
 
 .faqList {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
 .faqItem {
-  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
   transition: border-color var(--transition-fast);
 }
 
-.faqItem:first-child {
-  border-top: 1px solid var(--trov-border);
+.faqItem:hover {
+  border-color: var(--trov-border-hover);
 }
 
 .faqItemOpen {
-  background: var(--trov-surface);
+  border-color: var(--trov-accent-muted);
 }
 
 .faqQuestion {
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-lg) 0;
-  background: none;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
   border: none;
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--trov-text);
+  letter-spacing: -0.01em;
+  min-height: 44px;
   transition: color var(--transition-fast);
 }
 
-.faqItemOpen .faqQuestion {
-  padding: var(--space-lg);
+.faqDash {
+  display: inline-block;
+  width: 12px;
+  height: 1.5px;
+  background: var(--trov-accent-muted);
+  border-radius: 1px;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), width var(--transition-fast);
 }
 
-.faqQuestion:hover {
-  color: var(--trov-accent);
+.faqItemOpen .faqDash {
+  background: var(--trov-accent);
+  width: 18px;
+}
+
+.faqQuestionText {
+  flex: 1;
 }
 
 .faqChevron {
-  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--trov-text-muted);
-  transition: transform var(--transition-normal);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
 .faqChevronOpen {
@@ -185,79 +260,101 @@
 }
 
 .faqAnswer {
-  padding: 0 0 var(--space-lg);
-}
-
-.faqItemOpen .faqAnswer {
-  padding: 0 var(--space-lg) var(--space-lg);
+  padding: 0 14px 14px 36px;
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.65;
 }
 
 .faqAnswer p {
-  font-size: 14px;
-  color: var(--trov-text-secondary);
-  line-height: 1.7;
   margin: 0;
 }
 
-/* ══════════════════════════════════════════════
-   CTA — Banner card, not centered hero section
-   ══════════════════════════════════════════════ */
+/* CTA section: cross-link to other tools */
 
 .ctaSection {
-  padding: 0 0 var(--space-4xl);
+  padding: 16px 0 8px;
 }
 
 .ctaCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xl);
-  padding: var(--space-xl) var(--space-2xl);
+  position: relative;
+  padding: 20px 16px;
   background: var(--trov-surface);
   border: 1px solid var(--trov-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.ctaContent {
-  flex: 1;
+.ctaCard::before,
+.ctaCard::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.ctaCard::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--trov-accent);
+  border-left: 1.5px solid var(--trov-accent);
+}
+
+.ctaCard::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid var(--trov-accent);
+  border-right: 1.5px solid var(--trov-accent);
+}
+
+.ctaLeft {
   min-width: 0;
 }
 
 .ctaTitle {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: clamp(1.25rem, 4vw, 1.625rem);
   font-weight: 700;
   color: var(--trov-text);
   letter-spacing: -0.02em;
-  margin-bottom: 6px;
+  line-height: 1.15;
+  margin: 0 0 10px;
 }
 
 .ctaDesc {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--trov-text-secondary);
-  line-height: 1.5;
-  margin: 0;
+  line-height: 1.55;
+  max-width: 500px;
+  margin: 0 0 16px;
 }
 
 .ctaActions {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  flex-shrink: 0;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .ctaPrimary {
   display: inline-flex;
   align-items: center;
-  padding: 10px 22px;
-  background: var(--trov-accent);
-  color: var(--trov-text-on-accent);
-  border-radius: var(--radius-md);
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--trov-text-on-accent);
+  background: var(--trov-accent);
+  border: none;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  white-space: nowrap;
+  cursor: pointer;
   transition: background var(--transition-fast), transform var(--transition-fast);
+  min-height: 44px;
 }
 
 .ctaPrimary:hover {
@@ -269,67 +366,265 @@
 .ctaSecondary {
   display: inline-flex;
   align-items: center;
-  padding: 10px 22px;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--trov-accent);
   background: transparent;
-  color: var(--trov-text-secondary);
   border: 1.5px solid var(--trov-border);
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  font-size: 14px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  white-space: nowrap;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  min-height: 44px;
 }
 
 .ctaSecondary:hover {
   border-color: var(--trov-accent);
-  color: var(--trov-accent);
+  background: var(--trov-glow);
 }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-   ══════════════════════════════════════════════ */
+/* CTA right panel */
 
-@media (max-width: 768px) {
-  .toolSection {
-    padding: var(--space-2xl) 0 var(--space-xl);
-  }
+.ctaRight {
+  position: relative;
+  padding: 14px;
+  background: var(--trov-bg);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+}
 
-  .contentSection,
-  .faqSection {
-    padding: var(--space-3xl) 0;
-  }
+.ctaPanelLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--trov-text-muted);
+  letter-spacing: 0.1em;
+  margin: 0 0 10px;
+}
 
-  .explainerGrid {
-    grid-template-columns: 1fr;
-  }
+.ctaSpecList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-  .faqQuestion {
-    font-size: 14px;
-  }
+.ctaSpecItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--trov-text);
+  letter-spacing: 0.02em;
+}
 
-  .faqItemOpen .faqQuestion {
-    padding: var(--space-md);
-  }
+.ctaSpecMark {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-left: 1.5px solid var(--trov-accent);
+  border-top: 1.5px solid var(--trov-accent);
+  flex-shrink: 0;
+}
 
-  .faqItemOpen .faqAnswer {
-    padding: 0 var(--space-md) var(--space-md);
+/* Breakpoints (mobile-first, min-width only) */
+
+/* 416px+ : more room */
+@media (min-width: 416px) {
+  .page {
+    padding: 24px 0 32px;
   }
 
   .ctaCard {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--space-xl);
-  }
-
-  .ctaActions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .ctaPrimary,
-  .ctaSecondary {
-    width: 100%;
-    justify-content: center;
+    padding: 24px 20px;
   }
 }
+
+/* 640px+ : tablet - 2 col explainer grid */
+@media (min-width: 640px) {
+  .page {
+    padding: 32px 0 48px;
+  }
+
+  .toolSection {
+    padding: 12px 0 24px;
+  }
+
+  .methodSection,
+  .answersSection,
+  .ctaSection {
+    padding: 24px 0 12px;
+  }
+
+  .toolHost {
+    margin: 0 auto;
+  }
+
+  .ctaCard::before,
+  .ctaCard::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ctaCard {
+    padding: 32px 28px;
+    gap: 28px;
+  }
+
+  .methodIntro {
+    font-size: 0.9375rem;
+  }
+
+  .explainerGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .explainerCard {
+    padding: 16px;
+  }
+
+  .faqQuestion {
+    padding: 14px 16px;
+    font-size: 0.9375rem;
+  }
+
+  .faqAnswer {
+    padding: 0 16px 16px 38px;
+    font-size: 0.875rem;
+  }
+
+  .ctaRight {
+    padding: 18px;
+  }
+}
+
+/* 1024px+ : desktop - sticky strip, 3-col explainer, two-pane CTA */
+@media (min-width: 1024px) {
+  .page {
+    padding: 32px 0 64px;
+  }
+
+  /* Inline labels hidden, strip takes over */
+  .sectionLabel {
+    display: none;
+  }
+
+  .strip {
+    display: block;
+    position: sticky;
+    top: 64px;
+    z-index: 5;
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--trov-border);
+  }
+
+  .stripInner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 10px var(--space-lg);
+  }
+
+  .stripItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--trov-text-muted);
+    padding: 6px 0;
+    border-bottom: 1.5px solid transparent;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .stripItem:hover {
+    color: var(--trov-text-secondary);
+  }
+
+  .stripNum { color: inherit; }
+  .stripSlash { opacity: 0.5; color: var(--trov-text-muted); }
+  .stripName { color: inherit; }
+
+  .stripItemActive {
+    color: var(--trov-text);
+    border-bottom-color: var(--trov-accent);
+  }
+
+  .stripItemActive .stripNum {
+    color: var(--trov-accent);
+  }
+
+  .toolSection {
+    padding: 24px 0 32px;
+  }
+
+  .methodSection,
+  .answersSection,
+  .ctaSection {
+    padding: 28px 0 16px;
+  }
+
+  .methodHead {
+    margin-bottom: 20px;
+  }
+
+  .explainerGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+
+  .explainerCard {
+    padding: 18px;
+  }
+
+  /* CTA becomes two-pane */
+  .ctaCard {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 32px;
+    gap: 32px;
+  }
+
+  .ctaLeft {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ctaRight {
+    flex: 0.9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ctaSpecList {
+    gap: 10px;
+  }
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaPrimary:hover { transform: none; }
+  .explainerCard { transition: none; }
+  .faqItem { transition: none; }
+  .stripItem { transition: none; }
+  .faqDash { transition: none; }
+  }

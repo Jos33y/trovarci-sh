@@ -634,18 +634,19 @@
    ================================================ */
 
 @media (max-width: 768px) {
-  .tool { border-radius: var(--radius-lg); }
-  .toolHeader { padding: var(--space-md) var(--space-lg); }
+  /* Mobile treats the tool as a working surface, not a floating card. */
+  .tool { border: none; border-radius: 0; }
+  .toolHeader { padding: var(--space-md); }
   .toolTitle { font-size: 16px; }
   .toolDesc { display: none; }
-  .inputSection { padding: var(--space-lg); }
+  .inputSection { padding: var(--space-md); }
   .fieldRow { flex-direction: column; gap: 0; }
   .testButton { width: 100%; justify-content: center; }
   .inputActions { flex-direction: column; align-items: stretch; }
   .shortcutHint { display: none; }
-  .terminalBody { padding: var(--space-md) var(--space-lg); }
+  .terminalBody { padding: var(--space-md); }
   .termLine { font-size: 12px; }
-  .summarySection { padding: var(--space-lg); }
+  .summarySection { padding: var(--space-md); }
   .summaryGrid { grid-template-columns: 1fr; gap: 2px; }
   .summaryItem { display: flex; gap: var(--space-sm); }
   .resultActions { flex-direction: column; }

@@ -1,6 +1,4 @@
-/* ================================================
-   NumberVerifier Component - Rebuilt with visual identity
-   ================================================ */
+/* NumberVerifier Component - Rebuilt with visual identity */
 
 .tool {
   max-width: 680px;
@@ -11,9 +9,7 @@
   padding: var(--space-xl);
 }
 
-/* ================================================
-   Header
-   ================================================ */
+/* Header */
 
 .toolHeader {
   display: flex;
@@ -69,9 +65,7 @@
   flex-shrink: 0;
 }
 
-/* ================================================
-   Country Picker - custom, not native select
-   ================================================ */
+/* Country Picker - custom, not native select */
 
 .singleInput {
   margin-bottom: var(--space-md);
@@ -202,9 +196,7 @@
 
 .errorText { font-size: 13px; color: var(--trov-error); margin: var(--space-sm) 0 0; }
 
-/* ================================================
-   Number Hero Display - the formatted number, large
-   ================================================ */
+/* Number Hero Display - the formatted number, large */
 
 .resultSection { margin-bottom: var(--space-md); }
 
@@ -267,9 +259,7 @@
 .invalidTitle { font-size: 15px; font-weight: 600; color: var(--trov-error); margin: 0 0 4px; }
 .invalidReason { font-size: 13px; color: var(--trov-text-secondary); line-height: 1.5; margin: 0; }
 
-/* ================================================
-   Info Cards - Line Type + Format side by side
-   ================================================ */
+/* Info Cards - Line Type + Format side by side */
 
 .infoCards {
   display: grid;
@@ -362,9 +352,7 @@
   color: var(--trov-text);
 }
 
-/* ================================================
-   Tier 2 Unlock Prompt
-   ================================================ */
+/* Tier 2 Unlock Prompt */
 
 .tier2Unlock {
   background: var(--trov-bg);
@@ -462,9 +450,7 @@
   animation: loadingSlide 1.5s ease infinite;
 }
 
-/* ================================================
-   Carrier Result Card
-   ================================================ */
+/* Carrier Result Card */
 
 .carrierResult {
   background: var(--trov-bg);
@@ -581,9 +567,7 @@
   margin-top: 2px;
 }
 
-/* ================================================
-   Shared Actions
-   ================================================ */
+/* Shared Actions */
 
 .resultActions { display: flex; gap: var(--space-sm); margin-bottom: var(--space-md); }
 
@@ -610,9 +594,7 @@
 .modeSwitchLink:hover { color: var(--trov-accent-hover); }
 .arrow { display: inline-block; margin-left: 4px; }
 
-/* ================================================
-   Bulk - Upload
-   ================================================ */
+/* Bulk - Upload */
 
 .bulkUpload { margin-bottom: var(--space-md); }
 
@@ -698,9 +680,7 @@
 .stepCost { display: block; font-size: 11px; color: var(--trov-text-muted); }
 .stepArrow { color: var(--trov-text-muted); font-size: 14px; }
 
-/* ================================================
-   Bulk - Preview
-   ================================================ */
+/* Bulk - Preview */
 
 .previewSection { margin-bottom: var(--space-md); }
 
@@ -723,9 +703,7 @@
 }
 .verifyBulkButton:hover { background: var(--trov-accent-hover); transform: translateY(-1px); }
 
-/* ================================================
-   Bulk - Progress
-   ================================================ */
+/* Bulk - Progress */
 
 .progressSection { margin-bottom: var(--space-lg); }
 
@@ -771,9 +749,7 @@
 
 .progressDetails { font-size: 12px; color: var(--trov-text-muted); font-family: var(--font-mono); }
 
-/* ================================================
-   Bulk - Format Results
-   ================================================ */
+/* Bulk - Format Results */
 
 .formatResultsSection { margin-bottom: var(--space-md); }
 
@@ -856,9 +832,7 @@
 
 .skipOption { margin-bottom: var(--space-md); }
 
-/* ================================================
-   Bulk - Final Results
-   ================================================ */
+/* Bulk - Final Results */
 
 .bulkResultsSection { margin-bottom: var(--space-md); }
 .bulkResultsSubhead { font-size: 14px; color: var(--trov-text-secondary); margin: 0 0 var(--space-lg); }
@@ -1009,9 +983,7 @@
   background: var(--trov-bg); padding: 2px 6px; border-radius: 4px; margin-left: 4px;
 }
 
-/* ================================================
-   Animations
-   ================================================ */
+/* Animations */
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -1022,12 +994,11 @@
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
-/* ================================================
-   Responsive
-   ================================================ */
+/* Responsive */
 
 @media (max-width: 640px) {
-  .tool { padding: var(--space-lg) var(--space-md); border-radius: var(--radius-lg); }
+  /* Mobile treats the tool as a working surface, not a floating card. */
+  .tool { padding: var(--space-md); border: none; border-radius: 0; }
   .inputRow { flex-direction: column; }
   .countryButton { width: 100%; justify-content: center; padding: 12px 14px; }
   .verifyButton { width: 100%; }
@@ -1058,12 +1029,12 @@
   .formatStatCount { font-size: 18px; }
   .carrierName { font-size: 16px; }
 }
-/* ─────────────────────────────────────────────────────────────────────
+/* 
    Inline signup prompt
    Mirrors the gold-bordered prompt from EmailScorer. Triggered when an
    anonymous user clicks 'Get Carrier Info', or when their session
    expires mid-flow. The wrapper sits above the result actions.
-   ───────────────────────────────────────────────────────────────────── */
+    */
 
 .authPrompt {
   margin-top: var(--space-md);
@@ -1159,11 +1130,11 @@
 }
 
 
-/* ─────────────────────────────────────────────────────────────────────
+/* 
    Invalid-number partial parse hint
    Shown under the 'Invalid number' card when libphonenumber returned
    enough data to suggest what the user might have meant.
-   ───────────────────────────────────────────────────────────────────── */
+    */
 
 .invalidPartial {
   margin-top: 8px;
@@ -1183,12 +1154,12 @@
 }
 
 
-/* ─────────────────────────────────────────────────────────────────────
+/* 
    Bulk-mode 'coming soon' marker
    The bulk JSX is parked behind BULK_AVAILABLE=false until the Email
    Verifier ships the shared job-queue infrastructure. This pill replaces
    the old 'Have a list?' switch link with an honest roadmap signal.
-   ───────────────────────────────────────────────────────────────────── */
+    */
 
 .bulkComingSoon {
   display: inline-flex;
@@ -1213,7 +1184,7 @@
 }
 
 
-/* ─────────────────────────────────────────────────────────────────────
+/* 
    Four-state SMS verdict palette
    Replaces the binary .smsYes / .smsNo with four buckets that reflect
    real-world deliverability:
@@ -1227,7 +1198,7 @@
    referenced by NumberVerifier.jsx after this patch and can be deleted
    from NumberVerifier.module.css when convenient. They cause no harm
    if left in place.
-   ───────────────────────────────────────────────────────────────────── */
+    */
 
 .smsConfident { background: rgba(52, 211, 153, 0.06); }
 .smsFlaky     { background: rgba(251, 146, 60, 0.06); }
@@ -1245,7 +1216,7 @@
 .smsNone      .smsTitle { color: var(--trov-error); }
 
 
-/* ─────────────────────────────────────────────────────────────────────
+/* 
    Lookup error banner
    Surfaces server-side errors (insufficient credits, rate limit, API
    failure) when they land on the result section. Without this, the
@@ -1255,7 +1226,7 @@
    Sits ABOVE the unlock card so the user reads the problem first,
    then sees what to do about it. If balance hit zero, an inline
    'Buy credits' link saves a navigation hop.
-   ───────────────────────────────────────────────────────────────────── */
+    */
 
 .lookupError {
   margin-top: var(--space-md);
@@ -1332,13 +1303,13 @@
   transform: none;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* 
    BULK MODE - appended for sub-batch 7C.
    All classes prefixed `bulk*` to avoid collisions. Reuses tokens from
    the existing single-mode rules (border-radius, spacing, accent, status).
-   ═══════════════════════════════════════════════════════════════════════════ */
+    */
 
-/* ── Upload (paste) ── */
+/* Upload (paste) */
 
 .bulkUpload {
   display: flex;
@@ -1461,7 +1432,7 @@
   border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
-/* ── Preview ── */
+/* Preview */
 
 .bulkPreviewSection {
   display: flex;
@@ -1585,7 +1556,7 @@
   color: var(--trov-text);
 }
 
-/* ── Verifying (live progress) ── */
+/* Verifying (live progress) */
 
 .bulkProgressSection {
   display: flex;
@@ -1664,7 +1635,7 @@
   color: var(--trov-error);
 }
 
-/* ── Result ── */
+/* Result */
 
 .bulkResultSection {
   display: flex;

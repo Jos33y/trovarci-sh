@@ -1,7 +1,4 @@
-/* ══════════════════════════════════════════════
-   Email Scorer - App-panel design
-   Same visual language as Domain Checker.
-   ══════════════════════════════════════════════ */
+/* Email Scorer - App-panel design */
 
 .tool {
   max-width: 760px;
@@ -74,9 +71,7 @@
   white-space: nowrap;
 }
 
-/* ══════════════════════════════════════════════
-   Input Section
-   ══════════════════════════════════════════════ */
+/* Input Section */
 
 .inputSection {
   padding: var(--space-xl);
@@ -298,9 +293,7 @@
   color: var(--trov-text-muted);
 }
 
-/* ══════════════════════════════════════════════
-   Processing Animation
-   ══════════════════════════════════════════════ */
+/* Processing Animation */
 
 .processingSection {
   padding: var(--space-lg) var(--space-xl) var(--space-xl);
@@ -391,9 +384,7 @@
   letter-spacing: 0.04em;
 }
 
-/* ══════════════════════════════════════════════
-   Results Section
-   ══════════════════════════════════════════════ */
+/* Results Section */
 
 .resultsSection {
   padding: var(--space-xl);
@@ -699,17 +690,19 @@
   color: var(--trov-accent);
 }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-   ══════════════════════════════════════════════ */
+/* Responsive */
 
 @media (max-width: 768px) {
+  /* Mobile treats the tool as a working surface, not a floating card.
+     Drop the panel border + radius so the tool extends edge-to-edge cleanly.
+     Internal padding stays at md (16px) for proper breathing around inputs. */
   .tool {
-    border-radius: var(--radius-lg);
+    border: none;
+    border-radius: 0;
   }
 
   .toolHeader {
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md);
   }
 
   .toolTitle {
@@ -721,7 +714,7 @@
   }
 
   .inputSection {
-    padding: var(--space-lg);
+    padding: var(--space-md);
   }
 
   .scoreButton {
@@ -739,11 +732,11 @@
   }
 
   .processingSection {
-    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    padding: var(--space-md);
   }
 
   .resultsSection {
-    padding: var(--space-lg);
+    padding: var(--space-md);
   }
 
   .gauge {
@@ -796,11 +789,7 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   AUTH PROMPT (anonymous user CTA)
-   Gold-accented affirmative tone, not red error-tone. This is the
-   positive-path invitation to sign up, not a blocking error.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* Auth prompt (anonymous user CTA) - gold-accented affirmative tone, not error-tone. */
 
 .authPrompt {
   margin-bottom: var(--space-md);

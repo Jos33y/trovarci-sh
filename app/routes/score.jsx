@@ -1,18 +1,17 @@
-import { useState } from 'react';
-import { useLoaderData } from 'react-router';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLoaderData } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import EmailScorer from '~/components/tools/EmailScorer';
-import { Link } from 'react-router';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import { getOptionalUser } from '~/utils/session.server';
 import { CREDIT_COSTS, WELCOME_BONUS_AMOUNT } from '~/utils/creditsConfig.server';
 import styles from '~/styles/modules/routes/score.module.css';
 
-/* Loader: fetch the user if a session exists, otherwise null. The page
-   stays publicly reachable so search engines can index it, and anonymous
-   visitors see a sign-up prompt when they try to score. */
+// /score - Email Scorer tool page. F2.5: corner-bracketed host card + sticky strip + numbered labels.
+
+// Loader: fetch optional user. Page is publicly indexable; anonymous users see signup prompt on scoring.
 export async function loader({ request }) {
   const user = await getOptionalUser(request);
   return {
@@ -22,15 +21,19 @@ export async function loader({ request }) {
   };
 }
 
-export const meta = () => {
-  return getSeo({
-    title: 'Free Email Spam Checker | Score Your Email Before Sending',
-    description: 'AI-powered email deliverability scorer. Check your subject line and email content for spam triggers, compliance issues, and formatting problems. Free, instant results.',
-    path: '/score',
-  });
-};
+export const meta = () => getSeo({
+  title: 'Free Email Spam Checker | Score Your Email Before Sending',
+  description: 'AI-powered email deliverability scorer. Check your subject line and email content for spam triggers, compliance issues, and formatting problems. Free, instant results.',
+  path: '/score',
+});
 
-const faqItems = [
+const SECTIONS = [
+  { id: 'tool', num: '01', name: 'TOOL' },
+  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'answers', num: '03', name: 'ANSWERS' },
+];
+
+const FAQ_ITEMS = [
   {
     q: 'How does the email spam checker work?',
     a: 'The Email Scorer sends your content to Arcis, our AI analysis engine powered by Claude. Unlike keyword-based tools, Arcis reads your email the way a modern spam filter does, evaluating context, structure, links, and compliance together. It returns a 0-100 score with specific issues and fixes.',
@@ -45,7 +48,7 @@ const faqItems = [
   },
   {
     q: 'What words trigger spam filters?',
-    a: 'Modern spam filters do not use simple keyword lists. Context matters. "Free" is fine in "Free guide to email deliverability" but risky in "FREE MONEY NOW!!!" The scorer evaluates phrases in context, not as isolated keywords.',
+    a: 'Modern spam filters do not use simple keyword lists. Context matters. "Free" is fine in "Free guide to email deliverability" but risky in "FREE MONEY NOW". The scorer evaluates phrases in context, not as isolated keywords.',
   },
   {
     q: 'How many links should an email have?',
@@ -53,7 +56,7 @@ const faqItems = [
   },
   {
     q: 'How much does it cost to score an email?',
-    a: 'One credit per scoring call. New accounts receive a welcome bonus of 10 credits, which covers ten scans. After that, credits are available in top-up packages at a flat rate of $0.010 per credit (so 10 scans cost $0.10, 100 scans cost $1, 500 scans cost $5). If the scoring engine fails for any reason, your credit is refunded automatically.',
+    a: 'One credit per scoring call. New accounts receive a welcome bonus of 10 credits, which covers ten scans. After that, credits are available in top-up packages at a flat rate of $0.010 per credit. If the scoring engine fails for any reason, your credit is refunded automatically.',
   },
   {
     q: 'Does the email scorer store my email content?',
@@ -65,7 +68,7 @@ const faqItems = [
   },
 ];
 
-const categoryExplainers = [
+const CATEGORIES = [
   {
     label: 'Subject',
     title: 'Subject lines get judged in milliseconds',
@@ -98,24 +101,79 @@ const categoryExplainers = [
   },
 ];
 
+// Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
+function SectionLabel({ num, name }) {
+  return (
+    <div className={styles.sectionLabel}>
+      <span className={styles.sectionNum}>{num}</span>
+      <span className={styles.sectionSlash}>/</span>
+      <span className={styles.sectionName}>{name}</span>
+    </div>
+  );
+}
+
+// Horizontal sticky strip (desktop only).
+function SectionStrip({ activeId }) {
+  return (
+    <div className={styles.strip} aria-hidden="true">
+      <div className={`container ${styles.stripInner}`}>
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
+          >
+            <span className={styles.stripNum}>{s.num}</span>
+            <span className={styles.stripSlash}>/</span>
+            <span className={styles.stripName}>{s.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ScorePage() {
   const { user, creditCost, welcomeBonus } = useLoaderData();
-  const contentRef = useReveal();
+  const toolRef = useReveal();
+  const methodRef = useReveal();
+  const gridRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
   const [openFaq, setOpenFaq] = useState(null);
+  const [activeId, setActiveId] = useState('tool');
+
+  const sectionRefs = {
+    tool: useRef(null),
+    method: useRef(null),
+    answers: useRef(null),
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+    );
+    for (const id of Object.keys(sectionRefs)) {
+      const el = sectionRefs[id].current;
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
+    mainEntity: FAQ_ITEMS.map((item) => ({
       '@type': 'Question',
       name: item.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.a,
-      },
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
     })),
   };
 
@@ -127,57 +185,47 @@ export default function ScorePage() {
     url: 'https://trovarci.sh/score',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    creator: {
-      '@type': 'Organization',
-      name: 'Trovarcis',
-      url: 'https://trovarcis.com',
-    },
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    creator: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
   };
 
   return (
     <>
       <Header />
+      <SectionStrip activeId={activeId} />
       <main className={styles.page}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-        {/* Tool IS the hero */}
-        <section className={styles.toolSection}>
-          <div className="container">
-            <EmailScorer
-              isAuthed={!!user}
-              initialBalance={user?.creditsBalance ?? null}
-              creditCost={creditCost}
-              welcomeBonus={welcomeBonus}
-            />
+        {/* Tool */}
+        <section id="tool" ref={sectionRefs.tool} className={styles.toolSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="01" name="TOOL" />
+            <div ref={toolRef} className={`${styles.toolHost} reveal`}>
+              <EmailScorer
+                isAuthed={!!user}
+                initialBalance={user?.creditsBalance ?? null}
+                creditCost={creditCost}
+                welcomeBonus={welcomeBonus}
+              />
+            </div>
           </div>
         </section>
 
-        {/* SEO Content */}
-        <section className={styles.contentSection}>
-          <div className="container container--narrow" ref={contentRef}>
-            <h2 className={styles.contentTitle}>How spam filters evaluate your email</h2>
-            <p className={styles.contentIntro}>
-              Modern spam filters are machine learning models, not keyword lists. They evaluate your email across dozens of signals simultaneously. A single "spam word" rarely matters. The combination of subject line patterns, content structure, link behavior, and compliance signals determines whether your email reaches the inbox.
-            </p>
-            <p className={styles.contentIntro}>
-              The Email Scorer checks the five categories that matter most. Each issue includes a plain-language explanation and a specific fix.
-            </p>
+        {/* Method - how spam filters evaluate your email */}
+        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="02" name="METHOD" />
+            <div ref={methodRef} className={`${styles.methodHead} reveal`}>
+              <h2 className={styles.methodTitle}>How spam filters evaluate your email</h2>
+              <p className={styles.methodIntro}>
+                Modern spam filters are machine learning models, not keyword lists. They evaluate dozens of signals at once. A single "spam word" rarely matters. The combination of subject patterns, content structure, link behavior, and compliance determines whether your email reaches the inbox.
+              </p>
+            </div>
 
-            <div className={styles.explainerGrid}>
-              {categoryExplainers.map((item) => (
-                <div key={item.label} className={styles.explainerCard}>
+            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
+              {CATEGORIES.map((item) => (
+                <div key={item.label} className={`${styles.explainerCard} reveal`}>
                   <div className={styles.explainerTop}>
                     <span className={styles.explainerIcon}>
                       <item.icon />
@@ -190,18 +238,21 @@ export default function ScorePage() {
               ))}
             </div>
 
-            <p className={styles.contentOutro}>
-              Infrastructure matters too. If your domain lacks SPF, DKIM, or DMARC records, even a perfect email can land in spam. Use the Domain Checker to verify your authentication setup.
+            <p className={styles.methodOutro}>
+              Infrastructure matters too. If your domain lacks SPF, DKIM, or DMARC records, even a perfect email can land in spam. Use the <Link to="/domain" className={styles.inlineLink}>Domain Checker</Link> to verify your authentication setup.
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className={styles.faqSection}>
-          <div className="container container--narrow" ref={faqRef}>
-            <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+        {/* Answers - FAQ */}
+        <section id="answers" ref={sectionRefs.answers} className={styles.answersSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="ANSWERS" />
+            <div ref={faqRef} className={`${styles.faqHead} reveal`}>
+              <h2 className={styles.faqTitle}>Frequently asked questions</h2>
+            </div>
             <div className={styles.faqList}>
-              {faqItems.map((item, i) => {
+              {FAQ_ITEMS.map((item, i) => {
                 const isOpen = openFaq === i;
                 return (
                   <div
@@ -213,7 +264,8 @@ export default function ScorePage() {
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
                     >
-                      <span>{item.q}</span>
+                      <span className={styles.faqDash} aria-hidden="true" />
+                      <span className={styles.faqQuestionText}>{item.q}</span>
                       <span className={`${styles.faqChevron} ${isOpen ? styles.faqChevronOpen : ''}`}>
                         <ChevronIcon />
                       </span>
@@ -230,23 +282,36 @@ export default function ScorePage() {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* Cross-link CTA */}
         <section className={styles.ctaSection}>
-          <div className="container" ref={ctaRef}>
-            <div className={styles.ctaCard}>
-              <div className={styles.ctaContent}>
+          <div className={`container ${styles.container}`}>
+            <div ref={ctaRef} className={`${styles.ctaCard} reveal`}>
+              <div className={styles.ctaLeft}>
                 <h2 className={styles.ctaTitle}>Score good? Check your domain next.</h2>
                 <p className={styles.ctaDesc}>
                   Content is half the equation. Domain authentication, reputation, and DNS configuration are the other half.
                 </p>
+                <div className={styles.ctaActions}>
+                  <Link to="/domain" className={styles.ctaPrimary}>Check domain health</Link>
+                  <Link to="/verify" className={styles.ctaSecondary}>Verify your list</Link>
+                </div>
               </div>
-              <div className={styles.ctaActions}>
-                <Link to="/domain" className={styles.ctaPrimary}>
-                  Check Domain Health
-                </Link>
-                <Link to="/verify" className={styles.ctaSecondary}>
-                  Verify Your List
-                </Link>
+              <div className={styles.ctaRight} aria-hidden="true">
+                <div className={styles.ctaPanelLabel}>NEXT STEPS</div>
+                <ul className={styles.ctaSpecList}>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Audit SPF, DKIM, DMARC</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Check blacklist status</span>
+                  </li>
+                  <li className={styles.ctaSpecItem}>
+                    <span className={styles.ctaSpecMark} aria-hidden="true" />
+                    <span>Clean your contact list</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -257,7 +322,7 @@ export default function ScorePage() {
   );
 }
 
-/* -- Inline SVGs for explainer cards -- */
+// Inline SVGs
 
 function ChevronIcon() {
   return (
