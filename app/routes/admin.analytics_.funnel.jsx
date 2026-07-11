@@ -1,11 +1,8 @@
-// Admin conversion funnel. Pageview through Payment confirmed.
-// Filename uses trailing underscore on `analytics_` so this is a sibling route, not a child of admin.analytics.
-import { Form, useLoaderData, useSubmit } from 'react-router';
+// Funnel dashboard: pageview -> auth -> checkout -> payment.
+
+import { Link, useLoaderData } from 'react-router';
 import { requireAdmin, adminAnalyticsFunnel } from '~/utils/admin.server';
-import KPICard from '~/components/admin/KPICard';
 import Funnel from '~/components/admin/Funnel';
-import EmptyState from '~/components/admin/EmptyState';
-import { FunnelIcon, TagIcon, ChartIcon, AlertIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
@@ -21,7 +18,10 @@ const FUNNEL_LABELS = {
   auth_success:         'Authenticated',
   checkout_click:       'Checkout click',
   payment_pending:      'Payment pending',
+  gateway_redirect:     'Gateway redirect',
   payment_confirmed:    'Payment confirmed',
+  payment_failed:       'Payment failed',
+  payment_abandoned:    'Payment abandoned',
 };
 
 const FUNNEL_KEYS = Object.keys(FUNNEL_LABELS);
@@ -30,15 +30,12 @@ export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
   const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '7', 10)));
-
   const funnel = await adminAnalyticsFunnel({ days });
   return { funnel, days };
 }
 
 export default function AdminFunnel() {
   const { funnel, days } = useLoaderData();
-  const submit = useSubmit();
-  const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
   const byType = new Map(funnel.map((s) => [s.event_type, s]));
   const steps = FUNNEL_KEYS.map((k) => {
@@ -48,69 +45,51 @@ export default function AdminFunnel() {
       : { event_type: k, label: FUNNEL_LABELS[k], events: 0, sessions: 0, users: 0 };
   });
 
-  const totalSessions = steps[0].sessions;
-  const finalSessions = steps[steps.length - 1].sessions;
-  const overallRate = totalSessions > 0 ? Math.round((finalSessions / totalSessions) * 100) : 0;
-  const dropoff = Math.max(0, totalSessions - finalSessions);
+  const totalSessions = steps[0]?.sessions || 0;
+  const finalSessions = steps[steps.length - 1]?.sessions || 0;
+  const conversion = totalSessions > 0
+    ? ((finalSessions / totalSessions) * 100).toFixed(2)
+    : '0.00';
 
   return (
     <>
       <header className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>Conversion funnel</h1>
-          <p className={styles.pageSubtitle}>Pageview → Payment, last {days} days</p>
+          <h1 className={styles.pageTitle}>Funnel</h1>
+          <p className={styles.pageSubtitle}>Pageview to payment conversion over last {days} days</p>
+        </div>
+        <div className={styles.pageActions}>
+          {[1, 7, 30, 90].map((d) => (
+            <Link
+              key={d}
+              to={`?days=${d}`}
+              className={`${styles.formButton} ${styles['formButton--ghost']} ${d === days ? styles['formButton--active'] : ''}`}
+            >
+              {d}d
+            </Link>
+          ))}
         </div>
       </header>
 
-      <Form method="get" className={styles.tableToolbar}>
-        <div className={styles.filterField}>
-          <label className={styles.filterLabel} htmlFor="days">Window</label>
-          <select id="days" name="days" defaultValue={String(days)} onChange={onFilterChange} className={styles.filterSelect}>
-            <option value="1">Last 24h</option>
-            <option value="7">Last 7d</option>
-            <option value="30">Last 30d</option>
-            <option value="90">Last 90d</option>
-          </select>
+      <div className={styles.summaryRow}>
+        <div className={styles.summaryTile}>
+          <div className={styles.summaryLabel}>Overall conversion</div>
+          <div className={styles.summaryValue}>{conversion}%</div>
+          <div className={styles.summarySub}>Pageview to payment confirmed</div>
         </div>
-      </Form>
-
-      <div className={styles.kpiStrip}>
-        <KPICard
-          label="Top of funnel"
-          value={totalSessions.toLocaleString()}
-          hint="sessions reached pageview"
-          icon={FunnelIcon}
-        />
-        <KPICard
-          label="Bottom of funnel"
-          value={finalSessions.toLocaleString()}
-          hint="confirmed payments"
-          icon={TagIcon}
-          variant="hero"
-        />
-        <KPICard
-          label="Overall rate"
-          value={`${overallRate}%`}
-          hint="pageview to paid"
-          icon={ChartIcon}
-        />
-        <KPICard
-          label="Drop-off"
-          value={dropoff.toLocaleString()}
-          hint="sessions lost across funnel"
-          icon={AlertIcon}
-        />
+        <div className={styles.summaryTile}>
+          <div className={styles.summaryLabel}>Sessions</div>
+          <div className={styles.summaryValue}>{totalSessions.toLocaleString()}</div>
+          <div className={styles.summarySub}>Entered funnel</div>
+        </div>
+        <div className={styles.summaryTile}>
+          <div className={styles.summaryLabel}>Conversions</div>
+          <div className={styles.summaryValue}>{finalSessions.toLocaleString()}</div>
+          <div className={styles.summarySub}>Reached payment confirmed</div>
+        </div>
       </div>
 
-      {totalSessions === 0 ? (
-        <EmptyState
-          icon={FunnelIcon}
-          title="No funnel data yet"
-          body="Once users land and move through signup and payment, this view will populate."
-        />
-      ) : (
-        <Funnel steps={steps} />
-      )}
+      <Funnel steps={steps} />
     </>
   );
 }

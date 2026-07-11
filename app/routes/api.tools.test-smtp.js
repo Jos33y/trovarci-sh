@@ -1,26 +1,10 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /api/tools/test-smtp
-
-   Orchestrates the SMTP Tester endpoint. Anonymous-accessible, no credits.
-   Rate-limited by IP via the shared Postgres-backed limiter.
-
-   Security posture:
-     - Credentials never appear in logs, Sentry, or the response body. Only
-       the redacted transcript lines from smtpTester.server.js are returned.
-     - Request body is parsed ONCE; the password string is held in a local
-       variable that goes out of scope when the function returns.
-     - SSRF guard runs inside the probe before any outbound socket opens.
-     - Strict IP rate limit: 20 tests per hour per IP. Abuse vectors this
-       stops: credential stuffing via our infra, SMTP scanning at scale.
-     - Hard 30s overall timeout enforced in the probe, not just the route.
-
-   This route deliberately does NOT log successful test requests; even metadata
-   about "this IP tested smtp.gmail.com" has a privacy-cost vs zero operational
-   value. Failures are not logged either for the same reason.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* /api/tools/test-smtp - SMTP Tester. Anonymous, IP rate-limited (20/hour). No credits. */
 
 import { runSmtpTest } from '~/lib/smtpTester.server';
 import { checkAndIncrement } from '~/utils/rateLimit.server';
+import { recordToolEvent } from '~/utils/toolAnalytics.server';
+
+const ANALYTICS_TOOL = 'smtp_test';
 
 const SMTP_TEST_POLICY = { windowMinutes: 60, maxAttempts: 20 };
 const RATE_LIMIT_BUCKET = (ip) => `smtp_test:ip:${ip}`;
@@ -36,10 +20,10 @@ export async function action({ request }) {
     return Response.json({ ok: false, error: 'Method not allowed' }, { status: 405 });
   }
 
-  /* 1. Rate limit by IP before any work. */
   const ip = clientIp(request);
   const rl = await checkAndIncrement(RATE_LIMIT_BUCKET(ip), SMTP_TEST_POLICY);
   if (!rl.allowed) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'RATE_LIMITED' });
     const retrySeconds = rl.retryAfterSeconds || 60;
     return Response.json(
       {
@@ -52,28 +36,27 @@ export async function action({ request }) {
     );
   }
 
-  /* 2. Parse request body. Support JSON only (consistent with Email Scorer). */
+  recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'start' });
+
   let body;
   try {
     body = await request.json();
   } catch {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'BAD_REQUEST' });
     return Response.json(
       { ok: false, error: 'Invalid request body', code: 'BAD_REQUEST' },
       { status: 400 },
     );
   }
 
-  /* 3. Shallow validation. Deeper validation lives in runSmtpTest which
-        returns structured failures we can surface directly. */
   if (!body || typeof body !== 'object') {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'BAD_REQUEST' });
     return Response.json(
       { ok: false, error: 'Request body must be an object', code: 'BAD_REQUEST' },
       { status: 400 },
     );
   }
 
-  /* 4. Run the test. The probe module handles SSRF, port validation, and
-        timeouts. It never throws - always returns a shaped result. */
   const result = await runSmtpTest({
     host:       body.host,
     port:       body.port,
@@ -85,10 +68,16 @@ export async function action({ request }) {
     timeoutSec: body.timeoutSec,
   });
 
-  /* 5. Map verdict to HTTP status so clients (and proxies/CDNs) can handle
-        them sensibly. Tests that reach the probe but fail the handshake are
-        still 200 - the request itself succeeded. Only a validation failure
-        BEFORE the probe runs gets a 4xx here. */
+  // SMTP test always returns 200 with the transcript; probe-level failures
+  // are surfaced in result.summary and are not tool_error at the endpoint level.
+  recordToolEvent(request, {
+    tool: ANALYTICS_TOOL,
+    phase: 'success',
+    metadata: {
+      verdict: result.summary?.verdict || null,
+    },
+  });
+
   return Response.json(
     {
       ok: true,
@@ -104,7 +93,6 @@ export async function action({ request }) {
   );
 }
 
-/* GETs are 405 so bots and curious visitors don't get empty 200s. */
 export function loader() {
   return Response.json({ ok: false, error: 'Use POST' }, { status: 405 });
 }

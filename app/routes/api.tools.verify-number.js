@@ -1,32 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /api/tools/verify-number
-
-   One endpoint, two modes. Mirrors the spend-then-refund-on-fail pattern
-   established by /api/tools/score-email.
-
-   Modes (selected via body.mode):
-
-     'format'   Tier 1 only. Free. No auth required. IP rate-limited.
-                Runs libphonenumber-js validation and returns format data.
-
-     'carrier'  Tier 1 + Tier 2. Auth required. 2 credits per call.
-                Runs format validation FIRST (free) - if format is invalid,
-                no credit is charged and an error is returned. Otherwise
-                spends credit, calls Twilio Lookup v2, refunds on failure.
-
-   Why one endpoint, not two:
-     - Same shape on success (formatResult always present, carrierResult
-       added in carrier mode). Frontend handles both responses with one
-       parser.
-     - Tier 2 always runs Tier 1 first server-side. We never trust a
-       client-supplied E.164.
-
-   Refund logic:
-     - Twilio returns ok:true (full or partial data) -> NO refund. Twilio
-       billed us either way.
-     - Twilio returns ok:false (auth, 404, 429, 5xx, timeout, TLS) -> refund.
-       These cases are not billed.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* /api/tools/verify-number - format check (free/anon) + carrier lookup (2 credits, authed).
+   Two tool identities in analytics: phone_format (anon) and phone_verify (authed carrier). */
 
 import { requireUser } from '~/utils/session.server';
 import { spendCredits, refundCredits } from '~/lib/credits.server';
@@ -34,34 +7,25 @@ import { CREDIT_COSTS } from '~/utils/creditsConfig.server';
 import { validateAndFormat } from '~/lib/phoneFormat.server';
 import { lookupCarrier } from '~/lib/twilioLookup.server';
 import { checkAndIncrement } from '~/utils/rateLimit.server';
+import { recordToolEvent } from '~/utils/toolAnalytics.server';
 
 const TOOL_NAME = 'phone_verify';
+const ANALYTICS_TOOL_FORMAT = 'phone_format';
+const ANALYTICS_TOOL_CARRIER = 'phone_verify';
 
-// Format check is cheap (no external API, no credit). Generous IP limit
-// so legitimate paste-test-clear-paste workflows are not blocked.
 const FORMAT_POLICY = { windowMinutes: 60, maxAttempts: 100 };
-
-// Carrier lookup costs us money on every call. Tighter user-scoped limit
-// catches scripted abuse before it bleeds budget.
 const CARRIER_POLICY = { windowMinutes: 60, maxAttempts: 30 };
 
 const FORMAT_RL_BUCKET  = (key)    => `phone_format:${key}`;
 const CARRIER_RL_BUCKET = (userId) => `phone_carrier:user:${userId}`;
 
-// Hard cap on raw input before we even try to parse. 64 leaves headroom
-// over the 32 cap inside phoneFormat.server.js without becoming a DoS vector.
 const MAX_INPUT_BYTES = 64;
-
-// ============================================================================
-// Action entry point
-// ============================================================================
 
 export async function action({ request }) {
   if (request.method !== 'POST') {
     return jsonError(405, 'Method not allowed', 'METHOD_NOT_ALLOWED');
   }
 
-  // Parse body. Accept JSON only - this is an SPA fetch endpoint.
   let body;
   try {
     body = await request.json();
@@ -75,6 +39,8 @@ export async function action({ request }) {
   const country = rawCountry.toUpperCase();
 
   if (rawNumber.length > MAX_INPUT_BYTES) {
+    const tool = mode === 'carrier' ? ANALYTICS_TOOL_CARRIER : ANALYTICS_TOOL_FORMAT;
+    recordToolEvent(request, { tool, phase: 'error', code: 'INPUT_TOO_LONG' });
     return jsonError(400, 'Phone number is too long', 'INPUT_TOO_LONG');
   }
 
@@ -84,21 +50,16 @@ export async function action({ request }) {
   return handleCarrier(request, { rawNumber, country });
 }
 
-/* GETs land on a 405 so crawlers and curious visitors do not pollute
-   counters or logs with empty 200s. */
 export function loader() {
   return jsonError(405, 'Use POST', 'METHOD_NOT_ALLOWED');
 }
 
-// ============================================================================
 // Tier 1: format check (free, no auth)
-// ============================================================================
-
 async function handleFormat(request, { rawNumber, country }) {
-  // IP-scoped rate limit. Anonymous-allowed endpoints always need an IP gate.
   const ip = getClientIp(request);
   const rl = await checkAndIncrement(FORMAT_RL_BUCKET('ip:' + ip), FORMAT_POLICY);
   if (!rl.allowed) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL_FORMAT, phase: 'error', code: 'RATE_LIMITED' });
     return jsonError(
       429,
       `Rate limit reached. Try again in ${rl.retryAfterSeconds || 60} seconds.`,
@@ -107,12 +68,12 @@ async function handleFormat(request, { rawNumber, country }) {
     );
   }
 
+  recordToolEvent(request, { tool: ANALYTICS_TOOL_FORMAT, phase: 'start' });
+
   const fmt = validateAndFormat(rawNumber, country);
 
-  // Format failures return HTTP 200 with ok:false. They are tool results,
-  // not transport errors - the frontend renders them inline rather than
-  // as an error toast.
   if (!fmt.ok) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL_FORMAT, phase: 'error', code: fmt.code || 'FORMAT_INVALID' });
     return Response.json({
       ok: false,
       error: fmt.error,
@@ -121,29 +82,28 @@ async function handleFormat(request, { rawNumber, country }) {
     });
   }
 
+  recordToolEvent(request, { tool: ANALYTICS_TOOL_FORMAT, phase: 'success' });
   return Response.json({
     ok: true,
     formatResult: fmt.result,
   });
 }
 
-// ============================================================================
 // Tier 2: carrier lookup (auth required, 2 credits)
-// ============================================================================
-
 async function handleCarrier(request, { rawNumber, country }) {
-  // 1. Auth. requireUser throws a redirect for browser nav; for SPA fetches
-  //    we want JSON 401 so the client can show an inline signup CTA.
   let user;
   try {
     user = await requireUser(request);
   } catch {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL_CARRIER, phase: 'error', code: 'AUTH_REQUIRED' });
     return jsonError(401, 'Sign in for carrier lookup', 'AUTH_REQUIRED');
   }
 
-  // 2. User-scoped rate limit. Cheap reject before any DB write or API call.
+  recordToolEvent(request, { tool: ANALYTICS_TOOL_CARRIER, phase: 'start', userId: user.id });
+
   const rl = await checkAndIncrement(CARRIER_RL_BUCKET(user.id), CARRIER_POLICY);
   if (!rl.allowed) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL_CARRIER, phase: 'error', code: 'RATE_LIMITED', userId: user.id });
     return jsonError(
       429,
       `Rate limit reached. Try again in ${rl.retryAfterSeconds || 60} seconds.`,
@@ -152,10 +112,14 @@ async function handleCarrier(request, { rawNumber, country }) {
     );
   }
 
-  // 3. Tier 1 ALWAYS runs first server-side. We never trust client E.164.
-  //    If format is bad, we return early with no credit charged.
   const fmt = validateAndFormat(rawNumber, country);
   if (!fmt.ok) {
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL_CARRIER,
+      phase: 'error',
+      code: fmt.code || 'FORMAT_INVALID',
+      userId: user.id,
+    });
     return Response.json({
       ok: false,
       error: fmt.error,
@@ -165,8 +129,6 @@ async function handleCarrier(request, { rawNumber, country }) {
     });
   }
 
-  // 4. Spend 2 credits atomically. FOR UPDATE row lock prevents double-spend
-  //    across concurrent requests from the same user.
   const cost = CREDIT_COSTS.phone_verify;
   const spend = await spendCredits(user.id, cost, TOOL_NAME, {
     metadata: {
@@ -176,8 +138,13 @@ async function handleCarrier(request, { rawNumber, country }) {
   });
 
   if (!spend.ok) {
-    // Insufficient credits. Return Tier 1 data anyway so the user still
-    // gets the format check value they asked for.
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL_CARRIER,
+      phase: 'error',
+      code: 'INSUFFICIENT_CREDITS',
+      userId: user.id,
+      metadata: { balance: spend.balance ?? null, required: cost },
+    });
     return Response.json(
       {
         ok: false,
@@ -191,22 +158,25 @@ async function handleCarrier(request, { rawNumber, country }) {
     );
   }
 
-  // 5. Twilio Lookup v2. lookupCarrier never throws.
   const lookup = await lookupCarrier(fmt.result.e164);
 
   if (!lookup.ok) {
-    // Refund and surface. The refund row references the original spend
-    // for a clean audit trail.
     try {
       await refundCredits(user.id, cost, {
         originalTransactionId: spend.transactionId,
         reason: lookup.code,
       });
     } catch (refundErr) {
-      // Refund itself failed. This is an internal alarm condition - log
-      // for ops and continue. Do not hide the original error from the user.
       console.error('Phone Verifier refund failed:', refundErr);
     }
+
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL_CARRIER,
+      phase: 'error',
+      code: lookup.code || 'CARRIER_LOOKUP_FAILED',
+      userId: user.id,
+      metadata: { refunded: true },
+    });
 
     return Response.json(
       {
@@ -220,8 +190,13 @@ async function handleCarrier(request, { rawNumber, country }) {
     );
   }
 
-  // 6. Success. Return Tier 1 + Tier 2 + the new balance so the client
-  //    can update its credit pill without a separate fetch.
+  recordToolEvent(request, {
+    tool: ANALYTICS_TOOL_CARRIER,
+    phase: 'success',
+    userId: user.id,
+    metadata: { spent: cost, country: fmt.result.country },
+  });
+
   return Response.json({
     ok: true,
     formatResult: fmt.result,
@@ -239,9 +214,7 @@ async function handleCarrier(request, { rawNumber, country }) {
   });
 }
 
-// ============================================================================
 // Helpers
-// ============================================================================
 
 function jsonError(status, error, code, extra = {}) {
   return Response.json(
@@ -270,13 +243,6 @@ function mapTwilioStatus(code) {
   }
 }
 
-/* Best-effort client IP. Trust order:
-     1. X-Forwarded-For first hop (Coolify / nginx prepend)
-     2. X-Real-IP
-     3. CF-Connecting-IP (Cloudflare)
-     4. Fallback to a constant so the rate limiter has a stable bucket key
-   In production behind Coolify + Cloudflare, X-Forwarded-For will always
-   be set. The fallback only triggers in tests and local dev. */
 function getClientIp(request) {
   const xff = request.headers.get('x-forwarded-for');
   if (xff) return xff.split(',')[0].trim();

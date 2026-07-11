@@ -1,15 +1,5 @@
-/**
- * Signup action. Handles four form intents from /signup:
- *
- *   intent=create_account   - step 1: validate, create user, send code
- *   intent=verify_code      - step 2: verify code, mark verified, issue session
- *   intent=resend_code      - step 2 resend: rate-limited reissue + send
- *   intent=change_email     - step 2: clear pending cookie, back to step 1
- *
- * The component determines step from the presence of the pending verification
- * cookie (read by the loader), not from action data. This keeps the flow
- * resilient across page refreshes and failed verifications.
- */
+// POST /signup - four intents from the same action (create_account, verify_code, resend_code, change_email).
+// Step is determined by the pending verification cookie, not by action data - resilient across refreshes.
 
 import { data, redirect } from 'react-router';
 import { createUser, markEmailVerified } from '~/utils/auth.server';
@@ -47,11 +37,22 @@ function userAgent(request) {
   return request.headers.get('user-agent')?.slice(0, 500) || null;
 }
 
+// Fire auth_error with metadata.kind='signup'. Never throws.
+function recordSignupError(request, step, code, extra = {}) {
+  try {
+    recordEvent(buildEventFromRequest(request, {
+      eventType: 'auth_error',
+      path: '/signup',
+      userId: extra.userId ?? null,
+      metadata: { kind: 'signup', step, code, ...extra },
+    }));
+  } catch { /* analytics failure must not block auth */ }
+}
+
 export async function signupAction({ request }) {
   const form = await request.formData();
   const intent = String(form.get('intent') || 'create_account');
 
-  // Funnel: every signup step, regardless of outcome.
   recordEvent(buildEventFromRequest(request, {
     eventType: 'auth_submit',
     path: '/signup',
@@ -64,12 +65,10 @@ export async function signupAction({ request }) {
   if (intent === 'resend_code')    return handleResendCode(request);
   if (intent === 'change_email')   return handleChangeEmail(request);
 
+  recordSignupError(request, 'unknown', 'UNKNOWN_INTENT');
   return data({ errors: { _form: 'Unknown action' } }, { status: 400 });
 }
 
-// -----------------------------------------------------------------------
-// Step 1
-// -----------------------------------------------------------------------
 async function handleCreateAccount(request, form) {
   const ip = clientIp(request);
 
@@ -79,6 +78,7 @@ async function handleCreateAccount(request, form) {
       rateLimitPolicies.signupByIp,
     );
     if (!rl.allowed) {
+      recordSignupError(request, 'create_account', 'RATE_LIMITED_IP');
       return data(
         { errors: { _form: 'Too many signups from this network. Try again later.' } },
         { status: 429, headers: rl.retryAfterSeconds ? { 'Retry-After': String(rl.retryAfterSeconds) } : {} },
@@ -100,11 +100,12 @@ async function handleCreateAccount(request, form) {
   if (!termsAccepted) errors.terms = 'You must accept the Terms and Privacy Policy';
 
   if (Object.keys(errors).length > 0) {
+    recordSignupError(request, 'create_account', 'VALIDATION', {
+      fields: Object.keys(errors).join(','),
+    });
     return data({ errors }, { status: 400 });
   }
 
-  // Compute safe redirect once - used by both real and decoy paths so the
-  // attacker cannot distinguish via redirect behavior.
   const redirectRaw = form.get('redirectTo');
   const safeRedirectTo = safeRedirect(
     typeof redirectRaw === 'string' ? redirectRaw : null,
@@ -114,26 +115,11 @@ async function handleCreateAccount(request, form) {
   const created = await createUser(emailResult.value, passwordResult.value);
   if (!created.ok) {
     if (created.reason === 'email_taken') {
-      // Email enumeration prevention.
-      //
-      // Returning a "this email is taken" error here would let any visitor
-      // build a list of registered users by submitting candidate emails to
-      // /signup. That breaks the same security posture forgot-password.jsx
-      // already protects: never reveal whether an email is registered.
-      //
-      // Strategy: run the same code path as a fresh signup, but with no
-      // real user creation, no real verification code, and no real session.
-      // The response shape, headers, and timing match a successful signup
-      // exactly. The existing user gets a notification email so they can
-      // act on it (sign in, reset password, or ignore).
-      //
-      // Verification attempts in collision mode return generic "incorrect
-      // code" errors (handled in handleVerifyCode). Resend attempts fire
-      // another collision email under the same rate limit policy.
-
-      // Cap at 1 collision email per hour per email to prevent a multi-IP
-      // attacker from email-bombing a victim. The IP-level signup rate
-      // limit above caps the same-IP case at 10/hour.
+      // Email enumeration prevention: run the same code path as a fresh signup
+      // (no real user creation, no real code, no real session). Response shape,
+      // headers, and timing match a successful signup exactly. Existing user
+      // gets a notification email. Verification attempts return generic errors.
+      // Cap collision emails at 1/hour per email to prevent multi-IP bombing.
       const collisionRl = await checkAndIncrement(
         rateLimitKeys.signupCollisionByEmail(emailResult.value),
         rateLimitPolicies.signupCollisionByEmail,
@@ -142,11 +128,12 @@ async function handleCreateAccount(request, form) {
         try {
           await sendSignupCollisionEmail({ to: emailResult.value });
         } catch (err) {
-          // eslint-disable-next-line no-console
           console.error('[signup] collision email send failed:', err);
-          // Swallow - never leak the collision via error states.
         }
       }
+
+      // Internal signal only - user sees the decoy verify step.
+      recordSignupError(request, 'create_account', 'EMAIL_TAKEN');
 
       const decoyCookie = await pendingVerificationCookie.serialize({
         userId: null,
@@ -160,8 +147,8 @@ async function handleCreateAccount(request, form) {
         { headers: { 'Set-Cookie': decoyCookie } },
       );
     }
-    // Other createUser failures (DB error, etc) - keep the message generic
-    // so it does not leak whether the email is taken via failure mode.
+    // Generic message so failure mode does not leak whether email is taken.
+    recordSignupError(request, 'create_account', 'CREATE_FAILED');
     return data(
       { errors: { _form: 'Could not create account. Try again in a moment.' } },
       { status: 500 },
@@ -173,14 +160,11 @@ async function handleCreateAccount(request, form) {
   try {
     await sendVerificationCodeEmail({ to: created.user.email, code });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('[signup] verification email send failed:', err);
+    recordSignupError(request, 'create_account', 'OTP_SEND_FAILED', { userId: created.user.id });
+    // Note: we still proceed. User can resend from step 2.
   }
 
-  // Funnel: account created + OTP dispatched. Welcome credits already
-  // landed inside createUser (see auth.server.js); we record the
-  // bonus separately at signup-complete because the user can't actually
-  // spend them until verify_code passes.
   recordEvent(buildEventFromRequest(request, {
     eventType: 'auth_otp_sent',
     path: '/signup',
@@ -200,15 +184,12 @@ async function handleCreateAccount(request, form) {
   );
 }
 
-// -----------------------------------------------------------------------
-// Step 2: verify
-// -----------------------------------------------------------------------
 async function handleVerifyCode(request, form) {
   const pending = await pendingVerificationCookie.parse(request.headers.get('Cookie'));
 
-  // Cookie must contain either a real userId OR the collision flag.
-  // Anything else means the session was tampered with or expired.
+  // Cookie must contain a real userId OR the collision flag. Anything else = tamper/expiry.
   if (!pending?.userId && !pending?.collision) {
+    recordSignupError(request, 'verify_code', 'SESSION_EXPIRED');
     return data(
       { errors: { _form: 'Your verification session expired. Start again.' } },
       { status: 400 },
@@ -217,13 +198,16 @@ async function handleVerifyCode(request, form) {
 
   const codeResult = validateVerificationCode(form.get('code'));
   if (!codeResult.ok) {
+    recordSignupError(request, 'verify_code', 'BAD_CODE_FORMAT', {
+      userId: pending.userId ?? null,
+    });
     return data({ errors: { code: codeResult.error } }, { status: 400 });
   }
 
-  // Collision case: never reveal whether the code matched anything. Always
-  // return the same "incorrect" message a real failed verify would return.
-  // The attacker cannot distinguish a real wrong code from a decoy session.
+  // Collision case: never reveal whether the code matched. Same "incorrect" message a real
+  // failed verify would return. Attacker cannot distinguish real vs decoy.
   if (pending.collision) {
+    recordSignupError(request, 'verify_code', 'INVALID_CODE_COLLISION');
     return data({ errors: { code: 'That code is incorrect' } }, { status: 400 });
   }
 
@@ -236,21 +220,21 @@ async function handleVerifyCode(request, form) {
       too_many_attempts: 'Too many attempts. Request a new code.',
       invalid_code:      'That code is incorrect',
     }[result.reason] || 'Verification failed';
+    recordSignupError(request, 'verify_code', String(result.reason || 'unknown').toUpperCase(), {
+      userId: pending.userId,
+    });
     return data({ errors: { code: message } }, { status: 400 });
   }
 
   await markEmailVerified(pending.userId);
 
-  // Welcome email. Sent only after successful verification so we never
-  // welcome someone who never confirmed their address. Failure here is
-  // non-fatal - we do not block the signup completion if Resend hiccups.
+  // Welcome email only after successful verification. Failure here is non-fatal.
   try {
     await sendAccountCreatedEmail({
       to: pending.email,
       welcomeCredits: WELCOME_BONUS_AMOUNT,
     });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('[signup] welcome email send failed:', err);
   }
 
@@ -259,8 +243,7 @@ async function handleVerifyCode(request, form) {
     ipAddress: clientIp(request),
   });
 
-  // Funnel: signup completed end-to-end. Sync record so we never lose a
-  // signup-conversion event - this is the only point where welcome
+  // Sync record - never lose a signup conversion. This is the only point where welcome
   // credits become spendable and the user has a usable session.
   await recordEventSync({
     event_type: 'auth_signup_complete',
@@ -277,29 +260,24 @@ async function handleVerifyCode(request, form) {
   headers.append('Set-Cookie', serializeSessionCookie(session.token, session.expiresAt));
   headers.append('Set-Cookie', await pendingVerificationCookie.serialize('', { maxAge: 0 }));
 
-  // Honor the redirect the user originally intended. safeRedirect is applied
-  // again at read time: the cookie is HMAC-signed but defense in depth costs
-  // us nothing here and protects against any future cookie-handling bugs.
+  // Honor original redirect intent. safeRedirect at read time is defense in depth
+  // even though the cookie is HMAC-signed.
   const destination = safeRedirect(pending.redirectTo, '/dashboard');
 
   throw redirect(destination, { headers });
 }
 
-// -----------------------------------------------------------------------
-// Step 2: resend
-// -----------------------------------------------------------------------
 async function handleResendCode(request) {
   const pending = await pendingVerificationCookie.parse(request.headers.get('Cookie'));
   if (!pending?.userId && !pending?.collision) {
+    recordSignupError(request, 'resend_code', 'SESSION_EXPIRED');
     return data(
       { errors: { _form: 'Your verification session expired. Start again.' } },
       { status: 400 },
     );
   }
 
-  // Use email-based bucket key for collision (no userId). Real users keyed
-  // by userId, decoy sessions keyed by email - separate buckets, same caps,
-  // identical UX from outside.
+  // Real users keyed by userId, decoy sessions keyed by email. Separate buckets, same caps.
   const rateLimitSubject = pending.userId || `collision:${pending.email}`;
 
   const perMinute = await checkAndIncrement(
@@ -307,6 +285,9 @@ async function handleResendCode(request) {
     rateLimitPolicies.resendCodePerMinute,
   );
   if (!perMinute.allowed) {
+    recordSignupError(request, 'resend_code', 'RATE_LIMITED_MIN', {
+      userId: pending.userId ?? null,
+    });
     return data(
       { errors: { _form: `Wait ${perMinute.retryAfterSeconds || 60} seconds before requesting another code` } },
       { status: 429 },
@@ -317,20 +298,21 @@ async function handleResendCode(request) {
     rateLimitPolicies.resendCodePerHour,
   );
   if (!perHour.allowed) {
+    recordSignupError(request, 'resend_code', 'RATE_LIMITED_HR', {
+      userId: pending.userId ?? null,
+    });
     return data(
       { errors: { _form: 'Too many code requests. Try again later.' } },
       { status: 429 },
     );
   }
 
-  // Collision case: resend the notification email instead of a real code.
-  // From the attacker's perspective this looks identical to a real resend.
   if (pending.collision) {
     try {
       await sendSignupCollisionEmail({ to: pending.email });
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('[signup] collision resend send failed:', err);
+      recordSignupError(request, 'resend_code', 'EMAIL_SEND_FAILED');
       return data({ errors: { _form: 'Could not send email. Try again in a moment.' } }, { status: 500 });
     }
     return data({ resent: true, email: pending.email });
@@ -341,20 +323,25 @@ async function handleResendCode(request) {
   try {
     await sendVerificationCodeEmail({ to: pending.email, code });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('[signup] resend email send failed:', err);
+    recordSignupError(request, 'resend_code', 'EMAIL_SEND_FAILED', {
+      userId: pending.userId,
+    });
     return data({ errors: { _form: 'Could not send email. Try again in a moment.' } }, { status: 500 });
   }
+
+  recordEvent(buildEventFromRequest(request, {
+    eventType: 'auth_otp_sent',
+    path: '/signup',
+    userId: pending.userId,
+    metadata: { kind: 'signup', resend: true },
+  }));
 
   return data({ resent: true, email: pending.email });
 }
 
-// -----------------------------------------------------------------------
-// Step 2: change email (back to step 1)
-// -----------------------------------------------------------------------
 async function handleChangeEmail(request) {
-  // Preserve the user's original redirect intent when bouncing back to
-  // step 1. Without this, changing email silently drops their destination.
+  // Preserve original redirect intent when bouncing back to step 1.
   const pending = await pendingVerificationCookie.parse(request.headers.get('Cookie'));
   const preservedRedirect = safeRedirect(pending?.redirectTo, null);
 

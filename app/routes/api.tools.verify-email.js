@@ -5,10 +5,12 @@ import { checkAndIncrement, rateLimitKeys, rateLimitPolicies } from '~/utils/rat
 import { spendCredits, refundCredits }                        from '~/lib/credits.server';
 import { CREDIT_COSTS }                                       from '~/utils/creditsConfig.server';
 import { verifyOneEmail }                                     from '~/lib/emailVerify.server';
+import { recordToolEvent }                                    from '~/utils/toolAnalytics.server';
 
 const COST = CREDIT_COSTS.email_verify;
+const ANALYTICS_TOOL = 'email_verify';
 
-// Never-throws wrapper around refundCredits. Logs hard failures, returns ok flag.
+// Never-throws wrapper around refundCredits.
 async function safeRefund(userId, amount, opts) {
   try {
     const r = await refundCredits(userId, amount, opts);
@@ -24,15 +26,17 @@ export async function action({ request }) {
     return Response.json({ ok: false, code: 'METHOD_NOT_ALLOWED' }, { status: 405 });
   }
 
-  // Top-level catch so we never return an empty-body 5xx (Cloudflare wraps those).
   try {
     const user = await requireUser(request);
+
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'start', userId: user.id });
 
     const rl = await checkAndIncrement(
       rateLimitKeys.emailVerifySingleByUser(user.id),
       rateLimitPolicies.emailVerifySingleByUser,
     );
     if (!rl.allowed) {
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'RATE_LIMITED', userId: user.id });
       return Response.json(
         { ok: false, code: 'RATE_LIMITED', retryAfterSeconds: rl.retryAfterSeconds },
         { status: 429, headers: rl.retryAfterSeconds ? { 'Retry-After': String(rl.retryAfterSeconds) } : undefined },
@@ -41,27 +45,37 @@ export async function action({ request }) {
 
     let body;
     try { body = await request.json(); }
-    catch { return Response.json({ ok: false, code: 'BAD_JSON' }, { status: 400 }); }
+    catch {
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'BAD_JSON', userId: user.id });
+      return Response.json({ ok: false, code: 'BAD_JSON' }, { status: 400 });
+    }
 
     const email   = typeof body?.email   === 'string' ? body.email.trim()   : '';
     const country = typeof body?.country === 'string' ? body.country.trim() : null;
 
     if (!email) {
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'EMAIL_REQUIRED', userId: user.id });
       return Response.json({ ok: false, code: 'EMAIL_REQUIRED', error: 'email is required' }, { status: 400 });
     }
 
-    // Spend credit up front so we cannot oversell. Wrap because spendCredits can throw on DB errors.
     let spend;
     try {
       spend = await spendCredits(user.id, COST, 'email_verify', { metadata: { email } });
     } catch (err) {
       console.error('[verify-email] spend threw:', err?.message || err);
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'SPEND_THREW', userId: user.id });
       return Response.json({ ok: false, code: 'SPEND_THREW', error: 'Could not spend credits' }, { status: 500 });
     }
 
     if (!spend.ok) {
-      // spendCredits failure shape: { ok:false, reason:'insufficient', balance }
       const insufficient = spend.reason === 'insufficient';
+      recordToolEvent(request, {
+        tool: ANALYTICS_TOOL,
+        phase: 'error',
+        code: insufficient ? 'INSUFFICIENT_CREDITS' : 'SPEND_FAILED',
+        userId: user.id,
+        metadata: { balance: spend.balance ?? null, required: COST },
+      });
       return Response.json(
         {
           ok:            false,
@@ -74,7 +88,6 @@ export async function action({ request }) {
       );
     }
 
-    // verifyOneEmail is contractually never-throws but wrap belt-and-braces.
     let result;
     try {
       result = await verifyOneEmail(email, country ? { country } : {});
@@ -84,17 +97,30 @@ export async function action({ request }) {
         originalTransactionId: spend.transactionId,
         reason: 'email_verify_threw',
       });
+      recordToolEvent(request, {
+        tool: ANALYTICS_TOOL,
+        phase: 'error',
+        code: 'EMAIL_VERIFY_THREW',
+        userId: user.id,
+        metadata: { refunded: refund.ok },
+      });
       return Response.json(
         { ok: false, code: 'EMAIL_VERIFY_THREW', error: err?.message || 'Verification crashed', refunded: refund.ok },
         { status: 500 },
       );
     }
 
-    // Infrastructure failure - refund. Verdict (any category) - keep the credit.
     if (!result.ok) {
       const refund = await safeRefund(user.id, COST, {
         originalTransactionId: spend.transactionId,
         reason: 'email_verify_failed_' + (result.code || 'unknown'),
+      });
+      recordToolEvent(request, {
+        tool: ANALYTICS_TOOL,
+        phase: 'error',
+        code: result.code || 'EMAIL_VERIFY_FAILED',
+        userId: user.id,
+        metadata: { refunded: refund.ok },
       });
       return Response.json(
         {
@@ -108,10 +134,25 @@ export async function action({ request }) {
       );
     }
 
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL,
+      phase: 'success',
+      userId: user.id,
+      metadata: { spent: COST },
+    });
+
     return Response.json({ ok: true, result: result.result });
 
   } catch (err) {
+    // Auth failure: requireUser throws a Response object. Return it as-is
+    // instead of miscategorising as INTERNAL. Fire tool_error AUTH_REQUIRED
+    // for clean signup-opportunity metrics.
+    if (err instanceof Response) {
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'AUTH_REQUIRED' });
+      return err;
+    }
     console.error('[verify-email] uncaught:', err?.message || err, err?.stack ? '\n' + err.stack : '');
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'INTERNAL' });
     return Response.json(
       { ok: false, code: 'INTERNAL', error: err?.message || 'Internal server error' },
       { status: 500 },

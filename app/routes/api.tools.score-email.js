@@ -1,23 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /api/tools/score-email
-
-   Orchestrates: auth -> rate limit -> input validation -> credit spend ->
-   Claude API call -> (refund on failure) -> shaped response.
-
-   Credit accounting pattern: spend-then-refund-on-fail.
-     1. spendCredits decrements user balance atomically in a DB transaction
-     2. Claude API is called
-     3. On any failure after spend, refundCredits puts the credit back
-        and writes a refund ledger row pointing at the original transaction
-     4. On success, the shaped result is returned with the new balance
-
-   Why this pattern, not pay-on-success:
-     - Double-spend is impossible with FOR UPDATE row lock in spendCredits
-     - Audit trail is clean: every API call leaves at least one ledger row
-     - Refund ledger rows have reference_id = original tx, so failures are
-       traceable without heuristics
-     - Same pattern DNS scan, email verifier, and phone verifier will use
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* /api/tools/score-email - Email Scorer endpoint. Auth-gated, 1 credit, spend-then-refund-on-fail. */
 
 import { requireUser } from '~/utils/session.server';
 import { spendCredits, refundCredits } from '~/lib/credits.server';
@@ -31,13 +12,11 @@ import {
   checkResultCache,
   setResultCache,
 } from '~/lib/scoreCache.server';
+import { recordToolEvent } from '~/utils/toolAnalytics.server';
 
 const TOOL_NAME = 'email_score';
+const ANALYTICS_TOOL = 'email_score';
 
-/* Tool-specific rate limit policy. Following the same convention as the
-   auth limits in rateLimit.server.js (windowMinutes + maxAttempts).
-   10 scores per user per hour is generous for a real user and catches
-   accidental loops / scripted abuse before Stripe telemetry notices. */
 const SCORE_EMAIL_POLICY = { windowMinutes: 60, maxAttempts: 10 };
 const RATE_LIMIT_BUCKET = (userId) => `score_email:user:${userId}`;
 
@@ -46,39 +25,26 @@ export async function action({ request }) {
     return Response.json({ ok: false, error: 'Method not allowed' }, { status: 405 });
   }
 
-  // 1. Auth. Throws a redirect for unauth'd browser requests; for fetch
-  //    calls from our own SPA we want JSON back, so catch and return 401.
   let user;
   try {
     user = await requireUser(request);
   } catch (err) {
-    // requireUser throws a Response (redirect or 401) for unauth'd sessions.
-    // We want a JSON response instead so the client can show an auth prompt.
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'AUTH_REQUIRED' });
     return Response.json(
       { ok: false, error: 'Sign in required', code: 'AUTH_REQUIRED' },
       { status: 401 }
     );
   }
 
-  // 1.5. Idempotency: if the client sent an Idempotency-Key header AND
-  //      a request with that key from this user is already in-flight,
-  //      wait on its result instead of starting a new one. Standard
-  //      pattern (Stripe, Square, every modern payments API) for
-  //      preventing double-charge on accidental retries.
   const idempotencyKey = request.headers.get('idempotency-key') || null;
   if (idempotencyKey) {
     const existing = checkIdempotency(user.id, idempotencyKey);
     if (existing) {
-      // Return whatever the original request returned - including the
-      // Response object verbatim (body cloned).
       const resp = await existing;
       return resp.clone ? resp.clone() : resp;
     }
   }
 
-  // The actual work, wrapped so we can register it as in-flight before
-  // awaiting. Anything inside this function is what the idempotency
-  // cache "remembers" and replays.
   const work = (async () => {
     return await processScoreRequest(user, request, idempotencyKey);
   })();
@@ -91,7 +57,8 @@ export async function action({ request }) {
 }
 
 async function processScoreRequest(user, request, idempotencyKey) {
-  // 2. Parse input. Support both JSON and form-encoded bodies.
+  recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'start', userId: user.id });
+
   let rawInput;
   try {
     const contentType = request.headers.get('content-type') || '';
@@ -106,40 +73,38 @@ async function processScoreRequest(user, request, idempotencyKey) {
       };
     }
   } catch {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'BAD_REQUEST', userId: user.id });
     return Response.json(
       { ok: false, error: 'Could not parse request body', code: 'BAD_REQUEST' },
       { status: 400 }
     );
   }
 
-  // 3. Server-side input validation BEFORE charging a credit.
-  //    Re-runs the normalizer so request-side tampering cannot bypass limits.
   const normalized = normalizeScoringInput(rawInput);
   const validation = validateScoringInput(normalized);
   if (!validation.valid) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'VALIDATION', userId: user.id });
     return Response.json(
       { ok: false, error: validation.error, code: 'VALIDATION' },
       { status: 400 }
     );
   }
 
-  // 3.5. Result cache: same user + same content within the last hour
-  //      returns the prior result without spending a credit or hitting
-  //      Anthropic. Two purposes:
-  //        - UX: refresh / re-mount doesn't re-charge the user
-  //        - Anti-gaming: paste-same-email-twice for free reads is
-  //          mitigated by giving them the cached answer rather than a
-  //          fresh score (cached === their previous score === useless
-  //          to game)
   const contentHash = hashScoringInput(normalized);
   const cached = checkResultCache(user.id, contentHash);
   if (cached) {
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL,
+      phase: 'success',
+      userId: user.id,
+      metadata: { cached: true, spent: 0 },
+    });
     return Response.json({
       ok: true,
       result: cached,
       credits: {
         spent: 0,
-        balance: null,         // unchanged - client should keep its current display
+        balance: null,
         transactionId: null,
         cached: true,
       },
@@ -147,12 +112,9 @@ async function processScoreRequest(user, request, idempotencyKey) {
     });
   }
 
-  // 4. Rate limit via the shared Postgres-backed limiter. checkAndIncrement
-  //    is atomic: it UPSERTs the counter and returns the windowed sum in a
-  //    single round-trip, so two concurrent requests cannot both pass the
-  //    check with stale data.
   const rl = await checkAndIncrement(RATE_LIMIT_BUCKET(user.id), SCORE_EMAIL_POLICY);
   if (!rl.allowed) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'RATE_LIMITED', userId: user.id });
     const retrySeconds = rl.retryAfterSeconds || 60;
     return Response.json(
       {
@@ -165,15 +127,19 @@ async function processScoreRequest(user, request, idempotencyKey) {
     );
   }
 
-  // 5. Spend 1 credit atomically. The FOR UPDATE lock in spendCredits
-  //    guarantees two concurrent requests from the same user cannot both
-  //    pass the balance check with stale data.
   const cost = CREDIT_COSTS.email_score;
   const spend = await spendCredits(user.id, cost, TOOL_NAME, {
     metadata: { inputMode: normalized.mode },
   });
 
   if (!spend.ok) {
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL,
+      phase: 'error',
+      code: 'INSUFFICIENT_CREDITS',
+      userId: user.id,
+      metadata: { balance: spend.balance ?? null, required: cost },
+    });
     return Response.json(
       {
         ok: false,
@@ -186,24 +152,26 @@ async function processScoreRequest(user, request, idempotencyKey) {
     );
   }
 
-  // 6. Call the scoring engine. Any failure after this point must refund.
   const score = await scoreEmail(normalized);
 
   if (!score.ok) {
-    // Refund and surface the error. The refund ledger row points at the
-    // original spend transaction for a clean audit trail.
     try {
       await refundCredits(user.id, cost, {
         originalTransactionId: spend.transactionId,
         reason: score.code,
       });
     } catch (refundErr) {
-      // Refund failure is a serious internal problem but must not hide the
-      // original error from the user. Log server-side for monitoring.
       console.error('Email Scorer refund failed after API error:', refundErr);
     }
 
-    // Map engine errors to HTTP status codes that match their semantics.
+    recordToolEvent(request, {
+      tool: ANALYTICS_TOOL,
+      phase: 'error',
+      code: score.code || 'ARCIS_UNKNOWN',
+      userId: user.id,
+      metadata: { refunded: true },
+    });
+
     const status = mapEngineErrorStatus(score.code);
     return Response.json(
       {
@@ -216,9 +184,14 @@ async function processScoreRequest(user, request, idempotencyKey) {
     );
   }
 
-  // 7. Success. Return the shaped result plus the new balance so the
-  //    client can update the credit indicator without a separate fetch.
   setResultCache(user.id, contentHash, score.result);
+
+  recordToolEvent(request, {
+    tool: ANALYTICS_TOOL,
+    phase: 'success',
+    userId: user.id,
+    metadata: { cached: false, spent: cost },
+  });
 
   return Response.json({
     ok: true,
@@ -236,8 +209,6 @@ async function processScoreRequest(user, request, idempotencyKey) {
   });
 }
 
-/* GETs fall through to a 405 so crawlers and curious visitors do not get
-   an empty 200 response. */
 export function loader() {
   return Response.json({ ok: false, error: 'Use POST' }, { status: 405 });
 }

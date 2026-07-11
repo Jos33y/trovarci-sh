@@ -342,6 +342,7 @@ export async function adminAnalyticsFunnel({ days = 7 } = {}) {
     'auth_success',
     'checkout_click',
     'payment_pending',
+    'gateway_redirect',
     'payment_confirmed',
     'payment_failed',
     'payment_abandoned',
@@ -524,13 +525,13 @@ export async function adminKpiDeltas({ days = 7 } = {}) {
   const pct = (c, p) => (p === 0 ? (c > 0 ? 100 : 0) : Math.round(((c - p) / p) * 100));
 
   return {
-    pageviews:   { current: pv[0].current,        previous: pv[0].previous,        deltaPct: pct(pv[0].current, pv[0].previous) },
-    signups:     { current: su[0].current,        previous: su[0].previous,        deltaPct: pct(su[0].current, su[0].previous) },
-    payments:    { current: pay[0].current,       previous: pay[0].previous,       deltaPct: pct(pay[0].current, pay[0].previous) },
-    revenue:     { current_cents: rev[0].current_cents, previous_cents: rev[0].previous_cents, deltaPct: pct(rev[0].current_cents, rev[0].previous_cents) },
-    errors:      { current: err[0].current,       previous: err[0].previous,       deltaPct: pct(err[0].current, err[0].previous) },
+    pageviews: { current: pv[0].current, previous: pv[0].previous, deltaPct: pct(pv[0].current, pv[0].previous) },
+    signups: { current: su[0].current, previous: su[0].previous, deltaPct: pct(su[0].current, su[0].previous) },
+    payments: { current: pay[0].current, previous: pay[0].previous, deltaPct: pct(pay[0].current, pay[0].previous) },
+    revenue: { current_cents: rev[0].current_cents, previous_cents: rev[0].previous_cents, deltaPct: pct(rev[0].current_cents, rev[0].previous_cents) },
+    errors: { current: err[0].current, previous: err[0].previous, deltaPct: pct(err[0].current, err[0].previous) },
     activeUsers: { current: au[0].current },
-    openJobs:    { current: oj[0].current },
+    openJobs: { current: oj[0].current },
   };
 }
 
@@ -787,18 +788,18 @@ export async function adminSystemStatus() {
   // tables ship. For now we report 'ok' on the assumption that the route
   // loaders will fail loudly if any of these are wedged.
   return {
-    postgres:  { status: postgresOk ? 'ok' : 'down', latency_ms: postgresLatencyMs },
-    resend:    { status: 'ok' },
+    postgres: { status: postgresOk ? 'ok' : 'down', latency_ms: postgresLatencyMs },
+    resend: { status: 'ok' },
     cryptomus: { status: 'ok' },
-    stripe:    { status: 'ok' },
-    worker:    { status: 'ok' },
+    stripe: { status: 'ok' },
+    worker: { status: 'ok' },
   };
 }
 
 // ─── Contact messages ───
 
 export async function adminListContactMessages({ status = null, subject = null, q = null, limit = 50, offset = 0 } = {}) {
-  const statusFilter  = status  ? sql`AND status = ${status}`   : sql``;
+  const statusFilter = status ? sql`AND status = ${status}` : sql``;
   const subjectFilter = subject ? sql`AND subject = ${subject}` : sql``;
   const qFilter = q
     ? sql`AND (email ILIKE ${'%' + q + '%'} OR name ILIKE ${'%' + q + '%'} OR message ILIKE ${'%' + q + '%'})`

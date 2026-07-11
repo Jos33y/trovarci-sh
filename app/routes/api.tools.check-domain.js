@@ -1,49 +1,22 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /api/tools/check-domain
-
-   Remix resource route. Accepts a POST with a domain, runs the full
-   domain health check server-side, returns JSON.
-
-   Rate limiting (P0-14):
-     Per-IP token bucket, 60 hits per hour. The Domain Checker does live
-     DNSBL queries against Spamhaus, SURBL, and several other blocklists.
-     If anonymous abuse from a botnet hits this endpoint hard, our server
-     IP gets banned by Spamhaus and EVERY legit user's check fails until
-     we get unlisted (which takes 24-72h and a written request).
-     60/hour is generous for human use (one scan per minute, sustained)
-     and tight enough to make scripted abuse painful.
-
-     In-memory bucket. Per-process, not distributed. Multi-node deployment
-     would let an attacker get 60*N before being throttled, but the
-     downside there is bounded and not catastrophic - upgrade to Redis or
-     the auth_rate_limits table if scale demands.
-
-   Session 1 notes (still valid):
-   - No caching. Repeated scans of the same domain re-query everything.
-     Adding a 5-minute in-memory TTL cache here is the cheapest win when
-     traffic warrants it.
-   - No DQS/paid API keys. Spamhaus public queries are rate-limited; for
-     commercial use the DQS subscription is required.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* /api/tools/check-domain - Domain Health Checker. Anonymous, IP-rate-limited (60/hour). */
 
 import { runDomainCheck } from '~/utils/domainChecks.server';
+import { recordToolEvent } from '~/utils/toolAnalytics.server';
 
-// ── Rate limit ──────────────────────────────────────────────────────────
-const RATE_WINDOW_MS = 60 * 60 * 1000;   // 1 hour
+const ANALYTICS_TOOL = 'domain_check';
+
+const RATE_WINDOW_MS = 60 * 60 * 1000;
 const RATE_MAX_HITS  = 60;
 
-// Map<ip, { hits: number[] }>. hits is a list of unix-ms timestamps within
-// the rolling window.
 const ipBuckets = new Map();
 const CLEAN_INTERVAL_MS = 5 * 60 * 1000;
 let lastGlobalClean = Date.now();
 
 function rateLimit(ip) {
-  if (!ip) return { allowed: true, retryAfter: null };  // no IP visible -> can't rate limit, allow
+  if (!ip) return { allowed: true, retryAfter: null };
 
   const now = Date.now();
 
-  // Periodic GC so the Map doesn't grow unbounded with one-shot IPs.
   if (now - lastGlobalClean > CLEAN_INTERVAL_MS) {
     const cutoff = now - RATE_WINDOW_MS;
     for (const [k, v] of ipBuckets) {
@@ -60,13 +33,10 @@ function rateLimit(ip) {
     ipBuckets.set(ip, bucket);
   }
 
-  // Drop hits older than the window.
   const cutoff = now - RATE_WINDOW_MS;
   bucket.hits = bucket.hits.filter((t) => t > cutoff);
 
   if (bucket.hits.length >= RATE_MAX_HITS) {
-    // The oldest hit in the window falls off RATE_WINDOW_MS after it was
-    // recorded; that's when the next slot frees up.
     const freesAt = bucket.hits[0] + RATE_WINDOW_MS;
     const retryAfter = Math.max(1, Math.ceil((freesAt - now) / 1000));
     return { allowed: false, retryAfter };
@@ -77,7 +47,6 @@ function rateLimit(ip) {
 }
 
 function getClientIp(request) {
-  // Coolify / nginx fronts the app, so X-Forwarded-For is authoritative.
   const xff = request.headers.get('x-forwarded-for');
   if (xff) return xff.split(',')[0].trim();
   return request.headers.get('x-real-ip') || null;
@@ -94,6 +63,7 @@ export async function action({ request }) {
   const ip = getClientIp(request);
   const rl = rateLimit(ip);
   if (!rl.allowed) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'RATE_LIMITED' });
     return Response.json(
       { ok: false, error: 'Too many domain checks. Try again shortly.' },
       {
@@ -102,6 +72,8 @@ export async function action({ request }) {
       }
     );
   }
+
+  recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'start' });
 
   let domain = '';
   try {
@@ -114,6 +86,7 @@ export async function action({ request }) {
       domain = form.get('domain') || '';
     }
   } catch (err) {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'BAD_REQUEST' });
     return Response.json(
       { ok: false, error: 'Could not parse request body' },
       { status: 400 }
@@ -121,6 +94,7 @@ export async function action({ request }) {
   }
 
   if (!domain || typeof domain !== 'string') {
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'MISSING_DOMAIN' });
     return Response.json(
       { ok: false, error: 'Missing domain' },
       { status: 400 }
@@ -130,15 +104,17 @@ export async function action({ request }) {
   try {
     const outcome = await runDomainCheck(domain);
     if (!outcome.ok) {
+      recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'CHECK_FAILED' });
       return Response.json(
         { ok: false, error: outcome.error },
         { status: 400 }
       );
     }
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'success' });
     return Response.json({ ok: true, result: outcome.result });
   } catch (err) {
-    // Surface a generic message to the client; log the full error server-side.
     console.error('Domain check failed:', err);
+    recordToolEvent(request, { tool: ANALYTICS_TOOL, phase: 'error', code: 'INTERNAL' });
     return Response.json(
       { ok: false, error: 'Scan failed unexpectedly. Try again in a moment.' },
       { status: 500 }
@@ -146,8 +122,6 @@ export async function action({ request }) {
   }
 }
 
-// Block GETs on the resource route so search engines and curious visitors
-// do not get an empty 200.
 export function loader() {
   return Response.json(
     { ok: false, error: 'Use POST' },

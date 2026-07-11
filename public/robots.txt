@@ -1,4 +1,29 @@
+# Trovarcis Reach - crawler directives
+# Public tool + content pages are crawlable. Gated routes (auth,
+# admin, per-user data, API) are excluded to preserve crawl budget.
+
 User-agent: *
 Allow: /
+
+# Auth flows - no SEO value, wastes crawl budget
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# User-gated interfaces
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account/
+
+# API routes - never meant to be crawled
+Disallow: /api/
+
+# User-specific transactional pages (per-id URLs)
+Disallow: /receipts/
+Disallow: /jobs/
+Disallow: /credits/pending/
 
 Sitemap: https://trovarci.sh/sitemap.xml
