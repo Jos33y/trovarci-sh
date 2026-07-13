@@ -108,11 +108,42 @@ export default function handleRequest(
 }
 
 // Authoritative capture for server-side route errors (loaders, actions). Aborted requests are navigation noise, skip.
+
+// URL patterns that indicate bot vulnerability scanning. The site does not serve any of these paths, so a request matching them is noise regardless of what error was thrown.
+const BOT_PROBE_PATTERNS = [
+  /\.(php|aspx|asp|cgi|jsp)(\/|$|\?)/i,
+  /(^|\/)(wp-|xmlrpc|phpinfo|_ignition|_profiler|adminer)/i,
+  /(^|\/)\.(env|git|aws|docker|htaccess|ssh|npm)(\.|\/|$)/i,
+  /(^|\/)(vendor|node_modules)\//i,
+];
+
+function isBotProbePath(pathname) {
+  return BOT_PROBE_PATTERNS.some((rx) => rx.test(pathname));
+}
+
+// React Router internal ErrorResponse: same category as thrown Response 4xx, but a plain object with internal:true. Covers 405 on catchall POSTs and 404 on unknown routes.
+function isInternalErrorResponse(error) {
+  return (
+    error &&
+    typeof error === 'object' &&
+    error.internal === true &&
+    typeof error.status === 'number'
+  );
+}
+
 export function handleError(error, { request }) {
   if (request.signal.aborted) return;
   // 4xx Response throws are routing outcomes (thrown 404s, 401s, gated redirects), not runtime bugs.
-  // Skipping them stops bot probes and normal routing from filling error_events with noise.
   if (error instanceof Response && error.status < 500) return;
+  // 4xx internal ErrorResponse (React Router's own 405/404 outcomes from POSTs and misses on the catchall route).
+  if (isInternalErrorResponse(error) && error.status < 500) return;
+  // Bot probes: known WordPress, PHP, .env, .git, vendor scan paths - drop regardless of error type.
+  try {
+    const url = new URL(request.url);
+    if (isBotProbePath(url.pathname)) return;
+  } catch {
+    // Malformed URL, fall through and let the normal recording path handle it.
+  }
   console.error('[handleError]', error);
   // Fire-and-forget; telemetry failure must not turn into a second error.
   recordServerError(error, request, {
