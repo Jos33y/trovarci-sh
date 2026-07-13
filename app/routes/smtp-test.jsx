@@ -11,7 +11,7 @@ import styles from '~/styles/modules/routes/smtp-test.module.css';
 
 export const meta = () => getSeo({
   title: 'Free SMTP Connection Tester',
-  description: 'Test your SMTP connection in 8 steps. See the full protocol handshake, TLS status, and authentication result with plain-language explanations. Free, no account needed.',
+  description: 'Test any SMTP server end to end. See the full protocol handshake, TLS status, and authentication result. SMTP port reference and error code lookup included. Free, no signup.',
   path: '/smtp-test',
 });
 
@@ -30,12 +30,72 @@ const EXPLAINER_CARDS = [
   { icon: MailCheckIcon, label: 'Step 6-8', title: 'Sender + Recipient + Close', desc: 'Verifies the server accepts your FROM address and a test recipient, then disconnects cleanly. No email is actually sent.' },
 ];
 
+const PORTS = [
+  {
+    num: '25',
+    purpose: 'Server-to-server relay',
+    encryption: 'Optional STARTTLS',
+    use: 'Blocked by most residential ISPs and cloud providers. Only mail servers use this in practice.',
+  },
+  {
+    num: '587',
+    purpose: 'Client mail submission',
+    encryption: 'STARTTLS',
+    use: 'The standard modern port for sending email from a client to your outbound server.',
+  },
+  {
+    num: '465',
+    purpose: 'Client submission (legacy)',
+    encryption: 'Implicit TLS',
+    use: 'Older clients that require encryption from the start. Still widely supported.',
+  },
+  {
+    num: '2525',
+    purpose: 'Alternative submission',
+    encryption: 'STARTTLS',
+    use: 'Common fallback when 587 is blocked. Not an official standard but widely accepted.',
+  },
+];
+
+const RESPONSE_CODES = [
+  {
+    category: 'Success (2xx / 3xx)',
+    codes: [
+      { code: '220', meaning: 'Service ready', detail: 'Server accepted the TCP connection and is ready to talk.' },
+      { code: '250', meaning: 'Requested action completed', detail: 'The most common success code. Command accepted, ready for the next.' },
+      { code: '354', meaning: 'Start mail input', detail: 'Server is ready to receive the message body after your DATA command.' },
+    ],
+  },
+  {
+    category: 'Try again (4xx)',
+    codes: [
+      { code: '421', meaning: 'Service not available', detail: 'Server is rate limiting, restarting, or shutting down. Retry with backoff.' },
+      { code: '450', meaning: 'Mailbox temporarily unavailable', detail: 'Recipient mailbox is locked or full. Server will queue.' },
+      { code: '451', meaning: 'Local error, action aborted', detail: 'Server-side problem. Retry usually works.' },
+      { code: '452', meaning: 'Insufficient system storage', detail: 'Server or mailbox out of disk space. Retry later.' },
+    ],
+  },
+  {
+    category: 'Do not retry (5xx)',
+    codes: [
+      { code: '500', meaning: 'Syntax error', detail: 'Command not recognized. Usually a client bug or wrong protocol.' },
+      { code: '501', meaning: 'Bad arguments', detail: 'Command recognized but the parameters are malformed.' },
+      { code: '502', meaning: 'Not implemented', detail: 'Server does not support this command. Older SMTP implementations.' },
+      { code: '550', meaning: 'Mailbox unavailable', detail: 'Recipient does not exist or is blocking your sender.' },
+      { code: '552', meaning: 'Message exceeds size limit', detail: 'Message is larger than the server accepts.' },
+      { code: '554', meaning: 'Transaction failed', detail: 'Rejected by policy. Often a blocklist hit or spam signal.' },
+    ],
+  },
+];
+
 const COMMON_ISSUES = [
   { code: 'Connection timeout', title: 'Port blocked by ISP', fix: 'Port 25 is blocked by most residential ISPs and cloud providers. Switch to port 587 (STARTTLS) or 465 (SSL/TLS).' },
   { code: '535 5.7.8', title: 'Gmail: wrong password type', fix: 'Gmail requires an App Password when 2FA is enabled. Generate one at myaccount.google.com under Security.' },
   { code: '535 5.7.139', title: 'Microsoft 365: SMTP AUTH disabled', fix: 'SMTP AUTH is disabled by default in Exchange. Enable it in the admin center or use an App Password.' },
   { code: 'SSL handshake failed', title: 'TLS mismatch', fix: 'Try a different port and security combo. Port 465 uses implicit TLS. Port 587 uses STARTTLS. Mixing them causes failures.' },
   { code: '421 4.7.0', title: 'Rate limited', fix: 'Too many connection attempts in a short time. Wait 60 seconds and try again.' },
+  { code: '550 5.7.1', title: 'Blocked by policy', fix: 'Recipient server rejected the message. Check SPF, DKIM, and DMARC alignment on the sender domain, and review sender IP reputation.' },
+  { code: 'Certificate error', title: 'TLS certificate expired or invalid', fix: 'Renew the server certificate. Self-signed certificates trigger this on clients that verify the chain. Use a certificate from a trusted authority.' },
 ];
 
 const FAQ_ITEMS = [
@@ -45,6 +105,10 @@ const FAQ_ITEMS = [
   { q: 'What is STARTTLS?', a: 'STARTTLS is a command that upgrades a plain-text SMTP connection to an encrypted TLS connection. The connection starts unencrypted on port 587, then both sides negotiate encryption before any sensitive data (like your password) is sent. It is different from implicit TLS on port 465, where the entire connection is encrypted from the start.' },
   { q: 'Is it safe to enter SMTP credentials in an online tool?', a: 'Our SMTP tester sends your credentials over HTTPS to our server, which connects to your SMTP server to run the test. Credentials are never stored, logged, or cached. The terminal output proves transparency by showing you exactly what commands were sent. We never send an actual email during the test.' },
   { q: "Why can't I connect to SMTP on port 25?", a: 'Most residential ISPs, AWS, Google Cloud, Azure, and other cloud providers block outbound port 25 to prevent spam. Use port 587 (STARTTLS) or port 465 (SSL/TLS) instead. These ports are designed for authenticated email submission and are not blocked.' },
+  { q: 'What is the difference between HELO and EHLO?', a: 'HELO is the original SMTP greeting command from RFC 821. EHLO is the extended version from RFC 2821 that lets the server advertise capabilities like SIZE, STARTTLS, AUTH, and PIPELINING. Modern SMTP clients always start with EHLO and fall back to HELO only if the server does not understand it.' },
+  { q: 'What does an SMTP 550 error mean?', a: 'A 550 response means the recipient mailbox is unavailable. Common causes: the recipient address does not exist, the receiving server is blocking your sender IP or domain, or the message failed a policy check (SPF, DKIM, DMARC). The extended status code (like 5.1.1 or 5.7.1) tells you which category applies. Check the response codes reference above for details.' },
+  { q: 'Why is Gmail rejecting my SMTP server?', a: 'Gmail rejects incoming SMTP for three main reasons: your sending IP has a poor reputation, your domain fails SPF or DKIM alignment, or your sending volume looks like spam. Check your domain with Google Postmaster Tools and audit SPF, DKIM, and DMARC. New sending domains often need a warm-up period before Gmail trusts them.' },
+  { q: 'Does testing my SMTP send a real email?', a: 'No. The tester runs the SMTP handshake up to the RCPT TO command, verifies the server accepts a sender and recipient, then disconnects with QUIT. It never issues DATA, so no message body is ever transmitted. Your recipients see nothing.' },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
@@ -83,6 +147,8 @@ export default function SmtpTestPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
   const methodGridRef = useReveal();
+  const portsRef = useReveal();
+  const codesRef = useReveal();
   const issuesRef = useReveal();
   const issuesGridRef = useReveal();
   const faqRef = useReveal();
@@ -129,7 +195,7 @@ export default function SmtpTestPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'SMTP Connection Tester',
-    description: 'Test your SMTP connection step by step. See the full protocol exchange. Free, no account required.',
+    description: 'Test your SMTP connection step by step. See the full protocol exchange, response codes, and port compatibility. Free, no account required.',
     url: 'https://trovarci.sh/smtp-test',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Any',
@@ -155,14 +221,16 @@ export default function SmtpTestPage() {
           </div>
         </section>
 
-        {/* Method - how SMTP works */}
+        {/* Method - how SMTP works, ports, response codes */}
         <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
             <SectionLabel num="02" name="METHOD" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
               <h2 className={styles.methodTitle}>How SMTP connections work</h2>
               <p className={styles.methodIntro}>
-                Every email your software sends starts with an SMTP handshake. Here is what happens at each step and what can go wrong.
+                SMTP (Simple Mail Transfer Protocol) is the standard mail servers use to hand off messages
+                to each other. Your client speaks SMTP to your outbound server, which then speaks SMTP to the
+                recipient's inbound server. Every step below has to succeed for a message to reach the mailbox.
               </p>
             </div>
 
@@ -182,6 +250,54 @@ export default function SmtpTestPage() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Ports subsection */}
+            <div ref={portsRef} className={`${styles.subsectionBlock} reveal`}>
+              <h3 className={styles.subsectionTitle}>Common SMTP ports</h3>
+              <p className={styles.subsectionIntro}>
+                Modern email clients pick between four ports depending on encryption expectations and provider policy.
+              </p>
+              <div className={styles.portsList}>
+                {PORTS.map((p) => (
+                  <div key={p.num} className={styles.portsRow}>
+                    <div className={styles.portsNum}>{p.num}</div>
+                    <div className={styles.portsMeta}>
+                      <div className={styles.portsPurpose}>{p.purpose}</div>
+                      <div className={styles.portsEncryption}>{p.encryption}</div>
+                      <p className={styles.portsUse}>{p.use}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Response codes reference */}
+            <div ref={codesRef} className={`${styles.subsectionBlock} reveal`}>
+              <h3 className={styles.subsectionTitle}>SMTP response codes reference</h3>
+              <p className={styles.subsectionIntro}>
+                Every SMTP response starts with a three-digit code. The first digit says whether the command
+                succeeded, failed temporarily, or failed permanently. Extended status codes (like 5.7.1) narrow
+                down the specific policy or delivery reason.
+              </p>
+              <div className={styles.codesGroups}>
+                {RESPONSE_CODES.map((group) => (
+                  <div key={group.category} className={styles.codesGroup}>
+                    <div className={styles.codesCategory}>{group.category}</div>
+                    <div className={styles.codesList}>
+                      {group.codes.map((c) => (
+                        <div key={c.code} className={styles.codesRow}>
+                          <div className={styles.codesNum}>{c.code}</div>
+                          <div className={styles.codesMeta}>
+                            <div className={styles.codesMeaning}>{c.meaning}</div>
+                            <p className={styles.codesDetail}>{c.detail}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
