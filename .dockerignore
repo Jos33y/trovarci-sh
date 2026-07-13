@@ -4,7 +4,6 @@ build
 .gitignore
 .env
 .env.*
-.nixpacks
 .vscode
 .idea
 .DS_Store
