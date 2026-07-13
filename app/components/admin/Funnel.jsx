@@ -4,10 +4,6 @@
 import styles from '~/styles/modules/admin/Funnel.module.css';
 import { formatInt } from '~/utils/format';
 
-function formatInt(n) {
-  return formatInt(n || 0);
-}
-
 export default function Funnel({ steps = [] }) {
   if (!steps || steps.length === 0) {
     return (
