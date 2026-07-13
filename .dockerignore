@@ -1,0 +1,17 @@
+node_modules
+build
+.git
+.gitignore
+.env
+.env.*
+.nixpacks
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+coverage
+.cache
+tmp
+temp
