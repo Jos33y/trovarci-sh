@@ -1,5 +1,6 @@
 // Horizontal bar chart for daily pageview series. One row per day.
 import styles from '~/styles/modules/admin/DailyBars.module.css';
+import { formatInt } from '~/utils/format';
 
 export default function DailyBars({ series }) {
   if (!series || series.length === 0) return null;
@@ -15,7 +16,7 @@ export default function DailyBars({ series }) {
             <span className={styles.bar}>
               <span className={styles.barFill} style={{ width: `${pct}%` }} />
             </span>
-            <span className={styles.value}>{d.pageviews.toLocaleString()}</span>
+            <span className={styles.value}>{formatInt(d.pageviews)}</span>
             <span className={styles.sessions}>{d.sessions}</span>
           </div>
         );

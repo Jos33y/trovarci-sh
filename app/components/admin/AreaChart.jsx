@@ -1,6 +1,7 @@
 // Revenue area chart. Confirmed (gold) over failed (red, low opacity). Hover crosshair + tooltip.
 import { useState, useRef, useId } from 'react';
 import styles from '~/styles/modules/admin/AreaChart.module.css';
+import { formatInt } from '~/utils/format';
 
 const W = 760;
 const H = 240;
@@ -55,7 +56,7 @@ export default function AreaChart({ data = [] }) {
   for (let i = 0; i <= gridSteps; i++) {
     const v = (max / gridSteps) * i;
     const y = yAt(v);
-    gridLines.push({ y, label: '$' + Math.round(v / 100).toLocaleString() });
+    gridLines.push({ y, label: '$' + formatInt(Math.round(v / 100)) });
   }
 
   const tickEvery = Math.max(1, Math.ceil(data.length / 8));

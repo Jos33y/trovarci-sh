@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Form, Link, useLocation } from 'react-router';
 import styles from '~/styles/modules/layout/UserMenu.module.css';
+import { formatInt } from '~/utils/format';
 
 // Avatar trigger + dropdown panel. Closes on outside click, Escape, or route change.
 export default function UserMenu({ user }) {
@@ -59,7 +60,7 @@ export default function UserMenu({ user }) {
             <div className={styles.userInitial} aria-hidden="true">{initial}</div>
             <div className={styles.userDetails}>
               <div className={styles.userEmail} title={user.email}>{user.email}</div>
-              <div className={styles.userMeta}>{credits.toLocaleString()} credits</div>
+              <div className={styles.userMeta}>{formatInt(credits)} credits</div>
             </div>
           </div>
 

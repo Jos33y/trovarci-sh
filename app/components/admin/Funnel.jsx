@@ -2,9 +2,10 @@
 // Each step gets a bar, value, and percent-of-top.
 // Conversion arrows show drop / gain between consecutive steps.
 import styles from '~/styles/modules/admin/Funnel.module.css';
+import { formatInt } from '~/utils/format';
 
 function formatInt(n) {
-  return (n || 0).toLocaleString();
+  return formatInt(n || 0);
 }
 
 export default function Funnel({ steps = [] }) {

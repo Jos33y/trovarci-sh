@@ -4,6 +4,7 @@ import { requireAdmin, adminListJobs } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import { LayersIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Jobs | Trovarcis Admin' },
@@ -138,10 +139,10 @@ export default function AdminJobs() {
                       </td>
                       <td data-label="Kind">{j.kind}</td>
                       <td data-label="Progress" className={styles['td--mono']}>
-                        <span>{j.processed_items.toLocaleString()} / {j.total_items.toLocaleString()}</span>
+                        <span>{formatInt(j.processed_items)} / {formatInt(j.total_items)}</span>
                         <span className={styles.progressNote}>· {pct}%</span>
                       </td>
-                      <td data-label="Credits" className={styles['td--num']}>{j.credits_charged.toLocaleString()}</td>
+                      <td data-label="Credits" className={styles['td--num']}>{formatInt(j.credits_charged)}</td>
                       <td data-label="Status">
                         <span className={`${styles.badge} ${styles[STATUS_BADGE[j.status] || 'badgeNeutral']}`}>{j.status}</span>
                       </td>

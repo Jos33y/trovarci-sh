@@ -7,6 +7,7 @@ import Footer from '~/components/layout/Footer';
 import { getSessionFromRequest, listUserSessions } from '~/utils/session.server';
 import { redirect } from 'react-router';
 import styles from '~/styles/modules/routes/accountSettings.module.css';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Account settings | Trovarcis Reach' },
@@ -395,7 +396,7 @@ function PlanSection({ user }) {
           <div className={styles.balanceMain}>
             <p className={styles.balanceLabel}>Credit balance</p>
             <p className={styles.balanceValue}>
-              {(user.creditsBalance || 0).toLocaleString('en-US')}
+              {formatInt(user.creditsBalance || 0)}
             </p>
           </div>
           <div className={styles.balanceActions}>

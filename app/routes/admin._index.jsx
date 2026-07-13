@@ -22,6 +22,7 @@ import {
   AlertIcon, CheckIcon, LayersIcon,
 } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Overview | Trovarcis Admin' },
@@ -90,23 +91,23 @@ export default function AdminOverview() {
       <div className={styles.kpiStrip}>
         <KPICard
           label="Pageviews (7d)"
-          value={deltas.pageviews.current.toLocaleString()}
-          hint={`${overview.totals.unique_sessions.toLocaleString()} sessions`}
+          value={formatInt(deltas.pageviews.current)}
+          hint={`${formatInt(overview.totals.unique_sessions)} sessions`}
           icon={GlobeIcon}
           spark={sparks.pageviews}
           delta={{ pct: deltas.pageviews.deltaPct }}
         />
         <KPICard
           label="Signups (7d)"
-          value={deltas.signups.current.toLocaleString()}
-          hint={`${overview.totals.unique_users.toLocaleString()} signed-in users`}
+          value={formatInt(deltas.signups.current)}
+          hint={`${formatInt(overview.totals.unique_users)} signed-in users`}
           icon={UsersIcon}
           spark={sparks.signups}
           delta={{ pct: deltas.signups.deltaPct }}
         />
         <KPICard
           label="Paid (7d)"
-          value={deltas.payments.current.toLocaleString()}
+          value={formatInt(deltas.payments.current)}
           hint={`${deltas.payments.previous} prev period`}
           icon={CardIcon}
           spark={sparks.payments}
@@ -115,7 +116,7 @@ export default function AdminOverview() {
         <KPICard
           label="Revenue (30d)"
           value={formatCents(deltas.revenue.current_cents)}
-          hint={`${deltas.payments.current.toLocaleString()} confirmed payments`}
+          hint={`${formatInt(deltas.payments.current)} confirmed payments`}
           icon={TagIcon}
           spark={sparks.payments}
           delta={{ pct: deltas.revenue.deltaPct }}
@@ -127,7 +128,7 @@ export default function AdminOverview() {
       <div className={styles.kpiStrip}>
         <KPICard
           label="Unresolved errors"
-          value={deltas.errors.current.toLocaleString()}
+          value={formatInt(deltas.errors.current)}
           hint="last 7d"
           icon={AlertIcon}
           spark={sparks.errors}
@@ -137,21 +138,21 @@ export default function AdminOverview() {
         />
         <KPICard
           label="Active users"
-          value={deltas.activeUsers?.current?.toLocaleString() || '0'}
+          value={formatInt(deltas.activeUsers?.current) || '0'}
           hint="verified, not deleted"
           icon={CheckIcon}
           delta={Number.isFinite(deltas.activeUsers?.deltaPct) ? { pct: deltas.activeUsers.deltaPct } : undefined}
         />
         <KPICard
           label="Open jobs"
-          value={deltas.openJobs?.current?.toLocaleString() || '0'}
+          value={formatInt(deltas.openJobs?.current) || '0'}
           hint="pending or processing"
           icon={LayersIcon}
           delta={Number.isFinite(deltas.openJobs?.deltaPct) ? { pct: deltas.openJobs.deltaPct } : undefined}
         />
         <KPICard
           label="Top country (7d)"
-          hint={topCountry ? `${topCountry.n.toLocaleString()} pageviews` : 'no data'}
+          hint={topCountry ? `${formatInt(topCountry.n)} pageviews` : 'no data'}
           variant="snapshot"
           snapshot={topCountry?.country}
         />

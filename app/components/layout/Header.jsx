@@ -14,6 +14,7 @@ import {
   PhoneIcon,
 } from '~/components/icons';
 import styles from '~/styles/modules/layout/Header.module.css';
+import { formatInt } from '~/utils/format';
 
 const NAV_LINKS = [
   { label: "Features", href: "/#features" },
@@ -214,7 +215,7 @@ export default function Header() {
                 <div className={styles.mobileAvatar} aria-hidden="true">{initial}</div>
                 <div className={styles.mobileUserText}>
                   <div className={styles.mobileUserEmail} title={user.email}>{user.email}</div>
-                  <div className={styles.mobileUserMeta}>{credits.toLocaleString()} credits</div>
+                  <div className={styles.mobileUserMeta}>{formatInt(credits)} credits</div>
                 </div>
               </div>
 

@@ -35,6 +35,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import styles from '~/styles/modules/tools/EmailVerifier.module.css';
 import BulkVerificationResult from './BulkVerificationResult';
+import { formatInt } from '~/utils/format';
 
 const MAX_BULK_SIZE = 50_000;
 const STEP_REVEAL_INTERVAL_MS = 350;
@@ -214,7 +215,7 @@ const FRIENDLY_ERROR = {
   EMAIL_REQUIRED:             'Enter an email address to check.',
   EMAILS_REQUIRED:            'Add at least one email to verify.',
   EMAILS_NOT_STRINGS:         'Every entry must be plain text.',
-  BULK_TOO_LARGE:             `Bulk uploads cap at ${MAX_BULK_SIZE.toLocaleString()} emails per job.`,
+  BULK_TOO_LARGE:             `Bulk uploads cap at ${formatInt(MAX_BULK_SIZE)} emails per job.`,
   BULK_CREATE_FAILED:         'Could not start the bulk job. Your credits were refunded.',
   PROXY_NO_CREDENTIALS:       'Verification infrastructure is being configured. Try again later.',
   EMAIL_VERIFY_PROXY_TIMEOUT: 'Connection to the destination server timed out.',
@@ -401,7 +402,7 @@ export default function EmailVerifier() {
       return;
     }
     if (unique.length > MAX_BULK_SIZE) {
-      setInputError(`Bulk uploads cap at ${MAX_BULK_SIZE.toLocaleString()} emails per job. You provided ${unique.length.toLocaleString()}.`);
+      setInputError(`Bulk uploads cap at ${formatInt(MAX_BULK_SIZE)} emails per job. You provided ${formatInt(unique.length)}.`);
       return;
     }
 
@@ -842,7 +843,7 @@ export default function EmailVerifier() {
                 </button>
               </div>
 
-              <p className={styles.uploadHint}>Accepted: .csv, .txt - Max {MAX_BULK_SIZE.toLocaleString()} emails per job</p>
+              <p className={styles.uploadHint}>Accepted: .csv, .txt - Max {formatInt(MAX_BULK_SIZE)} emails per job</p>
               {inputError && <p className={styles.errorText}>{inputError}</p>}
             </div>
           )}
@@ -852,7 +853,7 @@ export default function EmailVerifier() {
             <div className={styles.previewSection}>
               <div className={styles.previewCard}>
                 <div className={styles.previewStats}>
-                  <span className={styles.previewCount}>{bulkEmails.length.toLocaleString()}</span>
+                  <span className={styles.previewCount}>{formatInt(bulkEmails.length)}</span>
                   <span className={styles.previewLabel}>unique emails found</span>
                 </div>
                 {bulkDupes > 0 && (
@@ -864,12 +865,12 @@ export default function EmailVerifier() {
                 <div className={styles.previewCost}>
                   <span className={styles.costLabel}>Cost:</span>
                   <span className={styles.costValue}>{Math.ceil(bulkEmails.length / 5)} Credits</span>
-                  <span className={styles.costCalc}>({bulkEmails.length.toLocaleString()} emails &divide; 5)</span>
+                  <span className={styles.costCalc}>({formatInt(bulkEmails.length)} emails &divide; 5)</span>
                 </div>
               </div>
               <div className={styles.previewActions}>
                 <button className={styles.verifyBulkButton} onClick={handleBulkVerify}>
-                  Verify {bulkEmails.length.toLocaleString()} emails
+                  Verify {formatInt(bulkEmails.length)} emails
                 </button>
                 <button className={styles.resetButton} onClick={handleBulkReset}>Cancel</button>
               </div>
@@ -881,36 +882,36 @@ export default function EmailVerifier() {
           {phase === 'verifying' && (
             <div className={styles.progressSection}>
               <div className={styles.progressHeader}>
-                <span>Verifying {bulkTotal.toLocaleString()} emails...</span>
+                <span>Verifying {formatInt(bulkTotal)} emails...</span>
                 <span className={styles.progressPct}>{bulkPct}%</span>
               </div>
               <div className={styles.progressBar}>
                 <div className={styles.progressFill} style={{ width: bulkPct + '%' }} />
               </div>
               <div className={styles.progressDetails}>
-                <span>{bulkProgress.toLocaleString()} / {bulkTotal.toLocaleString()}</span>
+                <span>{formatInt(bulkProgress)} / {formatInt(bulkTotal)}</span>
               </div>
               <div className={styles.liveStats}>
                 <div className={`${styles.liveStat} ${styles.liveValid}`}>
-                  <span className={styles.liveCount}>{bulkStats.valid.toLocaleString()}</span>
+                  <span className={styles.liveCount}>{formatInt(bulkStats.valid)}</span>
                   <span className={styles.liveLabel}>Valid</span>
                 </div>
                 <div className={`${styles.liveStat} ${styles.liveInvalid}`}>
-                  <span className={styles.liveCount}>{bulkStats.invalid.toLocaleString()}</span>
+                  <span className={styles.liveCount}>{formatInt(bulkStats.invalid)}</span>
                   <span className={styles.liveLabel}>Invalid</span>
                 </div>
                 <div className={`${styles.liveStat} ${styles.liveRisky}`}>
-                  <span className={styles.liveCount}>{bulkStats.risky.toLocaleString()}</span>
+                  <span className={styles.liveCount}>{formatInt(bulkStats.risky)}</span>
                   <span className={styles.liveLabel}>Risky</span>
                 </div>
                 <div className={`${styles.liveStat} ${styles.liveUnknown}`}>
-                  <span className={styles.liveCount}>{bulkStats.unknown.toLocaleString()}</span>
+                  <span className={styles.liveCount}>{formatInt(bulkStats.unknown)}</span>
                   <span className={styles.liveLabel}>Unknown</span>
                 </div>
               </div>
               {bulkStats.error > 0 && (
                 <div className={styles.errorInfoRow}>
-                  <span className={styles.errorInfoCount}>{bulkStats.error.toLocaleString()}</span>
+                  <span className={styles.errorInfoCount}>{formatInt(bulkStats.error)}</span>
                   <span className={styles.errorInfoText}>
                     infrastructure {bulkStats.error === 1 ? 'failure' : 'failures'} so far - the worker could not reach these mailboxes
                   </span>

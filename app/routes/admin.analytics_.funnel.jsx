@@ -5,6 +5,7 @@ import { requireAdmin, adminAnalyticsFunnel } from '~/utils/admin.server';
 import Funnel from '~/components/admin/Funnel';
 import KPICard from '~/components/admin/KPICard';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Funnel | Trovarcis Admin' },
@@ -84,12 +85,12 @@ export default function AdminFunnel() {
         />
         <KPICard
           label="Sessions"
-          value={totalSessions.toLocaleString()}
+          value={formatInt(totalSessions)}
           hint="Entered funnel"
         />
         <KPICard
           label="Conversions"
-          value={finalSessions.toLocaleString()}
+          value={formatInt(finalSessions)}
           hint="Reached payment confirmed"
         />
       </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/NumberVerifier.module.css';
 import BulkVerificationResult from './BulkVerificationResult';
+import { formatInt } from '~/utils/format';
 
 /* NumberVerifier */
 
@@ -526,7 +527,7 @@ export default function NumberVerifier({
       return;
     }
     if (lines.length > MAX_BULK_PHONES) {
-      setBulkError(`Too many numbers. Max ${MAX_BULK_PHONES.toLocaleString()} per job`);
+      setBulkError(`Too many numbers. Max ${formatInt(MAX_BULK_PHONES)} per job`);
       return;
     }
 
@@ -1060,7 +1061,7 @@ export default function NumberVerifier({
             </div>
 
             <p className={styles.bulkUploadHint}>
-              Max {MAX_BULK_PHONES.toLocaleString()} numbers per job &middot; E.164 (+15...) or national format with country
+              Max {formatInt(MAX_BULK_PHONES)} numbers per job &middot; E.164 (+15...) or national format with country
             </p>
             {bulkError && <p className={styles.bulkErrorText}>{bulkError}</p>}
 
@@ -1077,7 +1078,7 @@ export default function NumberVerifier({
           <div className={styles.bulkPreviewSection}>
             <div className={styles.bulkPreviewCard}>
               <div className={styles.bulkPreviewStats}>
-                <span className={styles.bulkPreviewCount}>{bulkPhones.length.toLocaleString()}</span>
+                <span className={styles.bulkPreviewCount}>{formatInt(bulkPhones.length)}</span>
                 <span className={styles.bulkPreviewLabel}>unique numbers</span>
               </div>
               {bulkDupes > 0 && (
@@ -1085,8 +1086,8 @@ export default function NumberVerifier({
               )}
               <div className={styles.bulkPreviewCost}>
                 <span className={styles.bulkCostLabel}>Cost:</span>
-                <span className={styles.bulkCostValue}>{(bulkPhones.length * creditCost).toLocaleString()} Credits</span>
-                <span className={styles.bulkCostCalc}>({bulkPhones.length.toLocaleString()} &times; {creditCost})</span>
+                <span className={styles.bulkCostValue}>{formatInt(bulkPhones.length * creditCost)} Credits</span>
+                <span className={styles.bulkCostCalc}>({formatInt(bulkPhones.length)} &times; {creditCost})</span>
               </div>
               <div className={styles.bulkPreviewCountry}>
                 Default country: <CountryFlag code={selectedCountry.code} size={14} /> <strong>{selectedCountry.name}</strong>
@@ -1095,7 +1096,7 @@ export default function NumberVerifier({
 
             <div className={styles.bulkPreviewActions}>
               <button className={styles.bulkVerifyButton} onClick={handleBulkVerify}>
-                Verify {bulkPhones.length.toLocaleString()} numbers
+                Verify {formatInt(bulkPhones.length)} numbers
               </button>
               <button className={styles.bulkBackButton} onClick={handleBulkReset}>
                 Back
@@ -1112,10 +1113,10 @@ export default function NumberVerifier({
             <div className={styles.bulkProgressHeader}>
               <span className={styles.bulkProgressLabel}>
                 <span className={styles.spinnerDot} />
-                Verifying {bulkPhones.length.toLocaleString()} numbers
+                Verifying {formatInt(bulkPhones.length)} numbers
               </span>
               <span className={styles.bulkProgressCount}>
-                {bulkProgress.toLocaleString()} / {bulkPhones.length.toLocaleString()}
+                {formatInt(bulkProgress)} / {formatInt(bulkPhones.length)}
               </span>
             </div>
             <div className={styles.bulkProgressTrack}>

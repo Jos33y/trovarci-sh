@@ -1,27 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   GET /jobs/:jobId
-
-   Universal user-facing job detail page. Reachable from:
-     - Dashboard "Bulk jobs" rows (link target)
-     - Verifier pages once a bulk job is submitted (redirect destination)
-     - Direct paste of a job link by the user
-
-   Renders three states from one route, gated by progress.status:
-
-     terminal (complete | partial | cancelled | failed)
-       -> <BulkVerificationResult />: full results panel with filter tabs,
-          copy/download actions, partial-refund banner when applicable,
-          retry CTA when failed. Read-only for the user.
-
-     running (pending | processing)
-       -> live progress card with a hard-cancel button. SSE drives the
-          counts; on the 'complete' event we revalidate the loader and the
-          page swaps to the terminal view in-place.
-
-   Ownership: getJobForUser returns null when the job either doesn't
-   exist or belongs to another user. We collapse both into a 404 so the
-   route doesn't leak whether a job id exists for someone else.
-   ═══════════════════════════════════════════════════════════════════════════ */
+// GET /jobs/:jobId - user-facing job detail page. Renders terminal or running state from one route.
+// Ownership: getJobForUser returns null when the job doesn't exist OR belongs to another user; both collapse to 404.
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLoaderData, useNavigate, useRevalidator } from 'react-router';
@@ -31,6 +9,8 @@ import BulkVerificationResult from '~/components/tools/BulkVerificationResult';
 import { requireUser } from '~/utils/session.server';
 import { getJobForUser, getJobProgress } from '~/lib/jobQueue.server';
 import styles from '~/styles/modules/routes/job-detail.module.css';
+import { formatInt, formatDateTime } from '~/utils/format';
+
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TERMINAL_STATES = new Set(['complete', 'partial', 'cancelled', 'failed']);
@@ -59,9 +39,7 @@ export async function loader({ request, params }) {
   return { job, progress };
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ICONS
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Icons
 
 function ArrowLeftIcon({ size = 14 }) {
   return (
@@ -90,9 +68,7 @@ function AlertIcon({ size = 18 }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Helpers
 
 function typeLabel(type) {
   return type === 'phone' ? 'Phone lookup' : 'Email verification';
@@ -125,10 +101,7 @@ function fmtTimestamp(value) {
   if (!value) return null;
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  return formatDateTime(d);
 }
 
 function computeDurationMs(job, progress) {
@@ -139,24 +112,18 @@ function computeDurationMs(job, progress) {
   return Math.max(0, end - start);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PAGE
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Page
 
 export default function JobDetailPage() {
   const { job, progress: initialProgress } = useLoaderData();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
-  /* Live progress only matters while the job is non-terminal. Once terminal,
-     we use the loader-supplied progress directly. */
+  // Once terminal, loader-supplied progress is authoritative; live progress only matters while running.
   const [progress, setProgress] = useState(initialProgress);
   const isTerminal = TERMINAL_STATES.has(progress.status);
 
-  /* ── SSE subscription for running jobs ──
-     We pull initial state from the loader, then EventSource overlays
-     real-time updates. On 'complete' we revalidate so the loader's
-     authoritative job row drives the terminal render path. */
+  // SSE overlay for running jobs. On 'complete' we revalidate so the loader's job row drives terminal render.
   useEffect(() => {
     if (isTerminal) return undefined;
 
@@ -169,7 +136,7 @@ export default function JobDetailPage() {
           setProgress((prev) => ({ ...prev, ...data }));
         }
       } catch {
-        /* malformed payload - ignore */
+        // malformed payload - ignore
       }
     };
 
@@ -183,7 +150,7 @@ export default function JobDetailPage() {
     es.addEventListener('gone',     finalize);
 
     es.onerror = () => {
-      /* EventSource auto-reconnects unless we close it. Let it retry. */
+      // EventSource auto-reconnects unless we close it; let it retry.
     };
 
     return () => {
@@ -191,7 +158,6 @@ export default function JobDetailPage() {
     };
   }, [isTerminal, job.id, revalidator]);
 
-  /* Cancel state for running jobs */
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState('');
 
@@ -215,7 +181,7 @@ export default function JobDetailPage() {
         setCancelling(false);
         return;
       }
-      /* Cancel succeeded. Revalidate so the loader fetches the terminal row. */
+      // Cancel succeeded; revalidate so the loader fetches the terminal row.
       revalidator.revalidate();
     } catch (err) {
       setCancelError(err?.message || 'Cancel failed');
@@ -223,8 +189,7 @@ export default function JobDetailPage() {
     }
   };
 
-  /* Counts and totals from progress (best-effort for the BulkVerificationResult
-     hint; the component fetches its own items on mount for terminal jobs). */
+  // Best-effort counts for the BulkVerificationResult hint; the component fetches its own items for terminal jobs.
   const counts = useMemo(() => {
     const c = progress.counts || {};
     return {
@@ -251,13 +216,13 @@ export default function JobDetailPage() {
       <main className={styles.main}>
         <div className="container">
 
-          {/* ── Breadcrumb ── */}
+          {/* Breadcrumb */}
           <Link to="/dashboard" className={styles.backLink}>
             <ArrowLeftIcon size={12} />
             Back to dashboard
           </Link>
 
-          {/* ── Header ── */}
+          {/* Header */}
           <header className={styles.head}>
             <div className={styles.headLeft}>
               <span className={styles.kindPill}>{typeLabel(job.type)}</span>
@@ -280,7 +245,7 @@ export default function JobDetailPage() {
             </span>
           </header>
 
-          {/* ── Running state: progress + cancel ── */}
+          {/* Running state: progress + cancel */}
           {!isTerminal && (
             <section className={styles.runningCard}>
               <div className={styles.runningHead}>
@@ -303,7 +268,7 @@ export default function JobDetailPage() {
 
               <div className={styles.progressRow}>
                 <span className={styles.progressLabel}>
-                  {processedRows.toLocaleString()} / {totalRows.toLocaleString()} processed
+                  {formatInt(processedRows)} / {formatInt(totalRows)} processed
                 </span>
                 <span className={styles.progressPct}>{pct}%</span>
               </div>
@@ -317,28 +282,28 @@ export default function JobDetailPage() {
                   {(counts.valid > 0 || counts.mobile > 0) && (
                     <div className={styles.runningCount}>
                       <span className={`${styles.runningDot} ${styles.dotGood}`} aria-hidden="true" />
-                      <span className={styles.runningCountNum}>{(counts.valid || counts.mobile).toLocaleString()}</span>
+                      <span className={styles.runningCountNum}>{formatInt(counts.valid || counts.mobile)}</span>
                       <span className={styles.runningCountLabel}>{job.type === 'phone' ? 'mobile' : 'valid'}</span>
                     </div>
                   )}
                   {counts.risky > 0 && (
                     <div className={styles.runningCount}>
                       <span className={`${styles.runningDot} ${styles.dotRisky}`} aria-hidden="true" />
-                      <span className={styles.runningCountNum}>{counts.risky.toLocaleString()}</span>
+                      <span className={styles.runningCountNum}>{formatInt(counts.risky)}</span>
                       <span className={styles.runningCountLabel}>{job.type === 'phone' ? 'landline' : 'risky'}</span>
                     </div>
                   )}
                   {counts.invalid > 0 && (
                     <div className={styles.runningCount}>
                       <span className={`${styles.runningDot} ${styles.dotBad}`} aria-hidden="true" />
-                      <span className={styles.runningCountNum}>{counts.invalid.toLocaleString()}</span>
+                      <span className={styles.runningCountNum}>{formatInt(counts.invalid)}</span>
                       <span className={styles.runningCountLabel}>invalid</span>
                     </div>
                   )}
                   {counts.error > 0 && (
                     <div className={styles.runningCount}>
                       <span className={`${styles.runningDot} ${styles.dotError}`} aria-hidden="true" />
-                      <span className={styles.runningCountNum}>{counts.error.toLocaleString()}</span>
+                      <span className={styles.runningCountNum}>{formatInt(counts.error)}</span>
                       <span className={styles.runningCountLabel}>errored</span>
                     </div>
                   )}
@@ -354,7 +319,7 @@ export default function JobDetailPage() {
             </section>
           )}
 
-          {/* ── Failed state: friendly banner ── */}
+          {/* Failed state: friendly banner */}
           {isTerminal && progress.status === 'failed' && (
             <div className={styles.failedBanner} role="alert">
               <AlertIcon size={18} />
@@ -368,7 +333,7 @@ export default function JobDetailPage() {
             </div>
           )}
 
-          {/* ── Terminal state: full results panel ── */}
+          {/* Terminal state: full results panel */}
           {isTerminal && (
             <div className={styles.resultsWrap}>
               <BulkVerificationResult
@@ -393,10 +358,7 @@ export default function JobDetailPage() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ERROR BOUNDARY - shows a friendly 404/400 instead of the framework default
-   ═══════════════════════════════════════════════════════════════════════════ */
-
+// Friendly 404/400 error boundary instead of the framework default.
 export function ErrorBoundary() {
   return (
     <div className={styles.page}>

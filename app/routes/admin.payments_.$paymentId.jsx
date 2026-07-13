@@ -2,6 +2,7 @@
 import { Link, useLoaderData } from 'react-router';
 import { requireAdmin, adminGetPaymentDetail } from '~/utils/admin.server';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = ({ data }) => [
   { title: data?.payment ? `Payment ${data.payment.id.slice(0, 8)} | Admin` : 'Payment | Admin' },
@@ -86,7 +87,7 @@ export default function AdminPaymentDetail() {
               <div className={styles.kvValue}>{payment.package_key || '-'}</div>
 
               <div className={styles.kvKey}>Credits</div>
-              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{payment.credits.toLocaleString()}</div>
+              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{formatInt(payment.credits)}</div>
 
               <div className={styles.kvKey}>Amount</div>
               <div className={`${styles.kvValue} ${styles['kvValue--mono']} ${styles['kvValue--accent']}`}>

@@ -38,6 +38,19 @@ export function formatDateLong(input) {
   return `${month} ${day}, ${year} at ${hours}:${minutes} ${ampm} UTC`;
 }
 
+// Format Date/timestamp/ISO string into "Mar 15, 2026, 5:30 PM UTC" - compact date and time.
+export function formatDateTime(input) {
+  const d = new Date(input);
+  const month = MONTHS_SHORT[d.getUTCMonth()];
+  const day = d.getUTCDate();
+  const year = d.getUTCFullYear();
+  let hours = d.getUTCHours();
+  const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${month} ${day}, ${year}, ${hours}:${minutes} ${ampm} UTC`;
+}
+
 // Format Date/timestamp/ISO string into ISO YYYY-MM-DD.
 export function formatDateIso(input) {
   return new Date(input).toISOString().slice(0, 10);

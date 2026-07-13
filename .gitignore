@@ -60,3 +60,4 @@ SESSION-*.md
 # ===== Local installer / bundler artifacts =====
 *.zip
 install_*.ps1
+codemod-diff.txt

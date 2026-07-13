@@ -17,6 +17,7 @@ import {
   CardIcon, TagIcon, LayersIcon, VerifyIcon, ShieldIcon,
 } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = ({ data }) => [
   { title: data?.user ? `${data.user.email} | Admin` : 'User | Admin' },
@@ -162,20 +163,20 @@ export default function AdminUserDetail() {
       <div className={styles.kpiStrip}>
         <KPICard
           label="Current balance"
-          value={user.credits_balance.toLocaleString()}
+          value={formatInt(user.credits_balance)}
           hint="credits"
           icon={CardIcon}
         />
         <KPICard
           label="Lifetime purchased"
-          value={user.lifetime_purchased.toLocaleString()}
-          hint={`+${user.lifetime_granted.toLocaleString()} granted`}
+          value={formatInt(user.lifetime_purchased)}
+          hint={`+${formatInt(user.lifetime_granted)} granted`}
           icon={TagIcon}
         />
         <KPICard
           label="Lifetime used"
-          value={user.lifetime_used.toLocaleString()}
-          hint={`${user.lifetime_refunded.toLocaleString()} refunded`}
+          value={formatInt(user.lifetime_used)}
+          hint={`${formatInt(user.lifetime_refunded)} refunded`}
           icon={LayersIcon}
         />
         <KPICard
@@ -226,9 +227,9 @@ export default function AdminUserDetail() {
                         <span className={`${styles.badge} ${styles[TYPE_TONE[t.type] || 'badgeNeutral']}`}>{t.type}</span>
                       </td>
                       <td data-label="Delta" className={styles['td--num']} style={{ color: t.delta > 0 ? 'var(--trov-success)' : 'var(--trov-error)' }}>
-                        {t.delta > 0 ? '+' : ''}{t.delta.toLocaleString()}
+                        {t.delta > 0 ? '+' : ''}{formatInt(t.delta)}
                       </td>
-                      <td data-label="Balance" className={styles['td--num']}>{t.balance_after.toLocaleString()}</td>
+                      <td data-label="Balance" className={styles['td--num']}>{formatInt(t.balance_after)}</td>
                       <td data-label="Reference" className={styles.refCell} title={t.reference_id || ''}>
                         {t.reference_id || '-'}
                       </td>
@@ -325,8 +326,8 @@ export default function AdminUserDetail() {
                       <td data-label="Kind">
                         <Link to={`/admin/jobs/${j.id}`} className={styles.rowLink}>{j.kind}</Link>
                       </td>
-                      <td data-label="Items" className={styles['td--num']}>{j.processed_items.toLocaleString()} / {j.total_items.toLocaleString()}</td>
-                      <td data-label="Credits" className={styles['td--num']}>{j.credits_charged.toLocaleString()}</td>
+                      <td data-label="Items" className={styles['td--num']}>{formatInt(j.processed_items)} / {formatInt(j.total_items)}</td>
+                      <td data-label="Credits" className={styles['td--num']}>{formatInt(j.credits_charged)}</td>
                       <td data-label="Status">
                         <span className={`${styles.badge} ${styles[STATUS_BADGE[j.status] || 'badgeNeutral']}`}>{j.status}</span>
                       </td>

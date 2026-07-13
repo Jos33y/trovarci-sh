@@ -1,5 +1,6 @@
 // Ranked country traffic bars with flag chips. 'XX' renders as 'unknown' fallback.
 import styles from '~/styles/modules/admin/CountryMap.module.css';
+import { formatInt } from '~/utils/format';
 
 export default function CountryMap({ rows = [], limit = 10 }) {
   if (!rows || rows.length === 0) {
@@ -21,7 +22,7 @@ export default function CountryMap({ rows = [], limit = 10 }) {
     <div className={styles.wrap}>
       <header className={styles.head}>
         <h3 className={styles.title}>Top countries</h3>
-        <p className={styles.sub}>{total.toLocaleString()} pageviews · {rows.length} countries</p>
+        <p className={styles.sub}>{formatInt(total)} pageviews · {rows.length} countries</p>
       </header>
 
       <ul className={styles.list}>
@@ -47,7 +48,7 @@ export default function CountryMap({ rows = [], limit = 10 }) {
               <span className={styles.barTrack}>
                 <span className={styles.bar} style={{ width: `${pct}%` }} />
               </span>
-              <span className={styles.count}>{r.n.toLocaleString()}</span>
+              <span className={styles.count}>{formatInt(r.n)}</span>
             </li>
           );
         })}

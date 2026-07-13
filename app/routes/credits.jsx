@@ -11,6 +11,7 @@ import {
   CUSTOM_PRICE_PER_CREDIT,
 } from '~/utils/paymentsConfig.server';
 import styles from '~/styles/modules/routes/credits.module.css';
+import { formatInt } from '~/utils/format';
 
 export { checkoutAction as action } from '~/actions/checkout.server';
 
@@ -294,7 +295,7 @@ export default function CreditsPage() {
               {user ? (
                 <span>
                   Signed in as <strong>{user.email}</strong>. Current balance:{' '}
-                  <strong>{user.creditsBalance.toLocaleString()} credits</strong>.
+                  <strong>{formatInt(user.creditsBalance)} credits</strong>.
                 </span>
               ) : (
                 <span>
@@ -354,7 +355,7 @@ export default function CreditsPage() {
                   )}
                   <div className={styles.pkgName}>{pkg.name}</div>
                   <div className={styles.pkgCredits}>
-                    {pkg.credits.toLocaleString()}
+                    {formatInt(pkg.credits)}
                     <span className={styles.pkgCreditsLabel}> credits</span>
                   </div>
                   <div className={styles.pkgPrice}>
@@ -397,7 +398,7 @@ export default function CreditsPage() {
                       setSelected('custom');
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    placeholder={customMin.toLocaleString()}
+                    placeholder={formatInt(customMin)}
                     aria-label="Custom credit amount"
                     className={styles.customCreditsInput}
                   />
@@ -417,7 +418,7 @@ export default function CreditsPage() {
                 <ul className={styles.pkgFeatures}>
                   <li className={styles.pkgFeature}>
                     <span className={styles.pkgCheck}><CheckIcon /></span>
-                    Any amount from {customMin.toLocaleString()} to {customMax.toLocaleString()}
+                    Any amount from {formatInt(customMin)} to {formatInt(customMax)}
                   </li>
                   <li className={styles.pkgFeature}>
                     <span className={styles.pkgCheck}><CheckIcon /></span>
@@ -447,7 +448,7 @@ export default function CreditsPage() {
               <div className={styles.checkoutSummary}>
                 <span className={styles.checkoutSelected}>
                   {selectedPackage
-                    ? `${selectedPackage.name}: ${selectedPackage.credits.toLocaleString()} credits`
+                    ? `${selectedPackage.name}: ${formatInt(selectedPackage.credits)} credits`
                     : 'Select a package'}
                 </span>
                 <span className={styles.checkoutPrice}>

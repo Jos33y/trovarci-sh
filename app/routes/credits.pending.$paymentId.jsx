@@ -9,6 +9,7 @@ import { getPaymentForUser } from '~/lib/payments.server';
 import { getPaymentInfo, mapCryptomusStatus } from '~/lib/cryptomus.server';
 import { sql } from '~/utils/db.server';
 import styles from '~/styles/modules/routes/paymentPending.module.css';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Payment Status | Trovarcis Reach' },
@@ -109,7 +110,7 @@ export default function PaymentPendingPage() {
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Credits</span>
-                <span className={styles.detailValue}>{payment.credits.toLocaleString()}</span>
+                <span className={styles.detailValue}>{formatInt(payment.credits)}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Reference</span>

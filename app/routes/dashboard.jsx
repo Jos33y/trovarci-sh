@@ -8,6 +8,7 @@ import { listJobsForUser } from '~/lib/jobQueue.server';
 import { isEmailOnWaitlist } from '~/lib/waitlist.server';
 import { LOW_BALANCE_THRESHOLD } from '~/utils/creditsConfig.server';
 import styles from '~/styles/modules/routes/dashboard';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Dashboard | Trovarcis Reach' },
@@ -19,7 +20,7 @@ export const meta = () => [
 
 function shapeTransaction(row) {
   const isIncoming = row.delta > 0;
-  const amount = (isIncoming ? '+' : '') + row.delta.toLocaleString();
+  const amount = (isIncoming ? '+' : '') + formatInt(row.delta);
 
   let label = 'Transaction';
   let method = '';
@@ -28,7 +29,7 @@ function shapeTransaction(row) {
   const meta = row.metadata || {};
 
   if (row.type === 'purchase') {
-    label  = meta.package_name || `Credit purchase (${row.delta.toLocaleString()})`;
+    label  = meta.package_name || `Credit purchase (${formatInt(row.delta)})`;
     method = meta.payment_method || 'Stripe';
     if (meta.amount_usd) price = `-$${Number(meta.amount_usd).toFixed(2)}`;
   } else if (row.type === 'grant') {
@@ -46,7 +47,7 @@ function shapeTransaction(row) {
       smtp_test:     'SMTP test',
       dns_generate:  'DNS Generator',
     }[tool] || tool;
-    label  = count ? `${prettyTool} (${count.toLocaleString()})` : prettyTool;
+    label  = count ? `${prettyTool} (${formatInt(count)})` : prettyTool;
   } else if (row.type === 'adjustment') {
     label  = meta.reason || 'Admin adjustment';
     method = 'Admin';
@@ -79,7 +80,7 @@ function shapeJob(row) {
     detail = String(meta.filename);
   } else {
     const units = row.type === 'phone' ? 'numbers' : 'addresses';
-    detail = `${row.totalRows.toLocaleString()} ${units}`;
+    detail = `${formatInt(row.totalRows)} ${units}`;
   }
 
   let uiStatus;
@@ -483,7 +484,7 @@ export default function DashboardPage() {
                 <div className={styles.statIconWrap} data-color="gold"><CreditIcon size={17} /></div>
                 <span className={styles.statBadge} data-type={balanceStatus.type}>{balanceStatus.label}</span>
               </div>
-              <div className={styles.statValue}>{user.creditsBalance.toLocaleString()}</div>
+              <div className={styles.statValue}>{formatInt(user.creditsBalance)}</div>
               <div className={styles.statLabel}>Credits remaining</div>
             </div>
             <div className={styles.statCard}>
@@ -509,7 +510,7 @@ export default function DashboardPage() {
                 <div className={styles.statIconWrap} data-color="neutral"><TotalIcon size={17} /></div>
                 <span className={styles.statSub}>across all jobs</span>
               </div>
-              <div className={styles.statValue}>{stats.totalVerified.toLocaleString()}</div>
+              <div className={styles.statValue}>{formatInt(stats.totalVerified)}</div>
               <div className={styles.statLabel}>Records verified</div>
             </div>
           </div>
@@ -648,9 +649,9 @@ export default function DashboardPage() {
                           >
                             <td><span className={styles.typePill}>{job.type}</span></td>
                             <td className={styles.tdDetail} title={job.detail}>{job.detail}</td>
-                            <td className={styles.tdR}>{job.count.toLocaleString()}</td>
+                            <td className={styles.tdR}>{formatInt(job.count)}</td>
                             <td className={styles.tdR}>
-                              {job.valid !== null ? job.valid.toLocaleString() : <span className={styles.tdDash} aria-label="not available">-</span>}
+                              {job.valid !== null ? formatInt(job.valid) : <span className={styles.tdDash} aria-label="not available">-</span>}
                             </td>
                             <td className={styles.tdR}>
                               {job.rate !== null
@@ -659,7 +660,7 @@ export default function DashboardPage() {
                             </td>
                             <td className={styles.tdR}>
                               {job.credits > 0
-                                ? <span className={styles.creditUsed}>-{job.credits.toLocaleString()}</span>
+                                ? <span className={styles.creditUsed}>-{formatInt(job.credits)}</span>
                                 : <span className={styles.creditFree}>Free</span>}
                             </td>
                             <td className={styles.tdDate}>{fmtDate(job.date)}</td>

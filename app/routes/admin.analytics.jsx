@@ -11,6 +11,7 @@ import CountryMap from '~/components/admin/CountryMap';
 import DailyBars from '~/components/admin/DailyBars';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Analytics | Trovarcis Admin' },
@@ -62,23 +63,23 @@ export default function AdminAnalytics() {
       <div className={styles.kpiStrip}>
         <KPICard
           label="Pageviews"
-          value={overview.totals.pageviews.toLocaleString()}
-          hint={`${overview.totals.unique_sessions.toLocaleString()} sessions`}
+          value={formatInt(overview.totals.pageviews)}
+          hint={`${formatInt(overview.totals.unique_sessions)} sessions`}
           spark={sparks.pageviews}
         />
         <KPICard
           label="Unique users"
-          value={overview.totals.unique_users.toLocaleString()}
+          value={formatInt(overview.totals.unique_users)}
           hint="signed-in only"
         />
         <KPICard
           label="Signups"
-          value={overview.totals.signups.toLocaleString()}
+          value={formatInt(overview.totals.signups)}
           spark={sparks.signups}
         />
         <KPICard
           label="Payments"
-          value={overview.totals.payments.toLocaleString()}
+          value={formatInt(overview.totals.payments)}
           spark={sparks.payments}
           variant="hero"
         />
@@ -111,7 +112,7 @@ export default function AdminAnalytics() {
               {overview.topPaths.map((r) => (
                 <li key={r.path} className={styles.rankListItem}>
                   <span className={styles.rankListLabel}>{r.path}</span>
-                  <span className={styles.rankListValue}>{r.n.toLocaleString()}</span>
+                  <span className={styles.rankListValue}>{formatInt(r.n)}</span>
                 </li>
               ))}
             </ul>
@@ -129,7 +130,7 @@ export default function AdminAnalytics() {
               {overview.topReferrers.map((r) => (
                 <li key={r.referrer_domain} className={styles.rankListItem}>
                   <span className={styles.rankListLabel}>{r.referrer_domain}</span>
-                  <span className={styles.rankListValue}>{r.n.toLocaleString()}</span>
+                  <span className={styles.rankListValue}>{formatInt(r.n)}</span>
                 </li>
               ))}
             </ul>

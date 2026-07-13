@@ -42,6 +42,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from '~/styles/modules/tools/BulkVerificationResult.module.css';
+import { formatInt } from '~/utils/format';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ICONS - inline, no library
@@ -203,30 +204,30 @@ function buildHeadline(counts, total, type) {
 
   // 100% errors - the situation that broke the old EmailVerifier UI
   if (errs === total) {
-    return `All ${total.toLocaleString()} ${cfg.rowNoun} hit infrastructure errors`;
+    return `All ${formatInt(total)} ${cfg.rowNoun} hit infrastructure errors`;
   }
 
   // Mixed - lead with deliverable count, then breakdown
   const primary = counts[cfg.primaryBucket] || 0;
   const parts = [];
 
-  if (primary > 0) parts.push(`${primary.toLocaleString()} ${cfg.primaryLabel}`);
+  if (primary > 0) parts.push(`${formatInt(primary)} ${cfg.primaryLabel}`);
 
   if (type === 'phone') {
-    if (counts.risky > 0)   parts.push(`${counts.risky.toLocaleString()} landline`);
-    if (counts.invalid > 0) parts.push(`${counts.invalid.toLocaleString()} invalid`);
+    if (counts.risky > 0)   parts.push(`${formatInt(counts.risky)} landline`);
+    if (counts.invalid > 0) parts.push(`${formatInt(counts.invalid)} invalid`);
   } else {
-    if (counts.risky > 0)   parts.push(`${counts.risky.toLocaleString()} risky`);
-    if (counts.invalid > 0) parts.push(`${counts.invalid.toLocaleString()} invalid`);
-    if (counts.unknown > 0) parts.push(`${counts.unknown.toLocaleString()} unknown`);
+    if (counts.risky > 0)   parts.push(`${formatInt(counts.risky)} risky`);
+    if (counts.invalid > 0) parts.push(`${formatInt(counts.invalid)} invalid`);
+    if (counts.unknown > 0) parts.push(`${formatInt(counts.unknown)} unknown`);
   }
-  if (errs > 0) parts.push(`${errs.toLocaleString()} errored`);
+  if (errs > 0) parts.push(`${formatInt(errs)} errored`);
 
-  if (parts.length === 0) return `${total.toLocaleString()} ${cfg.rowNoun} processed`;
+  if (parts.length === 0) return `${formatInt(total)} ${cfg.rowNoun} processed`;
 
   // Special case: all rows are deliverable
   if (verdictTotal > 0 && primary === verdictTotal && errs === 0) {
-    return `All ${total.toLocaleString()} ${cfg.rowNoun} ${cfg.deliveryVerb}`;
+    return `All ${formatInt(total)} ${cfg.rowNoun} ${cfg.deliveryVerb}`;
   }
 
   return parts.join(' · ');
@@ -256,7 +257,7 @@ function getListHealth(counts) {
     return {
       verdict: 'Healthy',
       cls: 'healthHealthy',
-      message: `Of ${verdictTotal.toLocaleString()} verdicts, only ${invalidPct.toFixed(1)}% are invalid. Safe to send.`,
+      message: `Of ${formatInt(verdictTotal)} verdicts, only ${invalidPct.toFixed(1)}% are invalid. Safe to send.`,
     };
   }
   if (riskPct <= 5) {
@@ -521,7 +522,7 @@ export default function BulkVerificationResult({
 
   /* ── Render ── */
   const showHowMany = filtered.length > 50 && !showAll
-    ? `Showing 50 of ${filtered.length.toLocaleString()}`
+    ? `Showing 50 of ${formatInt(filtered.length)}`
     : null;
 
   const statusBadge =
@@ -544,7 +545,7 @@ export default function BulkVerificationResult({
               {statusBadge.label}
             </span>
             <span className={styles.heroMeta}>
-              {processedRows?.toLocaleString() || totalItems.toLocaleString()} processed
+              {formatInt(processedRows) || formatInt(totalItems)} processed
               {durationMs && ` · ${formatDuration(durationMs)}`}
             </span>
           </div>
@@ -562,7 +563,7 @@ export default function BulkVerificationResult({
           )}
           {creditsRefunded > 0 && (
             <p className={styles.refundNote}>
-              Refunded {creditsRefunded.toLocaleString()} credits for unprocessed {cfg.rowNoun}
+              Refunded {formatInt(creditsRefunded)} credits for unprocessed {cfg.rowNoun}
             </p>
           )}
           {loadError && <p className={styles.errorNote}>{loadError}</p>}
@@ -576,14 +577,14 @@ export default function BulkVerificationResult({
           <div className={styles.allErrorsBody}>
             <p className={styles.allErrorsTitle}>None of your {cfg.rowNoun} could be verified</p>
             <p className={styles.allErrorsText}>
-              All {totalItems.toLocaleString()} hit an infrastructure failure. The verification network
+              All {formatInt(totalItems)} hit an infrastructure failure. The verification network
               may be temporarily unavailable. Your credits were not consumed for failed verifications -
               you can retry safely.
             </p>
             <div className={styles.allErrorsActions}>
               <button className={styles.allErrorsCopyBtn} onClick={copyErrors} type="button">
                 {copyState.errors ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-                {copyState.errors ? 'Copied' : `Copy ${errorCount.toLocaleString()} ${cfg.rowNoun} for retry`}
+                {copyState.errors ? 'Copied' : `Copy ${formatInt(errorCount)} ${cfg.rowNoun} for retry`}
               </button>
               <button className={styles.allErrorsRetryBtn} onClick={onNewJob} type="button">
                 Start a new job
@@ -606,7 +607,7 @@ export default function BulkVerificationResult({
         <div className={styles.partialErrorsNotice}>
           <span className={styles.partialErrorsIcon}><WarningIcon size={14} /></span>
           <span className={styles.partialErrorsText}>
-            {errorCount.toLocaleString()} {cfg.rowNoun} could not be verified due to infrastructure issues.
+            {formatInt(errorCount)} {cfg.rowNoun} could not be verified due to infrastructure issues.
             Filter to &ldquo;Errored&rdquo; below to copy them and retry later.
           </span>
         </div>
@@ -624,7 +625,7 @@ export default function BulkVerificationResult({
               {copyState.primary ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
             </span>
             <span className={styles.copyPrimaryText}>
-              {copyState.primary ? 'Copied to clipboard' : `Copy ${primaryCount.toLocaleString()} ${cfg.primaryLabelPlural}`}
+              {copyState.primary ? 'Copied to clipboard' : `Copy ${formatInt(primaryCount)} ${cfg.primaryLabelPlural}`}
             </span>
             <span className={styles.copyPrimaryHint}>
               {copyState.primary
@@ -670,7 +671,7 @@ export default function BulkVerificationResult({
           <p className={styles.emptyText}>No {activeTab === 'all' ? cfg.rowNoun : activeTab + ' ' + cfg.rowNoun} in this list.</p>
           {activeTab !== 'all' && totalItems > 0 && (
             <button className={styles.emptyCta} onClick={() => setTab('all')} type="button">
-              View all {totalItems.toLocaleString()} {cfg.rowNoun}
+              View all {formatInt(totalItems)} {cfg.rowNoun}
             </button>
           )}
         </div>
@@ -743,7 +744,7 @@ export default function BulkVerificationResult({
             <div className={styles.showMoreRow}>
               <span className={styles.showMoreText}>{showHowMany}</span>
               <button className={styles.showMoreBtn} onClick={() => setShowAll(true)} type="button">
-                Show all {filtered.length.toLocaleString()}
+                Show all {formatInt(filtered.length)}
               </button>
             </div>
           )}
@@ -770,7 +771,7 @@ export default function BulkVerificationResult({
                   {copyState.filtered ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
                 </span>
                 <span className={styles.exportBtnLabel}>
-                  {copyState.filtered ? 'Copied' : `Copy ${filtered.length.toLocaleString()} filtered`}
+                  {copyState.filtered ? 'Copied' : `Copy ${formatInt(filtered.length)} filtered`}
                 </span>
                 <span className={styles.exportBtnHint}>To clipboard, one per line</span>
               </button>
@@ -781,7 +782,7 @@ export default function BulkVerificationResult({
                 {copyState.all ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
               </span>
               <span className={styles.exportBtnLabel}>
-                {copyState.all ? 'Copied' : `Copy all ${totalItems.toLocaleString()}`}
+                {copyState.all ? 'Copied' : `Copy all ${formatInt(totalItems)}`}
               </span>
               <span className={styles.exportBtnHint}>To clipboard, one per line</span>
             </button>
@@ -790,14 +791,14 @@ export default function BulkVerificationResult({
               <a className={styles.exportBtn} href={`/api/jobs/${jobId}/results?clean=1&format=txt`} download>
                 <span className={styles.exportBtnIcon}><DownloadIcon size={16} /></span>
                 <span className={styles.exportBtnLabel}>Download {cfg.primaryLabel}.txt</span>
-                <span className={styles.exportBtnHint}>{primaryCount.toLocaleString()} {cfg.rowNoun}, plain text</span>
+                <span className={styles.exportBtnHint}>{formatInt(primaryCount)} {cfg.rowNoun}, plain text</span>
               </a>
             )}
 
             <a className={styles.exportBtn} href={`/api/jobs/${jobId}/results?format=txt`} download>
               <span className={styles.exportBtnIcon}><DownloadIcon size={16} /></span>
               <span className={styles.exportBtnLabel}>Download all.txt</span>
-              <span className={styles.exportBtnHint}>{totalItems.toLocaleString()} {cfg.rowNoun}, plain text</span>
+              <span className={styles.exportBtnHint}>{formatInt(totalItems)} {cfg.rowNoun}, plain text</span>
             </a>
 
             <a className={styles.exportBtn} href={`/api/jobs/${jobId}/results`} download>
@@ -848,7 +849,7 @@ function FilterTab({ active, onClick, label, count, dot }) {
     >
       {dot && <span className={`${styles.tabDot} ${dot}`} />}
       <span className={styles.tabLabel}>{label}</span>
-      <span className={styles.tabCount}>{count.toLocaleString()}</span>
+      <span className={styles.tabCount}>{formatInt(count)}</span>
     </button>
   );
 }

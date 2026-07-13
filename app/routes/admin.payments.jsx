@@ -4,6 +4,7 @@ import { requireAdmin, adminListPayments } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import { CardIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Payments | Trovarcis Admin' },
@@ -135,7 +136,7 @@ export default function AdminPayments() {
                     </td>
                     <td data-label="Gateway">{p.gateway}</td>
                     <td data-label="Package">{p.package_key || '-'}</td>
-                    <td data-label="Credits" className={styles['td--num']}>{p.credits.toLocaleString()}</td>
+                    <td data-label="Credits" className={styles['td--num']}>{formatInt(p.credits)}</td>
                     <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
                     <td data-label="Status">
                       <span className={`${styles.badge} ${styles[STATUS_BADGE[p.status] || 'badgeNeutral']}`}>{p.status}</span>

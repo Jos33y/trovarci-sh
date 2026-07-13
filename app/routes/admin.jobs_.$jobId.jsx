@@ -4,6 +4,7 @@ import { requireAdmin, adminGetJobDetail } from '~/utils/admin.server';
 import { logAdminAction } from '~/utils/adminActions.server';
 import { cancelJob } from '~/lib/jobQueue.server';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = ({ data }) => [
   { title: data?.job ? `Job ${data.job.id.slice(0, 8)} | Admin` : 'Job | Admin' },
@@ -122,7 +123,7 @@ export default function AdminJobDetail() {
             </div>
             <div className={styles.kvList}>
               <div className={styles.kvKey}>Items</div>
-              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{job.processed_items.toLocaleString()} / {job.total_items.toLocaleString()}</div>
+              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{formatInt(job.processed_items)} / {formatInt(job.total_items)}</div>
 
               <div className={styles.kvKey}>Kind</div>
               <div className={styles.kvValue}>{job.kind}</div>
@@ -134,10 +135,10 @@ export default function AdminJobDetail() {
               <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{formatDate(job.completed_at)}</div>
 
               <div className={styles.kvKey}>Credits charged</div>
-              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{job.credits_charged.toLocaleString()}</div>
+              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{formatInt(job.credits_charged)}</div>
 
               <div className={styles.kvKey}>Credits refunded</div>
-              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{job.credits_refunded.toLocaleString()}</div>
+              <div className={`${styles.kvValue} ${styles['kvValue--mono']}`}>{formatInt(job.credits_refunded)}</div>
             </div>
           </section>
 

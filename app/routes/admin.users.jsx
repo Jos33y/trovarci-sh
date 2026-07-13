@@ -3,6 +3,7 @@ import { Form, useLoaderData, useNavigate } from 'react-router';
 import { requireAdmin, adminSearchUsers } from '~/utils/admin.server';
 import EmptyState from '~/components/admin/EmptyState';
 import styles from '~/styles/modules/routes/admin';
+import { formatInt } from '~/utils/format';
 
 export const meta = () => [
   { title: 'Users | Trovarcis Admin' },
@@ -114,7 +115,7 @@ export default function AdminUsers() {
                         : <span className={`${styles.badge} ${styles.badgeWarning}`}>Unverified</span>}
                     </td>
                     <td data-label="Credits" className={styles['td--num']}>
-                      {u.credits_balance.toLocaleString()}
+                      {formatInt(u.credits_balance)}
                     </td>
                     <td data-label="Joined" className={styles['td--muted']}>{timeAgo(u.created_at)}</td>
                     <td data-label="Status">
