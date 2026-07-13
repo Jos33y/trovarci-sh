@@ -1,27 +1,5 @@
-/**
- * POST /api/telemetry/beacon
- *
- * Single client beacon endpoint. Accepts:
- *   { type: 'pageview', path, referrer, utm: {...} }
- *   { type: 'error', kind, severity, message, stack, path, line, column, context }
- *   { type: 'event',  eventType, path, metadata }   // for explicit funnel pings
- *
- * Always returns 204 No Content (or 400 on shape error). The client uses
- * navigator.sendBeacon which doesn't read the body anyway; we keep status
- * codes meaningful for testing.
- *
- * Body parsing:
- *   navigator.sendBeacon sends with Content-Type: text/plain;charset=UTF-8
- *   when given a string, or application/json when given a Blob with that
- *   type. We accept either; await request.text() and JSON.parse.
- *
- * Rate limit: per-session-hash, 200/hour. Generous - a heavy SPA could
- * legitimately fire ~100 beacons/hour on intense use; bots are filtered
- * upstream by the bot check in deriveSessionHash.
- *
- * Auth: optional. If the request has a session cookie we attribute the
- * event to the user; otherwise it's anonymous (session_hash only).
- */
+// POST /api/telemetry/beacon - client pageview, event, and error capture.
+// sendBeacon ignores response body; status codes kept meaningful for tests. Optional session attribution when signed in.
 
 import { getOptionalUser } from '~/utils/session.server';
 import {
@@ -32,9 +10,8 @@ import {
 import { recordClientError } from '~/utils/errors.server';
 import { isbot } from 'isbot';
 
-// Per-process in-memory rate limit. Keeps the DB out of the hot path for
-// the beacon endpoint (high frequency, low value per request).
-const RL_WINDOW_MS = 60 * 60 * 1000;   // 1 hour
+// Per-process in-memory rate limit: 200 hits per session-hash per hour. Keeps DB out of the beacon hot path.
+const RL_WINDOW_MS = 60 * 60 * 1000;
 const RL_MAX_HITS  = 200;
 const buckets = new Map();
 let lastGc = Date.now();
@@ -73,7 +50,7 @@ export async function action({ request }) {
 
   const sessionHash = deriveSessionHash(request);
   if (!rateLimitOk(sessionHash)) {
-    return new Response(null, { status: 204 }); // silent drop
+    return new Response(null, { status: 204 });
   }
 
   let raw;
@@ -82,9 +59,8 @@ export async function action({ request }) {
   } catch {
     return new Response(null, { status: 400 });
   }
+  // sendBeacon caps at 64KB; legitimate beacons are <1KB. Tighter cap here.
   if (!raw || raw.length > 16_384) {
-    // sendBeacon caps at 64KB but we cap tighter; legitimate beacons
-    // are small (<1KB).
     return new Response(null, { status: 400 });
   }
 
@@ -103,14 +79,21 @@ export async function action({ request }) {
     const path = typeof payload.path === 'string' ? payload.path.slice(0, 512) : null;
     if (!path) return new Response(null, { status: 400 });
 
-    // Reject framework / browser probe paths that are not real pageviews.
-    // The client-side telemetry IIFE already skips these but we double-up
-    // here so a misbehaving client (or a forged beacon) cannot pollute
-    // the analytics_events table.
+    // Framework and browser probe paths - drop silently so a misbehaving or forged client cannot pollute analytics_events.
     if (path.startsWith('/.well-known/')) return new Response(null, { status: 204 });
     if (path.startsWith('/__'))            return new Response(null, { status: 204 });
     if (path.startsWith('/api/'))          return new Response(null, { status: 204 });
     if (path.endsWith('.data'))            return new Response(null, { status: 204 });
+
+    // Admin routes and login redirects targeting admin - self-traffic noise, not real users.
+    // path may include ?query so split before the exact-match check.
+    const pathOnly = path.split('?')[0];
+    if (pathOnly === '/admin' || pathOnly.startsWith('/admin/')) {
+      return new Response(null, { status: 204 });
+    }
+    if (pathOnly === '/login' && (path.includes('redirectTo=%2Fadmin') || path.includes('redirectTo=/admin'))) {
+      return new Response(null, { status: 204 });
+    }
 
     const event = buildEventFromRequest(request, {
       eventType: 'pageview',
@@ -127,8 +110,7 @@ export async function action({ request }) {
   if (type === 'event') {
     const eventType = typeof payload.eventType === 'string' ? payload.eventType.slice(0, 64) : null;
     if (!eventType) return new Response(null, { status: 400 });
-    // Defence: don't let the client mint server-side event types. Allowlist
-    // the client-fireable types.
+    // Allowlist client-fireable event types; server-side event names cannot be minted from the browser.
     const CLIENT_ALLOWED = new Set([
       'click_outbound', 'click_internal_cta', 'tool_form_focus',
       'package_select', 'checkout_click', 'credits_view',
@@ -156,6 +138,7 @@ export async function action({ request }) {
   return new Response(null, { status: 400 });
 }
 
+// Flatten shallow object: keep strings under 256 chars, drop nested objects. Cap at 20 keys.
 function sanitiseMetadata(obj) {
   const out = {};
   let count = 0;
@@ -164,8 +147,6 @@ function sanitiseMetadata(obj) {
     if (typeof k !== 'string' || k.length > 64) continue;
     if (typeof v === 'string') out[k] = v.slice(0, 256);
     else if (typeof v === 'number' || typeof v === 'boolean') out[k] = v;
-    // Drop nested objects from client metadata - keeps the surface small
-    // and analysable. Server-side recordEvent calls can use richer shapes.
   }
   return out;
 }

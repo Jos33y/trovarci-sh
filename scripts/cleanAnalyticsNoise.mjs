@@ -1,18 +1,7 @@
 #!/usr/bin/env node
-/* ───────────────────────────────────────────────────────────────────────
-   cleanAnalyticsNoise.mjs
-
-   One-shot cleanup of analytics noise collected before hotfix-2:
-     - pageview_ssr rows (deprecated event type)
-     - /.well-known/* paths (Chrome devtools, ACME, etc)
-     - /api/* paths (XHRs, never pageviews)
-     - *.data paths (RR v7 client-nav data fetches)
-
-   Also re-rolls today's daily rollup so the cleaned numbers reflect.
-
-   Run once after hotfix-2:
-     node --env-file=.env scripts/cleanAnalyticsNoise.mjs
-   ─────────────────────────────────────────────────────────────────────── */
+// Cleanup of analytics noise: deprecated event types, framework probe paths, admin routes.
+// Also re-rolls today's daily rollup so cleaned numbers reflect. Idempotent - safe to re-run.
+// Run: node --env-file=.env scripts/cleanAnalyticsNoise.mjs
 
 import { sql } from '../app/utils/db.server.js';
 import { computeDailyRollup } from '../app/utils/analytics.server.js';
@@ -36,11 +25,27 @@ const r2 = await sql`
 `;
 console.log(`  removed junk paths:   ${r2.count}`);
 
+// Admin routes and login redirects targeting admin. position() is used for the login case because
+// LIKE would interpret %2F as a wildcard, so we scan for the literal URL-encoded substring instead.
+const r3 = await sql`
+  DELETE FROM analytics_events
+  WHERE path = '/admin'
+     OR path LIKE '/admin/%'
+     OR path LIKE '/admin?%'
+     OR (
+       path LIKE '/login?%'
+       AND (
+         position('redirectTo=%2Fadmin' in path) > 0
+         OR position('redirectTo=/admin' in path) > 0
+       )
+     )
+`;
+console.log(`  removed admin paths:  ${r3.count}`);
+
 const after = (await sql`SELECT count(*)::int AS n FROM analytics_events`)[0].n;
 console.log(`analytics_events after:  ${after}`);
 console.log('');
 
-// Wipe today's rollup so it recomputes cleanly.
 const today = new Date().toISOString().slice(0, 10);
 const rd = await sql`DELETE FROM analytics_daily WHERE day = ${today}::date`;
 console.log(`Cleared today's rollup: ${rd.count} rows`);

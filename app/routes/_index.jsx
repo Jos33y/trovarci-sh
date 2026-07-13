@@ -16,8 +16,8 @@ import CTA from '~/components/landing/CTA';
 import styles from '~/styles/modules/routes/home.module.css';
 
 export const meta = () => getSeo({
-  title: "The Email Deliverability Toolkit",
-  description: "Six pre-flight checks for every email you send. Verify lists, score copy, audit DNS, test SMTP. Pay as you go. 10 free credits on signup, no subscription.",
+  title: "Email deliverability and number verification tools",
+  description: "Six tools for email deliverability and number verification. Verify lists, score copy, audit DNS, test SMTP. Pay as you go. 10 free credits on signup, no subscription.",
   path: "/",
 });
 
@@ -26,6 +26,44 @@ export function loader() {
   return { posts };
 }
 
+// Organization + WebSite schema in one @graph. WebSite.potentialAction enables Google sitelinks
+// searchbox pointing at /blog?q= which the blog index route already parses.
+const HOME_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://trovarci.sh/#organization',
+      name: 'Trovarcis Reach',
+      url: 'https://trovarci.sh',
+      logo: 'https://trovarci.sh/android-chrome-512x512.png',
+      description: 'Email deliverability and number verification tools for anyone who sends email or verifies contacts.',
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: 'support@trovarci.sh',
+        availableLanguage: 'English',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://trovarci.sh/#website',
+      name: 'Trovarcis Reach',
+      url: 'https://trovarci.sh',
+      publisher: { '@id': 'https://trovarci.sh/#organization' },
+      inLanguage: 'en-US',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: 'https://trovarci.sh/blog?q={search_term_string}',
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+};
+
 export default function Home() {
   const { posts } = useLoaderData();
 
@@ -33,6 +71,11 @@ export default function Home() {
     <>
       <Header />
       <main>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_SCHEMA) }}
+        />
+
         {/* bg */}
         <Hero />
 

@@ -21,8 +21,8 @@ export function meta({ data: payload }) {
       title: post.title,
       description: post.description,
       path: `/blog/${post.slug}`,
+      type: 'article',
     }),
-    { property: 'og:type', content: 'article' },
     { property: 'article:published_time', content: post.date },
     { property: 'article:author', content: post.author },
   ];

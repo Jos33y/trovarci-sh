@@ -4,6 +4,7 @@ import { Link, useLoaderData } from 'react-router';
 import { TrovarcisReachLogo } from '~/components/shared/Logo';
 import { requireUser } from '~/utils/session.server';
 import { sql } from '~/utils/db.server';
+import { formatDateLong, formatDateIso, formatInt } from '~/utils/format';
 import styles from '~/styles/modules/routes/receipt.module.css';
 
 export const meta = ({ data }) => [
@@ -60,18 +61,6 @@ export async function loader({ request, params }) {
   };
 }
 
-function formatDateLong(date) {
-  return new Date(date).toLocaleString('en-US', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-    timeZone:  'UTC',
-  }) + ' UTC';
-}
-
-function formatDateShort(date) {
-  return new Date(date).toISOString().slice(0, 10);
-}
-
 export default function ReceiptPage() {
   const { user, receipt, payment } = useLoaderData();
 
@@ -86,7 +75,7 @@ export default function ReceiptPage() {
     adjustment: 'Account adjustment',
   }[receipt.type] || 'Statement';
 
-  const creditsAmount = Math.abs(receipt.delta).toLocaleString();
+  const creditsAmount = formatInt(Math.abs(receipt.delta));
   const amountUsd = meta.amount_usd ? `$${meta.amount_usd}` : null;
 
   const descriptionLine = (() => {
@@ -108,7 +97,7 @@ export default function ReceiptPage() {
         smtp_test:     'SMTP test',
         dns_generate:  'DNS Generator',
       }[meta.tool] || meta.tool || 'Service usage';
-      return meta.count ? `${prettyTool} (${Number(meta.count).toLocaleString()} units)` : prettyTool;
+      return meta.count ? `${prettyTool} (${formatInt(meta.count)} units)` : prettyTool;
     }
     return meta.reason || 'Account transaction';
   })();
@@ -202,7 +191,7 @@ export default function ReceiptPage() {
               <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Balance after</span>
                 <span className={styles.totalValueMuted}>
-                  {receipt.balanceAfter.toLocaleString()} credits
+                  {formatInt(receipt.balanceAfter)} credits
                 </span>
               </div>
             </div>
@@ -232,7 +221,7 @@ export default function ReceiptPage() {
               Questions about this {isUsage ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
             </p>
             <p className={styles.footerFine}>
-              Trovarcis LLC &middot; Wyoming, USA &middot; {formatDateShort(receipt.createdAt)}
+              Trovarcis LLC &middot; Wyoming, USA &middot; {formatDateIso(receipt.createdAt)}
             </p>
           </div>
 

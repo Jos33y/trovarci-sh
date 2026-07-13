@@ -36,12 +36,19 @@ export const TELEMETRY_CLIENT_SOURCE = `
 
   function pageview(){
     if(sent) return;
-    // Skip non-pageview paths: well-known probes, framework internals, API XHRs, RR v7 data fetches.
+    // Skip non-pageview paths: well-known probes, framework internals, API XHRs, RR v7 data fetches, admin routes.
     var p = location.pathname;
     if (p.indexOf('/.well-known/') === 0) return;
     if (p.indexOf('/__') === 0) return;
     if (p.indexOf('/api/') === 0) return;
     if (p.endsWith('.data')) return;
+    if (p === '/admin' || p.indexOf('/admin/') === 0) return;
+    // Login redirects targeting admin are admin traffic dressed up as auth; drop both encoded and unencoded forms.
+    if (p === '/login') {
+      var s = location.search || '';
+      if (s.indexOf('redirectTo=%2Fadmin') !== -1) return;
+      if (s.indexOf('redirectTo=/admin') !== -1) return;
+    }
     sent=true;
     send({type:'pageview',path:p+location.search,referrer:ref()});
   }

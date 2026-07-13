@@ -1,7 +1,7 @@
 {
-  "name": "Trovarcis",
+  "name": "Trovarcis Reach",
   "short_name": "Trovarcis",
-  "description": "Infrastructure for businesses that move fast",
+  "description": "Email deliverability and number verification tools for anyone who sends email or verifies contacts.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090B",
@@ -18,9 +18,26 @@
       "type": "image/png"
     },
     {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

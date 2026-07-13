@@ -1,0 +1,34 @@
+# Trovarcis Reach
+
+> Email deliverability and number verification tools for anyone who sends email or verifies contacts. Six tools share one credit ledger: Email Scorer, Email Verifier, Number Verifier, Domain Checker, SMTP Tester, and DNS Record Generator. Three tools are free with no signup. New accounts get 10 free credits, no card required.
+
+Trovarcis Reach is built for anyone who sends email, verifies contacts, or wants to. Business owners setting up email for a new company, founders running their own outreach, marketers checking domain health before a launch, cold outreach operators verifying lists, deliverability engineers diagnosing DMARC failures, SaaS teams verifying user signups at onboarding, and developers integrating email and number verification into their apps. Three of the six tools are free with no signup required (Domain Checker, SMTP Tester, DNS Record Generator), so a business owner can check whether a new domain is correctly configured for email without creating an account. The other three run on credits. The blog covers both foundational setup guides (SPF/DKIM/DMARC configuration, choosing a business email domain, first-time deliverability) and technical deep-dives (RFC-level SPF debugging, Gmail Promotions classifier signals, blacklist delisting).
+
+## Tools
+
+- [Email Scorer](https://trovarci.sh/score): Grades email content for Gmail Promotions tab risk, spam-filter signals, and structural issues using the Arcis AI engine. Returns the specific factors dragging placement and concrete fixes for each. 1 credit per scan, requires signup.
+- [Email Verifier](https://trovarci.sh/verify): Live SMTP probe for single addresses or bulk lists up to 50,000. Refunds credits on infrastructure failures, only charges on real verdicts. 1 credit per single check, 1 credit per 5 in bulk. Requires signup.
+- [Number Verifier](https://trovarci.sh/verify-number): Phone number format validation via libphonenumber is free with no signup. Optional carrier-network lookup returns line type, portability, and roaming status for 2 credits. Useful for SMS campaign list cleaning, onboarding fraud prevention, and voice outreach validation.
+- [Domain Checker](https://trovarci.sh/domain): 25+ checks across SPF, DKIM, DMARC, mail server config, SSL/TLS setup, DNS configuration, and 15+ blacklists. Useful for anyone setting up business email on a new domain or auditing an existing setup. Free, no signup.
+- [SMTP Tester](https://trovarci.sh/smtp-test): Diagnoses SMTP connection failures with plain-language explanations at every step of the handshake. Shows exactly where a connection breaks and why. Free, no signup.
+- [DNS Record Generator](https://trovarci.sh/records): Generates SPF, DKIM, DMARC, MX, BIMI, and MTA-STS records for any domain. Counts DNS lookups in real time and flags SPF records approaching the RFC 7208 10-lookup limit. Free, no signup.
+
+## Guides
+
+- [The complete guide to email deliverability in 2026](https://trovarci.sh/blog/email-deliverability-guide-2026): Broad overview of what determines inbox placement across Gmail, Outlook, and Yahoo. Covers authentication, reputation, the 2026 protocol layer (BIMI, MTA-STS, TLS-RPT), inbox placement classifiers, and infrastructure decisions. Start here if new to deliverability.
+- [How to set up SPF, DKIM, and DMARC](https://trovarci.sh/blog/spf-dkim-dmarc-setup): Step-by-step configuration for the three email authentication protocols. Foundational setup for anyone connecting a new business domain to a mail provider.
+- [Why your emails hit Gmail Promotions (and how to move them to Primary)](https://trovarci.sh/blog/gmail-promotions-tab-fix): The four signal groups Gmail uses to sort messages, why generic advice fails, and five concrete fixes ranked by impact. Covers subject-line patterns, HTML weight, List-Unsubscribe headers (RFC 8058), authentication baseline, and engagement warm-up.
+- [SPF PermError: the 10 DNS lookup limit and how to fix it](https://trovarci.sh/blog/spf-permerror-10-dns-lookups-fix): RFC 7208 section 4.6.4 in plain language, how to count hidden lookups from nested includes, plus the void-lookup cap most articles miss. Three ranked fixes: prune stale includes, subdomain delegation, SPF flattening.
+- [Is your domain blacklisted? How to check and fix it](https://trovarci.sh/blog/domain-blacklisted-check-fix): Diagnosing blacklist listings across major RBLs (Spamhaus, Barracuda, SORBS, and others) and the delisting process for each.
+- [Trovarcis Reach vs SendBlaster](https://trovarci.sh/blog/trovarcis-reach-vs-sendblaster): Feature and pricing comparison for bulk email use cases.
+
+## Company
+
+- [Pricing](https://trovarci.sh/pricing): Credit-based pricing. No monthly subscription. Credits don't expire.
+- [Contact](https://trovarci.sh/contact): Contact form. Business inquiries: hello@trovarcis.com. Product support: support@trovarci.sh.
+
+## Optional
+
+- [Privacy Policy](https://trovarci.sh/privacy): Data collection, retention, and GDPR/CCPA rights.
+- [Terms of Service](https://trovarci.sh/terms): Usage terms, acceptable use policy, liability.
+- [Refund Policy](https://trovarci.sh/refund): 15-day guarantee on credit purchases.

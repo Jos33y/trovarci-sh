@@ -1,13 +1,13 @@
-// app/routes/sitemap[.]xml.jsx
-// Dynamically-generated sitemap. Static pages hardcoded; blog posts read
-// from content/blog/*.md at request time (cached 1h via HTTP header).
+// Dynamic sitemap. Static routes hardcoded; blog posts read from content/blog/*.md at request time.
+// Cached 1h via HTTP Cache-Control header.
+
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
 
 const BASE_URL = 'https://trovarci.sh';
 
-// Public, indexable static routes. Order matters as a weak signal to Google.
+// Public indexable routes. Order matters as a weak crawl-priority signal to Google.
 const STATIC_URLS = [
     '/',
     '/tools',
@@ -18,6 +18,7 @@ const STATIC_URLS = [
     '/smtp-test',
     '/records',
     '/blog',
+    '/download',
     '/credits',
     '/contact',
     '/privacy',
@@ -36,10 +37,10 @@ async function getBlogPosts() {
             const raw = await fs.readFile(path.join(blogDir, file), 'utf-8');
             const { data } = matter(raw);
 
-            // Skip explicit drafts.
             if (data.draft === true) continue;
 
             const slug = data.slug || file.replace(/\.md$/, '');
+            // Prefer explicit updated field over publish date so rewrites bump the crawler signal.
             const lastmod = data.updated || data.date || null;
 
             posts.push({ slug, lastmod });
@@ -55,7 +56,6 @@ async function getBlogPosts() {
 function urlEntry(loc, lastmod) {
     let entry = `  <url>\n    <loc>${BASE_URL}${loc}</loc>`;
     if (lastmod) {
-        // Normalize to YYYY-MM-DD if it's a date-like string.
         const iso = new Date(lastmod).toISOString().slice(0, 10);
         entry += `\n    <lastmod>${iso}</lastmod>`;
     }

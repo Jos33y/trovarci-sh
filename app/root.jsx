@@ -1,3 +1,5 @@
+// Root document component - head/body shell, root loader, error boundary.
+
 import {
   Links,
   Meta,
@@ -24,55 +26,22 @@ export const links = () => [
   },
   { rel: "stylesheet", href: globalStyles },
   { rel: "stylesheet", href: animationStyles },
-  { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+  { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
   { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
   { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+  { rel: "icon", href: "/favicon-192x192.png", type: "image/png", sizes: "192x192" },
   { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
   { rel: "manifest", href: "/site.webmanifest" },
 ];
 
-/**
- * Root meta is intentionally empty for charSet/viewport/theme-color.
- *
- * In React Router v7, child routes that export their own `meta` REPLACE
- * the parent's meta entirely - they do not merge by default. Putting
- * viewport here meant any route with its own meta export (Email Scorer,
- * Verifier, credits pending, etc.) silently dropped the viewport tag,
- * which is why mobile rendered at the 980px synthetic-desktop fallback.
- *
- * Those three tags now live as STATIC markup in <head> below (in the
- * Layout component). They can never be overridden by route-level meta
- * and apply uniformly across the entire app.
- */
+// Empty by design - static charSet/viewport/theme-color live in <head> below so route meta cannot drop them.
 export const meta = () => [];
 
-/**
- * Root loader. Runs on every request, on every route.
- *
- * Returns the current user (from opaque session cookie) or null. The Header,
- * Footer, and any deep component can read this via:
- *
- *   const { user } = useRouteLoaderData('root') ?? {};
- *
- * Cost of this loader for anonymous traffic is a cookie-parse + null return
- * (no DB hit). For authenticated traffic it's a single indexed lookup on
- * sessions.token_hash, which is sub-millisecond.
- */
+// Root loader runs on every request. Returns { user } for downstream via useRouteLoaderData('root').
 export async function loader({ request }) {
   const user = await getOptionalUser(request);
-
-  // Note: page views are recorded client-side via the telemetry beacon
-  // (see telemetryClient.js + /api/telemetry/beacon). We deliberately
-  // DON'T record an SSR pageview here because:
-  //   1. RR v7 invokes the root loader on every client-side navigation
-  //      as a .data fetch, which would either double-count real users
-  //      or require us to discriminate document vs data requests
-  //      (fragile).
-  //   2. The client beacon already covers the only audience that
-  //      matters (humans with JS); bots are filtered upstream by
-  //      isbot, and no-JS scrapers don't fund the business.
-  //   3. One source = one funnel definition = one set of dashboards.
-
+  // SSR pageview intentionally skipped - client beacon in telemetryClient.js is the single source.
   return { user };
 }
 
@@ -100,11 +69,7 @@ export function Layout({ children }) {
         </div>
         {children}
         <Scripts />
-        {/* Client telemetry: pageview beacon + window.onerror /
-            unhandledrejection capture. Inlined (not a separate bundle
-            chunk) so it runs before hydration completes and survives
-            React render crashes. Source lives in
-            app/utils/telemetryClient.server.js. */}
+        {/* Inlined so it runs before hydration and survives React render crashes. Source: telemetryClient.js. */}
         <script
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: TELEMETRY_CLIENT_SOURCE }}
@@ -150,10 +115,7 @@ export function ErrorBoundary({ error }) {
     }
   }
 
-  // Client-side: if this boundary rendered for a non-route 5xx, fire
-  // the beacon so the error_events table sees that the user actually
-  // landed on the error page (not just that the server logged it).
-  // Wrapped in a try/catch + typeof check to handle SSR safely.
+  // Fire client beacon when this boundary renders for non-route 5xx so error_events records the landing.
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (typeof window === 'undefined') return;

@@ -3,6 +3,7 @@
 import { Link, useLoaderData } from 'react-router';
 import { requireAdmin, adminAnalyticsFunnel } from '~/utils/admin.server';
 import Funnel from '~/components/admin/Funnel';
+import KPICard from '~/components/admin/KPICard';
 import styles from '~/styles/modules/routes/admin';
 
 export const meta = () => [
@@ -51,6 +52,9 @@ export default function AdminFunnel() {
     ? ((finalSessions / totalSessions) * 100).toFixed(2)
     : '0.00';
 
+  // Hero variant only fires when there's real conversion; keeps the "0.00%" case flat.
+  const conversionVariant = parseFloat(conversion) > 0 ? 'hero' : 'default';
+
   return (
     <>
       <header className={styles.pageHeader}>
@@ -58,7 +62,7 @@ export default function AdminFunnel() {
           <h1 className={styles.pageTitle}>Funnel</h1>
           <p className={styles.pageSubtitle}>Pageview to payment conversion over last {days} days</p>
         </div>
-        <div className={styles.pageActions}>
+        <div className={styles.pageHeaderActions}>
           {[1, 7, 30, 90].map((d) => (
             <Link
               key={d}
@@ -71,22 +75,23 @@ export default function AdminFunnel() {
         </div>
       </header>
 
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryTile}>
-          <div className={styles.summaryLabel}>Overall conversion</div>
-          <div className={styles.summaryValue}>{conversion}%</div>
-          <div className={styles.summarySub}>Pageview to payment confirmed</div>
-        </div>
-        <div className={styles.summaryTile}>
-          <div className={styles.summaryLabel}>Sessions</div>
-          <div className={styles.summaryValue}>{totalSessions.toLocaleString()}</div>
-          <div className={styles.summarySub}>Entered funnel</div>
-        </div>
-        <div className={styles.summaryTile}>
-          <div className={styles.summaryLabel}>Conversions</div>
-          <div className={styles.summaryValue}>{finalSessions.toLocaleString()}</div>
-          <div className={styles.summarySub}>Reached payment confirmed</div>
-        </div>
+      <div className={styles.kpiStrip3}>
+        <KPICard
+          label="Overall conversion"
+          value={`${conversion}%`}
+          hint="Pageview to payment confirmed"
+          variant={conversionVariant}
+        />
+        <KPICard
+          label="Sessions"
+          value={totalSessions.toLocaleString()}
+          hint="Entered funnel"
+        />
+        <KPICard
+          label="Conversions"
+          value={finalSessions.toLocaleString()}
+          hint="Reached payment confirmed"
+        />
       </div>
 
       <Funnel steps={steps} />

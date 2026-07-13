@@ -1,0 +1,8 @@
+<svg width="512" height="512" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Container — gold filled -->
+  <rect x="1.5" y="1.5" width="45" height="45" rx="11" fill="#D4A843" stroke="#D4A843" stroke-width="1.5"/>
+  <!-- Shield crest — dark on gold -->
+  <path d="M24 7L11 13.5V24C11 28.5 13 32.5 16 35.5C18.5 38 21.2 39.8 24 41C26.8 39.8 29.5 38 32 35.5C35 32.5 37 28.5 37 24V13.5L24 7Z" fill="none" stroke="#09090B" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Thunder bolt — dark on gold -->
+  <path d="M27 13L17.5 25H22.5L20 36L32 23H26L27 13Z" fill="#09090B" stroke-linejoin="bevel"/>
+</svg>
