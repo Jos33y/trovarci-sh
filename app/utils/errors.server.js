@@ -1,58 +1,22 @@
-/**
- * Error telemetry recording.
- *
- * Synchronous insert path. Errors must NEVER be lost - that's the entire
- * point of the table. Network outage to PG = log to stderr and continue,
- * but we don't ring-buffer errors because a crash before flush would lose
- * exactly the data we need to diagnose the crash.
- *
- * Three intake surfaces:
- *
- *   recordServerError(error, request, opts)
- *     Server-side route exceptions caught by handleError in entry.server.jsx.
- *
- *   recordClientError(payload, request)
- *     Client-side errors POSTed to /api/telemetry/error. Payload comes from
- *     window.onerror, unhandledrejection, or HydratedRouter onError={}.
- *
- *   recordWorkerError(error, opts)
- *     Worker process catches. No request context.
- *
- * PII redaction is enforced at intake. The redacted_context field is
- * shaped after cleaning, never raw.
- */
+// Error telemetry recording - server routes, client beacons, worker catches.
+// Synchronous insert path. PII redacted at intake via KEY_DENYLIST_PARTIAL, HEADER_DENYLIST, and hashEmail.
+// No ring buffer: a crash before flush would lose exactly the data we need to diagnose the crash.
 
 import { sql } from './db.server.js';
 import { getCountry, deriveSessionHash } from './analytics.server.js';
+import crypto from 'node:crypto';
 
 const ERRORS_ENABLED = (process.env.ERRORS_ENABLED ?? 'true') !== 'false';
 
-// ─────────────────────────────────────────────────────────────────────────
 // PII redaction
-//
-// What we accept into redacted_context:
-//   - HTTP method, route path, status code (no query string)
-//   - Headers EXCEPT auth, cookie, x-api-key (full denylist below)
-//   - User-Agent (kept raw - useful for debugging client bugs, not PII)
-//   - Error name + message (truncated to 1KB each)
-//   - Stack (truncated to 8KB)
-//   - User id if known (UUID, not PII)
-//   - Custom 'context' object passed by caller, walked recursively with
-//     key-name redaction (passwords, tokens, emails -> hashes, etc)
-//
-// What we never accept:
-//   - Raw IP (we have CF-IPCountry and the session hash; that's enough)
-//   - Cookies, auth headers
-//   - Email addresses in plaintext (hashed if present)
-//   - Password / token / api-key fields (replaced with '[redacted]')
-//   - Request bodies (could contain PII, never logged)
-// ─────────────────────────────────────────────────────────────────────────
 
+// Header names whose values are never stored. Presence marked with `_${name}_present: true`.
 const HEADER_DENYLIST = new Set([
   'cookie', 'authorization', 'x-api-key', 'x-auth-token',
   'set-cookie', 'proxy-authorization', 'sign', 'stripe-signature',
 ]);
 
+// Object key substrings that trigger '[redacted]' replacement in redacted_context.
 const KEY_DENYLIST_PARTIAL = [
   'password', 'token', 'secret', 'api_key', 'apikey',
   'access_key', 'auth', 'session', 'jwt', 'cookie', 'credit_card',
@@ -61,7 +25,6 @@ const KEY_DENYLIST_PARTIAL = [
 
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 
-import crypto from 'node:crypto';
 function hashEmail(email) {
   return 'email:' + crypto.createHash('sha256').update(String(email).toLowerCase()).digest('hex').slice(0, 12);
 }
@@ -103,35 +66,66 @@ function redactValue(value, depth = 0) {
 function redactHeaders(request) {
   if (!request?.headers) return {};
   const out = {};
-  // Preserve only headers we know are safe + useful for debugging.
   const SAFE = ['user-agent', 'referer', 'accept-language', 'cf-ipcountry', 'sec-fetch-mode', 'sec-fetch-site', 'sec-fetch-dest'];
   for (const name of SAFE) {
     const v = request.headers.get(name);
     if (v) out[name] = redactString(v, 512);
   }
-  // Note presence of denylisted headers without their values, so we can
-  // see in admin "yes, an Authorization header was set, value not stored".
   for (const name of HEADER_DENYLIST) {
     if (request.headers.get(name)) out[`_${name}_present`] = true;
   }
   return out;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// Recording
-// ─────────────────────────────────────────────────────────────────────────
+// Error extraction - handles Error instances, plain objects thrown as { message, code }, strings,
+// Response instances, and unknowns. Prevents '[object Object]' rows when code does `throw { ... }`
+// instead of `throw new Error(...)`.
 
-/**
- * @param {Error|unknown} error
- * @param {Request|undefined} request
- * @param {{
- *   kind?: 'server_route'|'client_route'|'client_script'|'client_async'|'api_call'|'worker'|'webhook',
- *   severity?: 'fatal'|'error'|'warning'|'info',
- *   userId?: string|null,
- *   statusCode?: number,
- *   context?: Record<string, unknown>,
- * }} [opts]
- */
+function extractMessage(error) {
+  if (error == null) return 'Unknown error';
+  if (error instanceof Error) return error.message || error.toString() || 'Unknown error';
+  if (typeof error === 'string') return error || 'Unknown error';
+  if (typeof error === 'number' || typeof error === 'boolean') return String(error);
+  if (typeof Response !== 'undefined' && error instanceof Response) {
+    return `HTTP ${error.status}${error.statusText ? ' ' + error.statusText : ''}`;
+  }
+  if (typeof error === 'object') {
+    if (typeof error.message === 'string' && error.message) return error.message;
+    if (typeof error.error === 'string'   && error.error)   return error.error;
+    if (typeof error.reason === 'string'  && error.reason)  return error.reason;
+    if (typeof error.msg === 'string'     && error.msg)     return error.msg;
+    // Bounded JSON fallback captures shape when no known text field is present.
+    try {
+      const json = JSON.stringify(error);
+      if (json && json !== '{}') return json.slice(0, 512);
+    } catch { /* circular refs or non-serializable - fall through */ }
+    return '[object] ' + (error.constructor?.name || 'Object');
+  }
+  return String(error);
+}
+
+function extractStack(error) {
+  if (error instanceof Error && error.stack) return error.stack;
+  if (error && typeof error === 'object' && typeof error.stack === 'string') return error.stack;
+  return null;
+}
+
+function extractName(error) {
+  if (error instanceof Error) return error.name;
+  if (error && typeof error === 'object' && typeof error.name === 'string') return error.name;
+  return null;
+}
+
+function extractCode(error) {
+  if (error && typeof error === 'object' && 'code' in error && error.code != null) {
+    return String(error.code);
+  }
+  return null;
+}
+
+// Recording
+
+// Server-side route errors caught by handleError in entry.server.jsx.
 export async function recordServerError(error, request, opts = {}) {
   if (!ERRORS_ENABLED) return;
   await record({
@@ -145,22 +139,12 @@ export async function recordServerError(error, request, opts = {}) {
   });
 }
 
-/**
- * Client-side error from /api/telemetry/error endpoint. The request
- * here is the BEACON request (client -> server), not the request that
- * caused the error - that lives in the payload.
- *
- * @param {object} payload - the JSON body the client sent
- * @param {Request} request - the beacon request (for IP/UA/country)
- * @param {string|null} [userId]
- */
+// Client-side errors POSTed to /api/telemetry/beacon. The `request` is the beacon request,
+// not the request that caused the error - that context lives in the payload.
 export async function recordClientError(payload, request, userId = null) {
   if (!ERRORS_ENABLED) return;
 
-  // The client-supplied data is untrusted: cap sizes, redact, never
-  // execute. Stack/message/path are strings; everything else goes
-  // through redactValue.
-  const message = redactString(String(payload?.message ?? 'Unknown client error'), 1024);
+  const message = redactString(extractMessage(payload?.message ?? payload), 1024);
   const stack = payload?.stack ? redactString(String(payload.stack), 8192) : null;
   const path = typeof payload?.path === 'string' ? payload.path.slice(0, 512) : null;
   const kindInput = payload?.kind;
@@ -192,6 +176,7 @@ export async function recordClientError(payload, request, userId = null) {
   `;
 }
 
+// Worker process errors. No request context.
 export async function recordWorkerError(error, opts = {}) {
   if (!ERRORS_ENABLED) return;
   await record({
@@ -206,13 +191,9 @@ export async function recordWorkerError(error, opts = {}) {
 }
 
 async function record({ kind, severity, error, request, userId, statusCode, context }) {
-  const message = redactString(
-    error instanceof Error ? error.message : String(error ?? 'Unknown error'),
-    1024,
-  );
-  const stack = error instanceof Error && error.stack
-    ? redactString(error.stack, 8192)
-    : null;
+  const message = redactString(extractMessage(error), 1024);
+  const rawStack = extractStack(error);
+  const stack = rawStack ? redactString(rawStack, 8192) : null;
 
   let path = null;
   let method = null;
@@ -236,8 +217,8 @@ async function record({ kind, severity, error, request, userId, statusCode, cont
   const safeContext = {
     headers: request ? redactHeaders(request) : {},
     user_context: redactValue(context ?? {}),
-    error_name: error instanceof Error ? error.name : null,
-    error_code: error instanceof Error && 'code' in error ? String(error.code) : null,
+    error_name: extractName(error),
+    error_code: extractCode(error),
   };
 
   try {
@@ -252,15 +233,12 @@ async function record({ kind, severity, error, request, userId, statusCode, cont
       )
     `;
   } catch (insertErr) {
-    // Last resort. If we cannot record errors, we cannot debug - but we
-    // also cannot crash the whole request because of telemetry failure.
+    // Telemetry failure must not crash the request. Log to stderr and continue.
     console.error('[errors] insert failed:', insertErr.message, '| original:', message);
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Retention
-// ─────────────────────────────────────────────────────────────────────────
 
 export async function cleanupOldErrorEvents() {
   const days = parseInt(process.env.ERROR_EVENT_RETENTION_DAYS || '180', 10);
@@ -272,4 +250,4 @@ export async function cleanupOldErrorEvents() {
   return r.count || 0;
 }
 
-// Resolved errors stay forever (small, useful for post-mortems).
+// Resolved errors are kept forever. Small footprint, useful for post-mortems.

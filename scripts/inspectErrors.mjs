@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Diagnostic: inspect error_events for triage. Read-only, no writes.
-// Run: node --env-file=.env scripts/inspectErrors.mjs
+// Run: node scripts/inspectErrors.mjs
 
 import { sql } from '../app/utils/db.server.js';
 
@@ -86,7 +86,7 @@ const [{ botProbes }] = await sql`
 console.log(`  ${botProbes} rows match automated vulnerability scan patterns`);
 console.log('  (PHP/PHPUnit RCE probes, GraphQL scans, WordPress paths, env leaks, git leaks)\n');
 
-// Proxy / IPRoyal error detection - user's real issue.
+// Proxy / IPRoyal error detection.
 console.log('--- Proxy / IPRoyal signatures ---');
 const [{ proxyErrs }] = await sql`
   SELECT count(*)::int AS "proxyErrs"
@@ -102,7 +102,7 @@ const [{ proxyErrs }] = await sql`
 console.log(`  ${proxyErrs} rows match proxy-related patterns`);
 console.log('  (proxy, iproyal, socks5, 407, ECONNREFUSED, tunnel, proxyRotation stack frames)\n');
 
-// Top signatures for unresolved non-bot errors - this is your real triage list.
+// Top signatures for unresolved non-bot errors - the real triage list.
 console.log('--- Top 15 unresolved error signatures (non-bot) ---');
 const signatures = await sql`
   SELECT
@@ -137,7 +137,7 @@ console.log('');
 // Last 10 unresolved real errors with full detail.
 console.log('--- Last 10 unresolved real errors (full detail) ---');
 const recent = await sql`
-  SELECT id, created_at, kind, severity, path, message, stack, url
+  SELECT id, created_at, kind, severity, path, method, status_code, message, stack, redacted_context
   FROM error_events
   WHERE resolved_at IS NULL
     AND NOT (
@@ -162,13 +162,17 @@ for (const row of recent) {
   console.log(`\n[${row.id}]`);
   console.log(`  when:     ${ts}`);
   console.log(`  kind:     ${row.kind}   severity: ${row.severity}`);
-  console.log(`  path:     ${row.path || '(null)'}`);
-  if (row.url) console.log(`  url:      ${row.url}`);
+  if (row.method || row.status_code) console.log(`  request:  ${row.method || '?'} ${row.path || '?'}  status=${row.status_code || '?'}`);
+  else                                console.log(`  path:     ${row.path || '(null)'}`);
   console.log(`  message:  ${(row.message || '(null)').slice(0, 300)}`);
   if (row.stack) {
     const lines = String(row.stack).split('\n').slice(0, 6);
     console.log('  stack (first 6 lines):');
     for (const l of lines) console.log(`    ${l}`);
+  }
+  if (row.redacted_context) {
+    const ctxStr = typeof row.redacted_context === 'string' ? row.redacted_context : JSON.stringify(row.redacted_context);
+    console.log(`  context:  ${ctxStr.slice(0, 300)}`);
   }
 }
 console.log('');
