@@ -11,14 +11,15 @@ import styles from '~/styles/modules/routes/records.module.css';
 
 export const meta = () => getSeo({
   title: 'Free SPF, DKIM & DMARC Record Generator',
-  description: 'Generate copy-paste DNS records for email authentication. Pick your provider and registrar, get SPF, DKIM, DMARC, MX, BIMI and MTA-STS records with lookup counting and policy guidance.',
+  description: 'Generate copy-paste DNS records for email authentication with lookup counting, SPF mechanism reference, DKIM selector guide, and DMARC tag lookup. Free.',
   path: '/records',
 });
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
   { id: 'method', num: '02', name: 'METHOD' },
-  { id: 'answers', num: '03', name: 'ANSWERS' },
+  { id: 'reference', num: '03', name: 'REFERENCE' },
+  { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
 
 const FAQ_ITEMS = [
@@ -58,6 +59,22 @@ const FAQ_ITEMS = [
     q: 'Will this fix my emails going to spam?',
     a: 'Proper DNS authentication is the foundation of email deliverability. Without SPF, DKIM, and DMARC, most providers will flag your emails. However, deliverability also depends on content quality, sender reputation, and list hygiene. Use the Trovarcis Reach Email Scorer to check your content.',
   },
+  {
+    q: 'What is a DKIM selector?',
+    a: 'A DKIM selector is a short label like google, s1, or mte1 that identifies which public key to use when verifying a signature. It appears in DNS as {selector}._domainkey.{yourdomain}. Different services use different selector names: Google uses google._domainkey, Microsoft 365 uses selector1._domainkey and selector2._domainkey, SendGrid uses s1._domainkey and s2._domainkey. Each service picks its own selector so multiple senders can publish keys under the same domain without conflict.',
+  },
+  {
+    q: 'What is the difference between SPF alignment and DKIM alignment?',
+    a: 'DMARC only passes if either SPF or DKIM aligns with the From: address. SPF alignment means the domain in the Return-Path header (which SPF checks) matches the From: domain. DKIM alignment means the d= domain in the DKIM signature matches the From: domain. Relaxed alignment (the default) allows subdomains to align with the parent; strict alignment requires an exact match. Most senders should use relaxed alignment on both.',
+  },
+  {
+    q: 'Should I use ~all or -all in my SPF record?',
+    a: 'Start with ~all (soft fail) during setup. Receivers accept unauthorized mail but mark it as suspicious, which prevents legitimate mail from being dropped while you find every valid sender. Move to -all (hard fail) once you have watched DMARC reports for two to four weeks and all authorized senders are listed. Never use +all (allow all) or ?all (neutral); both defeat SPF entirely.',
+  },
+  {
+    q: 'How do I combine multiple SPF includes without hitting the 10-lookup limit?',
+    a: 'SPF caps DNS lookups at 10 per RFC 7208. Each include, a, mx, and redirect mechanism counts. Big providers like Google (3 lookups) and SendGrid (3 lookups) burn through the limit fast. Options: (1) drop unused providers, (2) use SPF flattening services like SPF Manager or EasyDMARC that replace includes with resolved IP ranges (but you must re-flatten when providers change IPs), (3) split traffic across subdomains so each stays under 10, or (4) contact senders that offer IP-list alternatives to their include:. This generator counts your lookups in real time and flags when you cross 8.',
+  },
 ];
 
 const RECORD_EXPLAINERS = [
@@ -79,6 +96,47 @@ const RECORD_EXPLAINERS = [
     icon: DmarcIcon,
     text: 'Ties SPF and DKIM together and tells receiving servers what to do when checks fail. Without DMARC, servers make their own decisions. With DMARC, you control the policy.',
   },
+];
+
+const SPF_MECHANISMS = [
+  { mechanism: 'v=spf1', purpose: 'Required version marker at the start of every SPF record', lookups: '0' },
+  { mechanism: 'include:', purpose: 'Pull in another domain\'s SPF record (e.g. include:_spf.google.com)', lookups: '1+' },
+  { mechanism: 'ip4:', purpose: 'Authorize a specific IPv4 address or CIDR range', lookups: '0' },
+  { mechanism: 'ip6:', purpose: 'Authorize a specific IPv6 address or range', lookups: '0' },
+  { mechanism: 'a', purpose: 'Authorize the domain\'s A record IPs', lookups: '1' },
+  { mechanism: 'mx', purpose: 'Authorize the domain\'s MX record IPs', lookups: '1+' },
+  { mechanism: 'exists:', purpose: 'Pass if the given domain resolves to any A record', lookups: '1' },
+  { mechanism: 'redirect=', purpose: 'Replace this SPF with another domain\'s policy entirely', lookups: '1' },
+  { mechanism: '~all', purpose: 'Soft fail: accept unauthorized senders but mark them', lookups: '0' },
+  { mechanism: '-all', purpose: 'Hard fail: reject unauthorized senders (enforcement target)', lookups: '0' },
+  { mechanism: '?all', purpose: 'Neutral: provides no protection, avoid', lookups: '0' },
+  { mechanism: '+all', purpose: 'Allow any sender, never use', lookups: '0' },
+];
+
+const DKIM_SELECTORS = [
+  { provider: 'Google Workspace', selector: 'google._domainkey', notes: 'Generated in Google Admin > Apps > Gmail > Authenticate email' },
+  { provider: 'Microsoft 365', selector: 'selector1._domainkey, selector2._domainkey', notes: 'Two selectors for key rotation, both must be published' },
+  { provider: 'SendGrid', selector: 's1._domainkey, s2._domainkey', notes: 'Domain authentication settings, CNAME records' },
+  { provider: 'Mailgun', selector: 'k1._domainkey', notes: 'Sending domain setup, provided as TXT' },
+  { provider: 'Postmark', selector: 'pm._domainkey', notes: 'Server API > Sender signatures > Add domain' },
+  { provider: 'Zoho Mail', selector: 'zmail._domainkey', notes: 'Email Authentication > DKIM in Zoho admin' },
+  { provider: 'Amazon SES', selector: '{token}._domainkey', notes: 'SES generates three CNAMEs; publish all three' },
+  { provider: 'Brevo (Sendinblue)', selector: 'mail._domainkey', notes: 'Senders and IP > Domains > Authenticate' },
+  { provider: 'Fastmail', selector: 'fm1._domainkey, fm2._domainkey, fm3._domainkey', notes: 'Three CNAMEs for their rotation policy' },
+  { provider: 'Resend', selector: 'resend._domainkey', notes: 'Follows Amazon SES pattern under the hood' },
+];
+
+const DMARC_TAGS = [
+  { tag: 'v', required: 'Yes', purpose: 'Protocol version, always DMARC1', example: 'v=DMARC1' },
+  { tag: 'p', required: 'Yes', purpose: 'Policy for the domain: none, quarantine, or reject', example: 'p=quarantine' },
+  { tag: 'sp', required: 'No', purpose: 'Policy for subdomains; inherits p= if omitted', example: 'sp=reject' },
+  { tag: 'pct', required: 'No', purpose: 'Percentage of mail to apply the policy to (default 100)', example: 'pct=50' },
+  { tag: 'rua', required: 'No', purpose: 'Aggregate report address for daily XML digests', example: 'rua=mailto:dmarc@yourdomain.com' },
+  { tag: 'ruf', required: 'No', purpose: 'Forensic report address for individual failure samples', example: 'ruf=mailto:forensics@yourdomain.com' },
+  { tag: 'adkim', required: 'No', purpose: 'DKIM alignment mode: r (relaxed, default) or s (strict)', example: 'adkim=r' },
+  { tag: 'aspf', required: 'No', purpose: 'SPF alignment mode: r (relaxed, default) or s (strict)', example: 'aspf=r' },
+  { tag: 'fo', required: 'No', purpose: 'Forensic report options: 0, 1, d, s', example: 'fo=1' },
+  { tag: 'ri', required: 'No', purpose: 'Reporting interval in seconds (default 86400)', example: 'ri=86400' },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
@@ -117,6 +175,7 @@ export default function RecordsPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
   const gridRef = useReveal();
+  const referenceRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
@@ -126,6 +185,7 @@ export default function RecordsPage() {
   const sectionRefs = {
     tool: useRef(null),
     method: useRef(null),
+    reference: useRef(null),
     answers: useRef(null),
   };
 
@@ -221,10 +281,112 @@ export default function RecordsPage() {
           </div>
         </section>
 
+        {/* Reference - SPF mechanisms, DKIM selectors, DMARC tags */}
+        <section id="reference" ref={sectionRefs.reference} className={styles.referenceSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="REFERENCE" />
+            <div ref={referenceRef} className={`${styles.referenceHead} reveal`}>
+              <h2 className={styles.referenceTitle}>Reference</h2>
+              <p className={styles.referenceIntro}>
+                The full mechanism, selector, and tag reference for SPF, DKIM, and DMARC. Handy when you need to read someone else's record or hand-tune your own.
+              </p>
+            </div>
+
+            <div id="spf" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>SPF mechanisms</h3>
+                <p className={styles.refBlockDesc}>
+                  Every part of an SPF record and what it costs in DNS lookups. Stay under 10 total or receivers return PermError.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColMechanism}>Mechanism</th>
+                      <th>Purpose</th>
+                      <th className={styles.refColLookups}>Lookups</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {SPF_MECHANISMS.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refZoneCell}>{row.mechanism}</td>
+                        <td className={styles.refDescCell}>{row.purpose}</td>
+                        <td className={styles.refLookupsCell}>{row.lookups}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="dkim" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>DKIM selectors by provider</h3>
+                <p className={styles.refBlockDesc}>
+                  Where each major sending service publishes its public key. The generator uses these automatically when you pick a provider.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColProvider}>Provider</th>
+                      <th className={styles.refColSelector}>Selector path</th>
+                      <th>Where to find</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DKIM_SELECTORS.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refCheckCell}>{row.provider}</td>
+                        <td className={styles.refZoneCell}>{row.selector}</td>
+                        <td className={styles.refDescCell}>{row.notes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="dmarc" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>DMARC tags</h3>
+                <p className={styles.refBlockDesc}>
+                  Every tag you can put in a DMARC record. Only v= and p= are required; the rest tune policy and reporting.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColTag}>Tag</th>
+                      <th className={styles.refColRequired}>Required</th>
+                      <th>Purpose</th>
+                      <th className={styles.refColExample}>Example</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DMARC_TAGS.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refZoneCell}>{row.tag}</td>
+                        <td className={styles.refCategoryCell}>{row.required}</td>
+                        <td className={styles.refDescCell}>{row.purpose}</td>
+                        <td className={styles.refZoneCell}>{row.example}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Answers - FAQ */}
         <section id="answers" ref={sectionRefs.answers} className={styles.answersSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="03" name="ANSWERS" />
+            <SectionLabel num="04" name="ANSWERS" />
             <div ref={faqRef} className={`${styles.faqHead} reveal`}>
               <h2 className={styles.faqTitle}>Frequently asked questions</h2>
             </div>

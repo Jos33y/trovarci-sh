@@ -11,14 +11,15 @@ import styles from '~/styles/modules/routes/domain.module.css';
 
 export const meta = () => getSeo({
   title: 'Free Domain Health Checker | Email, DNS & Reputation',
-  description: "Check your domain's email authentication (SPF, DKIM, DMARC), mail server health, blacklist status, SSL security, and DNS configuration. Free, instant results.",
+  description: "Check your domain's email authentication (SPF, DKIM, DMARC), MX and TLS health, blacklist status, SSL, and DNSSEC. 25+ tests with direct fix links. Free.",
   path: '/domain',
 });
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
   { id: 'method', num: '02', name: 'METHOD' },
-  { id: 'answers', num: '03', name: 'ANSWERS' },
+  { id: 'reference', num: '03', name: 'REFERENCE' },
+  { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
 
 const FAQ_ITEMS = [
@@ -49,6 +50,22 @@ const FAQ_ITEMS = [
   {
     q: 'How often should I check my domain health?',
     a: 'Check after any DNS changes, after setting up a new email provider, and periodically every 1-2 months. SSL certificates expire, blacklist statuses change, and DNS records can be accidentally modified. Regular checks catch problems before they affect your email delivery.',
+  },
+  {
+    q: 'What blacklists does the checker query?',
+    a: 'We query reputable public DNSBLs including Spamhaus ZEN, SpamCop, Barracuda BRBL, SORBS, UCEPROTECT, PSBL, Mailspike, and blocklist.de for IPs, plus Spamhaus DBL and SURBL for domains. Each listing links directly to the blacklist\'s removal or lookup page. Some zones like Spamhaus DQS or Barracuda paid tier offer higher-volume access; we use the publicly queryable versions.',
+  },
+  {
+    q: 'How does this compare to MXToolbox?',
+    a: 'MXToolbox has the widest DNSBL coverage (90+ zones) and mature reporting for enterprise use. Trovarcis Reach has a narrower blacklist scope but adds checks MXToolbox does not: SSL certificate validation, HTTPS redirect, HSTS headers, CAA records, and Google Safe Browsing. Every finding also links to a free fix path in our DNS Record Generator. Both tools are free for individual checks.',
+  },
+  {
+    q: 'What is DNSSEC and do I need it?',
+    a: 'DNSSEC (RFC 4033) adds cryptographic signatures to DNS records so recipients can verify the answer came from the authoritative nameserver and was not tampered with in transit. It defends against cache poisoning and DNS hijacking. Enable it if you handle payments, healthcare data, or run a high-value domain. Most consumer sites do not require it, but the check flags whether your zone is signed and whether the chain of trust validates.',
+  },
+  {
+    q: 'What is a soft SPF fail vs hard fail?',
+    a: 'The final mechanism in your SPF record decides what receivers do with unauthorized senders. ~all (soft fail) means unauthorized mail is accepted but marked, useful during setup. -all (hard fail) means unauthorized mail is rejected, the enforcement target after monitoring. ?all (neutral) provides no protection. +all allows any sender and should never be used.',
   },
 ];
 
@@ -83,6 +100,60 @@ const CATEGORIES = [
     icon: DnsIcon,
     text: 'Nameserver redundancy, SOA configuration, DNSSEC, and CAA records form the infrastructure that supports all other checks. Weak DNS makes everything else unreliable.',
   },
+];
+
+const CHECKS_BY_CATEGORY = [
+  { category: 'Email Auth', check: 'SPF record present', validates: 'Domain has a valid v=spf1 TXT record' },
+  { category: 'Email Auth', check: 'SPF lookup count', validates: 'Record stays within the 10-lookup RFC 7208 cap' },
+  { category: 'Email Auth', check: 'SPF policy', validates: 'Final mechanism is ~all or -all, not +all or ?all' },
+  { category: 'Email Auth', check: 'DKIM selectors', validates: 'Public keys published at common selector paths' },
+  { category: 'Email Auth', check: 'DKIM key size', validates: 'Public key is 1024 bits or larger' },
+  { category: 'Email Auth', check: 'DMARC record present', validates: 'Domain has a valid _dmarc TXT record' },
+  { category: 'Email Auth', check: 'DMARC policy', validates: 'Policy is p=quarantine or p=reject' },
+  { category: 'Email Auth', check: 'DMARC reporting', validates: 'rua= aggregate report address is set' },
+  { category: 'Email Auth', check: 'BIMI', validates: 'Optional _bimi TXT record with valid logo URL' },
+  { category: 'Mail Server', check: 'MX records present', validates: 'Domain publishes at least one MX record' },
+  { category: 'Mail Server', check: 'MX not CNAME', validates: 'MX target is a hostname, not a CNAME chain' },
+  { category: 'Mail Server', check: 'SMTP reachable', validates: 'Primary MX responds on port 25 within timeout' },
+  { category: 'Mail Server', check: 'STARTTLS supported', validates: 'Server advertises STARTTLS and completes TLS handshake' },
+  { category: 'Mail Server', check: 'Reverse DNS', validates: 'PTR record forward-confirms the hostname (FCrDNS)' },
+  { category: 'Reputation', check: 'IP blacklists', validates: 'Sending IPs checked against public DNSBLs' },
+  { category: 'Reputation', check: 'Domain blacklists', validates: 'Domain checked against Spamhaus DBL and SURBL' },
+  { category: 'Reputation', check: 'Safe Browsing', validates: 'Domain not flagged as deceptive by Google' },
+  { category: 'Security', check: 'SSL certificate', validates: 'Certificate chain complete and not expired' },
+  { category: 'Security', check: 'HTTPS redirect', validates: 'HTTP requests redirect to HTTPS' },
+  { category: 'Security', check: 'HSTS header', validates: 'Strict-Transport-Security header is present' },
+  { category: 'Security', check: 'CAA records', validates: 'CAA restricts who can issue certificates' },
+  { category: 'DNS Config', check: 'Nameserver redundancy', validates: 'At least two authoritative nameservers' },
+  { category: 'DNS Config', check: 'Nameserver diversity', validates: 'Nameservers span multiple network prefixes' },
+  { category: 'DNS Config', check: 'SOA record', validates: 'SOA present with sensible refresh, retry, expire' },
+  { category: 'DNS Config', check: 'DNSSEC', validates: 'DS record present and chain of trust validates' },
+];
+
+const BLACKLISTS = [
+  { name: 'Spamhaus ZEN', zone: 'zen.spamhaus.org', subject: 'IP', removal: 'Manual via check.spamhaus.org, 24-48h' },
+  { name: 'Spamhaus DBL', zone: 'dbl.spamhaus.org', subject: 'Domain', removal: 'Manual, proof of ownership required' },
+  { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'IP', removal: 'Auto-expires after 24h of no complaints' },
+  { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'IP', removal: 'Removal form, typically 12-24h' },
+  { name: 'SORBS', zone: 'dnsbl.sorbs.net', subject: 'IP', removal: 'Manual request, response times vary' },
+  { name: 'UCEPROTECT L1', zone: 'dnsbl-1.uceprotect.net', subject: 'IP', removal: 'Auto-delist after 7 days clean' },
+  { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'IP', removal: 'Self-service via psbl.surriel.com' },
+  { name: 'Mailspike', zone: 'bl.mailspike.net', subject: 'IP', removal: 'Auto-expires based on reputation' },
+  { name: 'blocklist.de', zone: 'bl.blocklist.de', subject: 'IP', removal: 'Auto-delist after 48h of no activity' },
+  { name: 'SURBL', zone: 'multi.surbl.org', subject: 'URI', removal: 'Manual, requires proof of remediation' },
+];
+
+const COMPARISON = [
+  { check: 'SPF, DKIM, DMARC parse', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'Yes' },
+  { check: 'BIMI', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'Yes' },
+  { check: 'MX + STARTTLS', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'No' },
+  { check: 'Blacklist zones', us: '10+ core', mxtoolbox: '90+ zones', mailtester: '8 zones', dmarcian: 'None' },
+  { check: 'SSL and HTTPS', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
+  { check: 'HSTS and CAA', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
+  { check: 'DNSSEC validation', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'No' },
+  { check: 'Safe Browsing', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
+  { check: 'Fix links to generator', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'Paid tier' },
+  { check: 'Cost', us: 'Free', mxtoolbox: 'Free basic', mailtester: 'Free', dmarcian: 'Free basic' },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
@@ -121,6 +192,7 @@ export default function DomainPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
   const gridRef = useReveal();
+  const referenceRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
@@ -130,6 +202,7 @@ export default function DomainPage() {
   const sectionRefs = {
     tool: useRef(null),
     method: useRef(null),
+    reference: useRef(null),
     answers: useRef(null),
   };
 
@@ -225,10 +298,116 @@ export default function DomainPage() {
           </div>
         </section>
 
+        {/* Reference - full check list, blacklists, comparison */}
+        <section id="reference" ref={sectionRefs.reference} className={styles.referenceSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="REFERENCE" />
+            <div ref={referenceRef} className={`${styles.referenceHead} reveal`}>
+              <h2 className={styles.referenceTitle}>Reference</h2>
+              <p className={styles.referenceIntro}>
+                The full list of checks by category, the blacklists we query, and where Trovarcis Reach fits alongside common alternatives.
+              </p>
+            </div>
+
+            <div id="checks" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>25+ checks by category</h3>
+                <p className={styles.refBlockDesc}>
+                  Every check ships with a plain-language result: pass, warning, or critical, plus a fix path.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColCategory}>Category</th>
+                      <th className={styles.refColCheck}>Check</th>
+                      <th>What it validates</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {CHECKS_BY_CATEGORY.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refCategoryCell}>{row.category}</td>
+                        <td className={styles.refCheckCell}>{row.check}</td>
+                        <td className={styles.refDescCell}>{row.validates}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="blacklists" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>Blacklists we query</h3>
+                <p className={styles.refBlockDesc}>
+                  Reputable public DNSBLs covering the zones mailbox providers actually consult. Each listing links to the blacklist's own removal page.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColName}>Blacklist</th>
+                      <th className={styles.refColZone}>Zone</th>
+                      <th className={styles.refColSubject}>Subject</th>
+                      <th>Removal path</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {BLACKLISTS.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refCheckCell}>{row.name}</td>
+                        <td className={styles.refZoneCell}>{row.zone}</td>
+                        <td className={styles.refCategoryCell}>{row.subject}</td>
+                        <td className={styles.refDescCell}>{row.removal}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="comparison" className={styles.refBlock}>
+              <div className={styles.refBlockHead}>
+                <h3 className={styles.refBlockTitle}>How this compares</h3>
+                <p className={styles.refBlockDesc}>
+                  Where Trovarcis Reach fits alongside MXToolbox, mail-tester, and dmarcian. MXToolbox wins on DNSBL depth; we cover a wider range of infrastructure checks.
+                </p>
+              </div>
+              <div className={styles.refTableWrap}>
+                <table className={styles.refTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.refColCompareCheck}>Check</th>
+                      <th className={styles.refColUs}>Trovarcis</th>
+                      <th>MXToolbox</th>
+                      <th>mail-tester</th>
+                      <th>dmarcian</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARISON.map((row, i) => (
+                      <tr key={i}>
+                        <td className={styles.refCheckCell}>{row.check}</td>
+                        <td className={styles.refUsCell}>{row.us}</td>
+                        <td className={styles.refDescCell}>{row.mxtoolbox}</td>
+                        <td className={styles.refDescCell}>{row.mailtester}</td>
+                        <td className={styles.refDescCell}>{row.dmarcian}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Answers - FAQ */}
         <section id="answers" ref={sectionRefs.answers} className={styles.answersSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="03" name="ANSWERS" />
+            <SectionLabel num="04" name="ANSWERS" />
             <div ref={faqRef} className={`${styles.faqHead} reveal`}>
               <h2 className={styles.faqTitle}>Frequently asked questions</h2>
             </div>

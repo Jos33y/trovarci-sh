@@ -31,7 +31,7 @@ Modes (choose one):
   --all           Ping every URL in the sitemap (use for initial submission)
   --blog-only     Ping only /blog/ post URLs from the sitemap
   --tools-only    Ping only tool pages (/score, /domain, /verify, /verify-number, /smtp-test, /records)
-  --changed       Ping only blog posts changed in the last git commit
+  --changed       Ping URLs whose blog posts or route files changed in the last git commit (route changes validated against sitemap)
   <urls>          Ping specific URLs passed as CLI arguments
 
 Options:
@@ -77,6 +77,74 @@ function getChangedBlogUrls() {
   }
 }
 
+// Map a Remix flat-routes filename to its URL path. Returns null for API routes,
+// catchalls, and any route containing a dynamic $ segment.
+function routeFileToUrl(filename) {
+  let name = filename.replace(/\.(jsx|js|tsx|ts)$/, '');
+
+  if (name === '$' || name.startsWith('$')) return null;
+  if (name.startsWith('api.')) return null;
+  if (name.split('.').some(seg => seg.startsWith('$'))) return null;
+
+  if (name === '_index') return '/';
+
+  // Preserve literal dots written as [.]  (e.g. sitemap[.]xml.jsx -> /sitemap.xml)
+  const DOT_HOLDER = '\u0001';
+  name = name.replace(/\[\.\]/g, DOT_HOLDER);
+
+  let segments = name.split('.').map(s => s.replace(/_$/, ''));
+  if (segments[segments.length - 1] === '_index') segments.pop();
+
+  return '/' + segments.join('/').replace(new RegExp(DOT_HOLDER, 'g'), '.');
+}
+
+function getChangedRouteFiles() {
+  try {
+    const output = execSync('git diff --name-only HEAD~1 HEAD -- app/routes/', { encoding: 'utf-8' });
+    return output
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .map(line => path.basename(line));
+  } catch {
+    return [];
+  }
+}
+
+// Merge blog and route changes. Route candidates are validated against the live
+// sitemap so admin, auth, API, and dynamic detail pages never leak to IndexNow.
+async function getChangedUrls() {
+  const blogUrls = getChangedBlogUrls();
+  const routeFiles = getChangedRouteFiles();
+
+  const routeCandidates = routeFiles
+    .map(routeFileToUrl)
+    .filter(Boolean)
+    .map(p => `${BASE_URL}${p}`);
+
+  if (routeCandidates.length === 0) {
+    return blogUrls;
+  }
+
+  let sitemapSet;
+  try {
+    sitemapSet = new Set(await fetchSitemapUrls());
+  } catch (err) {
+    console.warn(`[warn] sitemap fetch failed, skipping route validation: ${err.message}`);
+    return blogUrls;
+  }
+
+  const validated = routeCandidates.filter(u => sitemapSet.has(u));
+  const skipped = routeCandidates.filter(u => !sitemapSet.has(u));
+
+  if (skipped.length > 0) {
+    console.log(`[info] ${skipped.length} route change(s) not in sitemap, skipping:`);
+    for (const s of skipped) console.log(`         ${s}`);
+  }
+
+  return [...new Set([...blogUrls, ...validated])];
+}
+
 async function ping(urls) {
   const body = {
     host: HOST,
@@ -112,7 +180,7 @@ async function main() {
   if (flags.urls.length > 0) {
     urls = flags.urls;
   } else if (flags.changed) {
-    urls = getChangedBlogUrls();
+    urls = await getChangedUrls();
   } else if (flags.all || flags.blog || flags.tools) {
     console.log(`Fetching sitemap: ${BASE_URL}/sitemap.xml`);
     const all = await fetchSitemapUrls();
