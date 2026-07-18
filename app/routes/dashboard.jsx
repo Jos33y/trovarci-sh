@@ -344,8 +344,12 @@ function txTypeClass(type, styles) {
 
 /* HELPERS */
 
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 function fmtDate(d) {
-  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!d) return '';
+  const date = new Date(d);
+  return `${date.getUTCDate()} ${MONTHS_SHORT[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
 function daysSince(d) {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86400000);

@@ -121,7 +121,8 @@ function renderNetwork(rand, w, h, accent, accentAlt) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i];
       const b = nodes[j];
-      const dist = Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+      // r() rounds sqrt to stable precision - prevents last-ULP drift between Node V8 and browser V8 versions.
+      const dist = r(Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2));
       if (dist < w * 0.3) {
         const strong = a.isPrimary && b.isPrimary;
         elements.push(
@@ -264,13 +265,13 @@ function renderBurst(rand, w, h, accent, accentAlt) {
     elements.push(
       <line
         key={`ray-${i}`}
-        x1={cx + Math.cos(angle) * innerR}
-        y1={cy + Math.sin(angle) * innerR}
-        x2={cx + Math.cos(angle) * outerR}
-        y2={cy + Math.sin(angle) * outerR}
+        x1={r(cx + Math.cos(angle) * innerR)}
+        y1={r(cy + Math.sin(angle) * innerR)}
+        x2={r(cx + Math.cos(angle) * outerR)}
+        y2={r(cy + Math.sin(angle) * outerR)}
         stroke={accent}
         strokeWidth="0.7"
-        opacity={0.05 + rand() * 0.07}
+        opacity={r(0.05 + rand() * 0.07)}
       />
     );
   }
@@ -315,16 +316,16 @@ function renderStreams(rand, w, h, accent, accentAlt) {
       const count = 2 + Math.floor(rand() * 4);
       for (let p = 0; p < count; p++) {
         const t = 0.15 + (p / count) * 0.7;
-        const px = startX + (endX - startX) * t;
-        const py = baseY + Math.sin(t * Math.PI) * (-curve * 0.4);
+        const px = r(startX + (endX - startX) * t);
+        const py = r(baseY + Math.sin(t * Math.PI) * (-curve * 0.4));
         elements.push(
           <rect
             key={`sp-${i}-${p}`}
-            x={px - 4} y={py - 1.5}
+            x={r(px - 4)} y={r(py - 1.5)}
             width={8} height={3}
             rx={1.5}
             fill={accent}
-            opacity={0.1 + rand() * 0.12}
+            opacity={r(0.1 + rand() * 0.12)}
           />
         );
       }

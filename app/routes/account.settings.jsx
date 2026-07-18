@@ -1,6 +1,6 @@
 // /account/settings - Profile, Security (password + active sessions), Plan & credits, Data & privacy.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLoaderData, useNavigate, useRevalidator } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
@@ -65,20 +65,48 @@ function parseUA(ua) {
   return { browser, os };
 }
 
-function formatRelative(iso) {
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Deterministic across Node/browser and any timezone. Renders identically on server + client to avoid hydration mismatch.
+function formatAbsoluteShort(iso) {
   if (!iso) return '';
-  const then = new Date(iso).getTime();
-  const diffSec = Math.floor((Date.now() - then) / 1000);
-  if (diffSec < 60)    return 'just now';
-  if (diffSec < 3600)  return `${Math.floor(diffSec / 60)}m ago`;
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-  if (diffSec < 86400 * 7) return `${Math.floor(diffSec / 86400)}d ago`;
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const d = new Date(iso);
+  return `${d.getUTCDate()} ${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 function formatDate(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const d = new Date(iso);
+  return `${MONTHS_LONG[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
+// Server renders absolute date, client swaps to relative after mount. Prevents Date.now() hydration mismatch.
+function useRelativeTime(iso) {
+  const [display, setDisplay] = useState(() => formatAbsoluteShort(iso));
+
+  useEffect(() => {
+    if (!iso) return undefined;
+    const compute = () => {
+      const then = new Date(iso).getTime();
+      const diffSec = Math.floor((Date.now() - then) / 1000);
+      if (diffSec < 60)        return 'just now';
+      if (diffSec < 3600)      return `${Math.floor(diffSec / 60)}m ago`;
+      if (diffSec < 86400)     return `${Math.floor(diffSec / 3600)}h ago`;
+      if (diffSec < 86400 * 7) return `${Math.floor(diffSec / 86400)}d ago`;
+      return formatAbsoluteShort(iso);
+    };
+    setDisplay(compute());
+    const interval = setInterval(() => setDisplay(compute()), 30_000);
+    return () => clearInterval(interval);
+  }, [iso]);
+
+  return display;
+}
+
+function RelativeTime({ iso, className }) {
+  const display = useRelativeTime(iso);
+  return <span className={className}>{display}</span>;
 }
 
 export default function AccountSettings() {
@@ -341,7 +369,7 @@ function SessionsCard({ currentSessionId, sessions }) {
                 <div className={styles.sessionMeta}>
                   <span className={styles.mono}>{s.ipAddress || '-'}</span>
                   <span className={styles.dot}>·</span>
-                  <span>Active {formatRelative(s.lastSeenAt)}</span>
+                  <span>Active <RelativeTime iso={s.lastSeenAt} /></span>
                   <span className={styles.dot}>·</span>
                   <span>Signed in {formatDate(s.createdAt)}</span>
                 </div>

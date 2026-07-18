@@ -1,5 +1,5 @@
 // Right-rail timeline. SSR initial + 30s fetcher refresh while tab visible.
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import ActivityIcon from './ActivityIcon';
 import styles from '~/styles/modules/admin/LiveFeed.module.css';
@@ -11,7 +11,14 @@ const KIND_LABEL = {
   admin_action: 'Admin action',
 };
 
-function timeAgo(iso) {
+// Deterministic absolute date for SSR - matches "2026-07-14" format so hydration is stable.
+function absoluteDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toISOString().slice(0, 10);
+}
+
+// Client-only relative time. Computes ms diff on mount, refreshes every 30s.
+function computeAgo(iso) {
   if (!iso) return '';
   const ms = Date.now() - new Date(iso).getTime();
   if (ms < 0) return 'now';
@@ -22,7 +29,19 @@ function timeAgo(iso) {
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   if (d < 30) return `${d}d ago`;
-  return new Date(iso).toISOString().slice(0, 10);
+  return absoluteDate(iso);
+}
+
+// Renders absolute date server-side, swaps to relative on client. Prevents Date.now() hydration mismatch.
+function TimeAgo({ iso }) {
+  const [display, setDisplay] = useState(() => absoluteDate(iso));
+  useEffect(() => {
+    if (!iso) return undefined;
+    setDisplay(computeAgo(iso));
+    const t = setInterval(() => setDisplay(computeAgo(iso)), 30_000);
+    return () => clearInterval(t);
+  }, [iso]);
+  return <span>{display}</span>;
 }
 
 export default function LiveFeed({ initial = [], refreshPath = '/admin' }) {
@@ -69,7 +88,7 @@ export default function LiveFeed({ initial = [], refreshPath = '/admin' }) {
               <div className={styles.body}>
                 <div className={styles.line1}>
                   <span className={styles.kindLabel}>{KIND_LABEL[it.kind] || it.kind}</span>
-                  <span className={styles.timeAgo}>{timeAgo(it.created_at)}</span>
+                  <span className={styles.timeAgo}><TimeAgo iso={it.created_at} /></span>
                 </div>
                 <div className={styles.summary}>{it.summary}</div>
               </div>
