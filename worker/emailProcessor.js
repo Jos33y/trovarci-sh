@@ -1,42 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   worker/emailProcessor.js
-
-   Per-item processor. Wraps verifyOneEmail with retry policy and
-   progress ticking. The main loop calls processItem(claimedItem) once
-   per claim; this function does the rest (probe, classify, write back,
-   update job counter).
-
-   Retry policy:
-
-     Greylist (4xx SMTP, ok:true with greylisted:true):
-       attempt 1 -> retry in 5min
-       attempt 2 -> retry in 15min
-       attempt 3 -> retry in 60min
-       attempt 4 -> mark final unknown/greylist (gave up)
-
-     Infrastructure failure (ok:false from verifyOneEmail):
-       attempt 1 -> retry in 30s
-       attempt 2 -> mark error with the failure code
-
-     Successful verdict (ok:true, no greylist):
-       always terminal; markItemDone with the verdict
-
-   Why retry infra failures only once:
-     A transient proxy timeout or TCP reset is worth one redo. Persistent
-     infra failure means the worker hit something fundamentally broken
-     (proxy down, MX permanently unreachable). Pounding on it eats the
-     queue.
-
-   Why retry greylist 3x with growing intervals:
-     Standard postgrey defaults at 5min. Sendmail-style milter-greylist
-     unblocks at 15. The 60min hop catches the long tail. Beyond an
-     hour it stops being "try later" and starts being "this server is
-     not coming back to us" - mark as unknown and move on.
-
-   Never throws. verifyOneEmail is contractually never-throws; this
-   function still wraps it in try/catch as belt-and-braces because a
-   crash here would leave an item stuck in 'processing' forever.
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Per-item email processor. Wraps verifyOneEmail with retry policy and progress ticking.
+// Greylist retries at 5/15/60 min, infra retries once at 30s, then terminal error.
 
 import { verifyOneEmail } from '../app/lib/emailVerify.server.js';
 import {
@@ -54,14 +17,6 @@ const GREYLIST_RETRY_SECONDS = [5 * 60, 15 * 60, 60 * 60];
 const INFRA_RETRY_SECONDS = 30;
 const INFRA_RETRY_LIMIT   = 1; // attempts <= this means "still has retry budget"
 
-/**
- * Process a single claimed item end-to-end. Always finalizes the item
- * row (done | error | scheduled_retry) and ticks the parent job's
- * progress count.
- *
- * @param {object} item - row returned by jobQueue.claimItems()
- *   { id, jobId, rowIndex, input, attempts, userId, jobMetadata }
- */
 export async function processItem(item) {
   let result;
   try {
@@ -113,15 +68,10 @@ export async function processItem(item) {
     subcategory:  result.result.subcategory,
     smtpResponse: result.result.smtpResponse,
     result:       result.result,
+    billable:     result.result.billable,
   });
   await safeTick(item.jobId);
 }
-
-/* ─── Safe wrappers ────────────────────────────────────────────────────────
-   The processor must finish even if a finalize call throws (e.g. transient
-   DB hiccup). We log and move on; the stuck-item recovery loop will pick
-   up anything left in 'processing' state after 10 minutes.
-   ──────────────────────────────────────────────────────────────────────── */
 
 async function safeMarkDone(itemId, verdict) {
   try { await markItemDone(itemId, verdict); }
@@ -147,20 +97,20 @@ async function safeTick(jobId) {
     return;
   }
 
-  // Natural-completion refund path. Fires once per job lifecycle, on the
-  // tick that flipped status to 'complete' or 'partial'. The status guard
-  // in tickJobProgress and the partial unique index on credit_transactions
-  // both protect against double-firing in race conditions.
-  if (tickResult?.isComplete && tickResult.counts.error > 0) {
+  // Natural-completion refund. Always call on completion: refundable rows are
+  // errored items plus rows no vendor charged for, and the tick result only counts
+  // the former. refundUnusedCreditsForJob returns reason:'nothing_refundable' when
+  // there is nothing to pay back. The status guard in tickJobProgress and the
+  // partial unique index on credit_transactions protect against double-firing.
+  if (tickResult?.isComplete) {
     try {
       const r = await refundUnusedCreditsForJob(jobId);
       if (r?.ok && !r.idempotent) {
-        console.log(`[worker:email] refunded ${r.refunded} credits on natural completion of job ${jobId} (${tickResult.counts.error} errored items)`);
+        console.log(`[worker:email] refunded ${r.refunded} credits on job ${jobId} (${r.errorCount} errored, ${r.nonBillableCount} non-billable)`);
       }
     } catch (err) {
-      // Non-fatal. The job is already terminal; the user got their results.
-      // Refund will need to be issued manually via admin if this keeps
-      // failing. Log loudly so the next time someone opens logs they see it.
+      // Non-fatal. The job is terminal and the user has results. Log loudly so a
+      // stuck refund is visible; admin can issue it manually.
       console.error(`[worker:email] refundUnusedCreditsForJob failed for ${jobId}:`, err.message);
     }
   }

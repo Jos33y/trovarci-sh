@@ -8,8 +8,14 @@ import {
   STRIPE_ENABLED,
   CUSTOM_MIN_CREDITS,
   CUSTOM_MAX_CREDITS,
-  CUSTOM_PRICE_PER_CREDIT,
 } from '~/utils/paymentsConfig.server';
+import {
+  CREDIT_PACKAGES,
+  PACKAGE_KEYS,
+  PER_CREDIT_LABEL,
+  customPriceCents,
+  formatUsd,
+} from '~/utils/pricing';
 import styles from '~/styles/modules/routes/credits.module.css';
 import { formatInt } from '~/utils/format';
 
@@ -23,7 +29,6 @@ export async function loader({ request }) {
     stripeEnabled:    STRIPE_ENABLED,
     customMin:        CUSTOM_MIN_CREDITS,
     customMax:        CUSTOM_MAX_CREDITS,
-    customRate:       CUSTOM_PRICE_PER_CREDIT,
   };
 }
 
@@ -32,10 +37,10 @@ export const meta = () => [
   {
     name: 'description',
     content:
-      'Power the Trovarcis Reach toolkit with credits. Email verification, phone lookups, AI scoring. Pay-as-you-go from $5. Flat $0.01 per credit at any volume.',
+      'Credits for email verification, phone lookups, and AI scoring. Flat $0.010 per credit at any volume. Start at $5 with no minimum, no subscription.',
   },
   { property: 'og:title', content: 'Buy Verification Credits | Trovarcis Reach' },
-  { property: 'og:description', content: 'Pay-as-you-go credits for the email deliverability toolkit. Flat $0.01 per credit. No subscription.' },
+  { property: 'og:description', content: 'Pay-as-you-go credits for the email deliverability toolkit. Flat $0.010 per credit. No subscription.' },
   { property: 'og:url', content: 'https://trovarci.sh/credits' },
   { property: 'og:type', content: 'website' },
 ];
@@ -98,62 +103,24 @@ function InfoIcon({ size = 16 }) {
   );
 }
 
-const PACKAGES = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    credits: 500,
-    price: 5,
-    pricePerCredit: '$0.010',
-    features: [
-      '500 verification credits',
-      'Email verify: 2,500 emails (bulk)',
-      'Email verify: 500 emails (single)',
-      'Phone lookup: 250 numbers',
-      '12-month credit expiry',
-    ],
-    popular: false,
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    credits: 2500,
-    price: 25,
-    pricePerCredit: '$0.010',
-    features: [
-      '2,500 verification credits',
-      'Email verify: 12,500 emails (bulk)',
-      'Email verify: 2,500 emails (single)',
-      'Phone lookup: 1,250 numbers',
-      '12-month credit expiry',
-    ],
-    popular: true,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    credits: 10000,
-    price: 100,
-    pricePerCredit: '$0.010',
-    features: [
-      '10,000 verification credits',
-      'Email verify: 50,000 emails (bulk)',
-      'Email verify: 10,000 emails (single)',
-      'Phone lookup: 5,000 numbers',
-      '12-month credit expiry',
-    ],
-    popular: false,
-  },
-];
+const VALID_PKG_IDS = new Set([...PACKAGE_KEYS, 'custom']);
 
-const VALID_PKG_IDS = new Set(['starter', 'growth', 'pro', 'custom']);
+// Derived from the pack so the card can never disagree with what checkout charges.
+function packFeatures(pkg) {
+  return [
+    `${formatInt(pkg.credits)} email verifications`,
+    `or ${formatInt(Math.floor(pkg.credits / 2))} phone lookups`,
+    `or ${formatInt(pkg.credits)} AI email scores`,
+    '12-month credit expiry',
+  ];
+}
 
 const CREDIT_COSTS = [
-  { action: 'Email verification (single)', amount: '1', unit: 'credit',              free: false, note: 'Syntax + domain + SMTP check' },
-  { action: 'Email verification (bulk)',   amount: '1', unit: 'credit per 5 emails', free: false, note: 'Bulk discount: rounds up to nearest 5' },
-  { action: 'Phone number lookup',         amount: '2', unit: 'credits',             free: false, note: 'Real carrier + line type' },
-  { action: 'Phone verification (bulk)',   amount: '2', unit: 'credits per number',  free: false, note: 'Per number in the list' },
-  { action: 'Email Scorer (Arcis)',        amount: '1', unit: 'credit',              free: false, note: 'AI analysis per email content check' },
+  { action: 'Email verification (single)', amount: '1', unit: 'credit',             free: false, note: 'Syntax + domain + SMTP check' },
+  { action: 'Email verification (bulk)',   amount: '1', unit: 'credit per email',   free: false, note: 'Same rate as single. Volume pricing sits in the packs.' },
+  { action: 'Phone number lookup',         amount: '2', unit: 'credits',            free: false, note: 'Real carrier + line type' },
+  { action: 'Phone verification (bulk)',   amount: '2', unit: 'credits per number', free: false, note: 'Per number in the list' },
+  { action: 'Email Scorer (Arcis)',        amount: '1', unit: 'credit',             free: false, note: 'AI analysis per email content check' },
   { action: 'DNS Generator',               free: true,  note: 'Client-side, no API cost' },
   { action: 'Domain Health Checker',       free: true,  note: 'DNS lookups, no credit needed' },
   { action: 'SMTP Tester',                 free: true,  note: 'Tests your own SMTP connection' },
@@ -168,6 +135,14 @@ const FAQ_ITEMS_BASE = [
   {
     q: 'What happens if a verification fails?',
     a: 'Credits are only deducted on successful API calls. If a request errors out on our end, no credit is consumed.',
+  },
+  {
+    q: 'Do larger packs cost less per credit?',
+    a: 'No. Every credit costs $0.010 whether you buy 100 or 1,000,000. The packs are one-click pickers for common amounts, not pricing tiers. Buying the exact number you need through Custom costs the same per credit as any pack.',
+  },
+  {
+    q: 'Is there a minimum purchase?',
+    a: 'No. The smallest pack is $5 for 500 credits, and custom amounts start at 100 credits for $1.00. Most verification services set a minimum in the tens of dollars.',
   },
   {
     q: 'Is there a free tier?',
@@ -196,13 +171,13 @@ function buildPaymentFaq(stripeEnabled) {
 }
 
 export default function CreditsPage() {
-  const { user, cryptomusEnabled, stripeEnabled, customMin, customMax, customRate } = useLoaderData();
+  const { user, cryptomusEnabled, stripeEnabled, customMin, customMax } = useLoaderData();
   const actionData = useActionData();
   const navigation = useNavigation();
   const [searchParams] = useSearchParams();
 
   const formError = actionData?.errors?._form;
-  const customAmountError = actionData?.errors?.creditsAmount;
+  const serverAmountError = actionData?.errors?.creditsAmount;
   const isSubmitting = navigation.state !== 'idle' && navigation.formData != null;
 
   // Read ?pkg=<id> from URL. Falls back to 'growth' when missing or invalid.
@@ -244,19 +219,43 @@ export default function CreditsPage() {
       if (!Number.isFinite(parsed) || parsed < customMin || parsed > customMax) {
         return null;
       }
-      const priceCents = Math.ceil(parsed * customRate * 100);
       return {
         id: 'custom',
         name: 'Custom',
         credits: parsed,
-        price: (priceCents / 100).toFixed(2),
+        price: formatUsd(customPriceCents(parsed)),
       };
     }
-    const pkg = PACKAGES.find((p) => p.id === selected);
+    const pkg = CREDIT_PACKAGES.find((p) => p.key === selected);
     return pkg
-      ? { id: pkg.id, name: pkg.name, credits: pkg.credits, price: pkg.price.toString() }
+      ? {
+          id: pkg.key,
+          name: pkg.name,
+          credits: pkg.credits,
+          price: formatUsd(pkg.priceUsdCents),
+        }
       : null;
-  }, [selected, customCredits, customMin, customMax, customRate]);
+  }, [selected, customCredits, customMin, customMax]);
+
+  // Live range feedback. The server still validates in buildCustomPackage.
+  const customRangeError = useMemo(() => {
+    if (selected !== 'custom') return null;
+    const raw = String(customCredits).trim();
+    if (raw === '') return null;
+    const parsed = parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || String(parsed) !== raw) {
+      return 'Enter a whole number of credits.';
+    }
+    if (parsed < customMin) {
+      return `Minimum is ${formatInt(customMin)} credits.`;
+    }
+    if (parsed > customMax) {
+      return `Maximum is ${formatInt(customMax)} credits. Contact support for larger volumes.`;
+    }
+    return null;
+  }, [selected, customCredits, customMin, customMax]);
+
+  const customAmountError = customRangeError || serverAmountError;
 
   const gatewayKey = paymentMethod === 'crypto' ? 'cryptomus' : 'stripe';
   const gatewayName = paymentMethod === 'crypto' ? 'Cryptomus' : 'Stripe';
@@ -282,7 +281,7 @@ export default function CreditsPage() {
             <h1 className={styles.headline}>Buy credits.</h1>
             <p className={styles.sub}>
               Credits power the paid tools: email verification, AI scoring, and phone lookups.
-              Flat $0.01 per credit at any volume. No subscription.
+              Flat $0.010 per credit at any volume. Start at $5, no minimum, no subscription.
             </p>
           </div>
         </section>
@@ -335,17 +334,17 @@ export default function CreditsPage() {
 
             {/* Package cards */}
             <div className={styles.packagesGrid}>
-              {PACKAGES.map((pkg) => (
+              {CREDIT_PACKAGES.map((pkg) => (
                 <button
-                  key={pkg.id}
+                  key={pkg.key}
                   type="button"
                   className={[
                     styles.packageCard,
-                    selected === pkg.id ? styles.packageSelected : '',
+                    selected === pkg.key ? styles.packageSelected : '',
                     pkg.popular ? styles.packagePopular : '',
                   ].join(' ')}
-                  onClick={() => setSelected(pkg.id)}
-                  aria-pressed={selected === pkg.id}
+                  onClick={() => setSelected(pkg.key)}
+                  aria-pressed={selected === pkg.key}
                 >
                   {pkg.popular && (
                     <div className={styles.popularBadge}>
@@ -359,12 +358,12 @@ export default function CreditsPage() {
                     <span className={styles.pkgCreditsLabel}> credits</span>
                   </div>
                   <div className={styles.pkgPrice}>
-                    ${pkg.price}
+                    ${formatUsd(pkg.priceUsdCents)}
                     <span className={styles.pkgPriceUnit}> USD</span>
                   </div>
-                  <div className={styles.pkgPerCredit}>{pkg.pricePerCredit} per credit</div>
+                  <div className={styles.pkgPerCredit}>{PER_CREDIT_LABEL} per credit</div>
                   <ul className={styles.pkgFeatures}>
-                    {pkg.features.map((f) => (
+                    {packFeatures(pkg).map((f) => (
                       <li key={f} className={styles.pkgFeature}>
                         <span className={styles.pkgCheck}><CheckIcon /></span>
                         {f}
@@ -412,9 +411,7 @@ export default function CreditsPage() {
                 ) : (
                   <div className={styles.pkgPricePlaceholder}>$-</div>
                 )}
-                <div className={styles.pkgPerCredit}>
-                  ${customRate.toFixed(3)} per credit
-                </div>
+                <div className={styles.pkgPerCredit}>{PER_CREDIT_LABEL} per credit</div>
                 <ul className={styles.pkgFeatures}>
                   <li className={styles.pkgFeature}>
                     <span className={styles.pkgCheck}><CheckIcon /></span>
@@ -429,8 +426,8 @@ export default function CreditsPage() {
                     Instant delivery
                   </li>
                 </ul>
-                {customAmountError && selected === 'custom' && (
-                  <div className={styles.customError}>
+                {selected === 'custom' && customAmountError && (
+                  <div role="alert" className={styles.customError}>
                     {customAmountError}
                   </div>
                 )}

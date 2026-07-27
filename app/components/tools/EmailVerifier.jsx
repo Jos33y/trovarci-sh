@@ -1,36 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   EmailVerifier.jsx
-
-   Real component wired to the Batch 4 routes:
-     POST /api/tools/verify-email                     single-mode probe
-     POST /api/tools/verify-email-bulk                start a bulk job
-     GET  /api/jobs/:id/stream                        SSE progress (primary)
-     GET  /api/jobs/:id/status                        polling fallback
-     GET  /api/jobs/:id/results                       full CSV download
-     GET  /api/jobs/:id/results?clean=1               valid-only CSV
-     POST /api/jobs/:id/cancel                        cancel + partial refund
-
-   Drop-in replacement for the 670-line mock. Uses every CSS class name
-   already defined in EmailVerifier.module.css (do not add new classes;
-   the CSS file stays untouched). Behaviour preserved:
-     - Single mode: 5-step ladder reveal animation on result
-     - Bulk mode: drop zone for CSV, paste area, preview card, live count
-       grid during progress, stat cards on completion, list health verdict,
-       tool chain link
-     - Mode toggle via "Have a list?" / "Verify a single email instead"
-
-   Server result mapping:
-     The lib's verifyOneEmail returns result.steps as an array of
-     { name, status, detail }. The mock used step.label; we map name -> label
-     when shaping the display data. Status values are normalised
-     (pass/fail/warn) so the CSS .stepStatus_pass/fail/warn classes apply
-     cleanly regardless of small string drift on the server side.
-
-     The lib emits 4 verdict categories: valid / invalid / risky / unknown.
-     The CSS only has 3 verdict classes (valid/invalid/risky). We map
-     unknown -> risky for visual styling - "unknown" reads as "uncertain",
-     which is the closest of the three.
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Email verifier tool. Single probe, bulk job with SSE progress and polling fallback.
+// CSS has three verdict classes, so unknown maps to risky for styling.
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import styles from '~/styles/modules/tools/EmailVerifier.module.css';
@@ -42,7 +11,7 @@ const STEP_REVEAL_INTERVAL_MS = 350;
 const POLL_INTERVAL_MS = 1500;
 const TERMINAL_STATES = new Set(['complete', 'partial', 'cancelled', 'failed']);
 
-/* ── Icons ── */
+// Icons
 
 function MailIcon() {
   return (
@@ -63,7 +32,7 @@ function UploadIcon() {
 }
 
 
-/* ── Helpers ── */
+// Helpers
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -100,15 +69,7 @@ function formatDuration(ms) {
   return `${hours} hour${hours === 1 ? '' : 's'}${remMin ? ` ${remMin} min` : ''}`;
 }
 
-/* ── Server response shape mapping ────────────────────────────────────────
-   verifyOneEmail returns:
-     {
-       email, domain, category, subcategory, smtpResponse, mxHost,
-       isDisposable, isRole, isFreeProvider, isCatchall, durationMs,
-       steps: [{ name, status, detail }, ...]
-     }
-   We shape it into the form the existing JSX expects (verdict, label, etc).
-   ──────────────────────────────────────────────────────────────────────── */
+// Reshapes the verifyOneEmail result into the verdict/label form the JSX expects.
 
 function normalizeStepStatus(s) {
   if (!s) return 'pass';
@@ -207,7 +168,7 @@ function shapeServerResult(r) {
   };
 }
 
-/* ── Friendly error mapping ─────────────────────────────────────────────── */
+// Friendly error mapping
 
 const FRIENDLY_ERROR = {
   RATE_LIMITED:               'Too many requests. Try again in a minute.',
@@ -232,9 +193,9 @@ function friendlyError(code, fallback) {
   return FRIENDLY_ERROR[code] || fallback || 'Something went wrong. Try again.';
 }
 
-/* ── Component ─────────────────────────────────────────────────────────── */
+// Component
 
-export default function EmailVerifier() {
+export default function EmailVerifier({ creditCost = 1 }) {
   const toolRef = useRef(null);
   const fileInputRef = useRef(null);
   const stepTimerRef = useRef(null);
@@ -287,7 +248,7 @@ export default function EmailVerifier() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
   }, []);
 
-  /* ── Server-call wrapper that handles auth-redirect HTML responses ── */
+  // Server-call wrapper that handles auth-redirect HTML responses.
 
   const safeJson = useCallback(async (res) => {
     const text = await res.text();
@@ -305,9 +266,7 @@ export default function EmailVerifier() {
     }
   }, []);
 
-  /* ════════════════════════════════════════════════════════════════════
-     SINGLE MODE
-     ════════════════════════════════════════════════════════════════════ */
+  // Single mode
 
   const handleSingleVerify = useCallback(async () => {
     const trimmed = email.trim();
@@ -387,9 +346,7 @@ export default function EmailVerifier() {
     setTimeout(scrollToTool, 50);
   }, [scrollToTool]);
 
-  /* ════════════════════════════════════════════════════════════════════
-     BULK MODE
-     ════════════════════════════════════════════════════════════════════ */
+  // Bulk mode
 
   const processEmails = useCallback((raw, source) => {
     const lines = raw.split(/[\n,;]+/).map((l) => l.trim()).filter((l) => l && isValidEmail(l));
@@ -437,7 +394,7 @@ export default function EmailVerifier() {
     processEmails(pasteText, 'pasted');
   }, [pasteText, processEmails]);
 
-  /* ── Bulk transport: SSE primary, polling fallback ─────────────────── */
+  // Bulk transport: SSE primary, polling fallback.
 
   const finalizeBulkJob = useCallback(async (jobId, startedAt) => {
     cleanupBulkChannels();
@@ -576,7 +533,7 @@ export default function EmailVerifier() {
     const { body, authIssue } = await safeJson(res);
 
     if (authIssue) {
-      setInputError('Sign in to start a bulk verification job. Bulk runs at 1 credit per 5 emails.');
+      setInputError('Sign in to start a bulk verification job. Bulk runs at 1 credit per email.');
       setPhase('preview');
       return;
     }
@@ -632,7 +589,7 @@ export default function EmailVerifier() {
     setTimeout(scrollToTool, 50);
   }, [cleanupBulkChannels, scrollToTool]);
 
-  /* ── Mode switches ── */
+  // Mode switches
 
   const switchToBulk = useCallback(() => {
     if (stepTimerRef.current) { clearInterval(stepTimerRef.current); stepTimerRef.current = null; }
@@ -654,7 +611,7 @@ export default function EmailVerifier() {
     setInputError('');
   }, [cleanupBulkChannels]);
 
-  /* ── Keyboard ── */
+  // Keyboard
 
   const handleKeyDown = useCallback((e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -664,12 +621,12 @@ export default function EmailVerifier() {
     }
   }, [mode, handleSingleVerify]);
 
-  /* ── Derived bulk values for display ── */
+  // Derived bulk values for display
 
   const bulkTotal = bulkEmails.length;
   const bulkPct = bulkTotal > 0 ? Math.round((bulkProgress / bulkTotal) * 100) : 0;
 
-  /* ── Render ── */
+  // Render
 
   return (
     <div ref={toolRef} className={styles.tool}>
@@ -687,13 +644,11 @@ export default function EmailVerifier() {
           </div>
         </div>
         <span className={styles.freeBadge}>
-          {mode === 'single' ? '1 CREDIT' : '1 CREDIT / 5'}
+          {creditCost === 1 ? '1 CREDIT' : `${creditCost} CREDITS`}
         </span>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          SINGLE MODE
-          ════════════════════════════════════════════════════════════════ */}
+      {/* Single mode */}
       {mode === 'single' && (
         <>
           {/* Input */}
@@ -800,9 +755,7 @@ export default function EmailVerifier() {
         </>
       )}
 
-      {/* ════════════════════════════════════════════════════════════════
-          BULK MODE
-          ════════════════════════════════════════════════════════════════ */}
+      {/* Bulk mode */}
       {mode === 'bulk' && (
         <>
           {/* Upload phase */}
@@ -864,8 +817,8 @@ export default function EmailVerifier() {
                 )}
                 <div className={styles.previewCost}>
                   <span className={styles.costLabel}>Cost:</span>
-                  <span className={styles.costValue}>{Math.ceil(bulkEmails.length / 5)} Credits</span>
-                  <span className={styles.costCalc}>({formatInt(bulkEmails.length)} emails &divide; 5)</span>
+                  <span className={styles.costValue}>{formatInt(bulkEmails.length * creditCost)} Credits</span>
+                  <span className={styles.costCalc}>({creditCost} per email, same as single)</span>
                 </div>
               </div>
               <div className={styles.previewActions}>

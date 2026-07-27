@@ -7,7 +7,7 @@ Trovarcis Reach is built for anyone who sends email, verifies contacts, or wants
 ## Tools
 
 - [Email Scorer](https://trovarci.sh/score): Grades email content for Gmail Promotions tab risk, spam-filter signals, and structural issues using the Arcis AI engine. Returns the specific factors dragging placement and concrete fixes for each. 1 credit per scan, requires signup.
-- [Email Verifier](https://trovarci.sh/verify): Live SMTP probe for single addresses or bulk lists up to 50,000. Refunds credits on infrastructure failures, only charges on real verdicts. 1 credit per single check, 1 credit per 5 in bulk. Requires signup.
+- [Email Verifier](https://trovarci.sh/verify): Live SMTP probe for single addresses or bulk lists up to 50,000. Refunds credits on infrastructure failures, only charges on real verdicts. 1 credit per address, single or bulk. Requires signup.
 - [Number Verifier](https://trovarci.sh/verify-number): Phone number format validation via libphonenumber is free with no signup. Optional carrier-network lookup returns line type, portability, and roaming status for 2 credits. Useful for SMS campaign list cleaning, onboarding fraud prevention, and voice outreach validation.
 - [Domain Checker](https://trovarci.sh/domain): 25+ checks across SPF, DKIM, DMARC, mail server config, SSL/TLS setup, DNS configuration, and 15+ blacklists. Useful for anyone setting up business email on a new domain or auditing an existing setup. Free, no signup.
 - [SMTP Tester](https://trovarci.sh/smtp-test): Diagnoses SMTP connection failures with plain-language explanations at every step of the handshake. Shows exactly where a connection breaks and why. Free, no signup.
@@ -24,7 +24,7 @@ Trovarcis Reach is built for anyone who sends email, verifies contacts, or wants
 
 ## Company
 
-- [Pricing](https://trovarci.sh/pricing): Credit-based pricing. No monthly subscription. Credits don't expire.
+- [Credits](https://trovarci.sh/credits): Flat $0.010 per credit at any volume, from $5. No monthly subscription. Credits expire 12 months from purchase.
 - [Contact](https://trovarci.sh/contact): Contact form. Business inquiries: hello@trovarcis.com. Product support: support@trovarci.sh.
 
 ## Optional

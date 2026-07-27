@@ -34,7 +34,6 @@ export async function loader() {
     costs: {
       score: CREDIT_COSTS.email_score,
       verify: CREDIT_COSTS.email_verify,
-      verifyBulkPer5: CREDIT_COSTS.email_verify_bulk_per_5,
       phone: CREDIT_COSTS.phone_verify,
     },
   };
@@ -586,7 +585,7 @@ export default function Tools() {
               <span className={styles.gridFootnoteDash} aria-hidden="true" />
               <span>
                 <strong className={styles.gridFootnoteStrong}>{welcomeBonus} free credits on signup.</strong>
-                {' '}No card. Enough for {Math.floor(welcomeBonus / costs.score)} scores, {Math.floor(welcomeBonus / costs.verifyBulkPer5) * 5} bulk verifications, or {Math.floor(welcomeBonus / costs.phone)} carrier lookups. Three tools above need no account at all.
+                {' '}No card. Enough for {Math.floor(welcomeBonus / costs.score)} scores, {Math.floor(welcomeBonus / costs.verify)} email verifications, or {Math.floor(welcomeBonus / costs.phone)} carrier lookups. Three tools above need no account at all.
               </span>
             </div>
           </div>

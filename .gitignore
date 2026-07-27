@@ -61,3 +61,6 @@ SESSION-*.md
 *.zip
 install_*.ps1
 codemod-diff.txt
+
+# Installer backups
+_*-backup-*/

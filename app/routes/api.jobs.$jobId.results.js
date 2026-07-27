@@ -80,7 +80,7 @@ export async function loader({ request, params }) {
   });
 }
 
-// ─── Item fetchers ───
+//  Item fetchers
 
 async function fetchEmailItems(jobId, cleanOnly) {
   if (cleanOnly) {
@@ -98,7 +98,8 @@ async function fetchEmailItems(jobId, cleanOnly) {
            category,
            subcategory,
            smtp_response AS "smtpResponse",
-           error_code    AS "errorCode"
+           error_code    AS "errorCode",
+           billable
     FROM verification_job_items
     WHERE job_id = ${jobId}
     ORDER BY row_index
@@ -138,7 +139,7 @@ async function fetchPhoneItems(jobId, cleanOnly) {
   `;
 }
 
-// ─── Builders ───
+//  Builders
 
 function buildEmailCsv(items, cleanOnly) {
   if (cleanOnly) {
@@ -146,7 +147,7 @@ function buildEmailCsv(items, cleanOnly) {
     if (items.length === 0) return header;
     return header + items.map((i) => csvEscape(i.email)).join('\n') + '\n';
   }
-  const header = 'email,status,category,subcategory,smtp_response,error_code\n';
+  const header = 'email,status,category,subcategory,smtp_response,error_code,charged\n';
   if (items.length === 0) return header;
   const rows = items.map((i) => [
     csvEscape(i.email),
@@ -155,6 +156,7 @@ function buildEmailCsv(items, cleanOnly) {
     csvEscape(i.subcategory),
     csvEscape(i.smtpResponse),
     csvEscape(i.errorCode),
+    i.billable === false ? 'N' : 'Y',
   ].join(','));
   return header + rows.join('\n') + '\n';
 }

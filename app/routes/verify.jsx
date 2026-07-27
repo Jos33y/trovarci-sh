@@ -28,7 +28,6 @@ export async function loader({ request }) {
     welcomeBonus: WELCOME_BONUS_AMOUNT,
     costs: {
       verify: CREDIT_COSTS.email_verify,
-      verifyBulkPer5: CREDIT_COSTS.email_verify_bulk_per_5,
     },
   };
 }
@@ -90,7 +89,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How does pricing work?',
-    a: 'Single verifications cost 1 credit per scan. Bulk runs cost 1 credit per 5 emails (rounded up). At the flat rate of $0.010 per credit that works out to $0.002 per email in bulk - five times cheaper than single mode. If a verification fails because of an infrastructure issue on our side (proxy down, our timeout) the credit is refunded automatically.',
+    a: 'Every address costs 1 credit, single or bulk, and a credit is a flat $0.010 at any volume. If a verification fails because of an infrastructure issue on our side the credit is refunded automatically, so you only pay for definitive verdicts.',
   },
   {
     q: 'Can I cancel a bulk job mid-run?',
@@ -127,8 +126,8 @@ const TIERS = [
   {
     tier: 'Bulk',
     title: 'Bulk verify',
-    badge: '1 CR / 5',
-    desc: 'Paste up to 50,000 addresses. The worker processes them in parallel and surfaces live progress. Download the full results or just the clean (valid) list when it finishes.',
+    badge: '1 CREDIT',
+    desc: 'Paste up to 50,000 addresses. The worker processes them in parallel and surfaces live progress. Download the full results or only the clean (valid) list when it finishes.',
     icon: StackIcon,
     checks: [
       'Live progress via Server-Sent Events',
@@ -241,7 +240,7 @@ export default function VerifyPage() {
           <div className={`container ${styles.container}`}>
             <SectionLabel num="01" name="TOOL" />
             <div ref={toolRef} className={`${styles.toolHost} reveal`}>
-              <EmailVerifier user={user} balance={balance} />
+              <EmailVerifier user={user} balance={balance} creditCost={costs.verify} />
             </div>
           </div>
         </section>
@@ -284,7 +283,7 @@ export default function VerifyPage() {
             <div ref={tiersRef} className={`${styles.tiersHead} reveal`}>
               <h2 className={styles.tiersTitle}>Two ways to verify</h2>
               <p className={styles.tiersIntro}>
-                Single mode is instant. Bulk mode runs in the background and costs 5 times less per email. {welcomeBonus} free credits on signup, enough for {welcomeBonus * 5} bulk verifications or {welcomeBonus} single checks.
+                Single mode is instant. Bulk mode runs in the background and handles up to 50,000 addresses per job. Same 1 credit per address either way. {welcomeBonus} free credits on signup, enough for {welcomeBonus} verifications.
               </p>
             </div>
 

@@ -1,39 +1,28 @@
 import useReveal from '~/utils/useReveal';
+import { CREDIT_PACKAGES, PER_CREDIT_LABEL, formatUsd } from '~/utils/pricing';
+import { formatInt } from '~/utils/format';
 import styles from '~/styles/modules/landing/Pricing.module.css';
 
-// Mirrors CREDIT_PACKAGES in paymentsConfig.server.js. Flat $0.01/credit at every tier.
-const PACKS = [
-  {
-    name: "Starter",
-    price: "$5",
-    credits: "500",
-    bulkEmails: "2,500",
-    alternates: "Or 500 scores · 250 phone lookups",
-    cta: "Buy Starter",
-    href: "/credits?pkg=starter",
-    popular: false,
-  },
-  {
-    name: "Growth",
-    price: "$25",
-    credits: "2,500",
-    bulkEmails: "12,500",
-    alternates: "Or 2,500 scores · 1,250 phone lookups",
-    cta: "Buy Growth",
-    href: "/credits?pkg=growth",
-    popular: true,
-  },
-  {
-    name: "Pro",
-    price: "$100",
-    credits: "10,000",
-    bulkEmails: "50,000",
-    alternates: "Or 10,000 scores · 5,000 phone lookups",
-    cta: "Buy Pro",
-    href: "/credits?pkg=pro",
-    popular: false,
-  },
-];
+// Landing shows the first three rungs. Scale and Bulk live on /credits so this
+// section stays at three cards. Derived from the curve so it cannot drift.
+const LANDING_KEYS = ['starter', 'growth', 'pro'];
+
+const PACKS = LANDING_KEYS.map((key) => {
+  const p = CREDIT_PACKAGES.find((x) => x.key === key);
+  return {
+    name: p.name,
+    price: `$${formatUsd(p.priceUsdCents)}`,
+    credits: formatInt(p.credits),
+    emails: formatInt(p.credits),
+    perCredit: PER_CREDIT_LABEL,
+    alternates: `Or ${formatInt(p.credits)} scores \u00b7 ${formatInt(Math.floor(p.credits / 2))} phone lookups`,
+    cta: `Buy ${p.name}`,
+    href: `/credits?pkg=${p.key}`,
+    popular: Boolean(p.popular),
+  };
+});
+
+const TOP_PACK = CREDIT_PACKAGES[CREDIT_PACKAGES.length - 1];
 
 export default function Pricing() {
   const headerRef = useReveal();
@@ -53,7 +42,7 @@ export default function Pricing() {
           </div>
           <h2 className={styles.heading}>Pricing</h2>
           <p className={styles.sub}>
-            Flat $0.01 per credit. Same rate at any volume. No subscription, no renewal.
+            Flat $0.010 per credit. Same rate at any volume. No subscription, no renewal.
           </p>
         </div>
 
@@ -83,12 +72,12 @@ export default function Pricing() {
                   <span className={styles.detailLabel}>credits</span>
                 </li>
                 <li className={styles.detailSecondary}>
-                  <span className={styles.detailApprox}>≈</span>
-                  <span className={styles.detailNumber}>{pack.bulkEmails}</span>
-                  <span className={styles.detailText}>emails verified in bulk</span>
+                  <span className={styles.detailApprox}>{'\u2248'}</span>
+                  <span className={styles.detailNumber}>{pack.emails}</span>
+                  <span className={styles.detailText}>emails verified</span>
                 </li>
                 <li className={styles.detailTertiary}>{pack.alternates}</li>
-                <li className={styles.detailTertiary}>All free tools included</li>
+                <li className={styles.detailTertiary}>{pack.perCredit} per credit</li>
               </ul>
 
               <a
@@ -102,7 +91,8 @@ export default function Pricing() {
         </div>
 
         <div ref={footnoteRef} className={`${styles.footnote} reveal`}>
-          <p>Or buy any integer amount from 100 to 50,000 credits at the same rate.</p>
+          <p>Bigger packs are on the credits page: {TOP_PACK.name} is {formatInt(TOP_PACK.credits)} credits for ${formatUsd(TOP_PACK.priceUsdCents)}.</p>
+          <p>Or buy any amount from 100 to 1,000,000 credits at the same rate. All free tools included.</p>
           <p>Credits expire 12 months from purchase. Reminder emails before expiry.</p>
           <p>15-day money-back guarantee on unused credits.</p>
         </div>

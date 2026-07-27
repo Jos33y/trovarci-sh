@@ -11,7 +11,7 @@ const COMPETITORS = [
 const ROWS = [
   {
     label: "Email verification",
-    values: ["From $0.002 / email*", "$0.008 / email", "$0.0195 / email", false],
+    values: ["$0.010 / email*", "$0.008 / email", "$0.0195 / email", false],
   },
   {
     label: "AI email scoring",
@@ -124,7 +124,7 @@ export default function Comparison() {
         </div>
 
         <p className={styles.note}>
-          *Bulk rate: 1 credit per 5 emails at $0.01 per credit. Single-mode verification is $0.01 per email.
+          *One credit per address at a flat $0.010 per credit, single or bulk, at any volume. Competitor rates are entry-tier and drop with committed volume.
         </p>
       </div>
     </section>

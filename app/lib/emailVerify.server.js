@@ -1,56 +1,9 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   emailVerify.server.js
-
-   The verification pipeline. One public function: verifyOneEmail(email).
-   Composes every other primitive in this layer:
-
-     - dnsLookup.server      MX resolution
-     - ssrfGuard.server      block private/reserved MX targets
-     - disposableDomains     in-memory Set lookup
-     - catchallCache         24h cached catch-all status per domain
-     - proxyRotation         SOCKS5 proxy with sticky sessions
-     - SMTP RCPT TO probe    actual mailbox existence check (this file)
-
-   Pipeline stages, in order, short-circuit on terminal verdicts:
-
-     1. Syntax check         RFC-loose. Bad syntax -> invalid, no probe.
-     2. Disposable tag       Set lookup. Doesn't short-circuit; tagged for
-                             classification later.
-     3. Role tag             Regex on local part. Same: tagged, not short.
-     4. Free-provider tag    Set lookup. Same: tagged, not short.
-     5. MX lookup            DNS. No MX -> invalid, no probe.
-     6. SSRF guard on MX     Reject if MX resolves to private/reserved IP.
-     7. Catch-all check      Cache hit -> use it. Miss -> probe random
-                             local part -> cache result. Catch-all -> risky,
-                             skip RCPT to actual address.
-     8. SMTP RCPT TO probe   Through SOCKS5 proxy, port 25.
-     9. Classification       Combine probe result + tags into final verdict.
-
-   Result shape:
-
-     { ok: true, result: {
-         email, domain, category, subcategory, smtpResponse,
-         isDisposable, isRole, isFreeProvider, isCatchall, mxHost,
-         durationMs, steps: [{ name, status, detail }]
-     } }
-
-   Or, on infrastructure failure (timeout, proxy failure, internal error):
-
-     { ok: false, code, error, result: { ... partial info ... } }
-
-   Caller refunds when ok:false. Caller does NOT refund when ok:true with
-   category='unknown' (we did the work, the answer is genuinely uncertain).
-
-   Greylisting:
-     verifyOneEmail returns ok:true with category='unknown' and
-     subcategory='greylist' on a 4xx response. Single-mode callers treat
-     this as the verdict. Bulk-mode callers (the worker) detect the
-     greylist marker and call jobQueue.scheduleItemRetry instead of
-     markItemDone.
-
-   Never throws. All exceptions become ok:false results.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
+// Email verification pipeline. One public function: verifyOneEmail(email).
+// Verdict source is MillionVerifier when EXTERNAL_VERIFIER_PROVIDER=millionverifier,
+// otherwise a direct SOCKS5 SMTP probe. Local syntax and MX checks run first either way.
+// Returns { ok:true, result } | { ok:true, result, greylisted } | { ok:false, code, error, result }.
+// Caller refunds on ok:false, and on ok:true when result.billable is false.
+// Never throws.
 import net from 'node:net';
 import { SocksClient } from 'socks';
 
@@ -59,8 +12,9 @@ import { assertSafeHost } from '../utils/ssrfGuard.server.js';
 import { isDisposable } from './disposableDomains.server.js';
 import { getCatchall, setCatchall } from './catchallCache.server.js';
 import { getProxy, releaseProxy, markBlocked } from './proxyRotation.server.js';
+import { MILLIONVERIFIER_ENABLED, verifyEmailViaMillionVerifier } from './millionVerifier.server.js';
 
-/* ─── Config ───────────────────────────────────────────────────────────── */
+// Config
 
 const MX_LOOKUP_TIMEOUT_MS = 7_000;
 const PROXY_CONNECT_TIMEOUT_MS = 12_000;
@@ -151,7 +105,7 @@ export async function verifyOneEmail(email, opts = {}) {
   const result = freshResult();
 
   try {
-    // ─── Step 1: syntax ───────────────────────────────────────────────────
+    //  Step 1: syntax
     const syntax = parseAndValidateEmail(email);
     if (!syntax.ok) {
       result.email = String(email == null ? '' : email).slice(0, MAX_EMAIL_LENGTH).toLowerCase();
@@ -165,17 +119,17 @@ export async function verifyOneEmail(email, opts = {}) {
     result.domain = syntax.domain;
     pushStep(result, 'syntax', 'pass', 'Properly formatted');
 
-    // ─── Steps 2-4: cheap tags (no I/O) ───────────────────────────────────
+    //  Steps 2-4: cheap tags (no I/O)
     try {
       result.isDisposable = isDisposable(result.domain);
     } catch {
-      // Disposable list failed to load. Don't block verification - just leave the tag false.
+      // Disposable list failed to load. Leave the tag false rather than blocking verification.
       result.isDisposable = false;
     }
     result.isRole = ROLE_REGEX.test(syntax.value);
     result.isFreeProvider = FREE_PROVIDERS.has(result.domain);
 
-    // ─── Step 5: MX lookup ────────────────────────────────────────────────
+    //  Step 5: MX lookup
     const mx = await resolveMx(result.domain, MX_LOOKUP_TIMEOUT_MS);
     if (!mx.ok || !Array.isArray(mx.value) || mx.value.length === 0) {
       result.category = 'invalid';
@@ -190,7 +144,7 @@ export async function verifyOneEmail(email, opts = {}) {
     const primaryMx = mx.value[0].exchange;
     result.mxHost = primaryMx;
 
-    // ─── Step 6: SSRF guard ───────────────────────────────────────────────
+    //  Step 6: SSRF guard
     const guard = await assertSafeHost(primaryMx);
     if (!guard.ok) {
       result.category = 'unknown';
@@ -211,8 +165,70 @@ export async function verifyOneEmail(email, opts = {}) {
       return { ok: true, result };
     }
 
-    // ─── Step 7: catch-all check (cache or live) ──────────────────────────
+    //  Step 7: catch-all check (cache or live)
     const cached = await getCatchall(result.domain).catch(() => null);
+
+    if (cached && cached.isCatchall) {
+      result.isCatchall = true;
+      result.category = 'risky';
+      result.subcategory = 'catchall';
+      result.smtpResponse = 'Domain accepts all addresses';
+      pushStep(result, 'mailbox', 'warn', 'Server accepts all addresses (cached catch-all)');
+      result.durationMs = Date.now() - start;
+      return { ok: true, result };
+    }
+
+    if (MILLIONVERIFIER_ENABLED) {
+      const mv = await verifyEmailViaMillionVerifier(syntax.value);
+
+      if (!mv.ok) {
+        result.category = 'unknown';
+        pushStep(result, 'mailbox', 'warn', 'Verification provider did not return a verdict');
+        result.durationMs = Date.now() - start;
+        return { ok: false, code: mv.code, error: mv.error, result };
+      }
+
+      result.billable = mv.billable;
+      if (mv.raw.role) result.isRole = true;
+      if (mv.raw.free) result.isFreeProvider = true;
+
+      if (mv.verdict === 'catch_all') {
+        result.isCatchall = true;
+        result.category = 'risky';
+        result.subcategory = 'catchall';
+        result.smtpResponse = 'Domain accepts all addresses';
+        pushStep(result, 'mailbox', 'warn', 'Server accepts all addresses (catch-all)');
+        // Cache it so the next address on this domain costs nothing.
+        await setCatchall(result.domain, true, { detectedVia: 'external_api' }).catch(() => {});
+      } else if (mv.verdict === 'invalid') {
+        result.category = 'invalid';
+        if (mv.raw.subresult === 'dns_error') {
+          result.subcategory = 'no_mx';
+          pushStep(result, 'mailbox', 'fail', 'Domain cannot receive mail');
+        } else if (mv.raw.subresult === 'syntax_error') {
+          result.subcategory = 'syntax';
+          pushStep(result, 'mailbox', 'fail', 'Address is not valid');
+        } else {
+          result.subcategory = 'mailbox';
+          pushStep(result, 'mailbox', 'fail', 'Mailbox does not exist');
+        }
+      } else if (mv.verdict === 'disposable') {
+        result.isDisposable = true;
+        result.category = 'risky';
+        result.subcategory = 'disposable';
+        pushStep(result, 'mailbox', 'warn', 'Disposable address');
+      } else if (mv.verdict === 'unknown') {
+        result.category = 'unknown';
+        pushStep(result, 'mailbox', 'warn', 'Server response was inconclusive');
+      } else {
+        pushStep(result, 'mailbox', 'pass', 'Mailbox exists');
+        classifyAccepted(result);
+      }
+
+      result.durationMs = Date.now() - start;
+      return { ok: true, result };
+    }
+
     if (cached) {
       result.isCatchall = cached.isCatchall;
     } else {
@@ -241,7 +257,7 @@ export async function verifyOneEmail(email, opts = {}) {
       return { ok: true, result };
     }
 
-    // ─── Step 8: real RCPT TO probe ───────────────────────────────────────
+    //  Step 8: real RCPT TO probe
     const probe = await probeMx(primaryMx, syntax.value, opts);
 
     if (!probe.ok) {
@@ -259,7 +275,10 @@ export async function verifyOneEmail(email, opts = {}) {
       };
     }
 
+    result.billable = true;
+
     if (probe.greylisted) {
+      result.billable = false;
       result.category = 'unknown';
       result.subcategory = 'greylist';
       result.smtpResponse = probe.smtpResponse || null;
@@ -282,6 +301,7 @@ export async function verifyOneEmail(email, opts = {}) {
       // that's not a clear rejection). Treat as unknown.
       pushStep(result, 'mailbox', 'warn', 'Server response was inconclusive');
       result.category = 'unknown';
+      result.billable = false;
     }
 
     result.durationMs = Date.now() - start;
@@ -316,6 +336,7 @@ function freshResult() {
     isCatchall: false,
     mxHost: null,
     durationMs: 0,
+    billable: false,
     steps: [],
   };
 }
@@ -406,7 +427,7 @@ function randomLocalPart(len) {
  * probes against the same domain rotate to a fresh exit IP.
  */
 async function probeMx(mxHost, targetEmail, opts = {}) {
-  // ─── Acquire a TCP socket to mxHost:25 ───
+  //  Acquire a TCP socket to mxHost:25
   // Two paths:
   //   A. Proxy path (production): SOCKS5 through IPRoyal session
   //   B. Direct path (DEV ONLY): plain net.Socket from this machine's IP
@@ -424,7 +445,7 @@ async function probeMx(mxHost, targetEmail, opts = {}) {
   let sessionId;       // null in direct mode - releaseProxy(null) is safe
 
   if (proxyResult.ok) {
-    // ── Path A: proxy connect ──
+    //  Path A: proxy connect
     const proxy = proxyResult.proxy;
     sessionId = proxy.sessionId;
 
@@ -453,7 +474,7 @@ async function probeMx(mxHost, targetEmail, opts = {}) {
     }
     socket = socksConnection.socket;
   } else if (proxyResult.code === 'PROXY_NO_CREDENTIALS' && ALLOW_DIRECT_CONNECT) {
-    // ── Path B: direct connect (DEV ONLY) ──
+    //  Path B: direct connect (DEV ONLY)
     // No proxy configured AND dev flag enabled - connect directly.
     // Most home ISPs block outbound port 25, so this may fail with
     // ECONNREFUSED/ETIMEDOUT on residential connections. From a VPS or

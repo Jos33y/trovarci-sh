@@ -6,7 +6,7 @@ import styles from '~/styles/modules/landing/FAQ.module.css';
 const QUESTIONS = [
   {
     q: "What does a credit get me?",
-    a: "$0.01 per credit. Email scoring costs 1 credit. Single email verification costs 1 credit. Phone lookup costs 2 credits. Bulk email verification gets a 5x discount (1 credit per 5 emails). Domain Checker, SMTP Tester, and DNS Generator cost zero credits.",
+    a: "A flat $0.010 per credit at any volume. Email scoring costs 1 credit. Email verification costs 1 credit per address, single or bulk. Phone lookup costs 2 credits. Domain Checker, SMTP Tester, and DNS Generator cost zero credits.",
   },
   {
     q: "Do credits expire?",
@@ -17,8 +17,8 @@ const QUESTIONS = [
     a: "Scorer grades a draft email for spam triggers, formatting issues, and missing authentication elements. Verifier checks whether an email address actually exists and accepts mail. Different jobs, different tools.",
   },
   {
-    q: "Is bulk verification faster than single?",
-    a: "Same speed, lower price. Bulk costs 1 credit per 5 emails. Single costs 1 credit per email. Use bulk for lists, single for ad-hoc checks.",
+    q: "Is bulk verification cheaper than single?",
+    a: "Same price, 1 credit per address either way. Bulk runs in the background and handles up to 50,000 addresses per job, so use it for lists and single for ad-hoc checks. Addresses we resolve without a live probe are refunded.",
   },
   {
     q: "Do you store the data I upload?",

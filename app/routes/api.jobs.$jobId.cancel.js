@@ -34,10 +34,11 @@ export async function action({ request, params }) {
     return Response.json(result, { status });
   }
 
-  // Compute kept credits via type-aware dispatcher; refund the diff.
+  // Keep only what was billable. A done row no vendor charged for is refunded.
+  const keptRows = Number.isInteger(result.billableRows) ? result.billableRows : result.processedRows;
   let creditsKept;
   try {
-    creditsKept = bulkCost(result.type, result.processedRows);
+    creditsKept = bulkCost(result.type, keptRows);
   } catch (err) {
     console.error(`[cancel] bulkCost dispatch failed for job ${result.jobId} (type=${result.type}):`, err);
     return Response.json({
@@ -78,6 +79,7 @@ export async function action({ request, params }) {
     creditsKept:     result.creditsHeld - creditsRefunded,
     creditsRefunded,
     processedRows:   result.processedRows,
+    billableRows:    keptRows,
     totalRows:       result.totalRows,
   });
 }
