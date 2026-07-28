@@ -1,10 +1,4 @@
-/**
- * Email delivery via Resend.
- *
- * Environment variables:
- *   RESEND_API_KEY     - required in production, optional in dev
- *   EMAIL_FROM_ADDRESS - sender address, e.g. 'Trovarcis <hello@trovarci.sh>'
- */
+// Transactional email delivery via Resend. Falls back to console output when RESEND_API_KEY is unset.
 
 import { Resend } from 'resend';
 
@@ -31,6 +25,11 @@ function getFromAddress() {
   );
 }
 
+// Sending domain is relay.trovarci.sh, replies go to a mailbox that exists.
+function getReplyToAddress() {
+  return process.env.EMAIL_REPLY_TO_ADDRESS || 'support@trovarcis.com';
+}
+
 async function send({ to, subject, html, text }) {
   const client = getResend();
 
@@ -44,16 +43,21 @@ async function send({ to, subject, html, text }) {
   const from = getFromAddress();
   if (!from) throw new Error('EMAIL_FROM_ADDRESS is required in production');
 
-  const { data, error } = await client.emails.send({ from, to, subject, html, text });
+  const { data, error } = await client.emails.send({
+    from,
+    to,
+    replyTo: getReplyToAddress(),
+    subject,
+    html,
+    text,
+  });
   if (error) {
     throw new Error(`Resend send failed: ${error.message || 'unknown'}`);
   }
   return { ok: true, id: data?.id };
 }
 
-// -----------------------------------------------------------------------
 // Verification code email (signup)
-// -----------------------------------------------------------------------
 
 export async function sendVerificationCodeEmail({ to, code }) {
   const subject = `${code} is your Trovarcis verification code`;
@@ -74,9 +78,7 @@ export async function sendVerificationCodeEmail({ to, code }) {
   return send({ to, subject, html: verificationCodeHtml(code), text });
 }
 
-// -----------------------------------------------------------------------
 // Password reset email
-// -----------------------------------------------------------------------
 
 export async function sendPasswordResetEmail({ to, resetUrl }) {
   const subject = 'Reset your Trovarcis password';
@@ -99,9 +101,7 @@ export async function sendPasswordResetEmail({ to, resetUrl }) {
   return send({ to, subject, html: passwordResetHtml(resetUrl), text });
 }
 
-// -----------------------------------------------------------------------
 // Signup collision email (email enumeration prevention)
-// -----------------------------------------------------------------------
 
 /**
  * Notify the existing account holder when someone attempts to sign up
@@ -134,9 +134,7 @@ export async function sendSignupCollisionEmail({ to }) {
   return send({ to, subject, html: signupCollisionHtml(to), text });
 }
 
-// -----------------------------------------------------------------------
 // Account created email (welcome / verification success)
-// -----------------------------------------------------------------------
 
 /**
  * Welcome email after the user verifies their signup. Confirms account is
@@ -166,9 +164,7 @@ export async function sendAccountCreatedEmail({ to, welcomeCredits = 10 }) {
   return send({ to, subject, html: accountCreatedHtml(welcomeCredits), text });
 }
 
-// -----------------------------------------------------------------------
 // Payment receipt email (fires after credits are granted on a confirmed payment)
-// -----------------------------------------------------------------------
 
 // Sent from Cryptomus + Stripe webhook handlers after completePayment grants
 // credits, only on the non-replay, non-underpaid path. Confirms the purchase,
@@ -224,9 +220,7 @@ export async function sendPaymentReceiptEmail({
   });
 }
 
-// -----------------------------------------------------------------------
 // Password changed email (security notification)
-// -----------------------------------------------------------------------
 
 /**
  * Confirmation email after a password reset succeeds. Standard security
@@ -256,9 +250,7 @@ export async function sendPasswordChangedEmail({ to }) {
   return send({ to, subject, html: passwordChangedHtml(), text });
 }
 
-// -----------------------------------------------------------------------
 // HTML templates
-// -----------------------------------------------------------------------
 
 function verificationCodeHtml(code) {
   return `<!DOCTYPE html>

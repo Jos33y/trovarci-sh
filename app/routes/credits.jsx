@@ -154,7 +154,7 @@ const FAQ_ITEMS_BASE = [
   },
   {
     q: "What's your refund policy?",
-    a: '15-day money-back guarantee on unused credits. Email support@trovarci.sh and we will process a full refund.',
+    a: '15-day money-back guarantee on unused credits. Email support@trovarcis.com and we will process a full refund.',
   },
 ];
 

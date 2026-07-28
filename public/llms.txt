@@ -25,7 +25,7 @@ Trovarcis Reach is built for anyone who sends email, verifies contacts, or wants
 ## Company
 
 - [Credits](https://trovarci.sh/credits): Flat $0.010 per credit at any volume, from $5. No monthly subscription. Credits expire 12 months from purchase.
-- [Contact](https://trovarci.sh/contact): Contact form. Business inquiries: hello@trovarcis.com. Product support: support@trovarci.sh.
+- [Contact](https://trovarci.sh/contact): Contact form. Business inquiries: hello@trovarcis.com. Product support: support@trovarcis.com.
 
 ## Optional
 

@@ -41,7 +41,7 @@ const HOME_SCHEMA = {
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'customer support',
-        email: 'support@trovarci.sh',
+        email: 'support@trovarcis.com',
         availableLanguage: 'English',
       },
     },

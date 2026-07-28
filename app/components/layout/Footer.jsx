@@ -38,7 +38,7 @@ const COLUMNS = [
       { label: "Contact", href: "/contact" },
       { label: "X (Twitter)", href: "https://x.com/trovarcisreach", external: true },
       { label: "GitHub", href: "https://github.com/trovarcis", external: true },
-      { label: "support@trovarci.sh", href: "mailto:support@trovarci.sh", external: true },
+      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com", external: true },
     ],
   },
 ];

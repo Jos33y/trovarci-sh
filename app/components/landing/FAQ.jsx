@@ -30,7 +30,7 @@ const QUESTIONS = [
   },
   {
     q: "What's your refund policy?",
-    a: "15-day money-back guarantee on unused credits. Email support@trovarci.sh and we'll process a full refund, no questions.",
+    a: "15-day money-back guarantee on unused credits. Email support@trovarcis.com and we'll process a full refund, no questions.",
   },
   {
     q: "Is there a free plan?",
