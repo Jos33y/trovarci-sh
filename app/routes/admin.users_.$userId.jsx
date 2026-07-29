@@ -1,5 +1,6 @@
 // Admin user detail - KPI summary, nested tables, credit adjustment form, audit log.
 import { useState } from 'react';
+import { createHash } from 'node:crypto';
 import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect } from 'react-router';
 import {
   requireAdmin,
@@ -25,6 +26,13 @@ export const meta = ({ data }) => [
 ];
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// credit_transactions.reference_id is uuid, so hash the idempotency key into v5 shape.
+function referenceUuid(key) {
+  const h = createHash('sha256').update(key).digest('hex');
+  const variant = ((parseInt(h[16], 16) & 0x3) | 0x8).toString(16);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${variant}${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
 
 export async function loader({ request, params }) {
   await requireAdmin(request);
@@ -80,17 +88,11 @@ export async function action({ request, params }) {
     return data({ errors: { _form: 'Unknown action' } }, { status: 400 });
   }
 
+  // Amount and reason are in the key so a corrected re-submit is not swallowed as a double-click.
   const minuteBucket = Math.floor(Date.now() / 60_000);
-  const referenceId = `admin_${creditType}_${admin.id}_${minuteBucket}`;
-
-  await logAdminAction(null, {
-    actorId: admin.id,
-    actionType,
-    targetUserId: params.userId,
-    targetKind: 'user',
-    reason,
-    context: { amount, credit_type: creditType, reference_id: referenceId },
-  });
+  const referenceId = referenceUuid(
+    `admin_${creditType}_${admin.id}_${params.userId}_${amount}_${reason}_${minuteBucket}`
+  );
 
   const result = await grantCredits(params.userId, amount, creditType, {
     referenceId,
@@ -99,6 +101,22 @@ export async function action({ request, params }) {
       actor_id: admin.id,
       actor_email: admin.email,
       reason,
+    },
+  });
+
+  // Logged after the grant so the audit trail cannot claim a credit change that failed.
+  await logAdminAction(null, {
+    actorId: admin.id,
+    actionType,
+    targetUserId: params.userId,
+    targetKind: 'user',
+    reason,
+    context: {
+      amount,
+      credit_type: creditType,
+      reference_id: referenceId,
+      transaction_id: result.transactionId,
+      idempotent: result.idempotent,
     },
   });
 
