@@ -135,7 +135,7 @@ Four pieces of advice you'll find on the top-10 SERP pages that don't work:
 
 Content and header fixes only work if your domain authentication is clean. A subject line rewrite that still lands in Promotions because DMARC is failing wastes the fix.
 
-Run your domain through the [Domain Checker](/domain) before and after any content change. The tool runs 25+ checks across SPF syntax and alignment, DKIM selector presence, DMARC policy and reporting, mail server configuration, SSL/TLS on the mail server, and blacklist status across 15+ RBLs.
+Run your domain through the [Domain Checker](/domain) before and after any content change. The tool runs 25+ checks across SPF syntax and alignment, DKIM selector presence, DMARC policy and reporting, mail server configuration, SSL/TLS on the mail server, and blacklist status across the major IP and domain blacklists.
 
 The output tells you which specific authentication or reputation factor is failing, if any. Fix those first. Then the content changes above will actually stick.
 

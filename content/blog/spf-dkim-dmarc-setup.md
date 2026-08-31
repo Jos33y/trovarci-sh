@@ -192,7 +192,7 @@ After configuring all three records, verify the chain:
 
 If any one fails, go back to that specific record and double-check the configuration. DNS changes can take up to 48 hours to propagate globally, though most take effect within 15 minutes.
 
-Or run the [Domain Checker](/domain) against your domain. It verifies SPF syntax and alignment, DKIM selector presence, DMARC policy and reporting configuration, mail server configuration, SSL/TLS on the mail server, and blacklist listings across 15+ RBLs in one pass. Green across the board means your authentication baseline is correctly configured.
+Or run the [Domain Checker](/domain) against your domain. It verifies SPF syntax and alignment, DKIM selector presence, DMARC policy and reporting configuration, mail server configuration, SSL/TLS on the mail server, and blacklist listings across the major IP and domain blacklists in one pass. Green across the board means your authentication baseline is correctly configured.
 
 ## Beyond DMARC: BIMI, MTA-STS, TLS-RPT
 

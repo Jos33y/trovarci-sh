@@ -25,7 +25,7 @@ const SECTIONS = [
 const FAQ_ITEMS = [
   {
     q: 'What does the Domain Health Checker test?',
-    a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation across 15+ blacklists, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
+    a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation across 7 blacklist zones, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
   },
   {
     q: 'Is my domain information stored or shared?',
@@ -53,7 +53,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What blacklists does the checker query?',
-    a: 'We query reputable public DNSBLs including Spamhaus ZEN, SpamCop, Barracuda BRBL, SORBS, UCEPROTECT, PSBL, Mailspike, and blocklist.de for IPs, plus Spamhaus DBL and SURBL for domains. Each listing links directly to the blacklist\'s removal or lookup page. Some zones like Spamhaus DQS or Barracuda paid tier offer higher-volume access; we use the publicly queryable versions.',
+    a: 'We query 7 public DNSBL zones: Spamhaus ZEN, SpamCop, Barracuda BRBL, SORBS and PSBL for IPs, plus Spamhaus DBL and SURBL for domains. Each listing links directly to the blacklist\'s removal or lookup page. Some zones like Spamhaus DQS or Barracuda paid tier offer higher-volume access; we use the publicly queryable versions.',
   },
   {
     q: 'How does this compare to MXToolbox?',
@@ -86,7 +86,7 @@ const CATEGORIES = [
     label: 'Reputation',
     title: 'Blacklists can block your email silently',
     icon: ReputationIcon,
-    text: 'If your IP or domain appears on a blacklist, receiving servers may reject your email without telling you. We check 15+ major blacklists including Spamhaus, Barracuda, and SpamCop.',
+    text: 'If your IP or domain appears on a blacklist, receiving servers may reject your email without telling you. We check 7 blacklist zones, 5 for IPs and 2 for domains, including Spamhaus, Barracuda and SpamCop.',
   },
   {
     label: 'Security',
@@ -136,10 +136,7 @@ const BLACKLISTS = [
   { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'IP', removal: 'Auto-expires after 24h of no complaints' },
   { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'IP', removal: 'Removal form, typically 12-24h' },
   { name: 'SORBS', zone: 'dnsbl.sorbs.net', subject: 'IP', removal: 'Manual request, response times vary' },
-  { name: 'UCEPROTECT L1', zone: 'dnsbl-1.uceprotect.net', subject: 'IP', removal: 'Auto-delist after 7 days clean' },
   { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'IP', removal: 'Self-service via psbl.surriel.com' },
-  { name: 'Mailspike', zone: 'bl.mailspike.net', subject: 'IP', removal: 'Auto-expires based on reputation' },
-  { name: 'blocklist.de', zone: 'bl.blocklist.de', subject: 'IP', removal: 'Auto-delist after 48h of no activity' },
   { name: 'SURBL', zone: 'multi.surbl.org', subject: 'URI', removal: 'Manual, requires proof of remediation' },
 ];
 
@@ -147,7 +144,7 @@ const COMPARISON = [
   { check: 'SPF, DKIM, DMARC parse', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'Yes' },
   { check: 'BIMI', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'Yes' },
   { check: 'MX + STARTTLS', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'No' },
-  { check: 'Blacklist zones', us: '10+ core', mxtoolbox: '90+ zones', mailtester: '8 zones', dmarcian: 'None' },
+  { check: 'Blacklist zones', us: '7 zones', mxtoolbox: '90+ zones', mailtester: '8 zones', dmarcian: 'None' },
   { check: 'SSL and HTTPS', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
   { check: 'HSTS and CAA', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
   { check: 'DNSSEC validation', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'No' },

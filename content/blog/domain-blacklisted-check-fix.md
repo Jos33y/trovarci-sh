@@ -51,7 +51,7 @@ Spamhaus is by far the most impactful. If you're on Spamhaus SBL or XBL, almost 
 
 You can check manually by visiting each blacklist's lookup tool. Spamhaus has check.spamhaus.org, Barracuda has barracudacentral.org/lookups, and so on. Each takes 30 seconds, so covering the 6 major lists is 3 to 5 minutes of work.
 
-The faster approach: run one aggregate check that queries multiple blacklists in a single pass. The [Domain Checker](/domain) covers 15+ blacklists (Spamhaus SBL/XBL/PBL, Barracuda, SORBS multi-category, SpamCop, CBL, UCEPROTECT, and more) plus SPF, DKIM, DMARC, mail server configuration, SSL/TLS, and DNS setup. Paste a domain, wait 10 seconds, get the full report. Free, no signup.
+The faster approach: run one aggregate check that queries multiple blacklists in a single pass. The [Domain Checker](/domain) queries Spamhaus ZEN and DBL, SpamCop, Barracuda, SORBS, PSBL and SURBL in a single pass, plus SPF, DKIM, DMARC, mail server configuration, SSL/TLS, and DNS setup. Paste a domain, wait 10 seconds, get the full report. Free, no signup.
 
 ## Monitor Gmail-specific reputation with Postmaster Tools
 
@@ -95,7 +95,7 @@ Each blacklist has its own removal process:
 
 Prevention is far easier than removal. These practices keep you off blacklists:
 
-**Clean your list regularly.** Remove bounced addresses immediately. Run your list through the [Email Verifier](/verify) before campaigns to catch invalid addresses via live SMTP probe. Cleaning before sending prevents most bounce-driven blacklistings.
+**Clean your list regularly.** Remove bounced addresses immediately. Run your list through the [Email Verifier](/verify) before campaigns to catch invalid addresses before they bounce. Cleaning before sending prevents most bounce-driven blacklistings.
 
 **Monitor Google Postmaster Tools weekly.** Covered above. React to any score dropping from High to Medium before it drops further. This is your early warning system.
 
@@ -113,7 +113,7 @@ Prevention is far easier than removal. These practices keep you off blacklists:
 
 Three actions ranked by impact:
 
-1. **Check your current domain health.** Run your sending domain through the [Domain Checker](/domain). It checks SPF, DKIM, DMARC, mail server config, SSL/TLS, and blacklist status across 15+ RBLs in one pass. Free, no signup.
+1. **Check your current domain health.** Run your sending domain through the [Domain Checker](/domain). It checks SPF, DKIM, DMARC, mail server config, SSL/TLS, and blacklist status across the major IP and domain blacklists in one pass. Free, no signup.
 2. **Verify Google Postmaster Tools.** If Gmail is a meaningful percentage of your recipients (in 2026, it usually is), this is the first monitoring surface to configure. Reading the dashboards weekly catches issues before they escalate into blacklistings.
 3. **Clean your next send before it goes out.** Run the recipient list through the [Email Verifier](/verify) to remove invalid addresses that would bounce and hurt your reputation on every send.
 

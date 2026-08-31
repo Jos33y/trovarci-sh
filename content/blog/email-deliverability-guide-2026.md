@@ -126,14 +126,14 @@ New domains start with no reputation, which is almost as bad as bad reputation. 
 
 Concrete thresholds enforced in 2026:
 
-- **Bounce rate under 2%.** Ideally under 0.5%. A bounce means an address rejected your mail. High bounce rates signal you're not maintaining your list or you bought it. Clean before sending: the [Email Verifier](/verify) removes invalid addresses via live SMTP probe before they burn your reputation.
+- **Bounce rate under 2%.** Ideally under 0.5%. A bounce means an address rejected your mail. High bounce rates signal you're not maintaining your list or you bought it. Clean before sending: the [Email Verifier](/verify) removes invalid addresses before they burn your reputation.
 - **Spam complaint rate under 0.3%.** Enforced hard by Google as covered above. Complaints are almost entirely a permission problem, not a content problem. If people are complaining, they didn't opt in clearly or the sending frequency exceeded expectations.
 - **Engagement rate above 20% opens.** Below that, Gmail assumes recipients don't want your mail regardless of content.
 - **Volume consistency.** Send 1,000 daily every day for a month, then jump to 20,000, and your reputation drops for two weeks even if all 20,000 were legitimate. Ramp gradually.
 
 The tool that shows you what Gmail sees: [Google Postmaster Tools](https://postmaster.google.com). Free. Requires verifying domain ownership. Shows your Gmail-specific reputation across four scores (IP reputation, domain reputation, feedback loop, spam rate) plus authentication pass rates and TLS negotiation stats. If you send any real volume to Gmail addresses and don't monitor this dashboard, you're operating blind.
 
-Domain and IP reputation degrade over time from small issues that compound: an old sending service whose SPF include never got removed and now points at a shut-down IP, a DKIM key that expired six months ago, a list segment that hasn't been cleaned in two years. Run your domain through the [Domain Checker](/domain) monthly. 25+ checks across SPF, DKIM, DMARC, mail server config, SSL/TLS, and 15+ blacklists.
+Domain and IP reputation degrade over time from small issues that compound: an old sending service whose SPF include never got removed and now points at a shut-down IP, a DKIM key that expired six months ago, a list segment that hasn't been cleaned in two years. Run your domain through the [Domain Checker](/domain) monthly. 25+ checks across SPF, DKIM, DMARC, mail server config, SSL/TLS, and blacklist status.
 
 If your domain is already on a blacklist, the full diagnosis and delisting workflow: [Is your domain blacklisted? How to check and fix it](/blog/domain-blacklisted-check-fix).
 
@@ -180,7 +180,7 @@ Build a repeatable diagnostic loop and run it before every campaign or major sen
 
 1. **Domain health check.** [Domain Checker](/domain) verifies SPF, DKIM, DMARC, mail server config, SSL/TLS, and blacklist status in one pass. Free, no signup.
 2. **Content score.** [Email Scorer](/score) grades the specific message you're about to send against Gmail Promotions and spam-filter signals. Returns concrete issues to fix.
-3. **List clean.** [Email Verifier](/verify) removes invalid addresses via live SMTP probe before they bounce and damage your reputation.
+3. **List clean.** [Email Verifier](/verify) removes invalid addresses before they bounce and damage your reputation.
 4. **Authentication record audit.** [DNS Record Generator](/records) counts SPF lookups in real time and flags records approaching the RFC 7208 10-lookup cap. Also generates DKIM, DMARC, MTA-STS, and BIMI records.
 5. **Send test.** [SMTP Tester](/smtp-test) probes your sending server and shows exactly where a connection succeeds or fails.
 
