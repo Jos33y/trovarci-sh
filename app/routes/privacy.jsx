@@ -51,7 +51,7 @@ export default function Privacy() {
 
           <div className={styles.content}>
             <p>
-              Trovarcis LLC ("Trovarcis", "we", "us") operates trovarci.sh and the
+              Trovarcis Reach ("Trovarcis", "we", "us") operates trovarci.sh and the
               Trovarcis Reach desktop and mobile applications. This policy explains
               how we handle your data when you use our products and services.
             </p>
@@ -257,7 +257,7 @@ export default function Privacy() {
             <div className={styles.contactBox}>
               <p>For privacy-related questions or data requests:</p>
               <p><strong>Email:</strong> <a href="mailto:support@trovarcis.com">support@trovarcis.com</a></p>
-              <p><strong>Company:</strong> Trovarcis LLC, Wyoming, USA</p>
+              <p><strong>Operator:</strong> Trovarcis Reach</p>
             </div>
           </div>
         </div>

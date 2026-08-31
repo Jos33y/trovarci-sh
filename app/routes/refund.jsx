@@ -147,7 +147,7 @@ export default function Refund() {
               <p>For refund requests or billing questions:</p>
               <p><strong>Email:</strong> <a href="mailto:support@trovarcis.com">support@trovarcis.com</a></p>
               <p><strong>Response time:</strong> Within 2 business days</p>
-              <p><strong>Company:</strong> Trovarcis LLC, Wyoming, USA</p>
+              <p><strong>Operator:</strong> Trovarcis Reach</p>
             </div>
           </div>
         </div>

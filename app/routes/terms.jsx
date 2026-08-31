@@ -22,7 +22,6 @@ const SECTIONS = [
   { id: 'intellectual-property', label: 'Intellectual property' },
   { id: 'disclaimer', label: 'Disclaimer and liability' },
   { id: 'termination', label: 'Termination' },
-  { id: 'governing-law', label: 'Governing law' },
   { id: 'changes', label: 'Changes to terms' },
   { id: 'contact', label: 'Contact' },
 ];
@@ -61,8 +60,8 @@ export default function Terms() {
               of Service. If you do not agree, do not use our products or services.
             </p>
             <p>
-              These terms constitute a legal agreement between you and Trovarcis LLC
-              ("Trovarcis", "we", "us"), a Wyoming limited liability company.
+              These terms constitute a legal agreement between you and the operator of
+              Trovarcis Reach ("Trovarcis", "we", "us").
             </p>
 
             <h2 id="description">Description of service</h2>
@@ -252,7 +251,7 @@ export default function Terms() {
             <h2 id="intellectual-property">Intellectual property</h2>
             <p>
               Trovarcis Reach, including its code, design, logo, name, documentation,
-              and the Arcis AI engine, are the intellectual property of Trovarcis LLC.
+              and the Arcis AI engine, are the intellectual property of Trovarcis Reach.
               Your purchase grants a license to use the software, not ownership of
               any intellectual property.
             </p>
@@ -276,7 +275,7 @@ export default function Terms() {
               <li>The software will be compatible with all systems or configurations.</li>
             </ul>
             <p>
-              To the maximum extent permitted by law, Trovarcis LLC shall not be
+              To the maximum extent permitted by law, Trovarcis Reach shall not be
               liable for any indirect, incidental, special, consequential, or
               punitive damages, or any loss of profits, revenue, data, or business
               opportunities arising from your use of the software.
@@ -297,17 +296,6 @@ export default function Terms() {
               ceases. Data stored locally on your device remains yours.
             </p>
 
-            <h2 id="governing-law">Governing law</h2>
-            <p>
-              These terms are governed by the laws of the State of Wyoming, United
-              States, without regard to its conflict of laws provisions.
-            </p>
-            <p>
-              Any disputes arising from these terms or your use of Trovarcis Reach
-              shall be resolved in the state or federal courts located in Wyoming.
-              You consent to the personal jurisdiction of such courts.
-            </p>
-
             <h2 id="changes">Changes to terms</h2>
             <p>
               We may update these terms from time to time. When we make material
@@ -326,7 +314,7 @@ export default function Terms() {
               <p>For questions about these terms:</p>
               <p><strong>General:</strong> <a href="mailto:support@trovarcis.com">support@trovarcis.com</a></p>
               <p><strong>Abuse reports:</strong> <a href="mailto:abuse@trovarcis.com">abuse@trovarcis.com</a></p>
-              <p><strong>Company:</strong> Trovarcis LLC, Wyoming, USA</p>
+              <p><strong>Operator:</strong> Trovarcis Reach</p>
             </div>
           </div>
         </div>

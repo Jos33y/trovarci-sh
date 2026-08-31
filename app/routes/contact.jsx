@@ -114,10 +114,6 @@ export default function ContactPage() {
                   <dt className={styles.infoLabel}>Response time</dt>
                   <dd className={styles.infoValue}>Within 24 hours</dd>
                 </div>
-                <div className={styles.infoItem}>
-                  <dt className={styles.infoLabel}>Office</dt>
-                  <dd className={styles.infoValue}>Wyoming, USA</dd>
-                </div>
               </dl>
             </aside>
 

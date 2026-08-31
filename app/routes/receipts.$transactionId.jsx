@@ -136,8 +136,7 @@ export default function ReceiptPage() {
           <div className={styles.parties}>
             <div className={styles.partyBlock}>
               <div className={styles.partyLabel}>From</div>
-              <div className={styles.partyName}>Trovarcis LLC</div>
-              <div className={styles.partyDetail}>Wyoming, USA</div>
+              <div className={styles.partyName}>Trovarcis Reach</div>
               <div className={styles.partyDetail}>support@trovarcis.com</div>
               <div className={styles.partyDetail}>trovarci.sh</div>
             </div>
@@ -221,7 +220,7 @@ export default function ReceiptPage() {
               Questions about this {isUsage ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
             </p>
             <p className={styles.footerFine}>
-              Trovarcis LLC &middot; Wyoming, USA &middot; {formatDateIso(receipt.createdAt)}
+              Trovarcis Reach &middot; {formatDateIso(receipt.createdAt)}
             </p>
           </div>
 

@@ -88,7 +88,7 @@ export default function Footer() {
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            <span className={styles.copyrightSymbol} aria-hidden="true" /> 2026 Trovarcis LLC <span className={styles.dot} aria-hidden="true" /> Wyoming, USA
+            <span className={styles.copyrightSymbol} aria-hidden="true" /> 2026 Trovarcis Reach
           </p>
         </div>
       </div>

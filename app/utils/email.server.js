@@ -712,7 +712,7 @@ function paymentReceiptHtml({ shortId, receiptUrl, packageName, creditsStr, amou
         </tr>
       </table>
       <div style="margin-top:24px;font-size:12px;color:#52525B;">
-        Trovarcis LLC &middot; Wyoming, USA &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
+        Trovarcis Reach &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
       </div>
     </td>
   </tr>
