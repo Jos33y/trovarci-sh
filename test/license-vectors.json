@@ -1,0 +1,32 @@
+{
+  "note": "Fixture keypair. Never used for real licenses. Both repos must reproduce these keys byte for byte.",
+  "spec": "decisions-sender-2026-08-24.md, the license key format section",
+  "publicKeyDer": "MCowBQYDK2VwAyEAR9iUiOTYM5HDweVOvlBEhd17x35KbdEJuM2MgrLGDhk=",
+  "privateKeyPem": "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIIVNC3gPgJBrvWDjFBzWgc85iLbwHmw15VIz1SRyKdKv\n-----END PRIVATE KEY-----\n",
+  "vectors": [
+    {
+      "name": "single entitlement",
+      "licenseId": "bc8e5675-480f-471e-b471-77f3f55d7f56",
+      "issuedAt": "2026-08-27T01:10:46.000Z",
+      "entitlements": 1,
+      "payloadHex": "bc8e5675480f471eb47177f3f55d7f566a8f8e9600000001",
+      "key": "TROV1.vI5WdUgPRx60cXfz9V1_VmqPjpYAAAABf5FLtVuOcfeRJdloZs5DlGchjah65xmLEJr8yswAWIenqVE_NN3fOvE9vUHyfTrUzA1TJ0PU65o5G4FDCxFPDw"
+    },
+    {
+      "name": "no entitlements",
+      "licenseId": "00000000-0000-4000-8000-000000000000",
+      "issuedAt": "2020-01-01T00:00:00.000Z",
+      "entitlements": 0,
+      "payloadHex": "000000000000400080000000000000005e0be10000000000",
+      "key": "TROV1.AAAAAAAAQACAAAAAAAAAAF4L4QAAAAAAYci9rQ8qGvd9Gcctr-9t-bwJeaaKmahzmZUswrhusFrZvlKdM0Ud18f-GyFHSANqx_Rt5Aq3rOf6EYG0DZgQCw"
+    },
+    {
+      "name": "all 32 slots",
+      "licenseId": "ffffffff-ffff-4fff-bfff-ffffffffffff",
+      "issuedAt": "2106-02-07T06:28:15.000Z",
+      "entitlements": 4294967295,
+      "payloadHex": "ffffffffffff4fffbfffffffffffffffffffffffffffffff",
+      "key": "TROV1.________T_-_____________________80gJj9SWOR7II4KltvZBGndgpciEfxsmJMDsvN84eQ1WSv0-92tG03sjB5jVu_dhK4ByVr5GGd3fIfCzItksCA"
+    }
+  ]
+}

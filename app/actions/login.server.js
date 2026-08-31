@@ -14,6 +14,7 @@ import {
   validateEmail,
   safeRedirect,
 } from '~/utils/validation.server.js';
+import { safeFormData } from '~/utils/formData.js';
 
 function clientIp(request) {
   const fwd = request.headers.get('x-forwarded-for');
@@ -40,7 +41,9 @@ function recordLoginError(request, code, extra = {}) {
 }
 
 export async function loginAction({ request }) {
-  const form = await request.formData();
+  // Return before auth_submit fires. A malformed probe is not a login attempt.
+  const form = await safeFormData(request);
+  if (!form) return data({ errors: { _form: GENERIC_AUTH_ERROR } }, { status: 400 });
 
   const emailRaw    = form.get('email');
   const passwordRaw = form.get('password');

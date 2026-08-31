@@ -15,6 +15,7 @@ import { peekResetToken, consumeResetToken } from '~/utils/passwordReset.server'
 import { updatePassword } from '~/utils/auth.server';
 import { revokeAllUserSessions } from '~/utils/session.server';
 import { validatePassword } from '~/utils/validation.server';
+import { safeFormData } from '~/utils/formData';
 import { sql } from '~/utils/db.server';
 import { sendPasswordChangedEmail } from '~/utils/email.server';
 import styles from '~/styles/modules/routes/signup.module.css';
@@ -44,7 +45,9 @@ export async function loader({ request }) {
 }
 
 export async function action({ request }) {
-  const form = await request.formData();
+  const form = await safeFormData(request);
+  if (!form) return data({ errors: { _form: 'Invalid request' } }, { status: 400 });
+
   const token    = String(form.get('token') || '');
   const password = String(form.get('password') || '');
   const confirm  = String(form.get('confirmPassword') || '');

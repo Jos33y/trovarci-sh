@@ -26,6 +26,7 @@ import {
   validateVerificationCode,
   safeRedirect,
 } from '~/utils/validation.server';
+import { safeFormData } from '~/utils/formData';
 
 function clientIp(request) {
   const fwd = request.headers.get('x-forwarded-for');
@@ -50,7 +51,9 @@ function recordSignupError(request, step, code, extra = {}) {
 }
 
 export async function signupAction({ request }) {
-  const form = await request.formData();
+  const form = await safeFormData(request);
+  if (!form) return data({ errors: { _form: 'Invalid request' } }, { status: 400 });
+
   const intent = String(form.get('intent') || 'create_account');
 
   recordEvent(buildEventFromRequest(request, {

@@ -11,6 +11,7 @@ import { sql } from '~/utils/db.server';
 import { issuePasswordResetToken } from '~/utils/passwordReset.server';
 import { sendPasswordResetEmail } from '~/utils/email.server';
 import { validateEmail } from '~/utils/validation.server';
+import { safeFormData } from '~/utils/formData';
 import {
   checkAndIncrement,
   rateLimitKeys,
@@ -33,7 +34,10 @@ export async function loader({ request }) {
 /* Always return the same "if an account exists, we sent an email" message to prevent enumeration. */
 /* Rate limit by IP (drive-by enumeration) and by email (targeted flooding). */
 export async function action({ request }) {
-  const form = await request.formData();
+  // A malformed body carries no email to protect, so 400 leaks nothing.
+  const form = await safeFormData(request);
+  if (!form) return data({ errors: { _form: 'Invalid request' } }, { status: 400 });
+
   const emailResult = validateEmail(form.get('email'));
 
   // Rate limit regardless of email validity, to prevent format-probe attacks.
