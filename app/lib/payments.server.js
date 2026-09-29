@@ -15,6 +15,7 @@
 
 import { sql } from '~/utils/db.server';
 import { grantCredits } from '~/lib/credits.server';
+import { CREDIT_EXPIRY_MONTHS } from '~/utils/creditsConfig.server';
 
 // -----------------------------------------------------------------------
 // Create
@@ -129,7 +130,6 @@ const UNDERPAYMENT_TOLERANCE_CENTS = (() => {
  *   newBalance: number,
  *   transactionId: string,
  *   userEmail?: string,
- *   userName?: string,
  *   underpaid?: boolean,
  *   shortfallCents?: number,
  * }>}
@@ -244,7 +244,6 @@ export async function completePayment(paymentId, gatewayData = {}) {
       newBalance: grantResult.newBalance,
       transactionId: grantResult.transactionId,
       userEmail: grantResult.userEmail,
-      userName: grantResult.userName,
     };
   });
 }
@@ -276,7 +275,7 @@ async function grantCreditsInTx(tx, { userId, amount, referenceId, metadata }) {
   }
 
   const [user] = await tx`
-    SELECT credits_balance, email, name
+    SELECT credits_balance, email
     FROM users
     WHERE id = ${userId} AND deleted_at IS NULL
     FOR UPDATE
@@ -294,13 +293,17 @@ async function grantCreditsInTx(tx, { userId, amount, referenceId, metadata }) {
     WHERE id = ${userId}
   `;
 
+  // Must match grantCredits: purchases carry expiry and FIFO remaining_amount.
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + CREDIT_EXPIRY_MONTHS);
+
   const [row] = await tx`
-    INSERT INTO credit_transactions (user_id, delta, balance_after, type, reference_id, metadata)
-    VALUES (${userId}, ${amount}, ${newBalance}, 'purchase', ${referenceId}, ${tx.json(metadata)})
+    INSERT INTO credit_transactions (user_id, delta, balance_after, type, reference_id, metadata, expires_at, remaining_amount)
+    VALUES (${userId}, ${amount}, ${newBalance}, 'purchase', ${referenceId}, ${tx.json(metadata)}, ${expiresAt}, ${amount})
     RETURNING id
   `;
 
-  return { transactionId: row.id, newBalance, idempotent: false, userEmail: user.email, userName: user.name };
+  return { transactionId: row.id, newBalance, idempotent: false, userEmail: user.email };
 }
 
 // -----------------------------------------------------------------------
