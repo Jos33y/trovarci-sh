@@ -29,6 +29,7 @@ const COLUMNS = [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Refund Policy", href: "/refund" },
+      { label: "Acceptable Use", href: "/acceptable-use" },
     ],
   },
   {
@@ -88,7 +89,7 @@ export default function Footer() {
 
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            <span className={styles.copyrightSymbol} aria-hidden="true" /> 2026 Trovarcis Reach
+            <span className={styles.copyrightSymbol} aria-hidden="true" /> 2026 Trovarcis, operated by Remvolabs
           </p>
         </div>
       </div>

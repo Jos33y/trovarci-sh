@@ -24,6 +24,7 @@ const STATIC_URLS = [
     '/privacy',
     '/terms',
     '/refund',
+    '/acceptable-use',
 ];
 
 async function getBlogPosts() {
