@@ -38,10 +38,13 @@ const VALID_ACTION_TYPES = new Set([
   'error_mark_resolved',
   'user_role_change',
   'contact_message_status_change',
+  'license_issue',
+  'license_revoke',
+  'license_device_release',
 ]);
 
 const VALID_TARGET_KINDS = new Set([
-  'user', 'payment', 'job', 'transaction', 'error_event', 'contact_message',
+  'user', 'payment', 'job', 'transaction', 'error_event', 'contact_message', 'license',
 ]);
 
 /**

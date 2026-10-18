@@ -39,7 +39,8 @@ function shape(row, liveDevices = null) {
 
 // Returns the issued license including its key. The key is stored so "I lost the email"
 // is a dashboard lookup rather than a re-sign, which would produce a different key.
-export async function issueLicense({ userId, entitlements = ['sender'], maxDevices = DEFAULT_MAX_DEVICES, paymentReference = null, issuedBy = null }) {
+// Pass a transaction as db when the caller writes an audit row that must commit with it.
+export async function issueLicense({ userId, entitlements = ['sender'], maxDevices = DEFAULT_MAX_DEVICES, paymentReference = null, issuedBy = null }, db = sql) {
   const licenseId = randomUUID();
   const issuedAt = new Date();
   const mask = toMask(entitlements);
@@ -47,7 +48,7 @@ export async function issueLicense({ userId, entitlements = ['sender'], maxDevic
   const payload = encodePayload({ licenseId, issuedAt: issuedAt.toISOString(), entitlements: mask });
   const licenseKey = formatKey(payload, sign(null, payload, getPrivateKey()));
 
-  const [row] = await sql`
+  const [row] = await db`
     INSERT INTO licenses
       (id, user_id, license_key, product, entitlements, max_devices, payment_reference, issued_by, issued_at)
     VALUES
@@ -145,8 +146,8 @@ async function deviceSummary(row) {
   return { used: await countLiveDevices(row.id), allowed: row.max_devices };
 }
 
-export async function releaseDevice({ licenseId, activationId }) {
-  const [row] = await sql`
+export async function releaseDevice({ licenseId, activationId }, db = sql) {
+  const [row] = await db`
     UPDATE license_activations
     SET released_at = now()
     WHERE id = ${activationId} AND license_id = ${licenseId} AND released_at IS NULL
@@ -155,8 +156,8 @@ export async function releaseDevice({ licenseId, activationId }) {
   return { ok: Boolean(row) };
 }
 
-export async function revokeLicense({ licenseId, reason }) {
-  const [row] = await sql`
+export async function revokeLicense({ licenseId, reason }, db = sql) {
+  const [row] = await db`
     UPDATE licenses
     SET status = 'revoked', revoked_at = now(), revoked_reason = ${reason}
     WHERE id = ${licenseId} AND status = 'active'
@@ -173,3 +174,5 @@ export async function listLicenseDevices(licenseId) {
     ORDER BY activated_at ASC
   `;
 }
+
+export { DEFAULT_MAX_DEVICES };

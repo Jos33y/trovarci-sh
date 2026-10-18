@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { TrovarcisAdminLogo } from '~/components/shared/Logo';
 import {
   GaugeIcon, UsersIcon, CardIcon, LayersIcon, EnvelopeIcon,
-  ChartIcon, FunnelIcon, RouteIcon, AlertIcon,
+  ChartIcon, FunnelIcon, RouteIcon, AlertIcon, KeyIcon,
 } from '~/components/icons';
 import NavItem from './NavItem';
 import styles from '~/styles/modules/admin/shell/Sidebar.module.css';
@@ -20,6 +20,7 @@ const GROUPS = [
     items: [
       { to: '/admin/users',    label: 'Users',    icon: UsersIcon },
       { to: '/admin/payments', label: 'Payments', icon: CardIcon },
+      { to: '/admin/licenses', label: 'Licenses', icon: KeyIcon },
       { to: '/admin/jobs',     label: 'Jobs',     icon: LayersIcon },
       { to: '/admin/messages', label: 'Messages', icon: EnvelopeIcon },
     ],

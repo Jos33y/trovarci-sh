@@ -16,6 +16,7 @@ export { default as EnvelopeIcon } from './EnvelopeIcon';
 export { default as FunnelIcon } from './FunnelIcon';
 export { default as GaugeIcon } from './GaugeIcon';
 export { default as GlobeIcon } from './GlobeIcon';
+export { default as KeyIcon } from './KeyIcon';
 export { default as LayersIcon } from './LayersIcon';
 export { default as LockIcon } from './LockIcon';
 export { default as MenuIcon } from './MenuIcon';

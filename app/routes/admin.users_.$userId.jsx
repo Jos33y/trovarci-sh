@@ -1,7 +1,7 @@
-// Admin user detail - KPI summary, nested tables, credit adjustment form, audit log.
+// Admin user detail - KPI summary, Sender licenses, nested tables, credit adjustment form, audit log.
 import { useState } from 'react';
-import { createHash } from 'node:crypto';
-import { Link, Form, useLoaderData, useActionData, useNavigation, data, redirect } from 'react-router';
+import { createHash, randomUUID } from 'node:crypto';
+import { Link, Form, useLoaderData, useActionData, useNavigation, useSearchParams, data, redirect } from 'react-router';
 import {
   requireAdmin,
   adminGetUserDetail,
@@ -12,12 +12,25 @@ import {
 } from '~/utils/admin.server';
 import { logAdminAction } from '~/utils/adminActions.server';
 import { grantCredits } from '~/lib/credits.server';
+import { DEFAULT_MAX_DEVICES } from '~/lib/licenses.server';
+import {
+  MAX_DEVICES_LIMIT,
+  listLicensesForUser,
+  listLicenseActionsForUser,
+  adminIssueLicense,
+  adminRevokeLicense,
+  adminReleaseDevice,
+  findIssuedByToken,
+} from '~/lib/licenseAdmin.server';
+import LicenseCard from '~/components/admin/licenses/LicenseCard';
+import IssueLicenseForm from '~/components/admin/licenses/IssueLicenseForm';
 import EmptyState from '~/components/admin/EmptyState';
 import KPICard from '~/components/admin/KPICard';
 import {
-  CardIcon, TagIcon, LayersIcon, VerifyIcon, ShieldIcon,
+  CardIcon, TagIcon, LayersIcon, VerifyIcon, ShieldIcon, KeyIcon, CheckIcon,
 } from '~/components/icons';
 import styles from '~/styles/modules/routes/admin';
+import licenseStyles from '~/styles/modules/admin/licenses/License.module.css';
 import { formatInt } from '~/utils/format';
 
 export const meta = ({ data }) => [
@@ -35,7 +48,7 @@ function referenceUuid(key) {
 }
 
 export async function loader({ request, params }) {
-  await requireAdmin(request);
+  const admin = await requireAdmin(request);
 
   if (!UUID_RE.test(params.userId)) {
     throw new Response('Bad request', { status: 400 });
@@ -46,14 +59,102 @@ export async function loader({ request, params }) {
     throw new Response('Not Found', { status: 404 });
   }
 
-  const [transactions, payments, jobs, actions] = await Promise.all([
+  const [transactions, payments, jobs, targetedActions, licenseActions, licenses] = await Promise.all([
     adminListUserTransactions(params.userId, { limit: 50 }),
     adminListUserPayments(params.userId),
     adminListUserJobs(params.userId),
     adminListActions({ targetUserId: params.userId, limit: 25 }),
+    listLicenseActionsForUser(params.userId, { limit: 25 }),
+    listLicensesForUser(params.userId),
   ]);
 
-  return { user, transactions, payments, jobs, actions };
+  // Self-issued license actions carry no target user, so they are merged in by owner.
+  const seen = new Set();
+  const actions = [...targetedActions, ...licenseActions]
+    .filter((a) => (seen.has(a.id) ? false : seen.add(a.id)))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 25);
+
+  return {
+    user,
+    transactions,
+    payments,
+    jobs,
+    actions,
+    licenses,
+    isSelf: admin.id === user.id,
+    issueToken: randomUUID(),
+    deviceLimits: { default: DEFAULT_MAX_DEVICES, max: MAX_DEVICES_LIMIT },
+  };
+}
+
+const LICENSE_INTENTS = new Set(['license_issue', 'license_revoke', 'license_release']);
+
+function readReason(form) {
+  const reason = String(form.get('reason') || '').trim();
+  return reason.length >= 5 && reason.length <= 500 ? reason : null;
+}
+
+async function licenseAction({ admin, userId, intent, form }) {
+  const owner = await adminGetUserDetail(userId);
+  if (!owner) return data({ errors: { _form: 'User not found' } }, { status: 404 });
+
+  if (intent === 'license_issue') {
+    const errors = {};
+    const maxDevices = Number(String(form.get('maxDevices') || ''));
+    const paymentReference = String(form.get('paymentReference') || '').trim() || null;
+    const issueToken = String(form.get('issueToken') || '');
+    const reason = readReason(form);
+
+    if (!Number.isInteger(maxDevices) || maxDevices < 1 || maxDevices > MAX_DEVICES_LIMIT) {
+      errors.maxDevices = `Devices must be a whole number from 1 to ${MAX_DEVICES_LIMIT}`;
+    }
+    if (paymentReference && paymentReference.length > 200) {
+      errors.paymentReference = 'Payment reference must be 200 characters or fewer';
+    }
+    if (!reason) errors.reason = 'Reason must be 5 to 500 characters';
+    if (!UUID_RE.test(issueToken)) errors._form = 'This form expired. Reload the page and issue again.';
+    if (owner.deleted_at) errors._form = 'This account is deleted. A license cannot be issued to it.';
+    if (Object.keys(errors).length > 0) return data({ issueErrors: errors }, { status: 400 });
+
+    // A double submit or a resent form lands on the license the first submit created.
+    const already = await findIssuedByToken(issueToken);
+    if (already) return redirect(`/admin/users/${userId}?issued=${already}#license-${already}`);
+
+    let license;
+    try {
+      license = await adminIssueLicense({ actor: admin, owner, maxDevices, paymentReference, reason, issueToken });
+    } catch (err) {
+      if (err?.code !== '23505') throw err;
+      const winner = await findIssuedByToken(issueToken);
+      return redirect(`/admin/users/${userId}?issued=${winner}#license-${winner}`);
+    }
+    return redirect(`/admin/users/${userId}?issued=${license.id}#license-${license.id}`);
+  }
+
+  const licenseId = String(form.get('licenseId') || '');
+  const reason = readReason(form);
+
+  if (intent === 'license_revoke') {
+    const fail = (message, status = 400) =>
+      data({ licenseError: { intent, target: licenseId, message } }, { status });
+    if (!UUID_RE.test(licenseId)) return fail('Invalid license id');
+    if (!reason) return fail('Reason must be 5 to 500 characters');
+
+    const result = await adminRevokeLicense({ actor: admin, ownerId: userId, licenseId, reason });
+    if (!result.ok) return fail('This license is already revoked or belongs to another account', 409);
+    return redirect(`/admin/users/${userId}?revoked=${licenseId}#license-${licenseId}`);
+  }
+
+  const activationId = String(form.get('activationId') || '');
+  const fail = (message, status = 400) =>
+    data({ licenseError: { intent, target: activationId, message } }, { status });
+  if (!UUID_RE.test(licenseId) || !UUID_RE.test(activationId)) return fail('Invalid device');
+  if (!reason) return fail('Reason must be 5 to 500 characters');
+
+  const result = await adminReleaseDevice({ actor: admin, ownerId: userId, licenseId, activationId, reason });
+  if (!result.ok) return fail('This device was already released', 409);
+  return redirect(`/admin/users/${userId}?released=${activationId}#license-${licenseId}`);
 }
 
 export async function action({ request, params }) {
@@ -62,12 +163,19 @@ export async function action({ request, params }) {
   if (!UUID_RE.test(params.userId)) {
     return data({ errors: { _form: 'Invalid user id' } }, { status: 400 });
   }
+
+  const form = await request.formData();
+  const intent = String(form.get('intent') || '');
+
+  // Licenses may be issued to the admin's own account. Credits may not.
+  if (LICENSE_INTENTS.has(intent)) {
+    return licenseAction({ admin, userId: params.userId, intent, form });
+  }
+
   if (params.userId === admin.id) {
     return data({ errors: { _form: 'You cannot adjust your own credits' } }, { status: 400 });
   }
 
-  const form = await request.formData();
-  const intent = String(form.get('intent') || '');
   const amountRaw = form.get('amount');
   const reason = String(form.get('reason') || '').trim();
 
@@ -152,10 +260,15 @@ function formatDate(iso) {
 }
 
 export default function AdminUserDetail() {
-  const { user, transactions, payments, jobs, actions } = useLoaderData();
+  const { user, transactions, payments, jobs, actions, licenses, isSelf, issueToken, deviceLimits } = useLoaderData();
   const actionData = useActionData();
   const nav = useNavigation();
   const submitting = nav.state === 'submitting';
+  const pendingIntent = submitting ? nav.formData?.get('intent') : null;
+  const [searchParams] = useSearchParams();
+  const issuedId = searchParams.get('issued');
+  const issued = issuedId ? licenses.find((l) => l.id === issuedId) : null;
+  const activeCount = licenses.filter((l) => l.status === 'active').length;
 
   const [intent, setIntent] = useState('grant');
 
@@ -177,6 +290,17 @@ export default function AdminUserDetail() {
           {user.email_verified_at && !user.deleted_at && <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active</span>}
         </div>
       </header>
+
+      {issued ? (
+        <div className={licenseStyles.issuedStrip} role="status">
+          <CheckIcon size={18} />
+          <p>
+            License <strong>{issued.id.slice(0, 8).toUpperCase()}</strong> issued and signed.{' '}
+            <a href={`#license-${issued.id}`} className={licenseStyles.issuedStripLink}>Copy the key</a>{' '}
+            from its card and paste it into Trovarcis Sender.
+          </p>
+        </div>
+      ) : null}
 
       <div className={styles.kpiStrip}>
         <KPICard
@@ -208,6 +332,35 @@ export default function AdminUserDetail() {
 
       <div className={styles.detailGrid}>
         <div className={styles.detailMain}>
+          {/* Sender licenses */}
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Sender licenses</h2>
+              <span className={styles.panelSub}>
+                {licenses.length === 0 ? 'none' : `${activeCount} active of ${licenses.length}`}
+              </span>
+            </header>
+            {licenses.length === 0 ? (
+              <EmptyState
+                icon={KeyIcon}
+                title="No Sender license"
+                body="Issue one from the side panel. The key is signed here and appears on its card."
+              />
+            ) : (
+              <div className={licenseStyles.list}>
+                {licenses.map((l) => (
+                  <LicenseCard
+                    key={l.id}
+                    license={l}
+                    fresh={l.id === issuedId}
+                    busy={pendingIntent === 'license_revoke' || pendingIntent === 'license_release'}
+                    licenseError={actionData?.licenseError}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
           {/* Transactions */}
           <section className={styles.panel}>
             <header className={styles.panelHead}>
@@ -358,6 +511,22 @@ export default function AdminUserDetail() {
         </div>
 
         <div className={styles.detailSide}>
+          {/* Issue license */}
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Issue Sender license</h2>
+            </header>
+            <IssueLicenseForm
+              email={user.email}
+              issueToken={issueToken}
+              defaultDevices={deviceLimits.default}
+              maxDevices={deviceLimits.max}
+              errors={actionData?.issueErrors}
+              busy={pendingIntent === 'license_issue'}
+              self={isSelf}
+            />
+          </section>
+
           {/* Action form */}
           <section className={styles.panel}>
             <header className={styles.panelHead}>
