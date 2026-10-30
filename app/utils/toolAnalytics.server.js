@@ -1,6 +1,4 @@
-// Tool analytics helper. Fire-and-forget wrapper over recordEvent for tool endpoints.
-// event_type shape: `tool_${phase}_${tool}` so the existing daily rollup gives per-tool
-// breakdowns without JSONB queries. Error codes go in metadata.code.
+// Tool analytics helper. event_type is `tool_${phase}_${tool}`; error codes go in metadata.code.
 
 import { recordEvent, buildEventFromRequest } from './analytics.server.js';
 
@@ -14,17 +12,21 @@ const VALID_TOOLS = new Set([
   'smtp_test',
 ]);
 
-/**
- * Record a tool lifecycle event. Never throws, never awaits.
- *
- * @param {Request} request
- * @param {object}  opts
- * @param {string}  opts.tool     - One of VALID_TOOLS
- * @param {string}  opts.phase    - 'start' | 'success' | 'error'
- * @param {string=} opts.code     - Error code (phase='error' only)
- * @param {string=} opts.userId   - Authed user id, or null for anonymous
- * @param {object=} opts.metadata - Additional per-event dimensions
- */
+// Tool APIs are called from the tool page, so the same-origin Referer is the page the tool was used on.
+function toolPagePath(request) {
+  const ref = request.headers.get('referer');
+  if (!ref) return null;
+  try {
+    const u = new URL(ref);
+    // Behind the proxy request.url can carry an internal host, so match our domain too.
+    const own = u.host === new URL(request.url).host || u.hostname === 'trovarci.sh' || u.hostname === 'www.trovarci.sh';
+    return own ? u.pathname.slice(0, 512) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Never throws, never awaits: analytics must not affect the tool response.
 export function recordToolEvent(request, { tool, phase, code, userId, metadata }) {
   try {
     if (!VALID_TOOLS.has(tool) || !VALID_PHASES.has(phase)) return;
@@ -34,12 +36,12 @@ export function recordToolEvent(request, { tool, phase, code, userId, metadata }
 
     const event = buildEventFromRequest(request, {
       eventType: `tool_${phase}_${tool}`,
-      path: null,
+      path: toolPagePath(request),
       userId: userId ?? null,
       metadata: md,
     });
     recordEvent(event);
   } catch {
-    // Analytics failure must never propagate to the tool response.
+    // Swallowed on purpose.
   }
 }

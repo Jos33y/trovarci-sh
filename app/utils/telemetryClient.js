@@ -3,7 +3,8 @@
 export const TELEMETRY_CLIENT_SOURCE = `
 (function(){
   var BEACON='/api/telemetry/beacon';
-  var sent=false; var errSeen={};
+  var lastSent=null; var errSeen={};
+  var firstReferrer=ref();
 
   function send(body){
     try{
@@ -22,7 +23,6 @@ export const TELEMETRY_CLIENT_SOURCE = `
     }catch(e){ return null; }
   }
 
-  // Serializes anything to a readable string. Prevents [object Object] in the error pipeline.
   function safeStr(v, fallback){
     if (v === null || v === undefined) return fallback || 'Unknown';
     if (typeof v === 'string') return v;
@@ -34,48 +34,53 @@ export const TELEMETRY_CLIENT_SOURCE = `
     return String(v);
   }
 
-  function pageview(){
-    if(sent) return;
-    // Skip non-pageview paths: well-known probes, framework internals, API XHRs, RR v7 data fetches, admin routes.
-    var p = location.pathname;
-    if (p.indexOf('/.well-known/') === 0) return;
-    if (p.indexOf('/__') === 0) return;
-    if (p.indexOf('/api/') === 0) return;
-    if (p.endsWith('.data')) return;
-    if (p === '/admin' || p.indexOf('/admin/') === 0) return;
-    // Login redirects targeting admin are admin traffic dressed up as auth; drop both encoded and unencoded forms.
+  function skip(p){
+    if (p.indexOf('/.well-known/') === 0) return true;
+    if (p.indexOf('/__') === 0) return true;
+    if (p.indexOf('/api/') === 0) return true;
+    if (p.endsWith('.data')) return true;
+    if (p === '/admin' || p.indexOf('/admin/') === 0) return true;
     if (p === '/login') {
       var s = location.search || '';
-      if (s.indexOf('redirectTo=%2Fadmin') !== -1) return;
-      if (s.indexOf('redirectTo=/admin') !== -1) return;
+      if (s.indexOf('redirectTo=%2Fadmin') !== -1 || s.indexOf('redirectTo=/admin') !== -1) return true;
     }
-    sent=true;
-    send({type:'pageview',path:p+location.search,referrer:ref()});
+    return false;
   }
+
+  // One pageview per distinct URL. React Router calls replaceState during hydration, which must not count twice.
+  function pageview(){
+    var p = location.pathname;
+    var key = p + location.search;
+    if (key === lastSent) return;
+    if (skip(p)) { lastSent = key; return; }
+    var isFirst = lastSent === null;
+    lastSent = key;
+    send({type:'pageview',path:key,referrer:isFirst ? firstReferrer : null});
+  }
+
+  window.__trovTrack=function(eventType, metadata){
+    send({type:'event',eventType:eventType,path:location.pathname,metadata:metadata||{}});
+  };
 
   if(document.readyState==='complete' || document.readyState==='interactive'){
     setTimeout(pageview,0);
   } else {
     window.addEventListener('DOMContentLoaded',pageview,{once:true});
   }
-  document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='hidden') pageview();
-  });
 
-  // SPA navigation hook for RR v7 client-side route changes.
   var origPush=history.pushState;
   history.pushState=function(){
     var r=origPush.apply(this,arguments);
-    sent=false; setTimeout(pageview,0);
+    setTimeout(pageview,0);
     return r;
   };
   var origReplace=history.replaceState;
   history.replaceState=function(){
     var r=origReplace.apply(this,arguments);
-    sent=false; setTimeout(pageview,0);
+    setTimeout(pageview,0);
     return r;
   };
-  window.addEventListener('popstate',function(){ sent=false; setTimeout(pageview,0); });
+  window.addEventListener('popstate',function(){ setTimeout(pageview,0); });
 
   // Dedupe per (message+filename+line) signature within 5s.
   function fp(msg,file,line){ return (msg||'?')+'|'+(file||'?')+'|'+(line||'?'); }

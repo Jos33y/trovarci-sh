@@ -95,13 +95,15 @@ export async function action({ request }) {
       return new Response(null, { status: 204 });
     }
 
+    // Attribution comes from the visited page, not from this beacon request.
+    const clientReferrer = typeof payload.referrer === 'string' ? payload.referrer.slice(0, 512) : null;
     const event = buildEventFromRequest(request, {
       eventType: 'pageview',
-      path,
+      path: pathOnly,
       userId,
-      metadata: {
-        client_referrer: typeof payload.referrer === 'string' ? payload.referrer.slice(0, 512) : null,
-      },
+      pageUrl: path,
+      referrer: clientReferrer,
+      metadata: { client_referrer: clientReferrer },
     });
     recordEvent(event);
     return new Response(null, { status: 204 });
@@ -115,6 +117,7 @@ export async function action({ request }) {
       'click_outbound', 'click_internal_cta', 'tool_form_focus',
       'package_select', 'checkout_click', 'credits_view',
       'video_play', 'video_complete', 'scroll_depth_50', 'scroll_depth_90',
+      'tool_success_dns_generate',
     ]);
     if (!CLIENT_ALLOWED.has(eventType)) return new Response(null, { status: 400 });
 
@@ -122,6 +125,7 @@ export async function action({ request }) {
       eventType,
       path: typeof payload.path === 'string' ? payload.path.slice(0, 512) : null,
       userId,
+      referrer: null,
       metadata: typeof payload.metadata === 'object' && payload.metadata
         ? sanitiseMetadata(payload.metadata)
         : {},

@@ -25,12 +25,10 @@ const TABS = [
   { id: 3, label: 'Records' },
 ];
 
-/* ══════════════════════════════════════════════
-   Main component
-   ══════════════════════════════════════════════ */
+// Main component.
 
 export default function DnsGenerator() {
-  /* ─── Core state ─── */
+  // Core state.
   const [step, setStep] = useState(1);
   const [domainInput, setDomainInput] = useState('');
   const [selectedProvider, setSelectedProvider] = useState(null);
@@ -40,7 +38,7 @@ export default function DnsGenerator() {
   const [customSpf, setCustomSpf] = useState('');
   const [dkimPublicKey, setDkimPublicKey] = useState('');
 
-  /* ─── DMARC state ─── */
+  // DMARC state.
   const [dmarcPolicy, setDmarcPolicy] = useState('none');
   const [dmarcReportEmail, setDmarcReportEmail] = useState('');
   const [dmarcPct, setDmarcPct] = useState(100);
@@ -49,7 +47,7 @@ export default function DnsGenerator() {
   const [dmarcAlignment, setDmarcAlignment] = useState('relaxed');
   const [dmarcAdvancedOpen, setDmarcAdvancedOpen] = useState(false);
 
-  /* ─── Advanced (BIMI + MTA-STS) state ─── */
+  // Advanced (BIMI + MTA-STS) state.
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [bimiEnabled, setBimiEnabled] = useState(false);
   const [bimiLogoUrl, setBimiLogoUrl] = useState('');
@@ -59,10 +57,10 @@ export default function DnsGenerator() {
   const [mtaStsMaxAge, setMtaStsMaxAge] = useState(604800);
   const [mtaStsReportEmail, setMtaStsReportEmail] = useState('');
 
-  /* ─── Ephemeral UI state ─── */
+  // Ephemeral UI state.
   const [copied, setCopied] = useState({});
 
-  /* ─── Derived values ─── */
+  // Derived values.
   const provider = useMemo(
     () => PROVIDERS.find((p) => p.id === selectedProvider) || null,
     [selectedProvider]
@@ -88,7 +86,7 @@ export default function DnsGenerator() {
     [dkimPublicKey]
   );
 
-  /* ─── Builders (memoized) ─── */
+  // Builders (memoized).
   const spf = useMemo(
     () =>
       buildSpfRecord({
@@ -161,7 +159,7 @@ export default function DnsGenerator() {
     [mtaStsEnabled, mtaStsMode, mtaStsMaxAge, mtaStsReportEmail, domain, provider]
   );
 
-  /* ─── Copy handler ─── */
+  // Copy handler.
   const handleCopy = useCallback((key, text) => {
     if (!navigator.clipboard) return;
     navigator.clipboard.writeText(text);
@@ -171,7 +169,7 @@ export default function DnsGenerator() {
     }, 2000);
   }, []);
 
-  /* ─── Step navigation ─── */
+  // Step navigation.
   const canProceedStep1 = domainValidation.valid && !!selectedProvider;
   const canProceedStep2 = !!selectedRegistrar;
 
@@ -184,7 +182,7 @@ export default function DnsGenerator() {
     [canProceedStep1, canProceedStep2]
   );
 
-  /* ─── Tab keyboard navigation (ArrowLeft / ArrowRight / Home / End) ─── */
+  // Tab keyboard navigation (ArrowLeft / ArrowRight / Home / End).
   const tabRefs = useRef([]);
   const onTabKeyDown = useCallback(
     (e, index) => {
@@ -202,7 +200,7 @@ export default function DnsGenerator() {
     []
   );
 
-  /* ─── Scroll to top on step change (fixes an existing UX issue) ─── */
+  // Scroll to top on step change.
   const toolRef = useRef(null);
   useEffect(() => {
     if (!toolRef.current) return;
@@ -212,7 +210,15 @@ export default function DnsGenerator() {
     }
   }, [step]);
 
-  /* ─── Plain-text "Copy all" output ─── */
+  // Count one generation per visit to the records step, with the provider chosen.
+  useEffect(() => {
+    if (step !== 3) return;
+    if (typeof window !== 'undefined' && typeof window.__trovTrack === 'function') {
+      window.__trovTrack('tool_success_dns_generate', { provider: selectedProvider || 'none' });
+    }
+  }, [step]);
+
+  // Plain-text "Copy all" output.
   const buildAllRecordsText = useCallback(() => {
     const lines = [];
     lines.push(`DNS Records for ${domain || 'yourdomain.com'}`);
@@ -281,7 +287,7 @@ export default function DnsGenerator() {
     return lines.join('\n');
   }, [domain, provider, registrar, mx, spf, dkimRecords, dmarc, bimi, mtaSts]);
 
-  /* ─── SPF status for the completion banner ─── */
+  // SPF status for the completion banner.
   const spfStatus = useMemo(() => {
     if (spf.totalLookups > 10) return { tone: 'error', label: 'Over limit' };
     if (spf.totalLookups > 8) return { tone: 'warning', label: `${spf.totalLookups}/10 lookups` };
@@ -294,11 +300,9 @@ export default function DnsGenerator() {
     return p.strength;
   }, [dmarcPolicy]);
 
-  /* ─────────────────────────────────── RENDER ─────────────────────────────────── */
 
   return (
     <div className={styles.toolCard} ref={toolRef}>
-      {/* ── Card Header ── */}
       <div className={styles.cardHeader}>
         <div className={styles.cardHeaderLeft}>
           <span className={styles.cardIcon}>
@@ -314,7 +318,6 @@ export default function DnsGenerator() {
         <span className={styles.freeBadge}>Free</span>
       </div>
 
-      {/* ── Tab Bar (role=tablist with ArrowKey support) ── */}
       <div className={styles.tabBar} role="tablist" aria-label="Generator steps">
         {TABS.map((tab, i) => {
           const isActive = step === tab.id;
@@ -345,7 +348,6 @@ export default function DnsGenerator() {
         })}
       </div>
 
-      {/* ── Body ── */}
       <div className={styles.toolBody}>
         {step === 1 && (
           <StepOne
@@ -440,9 +442,7 @@ export default function DnsGenerator() {
   );
 }
 
-/* ══════════════════════════════════════════════
-   Step 1: Provider + services + optional DKIM key
-   ══════════════════════════════════════════════ */
+// Step 1: Provider + services + optional DKIM key.
 
 function StepOne({
   domainInput,
@@ -670,9 +670,7 @@ function StepOne({
   );
 }
 
-/* ══════════════════════════════════════════════
-   Step 2: Registrar + DMARC
-   ══════════════════════════════════════════════ */
+// Step 2: Registrar + DMARC.
 
 function StepTwo({
   selectedRegistrar,
@@ -880,9 +878,7 @@ function StepTwo({
   );
 }
 
-/* ══════════════════════════════════════════════
-   Step 3: Generated records
-   ══════════════════════════════════════════════ */
+// Step 3: Generated records.
 
 function StepThree({
   domain,
@@ -1294,9 +1290,7 @@ function StepThree({
   );
 }
 
-/* ══════════════════════════════════════════════
-   Sub-components
-   ══════════════════════════════════════════════ */
+// Sub-components.
 
 function LivePreview({ label, record, meta, tone = 'ok', warnings = [], sources }) {
   const toneClass =
@@ -1483,9 +1477,7 @@ function RecordCard({
   );
 }
 
-/* ══════════════════════════════════════════════
-   Inline icons
-   ══════════════════════════════════════════════ */
+// Inline icons.
 
 function CheckMark() {
   return (

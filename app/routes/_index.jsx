@@ -26,8 +26,7 @@ export function loader() {
   return { posts };
 }
 
-// Organization + WebSite schema in one @graph. WebSite.potentialAction enables Google sitelinks
-// searchbox pointing at /blog?q= which the blog index route already parses.
+// Organization + WebSite schema in one @graph. No SearchAction: Google retired the sitelinks search box.
 const HOME_SCHEMA = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -52,14 +51,6 @@ const HOME_SCHEMA = {
       url: 'https://trovarci.sh',
       publisher: { '@id': 'https://trovarci.sh/#organization' },
       inLanguage: 'en-US',
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: 'https://trovarci.sh/blog?q={search_term_string}',
-        },
-        'query-input': 'required name=search_term_string',
-      },
     },
   ],
 };

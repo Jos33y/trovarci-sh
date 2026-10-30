@@ -1,54 +1,20 @@
-/**
- * Admin-side server helpers.
- *
- * Two concerns:
- *
- *   1. Access control: requireAdmin() throws 404 (not 403) for
- *      non-admin authenticated users. The 404 is deliberate - we never
- *      reveal that /admin exists to unauthorised users. Anonymous gets
- *      a redirect to /login (same as requireUser, no leak).
- *
- *   2. Read-only queries. Admin write paths go through the existing
- *      app-layer functions (grantCredits, refundCredits, cancelJob).
- *      Reads, however, often span multiple tables and want admin-only
- *      shapes (e.g. include user.email when listing payments). Those
- *      live here, not in lib/payments.server etc, so the user-facing
- *      surface stays minimal.
- *
- * Pre-write check (per the rule):
- *   - users.role enum: confirmed via 20260420000001_auth_baseline.cjs
- *     CHECK (role IN ('user', 'admin')). DEFAULT 'user'.
- *   - validateSession returns user.role: confirmed via session.server.js.
- *   - No new external API surface; no new dep.
- */
+// Admin-side server helpers.
 
 import { redirect } from 'react-router';
 import { requireUser } from './session.server.js';
 import { sql } from './db.server.js';
 
-/**
- * Loader/action guard for /admin/* routes.
- *
- * @param request - the Web Request
- * @returns the admin user object (same shape requireUser returns)
- * @throws 302 redirect to /login for anonymous users
- * @throws 404 Response for authenticated non-admins (no enumeration leak)
- */
+// Loader/action guard for /admin/* routes.
 export async function requireAdmin(request) {
   const user = await requireUser(request, { redirectTo: '/login' });
   if (user.role !== 'admin') {
-    // Non-admins get a hard 404 - same response shape they'd get for
-    // any non-existent path. No "you're not authorised" message that
-    // would confirm the route exists.
+    // 404, not 403, so the admin area is not confirmed to exist.
     throw new Response('Not Found', { status: 404 });
   }
   return user;
 }
 
-/**
- * Soft variant for components that want to know "is this an admin?"
- * without redirecting (e.g. conditional UI in shared headers).
- */
+// Soft variant of requireAdmin: returns a boolean instead of redirecting.
 export async function isAdmin(request) {
   try {
     const user = await requireUser(request, { redirectTo: '/login' });
@@ -58,14 +24,9 @@ export async function isAdmin(request) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // User search + profile reads
-// ─────────────────────────────────────────────────────────────────────────
 
-/**
- * Search users by email substring or exact UUID. Case-insensitive on email.
- * Returns up to `limit` rows, newest first.
- */
+// Search users by email substring or exact UUID.
 export async function adminSearchUsers({ q = '', limit = 50 } = {}) {
   const trimmed = q.trim();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed);
@@ -103,10 +64,7 @@ export async function adminSearchUsers({ q = '', limit = 50 } = {}) {
   `;
 }
 
-/**
- * Full user record for /admin/users/:userId. Includes lifetime aggregates
- * computed against credit_transactions and verification_jobs.
- */
+// Full user record for /admin/users/:userId.
 export async function adminGetUserDetail(userId) {
   const [user] = await sql`
     SELECT id, email, role, credits_balance, email_verified_at,
@@ -178,17 +136,7 @@ export async function adminListUserJobs(userId) {
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Payments list (cross-user)
-// ─────────────────────────────────────────────────────────────────────────
-
-/**
- * @param {object} opts
- * @param {string} [opts.gateway]    'cryptomus' | 'stripe' | undefined for all
- * @param {string} [opts.status]     'pending'|'awaiting_payment'|'confirmed'|'failed'|'expired'|undefined
- * @param {number} [opts.limit]      default 50
- * @param {number} [opts.offset]     default 0
- */
 export async function adminListPayments({
   gateway = null, status = null, limit = 50, offset = 0,
 } = {}) {
@@ -216,9 +164,7 @@ export async function adminGetPaymentDetail(paymentId) {
   return row ?? null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Jobs list (cross-user)
-// ─────────────────────────────────────────────────────────────────────────
 
 export async function adminListJobs({
   status = null, kind = null, limit = 50, offset = 0,
@@ -261,9 +207,7 @@ export async function adminGetJobDetail(jobId) {
   return row ?? null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // Analytics (read from the F1 tables)
-// ─────────────────────────────────────────────────────────────────────────
 
 export async function adminAnalyticsOverview({ days = 7 } = {}) {
   const since = `${days} days`;
@@ -373,9 +317,83 @@ export async function adminAnalyticsUserJourney(userId, { limit = 200 } = {}) {
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
+// Per-tool runs: starts, successes, errors, sign-in walls, and the sessions behind them.
+export async function adminToolUsage({ days = 7 } = {}) {
+  const since = `${days} days`;
+
+  const tools = await sql`
+    SELECT
+      regexp_replace(event_type, '^tool_(start|success|error)_', '') AS tool,
+      COUNT(*) FILTER (WHERE event_type LIKE 'tool_start_%')::int   AS starts,
+      COUNT(*) FILTER (WHERE event_type LIKE 'tool_success_%')::int AS successes,
+      COUNT(*) FILTER (WHERE event_type LIKE 'tool_error_%')::int   AS errors,
+      COUNT(*) FILTER (WHERE event_type LIKE 'tool_error_%' AND metadata->>'code' = 'AUTH_REQUIRED')::int AS auth_walls,
+      COUNT(DISTINCT session_hash) FILTER (WHERE event_type LIKE 'tool_success_%')::int AS sessions
+    FROM analytics_events
+    WHERE event_type ~ '^tool_(start|success|error)_'
+      AND created_at > now() - ${since}::interval
+      AND is_bot = FALSE
+    GROUP BY 1
+    ORDER BY successes DESC, starts DESC
+  `;
+
+  const errors = await sql`
+    SELECT
+      regexp_replace(event_type, '^tool_error_', '') AS tool,
+      COALESCE(metadata->>'code', 'UNKNOWN') AS code,
+      COUNT(*)::int AS n
+    FROM analytics_events
+    WHERE event_type LIKE 'tool_error_%'
+      AND created_at > now() - ${since}::interval
+      AND is_bot = FALSE
+    GROUP BY 1, 2
+    ORDER BY n DESC
+    LIMIT 12
+  `;
+
+  return { tools, errors };
+}
+
+// Each session's first pageview, its source, and whether that session ran a tool or signed up.
+// Session hashes rotate daily, so a visit that spans midnight UTC counts as two sessions.
+export async function adminLandingSessions({ days = 7 } = {}) {
+  const since = `${days} days`;
+  return sql`
+    WITH landing AS (
+      SELECT DISTINCT ON (session_hash)
+        session_hash,
+        path AS landing_path,
+        COALESCE(utm_source, referrer_domain) AS source
+      FROM analytics_events
+      WHERE event_type = 'pageview'
+        AND is_bot = FALSE
+        AND session_hash NOT IN ('bot', 'system', 'webhook')
+        AND created_at > now() - ${since}::interval
+      ORDER BY session_hash, created_at ASC, id ASC
+    ),
+    acts AS (
+      SELECT
+        session_hash,
+        bool_or(event_type LIKE 'tool_success_%') AS ran_tool,
+        bool_or(event_type = 'auth_signup_complete') AS signed_up
+      FROM analytics_events
+      WHERE is_bot = FALSE
+        AND created_at > now() - ${since}::interval
+      GROUP BY session_hash
+    )
+    SELECT
+      l.landing_path,
+      l.source,
+      COUNT(*)::int AS sessions,
+      COUNT(*) FILTER (WHERE a.ran_tool)::int AS ran_tool,
+      COUNT(*) FILTER (WHERE a.signed_up)::int AS signed_up
+    FROM landing l
+    LEFT JOIN acts a USING (session_hash)
+    GROUP BY 1, 2
+  `;
+}
+
 // Errors
-// ─────────────────────────────────────────────────────────────────────────
 
 export async function adminListErrors({
   kind = null, severity = null, resolved = null, limit = 50, offset = 0,
@@ -412,10 +430,7 @@ export async function adminGetErrorDetail(errorId) {
   return row ?? null;
 }
 
-/**
- * Mark an error_event as resolved. Writes admin_actions row first,
- * then updates the error row in the same transaction.
- */
+// Mark an error_event as resolved.
 export async function adminMarkErrorResolved(errorId, { actorId, note = null }) {
   return sql.begin(async (tx) => {
     await tx`
@@ -434,9 +449,7 @@ export async function adminMarkErrorResolved(errorId, { actorId, note = null }) 
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────
 // admin_actions feed
-// ─────────────────────────────────────────────────────────────────────────
 
 export async function adminListActions({ limit = 50, offset = 0, actorId = null, targetUserId = null } = {}) {
   return sql`
@@ -455,28 +468,9 @@ export async function adminListActions({ limit = 50, offset = 0, actorId = null,
   `;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// F2.5 viz read-side queries.
-//
-// All of these are pure SELECTs against existing tables; no schema change.
-// Shapes are tuned for the SVG components in app/components/admin/ - each
-// returns the minimum data the corresponding viz needs, no overfetch.
-// ─────────────────────────────────────────────────────────────────────────
+// Dashboard chart queries: plain SELECTs shaped for the SVG components in app/components/admin/.
 
-/**
- * KPI deltas vs previous period. Returns absolute counts and percent change
- * for pageviews / signups / payments / errors / revenue across two adjacent
- * windows. Single round-trip: one query per metric, run in parallel.
- *
- * @returns {object}
- *   pageviews: { current, previous, deltaPct }
- *   signups:   { current, previous, deltaPct }
- *   payments:  { current, previous, deltaPct }
- *   revenue:   { current_cents, previous_cents, deltaPct }
- *   errors:    { current, previous, deltaPct }
- *   activeUsers: { current }    (no delta - point in time)
- *   openJobs:    { current }
- */
+// KPI deltas vs previous period.
 export async function adminKpiDeltas({ days = 7 } = {}) {
   const cur = `${days} days`;
   const prev = `${days * 2} days`;
@@ -535,14 +529,7 @@ export async function adminKpiDeltas({ days = 7 } = {}) {
   };
 }
 
-/**
- * Daily counts for the last N days, grouped by metric. Powers the inline
- * sparklines on KPI cards. Returns four parallel arrays of length `days`,
- * day-aligned and zero-filled (we generate the date spine via generate_series
- * so missing days appear as 0 instead of gaps).
- *
- * @returns {object} { pageviews: [{day, n}], signups: [...], payments: [...], errors: [...] }
- */
+// Daily counts for the last N days, grouped by metric.
 export async function adminKpiSparklines({ days = 30 } = {}) {
   const since = `${days} days`;
 
@@ -620,11 +607,7 @@ export async function adminKpiSparklines({ days = 30 } = {}) {
   return { pageviews: pv, signups: su, payments: pay, errors: err };
 }
 
-/**
- * Daily revenue series for the area chart, partitioned by status. Returns
- * one row per day for the last N days, zero-filled. confirmed_cents is the
- * positive area; failed_cents is the (much smaller, low-opacity) shadow.
- */
+// Daily revenue series for the area chart, partitioned by status.
 export async function adminRevenueSeries({ days = 30 } = {}) {
   const since = `${days} days`;
   return sql`
@@ -649,11 +632,7 @@ export async function adminRevenueSeries({ days = 30 } = {}) {
   `;
 }
 
-/**
- * 7×24 heatmap: pageview counts bucketed by day-of-week × hour-of-day across
- * the last N days. Returns 0-168 rows; missing buckets get a 0 cell client-
- * side. dow is Postgres convention (0 = Sunday).
- */
+// 7×24 heatmap: pageview counts bucketed by day-of-week × hour-of-day across the last N days.
 export async function adminAnalyticsHeatmap({ days = 7 } = {}) {
   const since = `${days} days`;
   return sql`
@@ -670,11 +649,7 @@ export async function adminAnalyticsHeatmap({ days = 7 } = {}) {
   `;
 }
 
-/**
- * Country traffic for the dot-map / ranked-bar fallback. Same shape as
- * adminAnalyticsOverview.topCountries but with a configurable window and
- * larger limit so the map can scale dot radius across the long tail.
- */
+// Country traffic for the dot-map / ranked-bar fallback.
 export async function adminCountryTraffic({ days = 30, limit = 50 } = {}) {
   const since = `${days} days`;
   return sql`
@@ -690,14 +665,7 @@ export async function adminCountryTraffic({ days = 30, limit = 50 } = {}) {
   `;
 }
 
-/**
- * Interleaved live-feed across signups / payments / errors / admin_actions.
- * Single round-trip via UNION ALL with a shared shape; ORDER BY at the
- * outer query so we get a unified timeline. Each row carries enough to
- * render an icon + one-line summary + drill-in link.
- *
- * @returns array of { kind, created_at, summary, link, severity? }
- */
+// Interleaved live-feed across signups / payments / errors / admin_actions.
 export async function adminRecentActivity({ limit = 30 } = {}) {
   return sql`
     (
@@ -764,14 +732,7 @@ export async function adminRecentActivity({ limit = 30 } = {}) {
   `;
 }
 
-/**
- * System health status. V2 surface - the actual probes for Resend /
- * Cryptomus / Stripe webhook freshness will land in a follow-up batch.
- * For now the rail ships with a real Postgres ping (proves the loader
- * reached the DB) and placeholders for the rest.
- *
- * Keep this fast: the rail renders on every admin page.
- */
+// System health status.
 export async function adminSystemStatus() {
   const t0 = Date.now();
   let postgresOk = true;
@@ -784,9 +745,7 @@ export async function adminSystemStatus() {
     postgresLatencyMs = -1;
   }
 
-  // TODO(F2.5+): replace with real probes once the sender/payment liveness
-  // tables ship. For now we report 'ok' on the assumption that the route
-  // loaders will fail loudly if any of these are wedged.
+  // Only Postgres is probed; the rest report ok until real liveness probes exist.
   return {
     postgres: { status: postgresOk ? 'ok' : 'down', latency_ms: postgresLatencyMs },
     resend: { status: 'ok' },
@@ -796,7 +755,7 @@ export async function adminSystemStatus() {
   };
 }
 
-// ─── Contact messages ───
+// Contact messages
 
 export async function adminListContactMessages({ status = null, subject = null, q = null, limit = 50, offset = 0 } = {}) {
   const statusFilter = status ? sql`AND status = ${status}` : sql``;

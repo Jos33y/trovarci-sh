@@ -248,16 +248,14 @@ async function handleVerifyCode(request, form) {
 
   // Sync record - never lose a signup conversion. This is the only point where welcome
   // credits become spendable and the user has a usable session.
-  await recordEventSync({
-    event_type: 'auth_signup_complete',
-    session_hash: 'system',
-    user_id: pending.userId,
+  // Visitor session hash, so a signup can be traced back to its landing page.
+  await recordEventSync(buildEventFromRequest(request, {
+    eventType: 'auth_signup_complete',
     path: '/signup',
-    country: 'XX',
-    device_class: 'unknown',
-    is_bot: false,
+    userId: pending.userId,
+    referrer: null,
     metadata: { welcome_credits: WELCOME_BONUS_AMOUNT },
-  }).catch((err) => console.error('[signup] funnel record failed:', err.message));
+  })).catch((err) => console.error('[signup] funnel record failed:', err.message));
 
   const headers = new Headers();
   headers.append('Set-Cookie', serializeSessionCookie(session.token, session.expiresAt));
