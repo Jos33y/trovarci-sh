@@ -17,6 +17,10 @@ FROM node:22-slim
 ENV NODE_ENV=production
 WORKDIR /app
 
+# Coolify's health check calls curl inside the container.
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # Full node_modules on purpose: migrations need node-pg-migrate, a dev dependency.
 COPY --from=build --chown=node:node /app /app
 
