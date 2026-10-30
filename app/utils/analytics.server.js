@@ -14,8 +14,11 @@ if (!_pepper || _pepper.length < 32) {
   throw new Error('VERIFICATION_CODE_PEPPER must be set for analytics session hashing.');
 }
 
-// Hosts that count as our own site, so internal navigation is never a referrer.
-const OWN_HOSTS = new Set(['trovarci.sh', 'www.trovarci.sh', 'localhost']);
+// Our own site and payment gateways returning a buyer: neither is where a visitor came from.
+const OWN_HOSTS = new Set([
+  'trovarci.sh', 'www.trovarci.sh', 'localhost',
+  'pay.cryptomus.com', 'cryptomus.com', 'checkout.stripe.com', 'pay.stripe.com',
+]);
 
 const buffer = [];
 let bufferDropped = 0;

@@ -6,7 +6,11 @@ import { sql } from '../app/utils/db.server.js';
 import { computeDailyRollup } from '../app/utils/analytics.server.js';
 
 const APPLY = process.argv.includes('--apply');
-const OWN_HOSTS = ['trovarci.sh', 'www.trovarci.sh', 'localhost'];
+// Same list as OWN_HOSTS in app/utils/analytics.server.js.
+const OWN_HOSTS = [
+  'trovarci.sh', 'www.trovarci.sh', 'localhost',
+  'pay.cryptomus.com', 'cryptomus.com', 'checkout.stripe.com', 'pay.stripe.com',
+];
 
 // Duplicates: same session, same page, within 2 seconds. The old client sent a second pageview on hydration.
 const DUP_WINDOW = '2 seconds';
