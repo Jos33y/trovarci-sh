@@ -24,7 +24,7 @@ export const meta = () => [
 export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
-  const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '7', 10)));
+  const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') || '7', 10) || 7));
 
   const [overview, sparks, countries, toolUsage, landingRows] = await Promise.all([
     adminAnalyticsOverview({ days }),
@@ -95,7 +95,16 @@ export default function AdminAnalytics() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Analytics</h1>
-          <p className={styles.pageSubtitle}>Cookieless, in-house. Bots filtered server-side.</p>
+          <p className={styles.pageSubtitle}>Cookieless, in-house. Bots filtered server-side. Raw events kept 13 months.</p>
+        </div>
+        <div className={styles.pageHeaderActions}>
+          {/* Plain links: these are file downloads, not client-side navigation. */}
+          <a className={`${styles.formButton} ${styles['formButton--ghost']}`} href={`/admin/analytics/export?kind=events&days=${days}`} download>
+            Export events ({days}d)
+          </a>
+          <a className={`${styles.formButton} ${styles['formButton--ghost']}`} href="/admin/analytics/export?kind=daily" download>
+            Export daily totals
+          </a>
         </div>
       </header>
 
@@ -107,6 +116,8 @@ export default function AdminAnalytics() {
             <option value="7">Last 7d</option>
             <option value="30">Last 30d</option>
             <option value="90">Last 90d</option>
+            <option value="180">Last 180d</option>
+            <option value="365">Last 365d</option>
           </select>
         </div>
       </Form>

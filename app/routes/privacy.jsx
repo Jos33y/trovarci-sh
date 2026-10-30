@@ -35,7 +35,7 @@ export default function Privacy() {
         <div className={`container ${styles.inner}`}>
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.title}>Privacy Policy</h1>
-            <p className={styles.updated}>Last updated: October 17, 2026</p>
+            <p className={styles.updated}>Last updated: October 30, 2026</p>
           </header>
 
           <hr className={styles.divider} />
@@ -287,8 +287,9 @@ export default function Privacy() {
 
             <h3>Analytics retention</h3>
             <p>
-              Raw analytics events are deleted after 90 days. After that only
-              anonymous daily totals remain, with no per-user, per-IP or
+              Raw analytics events are kept for 13 months, so we can compare
+              the same season year on year, and are then deleted. After that
+              only anonymous daily totals remain, with no per-user, per-IP or
               per-session detail.
             </p>
 

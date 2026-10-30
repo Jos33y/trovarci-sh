@@ -358,9 +358,11 @@ export async function computeDailyRollup(dayIso) {
   return total;
 }
 
-// Raw events expire after ANALYTICS_EVENT_RETENTION_DAYS; daily rollups are kept.
+// Raw events expire after ANALYTICS_EVENT_RETENTION_DAYS (13 months, matching the privacy policy); daily rollups are kept.
+export const ANALYTICS_RETENTION_DAYS = parseInt(process.env.ANALYTICS_EVENT_RETENTION_DAYS || '400', 10);
+
 export async function cleanupOldAnalyticsEvents() {
-  const days = parseInt(process.env.ANALYTICS_EVENT_RETENTION_DAYS || '90', 10);
+  const days = ANALYTICS_RETENTION_DAYS;
   const r = await sql`
     DELETE FROM analytics_events
     WHERE created_at < now() - make_interval(days => ${days})
