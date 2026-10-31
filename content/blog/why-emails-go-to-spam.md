@@ -3,7 +3,7 @@ title: "Why your emails go to spam (and how to find out which reason is yours)"
 slug: "why-emails-go-to-spam"
 description: "Every guide lists fifteen causes. You have one or two. Four questions that narrow it down, what each answer points to, and the fix for each."
 date: "2026-08-28"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["spam-filter", "deliverability", "inbox-placement", "authentication", "sender-reputation"]
 readingTime: 11

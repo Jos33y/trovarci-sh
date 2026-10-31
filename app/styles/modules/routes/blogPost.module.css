@@ -100,6 +100,95 @@
   margin: 0 0 var(--space-xl);
 }
 
+/* Byline */
+
+.byline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: var(--space-md);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+}
+
+.bylineImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.bylineText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bylineName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-text);
+  transition: color 150ms ease;
+}
+
+.bylineRole {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+}
+
+.byline:hover .bylineName {
+  color: var(--trov-accent);
+}
+
+/* Author box after the article */
+
+.authorBox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-top: var(--space-2xl);
+  padding: var(--space-lg);
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+}
+
+.authorBoxImage {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.authorBoxText {
+  min-width: 0;
+}
+
+.authorBoxName {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.authorBoxName:hover {
+  color: var(--trov-accent);
+}
+
+.authorBoxBio {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+  text-wrap: pretty;
+}
+
 /* Tags */
 
 .tags {

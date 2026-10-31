@@ -1,22 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   domainChecks.server.js
-
-   Orchestrates the full Domain Health Check. Runs all checks concurrently,
-   returns the result shape the DomainChecker component already consumes.
-
-   Session 1 + 2 coverage (real):
-     Authentication: SPF, DKIM, DMARC, BIMI
-     Mail Server:    MX records, SMTP connectivity + STARTTLS, Reverse DNS
-     Reputation:     IP blacklists, Domain blacklists
-     DNS Config:     Nameservers, SOA, DNSSEC, CAA
-     Web & Security: SSL/TLS cert, HTTPS redirect, Security headers, Website
-
-   Still pending (needs external API key):
-     Reputation: Google Safe Browsing
-
-   The remaining `pendingInfo` check returns status 'info' with a short,
-   honest note rather than a fake pass.
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Domain Health Check: runs every check concurrently and returns the shape DomainChecker renders.
 
 import {
   resolveTxt,
@@ -39,11 +21,7 @@ import { probeSsl } from './sslCheck.server.js';
 import { probeHttpsRedirect, probeWebsite } from './httpProbe.server.js';
 import { PROVIDERS, SENDING_SERVICES } from './dnsRecords.js';
 
-/* ─── Known SPF include lookup costs ────────────────────────────────────
-   Populated from the curated lists maintained in dnsRecords.js. When an SPF
-   record uses a known include, we attribute its real lookup cost rather
-   than counting 1 per include mechanism. Unknown includes still count as 1
-   and the check caveats that the number may be an undercount. */
+// Real lookup cost of known SPF includes; unknown includes count as 1.
 
 const KNOWN_INCLUDE_COSTS = (() => {
   const map = {};
@@ -56,7 +34,7 @@ const KNOWN_INCLUDE_COSTS = (() => {
   return map;
 })();
 
-/* ─── DKIM selector list ─────────────────────────────────────────────────── */
+// DKIM selector list
 /* Scanned in parallel against the target domain. If any resolves a valid
    DKIM record, DKIM is considered configured. Order does not matter. */
 
@@ -78,7 +56,7 @@ const DKIM_SELECTORS = [
   'dkim',
 ];
 
-/* ─── Provider fingerprints (MX-based) ───────────────────────────────────── */
+// Provider fingerprints (MX-based)
 
 const PROVIDER_FINGERPRINTS = [
   { pattern: /\bgoogle\.com$|aspmx\.l\.google\.com$/i, name: 'Google Workspace' },
@@ -94,12 +72,9 @@ const PROVIDER_FINGERPRINTS = [
   { pattern: /mailgun\.org$|mxa\.mailgun\.org$/i, name: 'Mailgun' },
 ];
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CHECK BUILDERS
-   Each returns a check object: { name, status, title, detail, issues }.
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Check builders. Each returns { name, status, title, detail, issues }.
 
-/* ─── SPF ──────────────────────────────────────────────────────────────── */
+// SPF
 
 function buildSpfCheck(domain, txtResult) {
   if (!txtResult.ok) {
@@ -139,7 +114,11 @@ function buildSpfCheck(domain, txtResult) {
 
   // Parse mechanisms and compute real lookup cost.
   const mechanisms = spfRecord.split(/\s+/).slice(1); // drop leading "v=spf1"
-  const terminal = mechanisms.find((m) => /^[-~+?]all$/.test(m));
+  // A bare "all" means "+all" (RFC 7208 4.6.2).
+  const allMech = mechanisms.find((m) => /^[-~+?]?all$/i.test(m));
+  const terminal = allMech ? (/^[-~+?]/.test(allMech) ? allMech.toLowerCase() : '+all') : null;
+  // With no "all", redirect= hands the whole policy to another record (RFC 7208 6.1).
+  const redirectTarget = allMech ? null : (mechanisms.find((m) => /^redirect=/i.test(m)) || '').slice(9).toLowerCase() || null;
 
   let lookupCount = 0;
   let unknownIncludes = 0;
@@ -162,9 +141,16 @@ function buildSpfCheck(domain, txtResult) {
       continue;
     }
     // redirect=domain.tld -> also costs at least 1 lookup
-    if (/^redirect=/.test(m)) {
-      lookupCount += 1;
-      unknownIncludes += 1;
+    const redirectMatch = m.match(/^redirect=(.+)$/i);
+    if (redirectMatch) {
+      if (allMech) continue; // ignored when the record has an "all"
+      const known = KNOWN_INCLUDE_COSTS[redirectMatch[1].toLowerCase()];
+      if (known !== undefined) {
+        lookupCount += known;
+      } else {
+        lookupCount += 1;
+        unknownIncludes += 1;
+      }
       continue;
     }
     // a, mx, a:host, mx:host, exists:, ptr all consume 1 lookup each
@@ -196,7 +182,7 @@ function buildSpfCheck(domain, txtResult) {
     });
   }
 
-  if (!terminal) {
+  if (!terminal && !redirectTarget) {
     issues.push({
       severity: 'warning',
       title: 'SPF has no terminal mechanism',
@@ -215,6 +201,7 @@ function buildSpfCheck(domain, txtResult) {
   }
 
   let detail = spfRecord;
+  if (redirectTarget) detail += ` (policy set by ${redirectTarget})`;
   if (unknownIncludes > 0) {
     detail += ` (${unknownIncludes} unrecognised include${unknownIncludes !== 1 ? 's' : ''} estimated at 1 lookup each)`;
   }
@@ -230,7 +217,7 @@ function buildSpfCheck(domain, txtResult) {
   };
 }
 
-/* ─── DKIM ─────────────────────────────────────────────────────────────── */
+// DKIM
 
 async function buildDkimCheck(domain) {
   const selectorNames = DKIM_SELECTORS.map((s) => `${s}._domainkey.${domain}`);
@@ -274,7 +261,7 @@ async function buildDkimCheck(domain) {
   };
 }
 
-/* ─── DMARC ────────────────────────────────────────────────────────────── */
+// DMARC
 
 function buildDmarcCheck(domain, txtResult) {
   if (!txtResult.ok && !txtResult.isNoRecord) {
@@ -369,7 +356,7 @@ function buildDmarcCheck(domain, txtResult) {
   };
 }
 
-/* ─── BIMI ─────────────────────────────────────────────────────────────── */
+// BIMI
 
 function buildBimiCheck(domain, txtResult) {
   if (!txtResult.ok) {
@@ -427,7 +414,7 @@ function buildBimiCheck(domain, txtResult) {
   };
 }
 
-/* ─── MX ───────────────────────────────────────────────────────────────── */
+// MX
 
 function buildMxCheck(mxResult, detectedProvider) {
   if (!mxResult.ok) {
@@ -474,7 +461,7 @@ function buildMxCheck(mxResult, detectedProvider) {
   };
 }
 
-/* ─── Reverse DNS ──────────────────────────────────────────────────────── */
+// Reverse DNS
 
 async function buildReverseDnsCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
@@ -528,7 +515,7 @@ async function buildReverseDnsCheck(mxResult) {
   };
 }
 
-/* ─── Nameservers ──────────────────────────────────────────────────────── */
+// Nameservers
 
 async function buildNameserversCheck(nsResult) {
   if (!nsResult.ok || nsResult.value.length === 0) {
@@ -610,7 +597,7 @@ async function buildNameserversCheck(nsResult) {
   };
 }
 
-/* ─── SOA ──────────────────────────────────────────────────────────────── */
+// SOA
 
 function buildSoaCheck(soaResult) {
   if (!soaResult.ok) {
@@ -632,7 +619,7 @@ function buildSoaCheck(soaResult) {
   };
 }
 
-/* ─── DNSSEC ───────────────────────────────────────────────────────────── */
+// DNSSEC
 
 async function buildDnssecCheck(domain) {
   // Attempt DNSKEY at the zone. A successful resolution with records means
@@ -666,7 +653,7 @@ async function buildDnssecCheck(domain) {
   };
 }
 
-/* ─── CAA ──────────────────────────────────────────────────────────────── */
+// CAA
 
 function buildCaaCheck(caaResult) {
   if (!caaResult.ok) {
@@ -700,7 +687,7 @@ function buildCaaCheck(caaResult) {
   };
 }
 
-/* ─── Blacklist checks ─────────────────────────────────────────────────── */
+// Blacklist checks
 
 async function buildIpBlacklistCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
@@ -783,7 +770,7 @@ async function buildDomainBlacklistCheck(domain) {
   };
 }
 
-/* ─── SMTP Connectivity ────────────────────────────────────────────────── */
+// SMTP Connectivity
 
 async function buildSmtpConnectivityCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
@@ -875,7 +862,7 @@ async function buildSmtpConnectivityCheck(mxResult) {
   };
 }
 
-/* ─── SSL / TLS Certificate ────────────────────────────────────────────── */
+// SSL / TLS Certificate
 
 async function buildSslCheck(domain) {
   const probe = await probeSsl(domain);
@@ -959,7 +946,7 @@ async function buildSslCheck(domain) {
   };
 }
 
-/* ─── HTTPS Redirect ───────────────────────────────────────────────────── */
+// HTTPS Redirect
 
 async function buildHttpsRedirectCheck(domain) {
   const probe = await probeHttpsRedirect(domain);
@@ -1006,7 +993,7 @@ async function buildHttpsRedirectCheck(domain) {
   };
 }
 
-/* ─── Security Headers ─────────────────────────────────────────────────── */
+// Security Headers
 
 function buildSecurityHeadersCheck(websiteProbe) {
   if (!websiteProbe || !websiteProbe.ok) {
@@ -1055,7 +1042,7 @@ function buildSecurityHeadersCheck(websiteProbe) {
   };
 }
 
-/* ─── Website ──────────────────────────────────────────────────────────── */
+// Website
 
 function buildWebsiteCheck(websiteProbe) {
   if (!websiteProbe || !websiteProbe.ok) {
@@ -1107,7 +1094,7 @@ function buildWebsiteCheck(websiteProbe) {
   };
 }
 
-/* ─── Pending (Session 2) stubs ────────────────────────────────────────── */
+// Pending (Session 2) stubs
 
 function pendingInfo(name, reason) {
   return {
@@ -1119,9 +1106,7 @@ function pendingInfo(name, reason) {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ORCHESTRATOR
-   ═══════════════════════════════════════════════════════════════════════════ */
+// Orchestrator
 
 /**
  * Detect the email provider from MX records.

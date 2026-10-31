@@ -3,7 +3,7 @@ title: "Is your domain blacklisted? How to check and fix it"
 slug: "domain-blacklisted-check-fix"
 description: "Your emails might be landing in Spam because your domain or sending IP is on a blacklist. Here's how to find out, what caused it, and how to get removed."
 date: "2026-07-12"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["blacklist", "domain-reputation", "spam", "deliverability", "postmaster-tools", "dnsbl"]
 readingTime: 8

@@ -2,6 +2,7 @@ import { useLoaderData, Link, data } from 'react-router';
 import { getPost, getAdjacentPosts, getRelatedPosts } from '~/utils/markdown.server';
 import { formatDate, formatDateShort } from '~/utils/format';
 import { getSeo } from '~/utils/seo';
+import { getAuthor, authorUrl, authorSchema } from '~/utils/authors';
 import useReveal from '~/utils/useReveal';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
@@ -24,7 +25,7 @@ export function meta({ data: payload }) {
       type: 'article',
     }),
     { property: 'article:published_time', content: post.date },
-    { property: 'article:author', content: post.author },
+    { property: 'article:author', content: getAuthor(post.author).name },
   ];
 }
 
@@ -44,14 +45,16 @@ export default function BlogPost() {
   const contentRef = useReveal(0.01);
   const ctaRef = useReveal();
 
+  const author = getAuthor(post.author);
   const schemaData = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    author: { '@type': 'Organization', name: post.author },
-    publisher: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
+    dateModified: post.updated || post.date,
+    author: authorSchema(author),
+    publisher: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarci.sh' },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `https://trovarci.sh/blog/${post.slug}` },
   };
 
@@ -91,9 +94,21 @@ export default function BlogPost() {
                 {post.date && <time dateTime={post.date}>{formatDate(post.date)}</time>}
                 <span className={styles.dot} aria-hidden="true" />
                 <span>{post.readingTime} min read</span>
-                <span className={styles.dot} aria-hidden="true" />
-                <span>{post.author}</span>
               </div>
+
+              <Link to={authorUrl(author)} className={styles.byline}>
+                <img
+                  src={author.imageSmall}
+                  alt=""
+                  width="32"
+                  height="32"
+                  className={styles.bylineImage}
+                />
+                <span className={styles.bylineText}>
+                  <span className={styles.bylineName}>{author.name}</span>
+                  <span className={styles.bylineRole}>{author.role}</span>
+                </span>
+              </Link>
             </header>
 
             <hr className={styles.divider} />
@@ -102,6 +117,20 @@ export default function BlogPost() {
               <BlogContent html={post.html} />
             </div>
           </article>
+
+          <aside className={styles.authorBox} aria-label="About the author">
+            <img
+              src={author.imageSmall}
+              alt=""
+              width="56"
+              height="56"
+              className={styles.authorBoxImage}
+            />
+            <div className={styles.authorBoxText}>
+              <Link to={authorUrl(author)} className={styles.authorBoxName}>{author.name}</Link>
+              <p className={styles.authorBoxBio}>{author.short}</p>
+            </div>
+          </aside>
 
           {post.tags && post.tags.length > 0 && (
             <div className={styles.tags}>

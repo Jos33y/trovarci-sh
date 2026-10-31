@@ -3,7 +3,7 @@ title: "What bulk email really costs (and why you pay for contacts you never ema
 slug: "bulk-email-cost"
 description: "Four pricing models, real 2026 numbers at three list sizes, and the three-year totals nobody publishes. Plus the one lever that cuts the bill on every model."
 date: "2026-08-29"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Marketing"
 tags: ["pricing", "email-marketing", "bulk-email", "cost-comparison", "list-hygiene"]
 readingTime: 12

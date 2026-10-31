@@ -3,7 +3,7 @@ title: "How to send bulk email without getting blacklisted (what actually trigge
 slug: "send-bulk-email-without-blacklist"
 description: "Blacklisting is caused by who you send to, not what you write. The real triggers, the pre-send checklist, and the ramp schedule that keeps a sending domain clean."
 date: "2026-08-25"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["bulk-email", "blacklists", "spam-traps", "sender-reputation", "list-hygiene", "warm-up"]
 readingTime: 11

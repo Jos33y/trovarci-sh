@@ -18,6 +18,7 @@ const STATIC_URLS = [
     '/smtp-test',
     '/records',
     '/blog',
+    '/about/joseph-lagbalu',
     '/download',
     '/credits',
     '/contact',

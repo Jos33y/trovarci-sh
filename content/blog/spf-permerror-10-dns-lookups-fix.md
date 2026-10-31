@@ -3,7 +3,7 @@ title: "SPF PermError: the 10 DNS lookup limit and how to fix it"
 slug: "spf-permerror-10-dns-lookups-fix"
 description: "Your SPF just broke. Every email from your domain is failing authentication. Here's why the 10-lookup cap exists, how to count yours, and three ways to fix it."
 date: "2026-07-11"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "SMTP Guides"
 tags: ["spf", "dns", "email-authentication", "dmarc", "permerror"]
 readingTime: 10

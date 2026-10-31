@@ -3,7 +3,7 @@ title: "How to check phone numbers before sending bulk SMS (and stop paying for 
 slug: "check-phone-numbers-before-bulk-sms"
 description: "Every dead number on your list costs you money on every send. What phone verification actually checks, why landlines fail silently, and how to clean a list collected on paper."
 date: "2026-08-27"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Marketing"
 tags: ["sms", "phone-verification", "line-type", "list-hygiene", "bulk-sms"]
 readingTime: 9

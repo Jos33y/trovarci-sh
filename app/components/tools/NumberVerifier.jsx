@@ -704,7 +704,7 @@ export default function NumberVerifier({
         <div className={styles.toolHeaderLeft}>
           <span className={styles.toolIcon}><PhoneIcon /></span>
           <div>
-            <h2 className={styles.toolTitle}>Number Verifier</h2>
+            <h1 className={styles.toolTitle}>Number Verifier</h1>
             <p className={styles.toolSubtitle}>
               Validate phone numbers and detect carrier info
             </p>
@@ -737,6 +737,7 @@ export default function NumberVerifier({
               type="tel"
               className={styles.numberInput}
               placeholder="(415) 555-0123"
+              aria-label="Phone number to verify"
               value={number}
               autoComplete="off"
               onChange={(e) => { setNumber(e.target.value); setInputError(''); }}
@@ -1048,6 +1049,7 @@ export default function NumberVerifier({
                 className={styles.bulkPasteArea}
                 rows={8}
                 placeholder={'+15551234567\n+447911123456\n5552345678'}
+                aria-label="Phone numbers to verify, one per line"
                 value={pasteText}
                 onChange={(e) => { setPasteText(e.target.value); setBulkError(''); }}
               />

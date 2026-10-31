@@ -387,7 +387,7 @@ export default function EmailScorer({
             <GaugeIcon size={22} />
           </div>
           <div>
-            <h2 className={styles.toolTitle}>Email Scorer</h2>
+            <h1 className={styles.toolTitle}>Email Scorer</h1>
             <p className={styles.toolDesc}>Score your email for deliverability before you send</p>
           </div>
         </div>
@@ -433,6 +433,7 @@ export default function EmailScorer({
               type="text"
               className={styles.subjectInput}
               placeholder="Your Weekly Newsletter - March 2026"
+              aria-label="Subject line"
               value={subject}
               onChange={(e) => { setSubject(e.target.value); setInputError(''); }}
               disabled={phase === 'processing'}

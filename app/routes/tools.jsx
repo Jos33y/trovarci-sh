@@ -73,6 +73,7 @@ function SectionStrip({ activeId }) {
           <a
             key={s.id}
             href={`#${s.id}`}
+            tabIndex={-1}
             className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
           >
             <span className={styles.stripNum}>{s.num}</span>

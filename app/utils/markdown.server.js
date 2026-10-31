@@ -1,22 +1,23 @@
-/* Markdown server utility - reads content/blog/*.md, parses frontmatter, renders HTML. Server-only. */
+// Reads content/blog/*.md, parses frontmatter, renders HTML. Server-only.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
+import { DEFAULT_AUTHOR } from './authors.js';
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
 
 marked.setOptions({ gfm: true, breaks: false });
 
-/* Frontmatter shape - keep in sync with content/blog/*.md */
 function mapFrontmatter(filename, data) {
   return {
     slug: data.slug || filename.replace(/\.md$/, ''),
     title: data.title || 'Untitled',
     description: data.description || '',
     date: data.date || '',
-    author: data.author || 'Trovarcis Team',
+    updated: data.updated || '',
+    author: data.author || DEFAULT_AUTHOR,
     category: data.category || '',
     tags: data.tags || [],
     image: data.image || null,
@@ -24,7 +25,6 @@ function mapFrontmatter(filename, data) {
   };
 }
 
-/* Returns frontmatter-only metadata sorted newest first. */
 export function getAllPosts() {
   if (!fs.existsSync(BLOG_DIR)) return [];
 

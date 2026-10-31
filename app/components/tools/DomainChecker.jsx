@@ -294,7 +294,7 @@ export default function DomainChecker() {
             <ShieldCheckIcon size={22} />
           </div>
           <div>
-            <h2 className={styles.toolTitle}>Domain Health Checker</h2>
+            <h1 className={styles.toolTitle}>Domain Health Checker</h1>
             <p className={styles.toolDesc}>Check your domain's email, DNS, and reputation health</p>
           </div>
         </div>
@@ -310,6 +310,7 @@ export default function DomainChecker() {
               type="text"
               className={`${styles.domainInput} ${domainError ? styles.inputError : ''}`}
               placeholder="example.com"
+              aria-label="Domain to check"
               value={domain}
               onChange={(e) => {
                 setDomain(e.target.value);

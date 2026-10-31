@@ -3,7 +3,7 @@ title: "Email domain health check: the 25 tests that matter and what each failur
 slug: "email-domain-health-check"
 description: "What an email domain health check actually tests, what each failure costs you in inbox placement, and how to run the full audit on your own domain in under a minute."
 date: "2026-08-24"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["domain-health", "deliverability", "spf", "dkim", "dmarc", "blacklists", "dns"]
 readingTime: 10

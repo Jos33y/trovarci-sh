@@ -12,7 +12,6 @@ User-agent: msnbot
 User-agent: YandexBot
 User-agent: DuckDuckBot
 User-agent: Slurp
-User-agent: Baiduspider
 User-agent: SeznamBot
 User-agent: NaverBot
 User-agent: Yeti

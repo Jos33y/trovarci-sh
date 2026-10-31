@@ -3,7 +3,7 @@ title: "How to clean an email list before sending (and what to do with the resul
 slug: "clean-email-list-before-sending"
 description: "What list cleaning actually removes, what every verifier gets wrong about catch-all addresses, and how to decide what to send to once the results come back."
 date: "2026-08-26"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["email-verification", "list-hygiene", "catch-all", "bounce-rate", "deliverability"]
 readingTime: 11

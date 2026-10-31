@@ -129,7 +129,7 @@ const CREDIT_COSTS = [
 const FAQ_ITEMS_BASE = [
   {
     q: 'Do credits expire?',
-    a: 'Yes. 12 months from purchase. You will get email reminders before expiry so nothing slips away unused.',
+    a: 'Yes. Credits expire 12 months after the purchase they came from. Buying more does not reset older Credits, and the oldest Credits are used first.',
   },
   // Payment-method FAQ entry slotted in dynamically based on Stripe flag.
   {
@@ -538,6 +538,7 @@ export default function CreditsPage() {
                     className={styles.faqQuestion}
                     onClick={() => toggleFaq(i)}
                     aria-expanded={openFaq === i}
+                    aria-controls={`faq-${i}`}
                   >
                     <span>{q}</span>
                     <span className={[styles.faqChevron, openFaq === i ? styles.faqChevronOpen : ''].join(' ')}>
@@ -546,9 +547,7 @@ export default function CreditsPage() {
                       </svg>
                     </span>
                   </button>
-                  {openFaq === i && (
-                    <div className={styles.faqAnswer}>{a}</div>
-                  )}
+                  <div id={`faq-${i}`} className={styles.faqAnswer} hidden={openFaq !== i}>{a}</div>
                 </div>
               ))}
             </div>

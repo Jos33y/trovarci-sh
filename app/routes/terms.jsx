@@ -38,7 +38,7 @@ export default function Terms() {
         <div className={`container ${styles.inner}`}>
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.title}>Terms of Service</h1>
-            <p className={styles.updated}>Last updated: October 17, 2026</p>
+            <p className={styles.updated}>Last updated: October 31, 2026</p>
           </header>
 
           <hr className={styles.divider} />
@@ -160,7 +160,7 @@ export default function Terms() {
             </p>
             <ul>
               <li><strong>1 Credit = $0.01.</strong> Always.</li>
-              <li>Credits never expire.</li>
+              <li>Credits expire 12 months after the purchase they came from. Unused Credits from that purchase are then removed from your balance.</li>
               <li>Credits are non-transferable between accounts.</li>
               <li>Credit purchases are non-refundable except as described in our <a href="/refund">Refund Policy</a> or where required by law. If your account is deleted, remaining Credits are forfeited.</li>
               <li>We may adjust Credit pricing for tools with 30 days notice. Existing Credit balances keep their value.</li>

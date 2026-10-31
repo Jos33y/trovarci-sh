@@ -131,6 +131,7 @@ function SectionStrip({ activeId }) {
           <a
             key={s.id}
             href={`#${s.id}`}
+            tabIndex={-1}
             className={`${styles.stripItem} ${activeId === s.id ? styles.stripItemActive : ''}`}
           >
             <span className={styles.stripNum}>{s.num}</span>
@@ -349,6 +350,7 @@ export default function SmtpTestPage() {
                       className={styles.faqQuestion}
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
+                      aria-controls={`faq-${i}`}
                     >
                       <span className={styles.faqDash} aria-hidden="true" />
                       <span className={styles.faqQuestionText}>{item.q}</span>
@@ -356,11 +358,9 @@ export default function SmtpTestPage() {
                         <ChevronIcon />
                       </span>
                     </button>
-                    {isOpen && (
-                      <div className={styles.faqAnswer}>
-                        <p>{item.a}</p>
-                      </div>
-                    )}
+                    <div id={`faq-${i}`} className={styles.faqAnswer} hidden={!isOpen}>
+                      <p>{item.a}</p>
+                    </div>
                   </div>
                 );
               })}

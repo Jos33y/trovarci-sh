@@ -635,7 +635,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
         <div className={styles.toolHeaderLeft}>
           <span className={styles.toolIcon}><MailIcon /></span>
           <div>
-            <h2 className={styles.toolTitle}>Email Verifier</h2>
+            <h1 className={styles.toolTitle}>Email Verifier</h1>
             <p className={styles.toolSubtitle}>
               {mode === 'single'
                 ? 'Check if an email address is real and deliverable'
@@ -659,6 +659,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
                   type="email"
                   className={styles.emailInput}
                   placeholder="user@example.com"
+                  aria-label="Email address to verify"
                   value={email}
                   autoComplete="off"
                   onChange={(e) => { setEmail(e.target.value); setInputError(''); }}
@@ -788,6 +789,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
                   className={styles.pasteArea}
                   rows={4}
                   placeholder={"user1@example.com\nuser2@company.com\nuser3@domain.org"}
+                  aria-label="Email addresses to verify, one per line"
                   value={pasteText}
                   onChange={(e) => { setPasteText(e.target.value); setInputError(''); }}
                 />

@@ -3,7 +3,7 @@ title: "Why your emails hit Gmail Promotions (and how to move them to Primary)"
 slug: "gmail-promotions-tab-fix"
 description: "Gmail's Promotions tab crushes your open rate. Here's what triggers it, how to check your emails against every factor, and the fix that actually works."
 date: "2026-07-11"
-author: "Trovarcis Team"
+author: "joseph-lagbalu"
 category: "Email Deliverability"
 tags: ["gmail", "deliverability", "cold-outreach", "promotions-tab"]
 readingTime: 9
