@@ -90,13 +90,18 @@ async function handleOrderPaid(event, order) {
 
   if (result.userEmail && result.transactionId) {
     const pkg = getPackage(payment.package_key);
+    const tax = Number.isInteger(order.tax_amount) ? order.tax_amount : 0;
+    const paidTotal = Number.isInteger(total) ? total : payment.amount_usd_cents;
+    const amountUsd = tax > 0
+      ? `${(paidTotal / 100).toFixed(2)} (${paidTotal === payment.amount_usd_cents ? 'includes' : 'with'} $${(tax / 100).toFixed(2)} tax)`
+      : (paidTotal / 100).toFixed(2);
     sendPaymentReceiptEmail({
       to: result.userEmail,
       transactionId: result.transactionId,
       credits: payment.credits,
-      amountUsd: (payment.amount_usd_cents / 100).toFixed(2),
-      paymentMethod: 'Card',
-      packageName: pkg?.name || payment.package_key,
+      amountUsd,
+      paymentMethod: 'Card, via Polar',
+      packageName: pkg?.name || (payment.package_key === 'custom' ? 'Custom' : payment.package_key),
       newBalance: result.newBalance,
     }).catch((err) => console.error('[polar webhook] receipt email failed:', err.message));
   }

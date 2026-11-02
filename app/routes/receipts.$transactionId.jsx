@@ -5,6 +5,7 @@ import { TrovarcisReachLogo } from '~/components/shared/Logo';
 import { requireUser } from '~/utils/session.server';
 import { sql } from '~/utils/db.server';
 import { formatDateLong, formatDateIso, formatInt } from '~/utils/format';
+import { CREDIT_PACKAGES } from '~/utils/pricing';
 import styles from '~/styles/modules/routes/receipt.module.css';
 
 export const meta = ({ data }) => [
@@ -37,11 +38,29 @@ export async function loader({ request, params }) {
   if (tx.type === 'purchase' && tx.reference_id) {
     const [p] = await sql`
       SELECT id, gateway, gateway_reference, amount_usd_cents, credits,
-             payer_currency, payer_amount, txid, completed_at
+             payer_currency, payer_amount, txid, completed_at, metadata
       FROM payments
       WHERE id = ${tx.reference_id}
     `;
-    payment = p || null;
+    if (p) {
+      // Card orders: Polar's amounts, kept from the paid webhook. Only the figures the receipt shows.
+      const order = p.gateway === 'polar' ? p.metadata?.raw_webhook?.data || {} : {};
+      payment = {
+        gateway: p.gateway,
+        amountUsdCents: p.amount_usd_cents,
+        payerCurrency: p.payer_currency,
+        payerAmount: p.payer_amount,
+        txid: p.txid,
+        order: p.gateway === 'polar'
+          ? {
+              id: order.id || p.txid,
+              totalCents: Number.isInteger(order.total_amount) ? order.total_amount : null,
+              taxCents: Number.isInteger(order.tax_amount) ? order.tax_amount : 0,
+              receiptNumber: order.receipt_number || order.invoice_number || null,
+            }
+          : null,
+      };
+    }
   }
 
   const shortId = tx.id.slice(0, 8).toUpperCase();
@@ -77,10 +96,25 @@ export default function ReceiptPage() {
 
   const creditsAmount = formatInt(Math.abs(receipt.delta));
   const amountUsd = meta.amount_usd ? `$${meta.amount_usd}` : null;
+  const usd = (cents) => `$${(cents / 100).toFixed(2)}`;
+
+  // Card totals: tax is either inside the price (UK, EU) or added on top (US, India and others).
+  const order = payment?.order;
+  const priceCents = payment?.amountUsdCents ?? null;
+  const card = order && order.totalCents != null && priceCents != null
+    ? {
+        taxCents: order.taxCents,
+        taxIncluded: order.totalCents === priceCents,
+        totalCents: order.totalCents,
+      }
+    : null;
+
+  const packageName = CREDIT_PACKAGES.find((p) => p.key === meta.package_name)?.name
+    || (meta.package_name === 'custom' ? 'Custom' : meta.package_name);
 
   const descriptionLine = (() => {
     if (receipt.type === 'purchase') {
-      return `${meta.package_name || 'Credit package'} - ${creditsAmount} credits`;
+      return `${packageName || 'Credit pack'}: ${creditsAmount} Credits`;
     }
     if (receipt.type === 'grant') {
       return meta.source === 'welcome_bonus' ? 'Welcome bonus' : 'Credit grant';
@@ -183,9 +217,15 @@ export default function ReceiptPage() {
 
           {amountUsd && (
             <div className={styles.totals}>
+              {card && card.taxCents > 0 && (
+                <div className={styles.totalRow}>
+                  <span className={styles.totalLabel}>{card.taxIncluded ? 'Tax (included)' : 'Tax'}</span>
+                  <span className={styles.totalValueMuted}>{usd(card.taxCents)}</span>
+                </div>
+              )}
               <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Total paid</span>
-                <span className={styles.totalValue}>{amountUsd}</span>
+                <span className={styles.totalValue}>{card ? usd(card.totalCents) : amountUsd}</span>
               </div>
               <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Balance after</span>
@@ -196,16 +236,36 @@ export default function ReceiptPage() {
             </div>
           )}
 
-          {payment?.txid && (
+          {order && (
+            <div className={styles.bcDetails}>
+              <div className={styles.bcHeader}>Card payment</div>
+              <div className={styles.bcRow}>
+                <span className={styles.bcLabel}>Processed by</span>
+                <span className={styles.bcValue}>Polar, merchant of record</span>
+              </div>
+              {order.receiptNumber && (
+                <div className={styles.bcRow}>
+                  <span className={styles.bcLabel}>Polar receipt</span>
+                  <span className={styles.bcValueMono}>{order.receiptNumber}</span>
+                </div>
+              )}
+              <div className={styles.bcRow}>
+                <span className={styles.bcLabel}>Polar order</span>
+                <span className={styles.bcValueMono}>{order.id}</span>
+              </div>
+            </div>
+          )}
+
+          {payment?.gateway === 'cryptomus' && payment.txid && (
             <div className={styles.bcDetails}>
               <div className={styles.bcHeader}>Blockchain transaction</div>
               <div className={styles.bcRow}>
                 <span className={styles.bcLabel}>Network</span>
-                <span className={styles.bcValue}>{payment.payer_currency || '-'}</span>
+                <span className={styles.bcValue}>{payment.payerCurrency || '-'}</span>
               </div>
               <div className={styles.bcRow}>
                 <span className={styles.bcLabel}>Paid in crypto</span>
-                <span className={styles.bcValue}>{payment.payer_amount || '-'}</span>
+                <span className={styles.bcValue}>{payment.payerAmount || '-'}</span>
               </div>
               <div className={styles.bcRow}>
                 <span className={styles.bcLabel}>Transaction hash</span>
@@ -217,6 +277,7 @@ export default function ReceiptPage() {
           <div className={styles.footer}>
             <p className={styles.footerNote}>
               {!isUsage && 'Credits expire 12 months from purchase date. '}
+              {order && 'Polar sells card purchases on our behalf and emails its own tax receipt. '}
               Questions about this {isUsage ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
             </p>
             <p className={styles.footerFine}>
