@@ -9,6 +9,7 @@ import {
 } from '~/lib/payments.server';
 import { createInvoice } from '~/lib/cryptomus.server';
 import { createCheckoutSession } from '~/lib/stripe.server';
+import { createPolarCheckout } from '~/lib/polar.server';
 import {
   getPackage,
   buildCustomPackage,
@@ -16,6 +17,8 @@ import {
   CUSTOM_MAX_CREDITS,
   CRYPTOMUS_ENABLED,
   STRIPE_ENABLED,
+  POLAR_ENABLED,
+  getPolarProductId,
 } from '~/utils/paymentsConfig.server';
 import { recordEvent, buildEventFromRequest } from '~/utils/analytics.server';
 
@@ -74,7 +77,19 @@ export async function checkoutAction({ request }) {
     recordCheckoutError(request, user.id, 'STRIPE_DISABLED', { package_key: pkg.key });
     return data({ errors: { _form: 'Card payments are not yet available. Use crypto.' } }, { status: 503 });
   }
-  if (gateway !== 'cryptomus' && gateway !== 'stripe') {
+  if (gateway === 'polar' && !POLAR_ENABLED) {
+    recordCheckoutError(request, user.id, 'POLAR_DISABLED', { package_key: pkg.key });
+    return data({ errors: { _form: 'Card payments are not available right now. Use crypto.' } }, { status: 503 });
+  }
+  const polarProductId = gateway === 'polar' ? getPolarProductId(pkg.key) : null;
+  if (gateway === 'polar' && !polarProductId) {
+    recordCheckoutError(request, user.id, 'POLAR_NO_PRODUCT', { package_key: pkg.key });
+    return data(
+      { errors: { _form: pkg.key === 'custom' ? 'Card payment covers the packs. Pick a pack, or pay a custom amount with crypto.' : 'This pack is not available by card yet. Use crypto.' } },
+      { status: 400 },
+    );
+  }
+  if (!['cryptomus', 'stripe', 'polar'].includes(gateway)) {
     recordCheckoutError(request, user.id, 'UNKNOWN_GATEWAY', { gateway });
     return data({ errors: { _form: 'Unknown payment method' } }, { status: 400 });
   }
@@ -173,6 +188,34 @@ export async function checkoutAction({ request }) {
       }));
 
       throw redirect(session.url);
+    }
+
+    if (gateway === 'polar') {
+      const checkout = await createPolarCheckout({
+        paymentId: payment.id,
+        productId: polarProductId,
+        amountUsdCents: pkg.priceUsdCents,
+        isCustom: pkg.key === 'custom',
+        userId: user.id,
+        customerEmail: user.email,
+        packageKey: pkg.key,
+        credits: pkg.credits,
+      });
+
+      const updated = await markAwaitingPayment(payment.id, {
+        gatewayReference: checkout.id,
+        checkoutUrl: checkout.url,
+      });
+      if (!updated) throw new Error('Payment row state changed unexpectedly');
+
+      recordEvent(buildEventFromRequest(request, {
+        eventType: 'gateway_redirect',
+        path: '/credits',
+        userId: user.id,
+        metadata: { gateway, payment_id: payment.id, package_key: pkg.key },
+      }));
+
+      throw redirect(checkout.url);
     }
 
     throw new Error(`Unknown gateway: ${gateway}`);

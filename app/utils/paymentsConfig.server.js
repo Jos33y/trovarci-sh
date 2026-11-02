@@ -106,3 +106,25 @@ export const STRIPE_WEBHOOK_TOLERANCE_SEC = (() => {
   if (!Number.isFinite(n) || n <= 0) return 300;
   return n;
 })();
+
+// Polar (card payments, merchant of record). Off until POLAR_ENABLED=true and the token is set.
+export const POLAR_ENABLED = envFlag('POLAR_ENABLED', false);
+export const POLAR_API_BASE = optionalEnv('POLAR_API_BASE', 'https://api.polar.sh');
+
+export function getPolarCredentials() {
+  return {
+    accessToken:   requireEnv('POLAR_ACCESS_TOKEN'),
+    webhookSecret: requireEnv('POLAR_WEBHOOK_SECRET'),
+  };
+}
+
+// One Polar product per pack, e.g. POLAR_PRODUCT_GROWTH. POLAR_PRODUCT_CUSTOM is optional;
+// without it, custom amounts stay crypto-only.
+export function getPolarProductId(packageKey) {
+  return optionalEnv(`POLAR_PRODUCT_${String(packageKey).toUpperCase()}`);
+}
+
+export const POLAR_CUSTOM_ENABLED = POLAR_ENABLED && Boolean(getPolarProductId('custom'));
+
+// Which gateway the "Card" option uses. Polar first; Stripe stays as a fallback.
+export const CARD_GATEWAY = POLAR_ENABLED ? 'polar' : (STRIPE_ENABLED ? 'stripe' : null);

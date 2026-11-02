@@ -5,7 +5,8 @@ import Footer from '~/components/layout/Footer';
 import { getOptionalUser } from '~/utils/session.server';
 import {
   CRYPTOMUS_ENABLED,
-  STRIPE_ENABLED,
+  CARD_GATEWAY,
+  POLAR_CUSTOM_ENABLED,
   CUSTOM_MIN_CREDITS,
   CUSTOM_MAX_CREDITS,
 } from '~/utils/paymentsConfig.server';
@@ -26,7 +27,8 @@ export async function loader({ request }) {
   return {
     user,
     cryptomusEnabled: CRYPTOMUS_ENABLED,
-    stripeEnabled:    STRIPE_ENABLED,
+    cardGateway:      CARD_GATEWAY,
+    customCardOk:     CARD_GATEWAY === 'stripe' || POLAR_CUSTOM_ENABLED,
     customMin:        CUSTOM_MIN_CREDITS,
     customMax:        CUSTOM_MAX_CREDITS,
   };
@@ -158,20 +160,21 @@ const FAQ_ITEMS_BASE = [
   },
 ];
 
-function buildPaymentFaq(stripeEnabled) {
-  return stripeEnabled
+function buildPaymentFaq(cardEnabled) {
+  return cardEnabled
     ? {
         q: 'What payment methods do you accept?',
-        a: 'Card payments via Stripe and crypto via Cryptomus. Stripe accepts all major cards. Cryptomus accepts Bitcoin, USDT, USDC, Ethereum, Litecoin, and other major cryptocurrencies.',
+        a: 'Card and crypto. Cards are processed by Polar, which also handles sales tax for your country. Crypto goes through Cryptomus and accepts Bitcoin, USDT, USDC, Ethereum, Litecoin and other major coins, with no card or bank account needed.',
       }
     : {
-        q: 'Can I use crypto to pay?',
-        a: 'Yes. We accept Bitcoin, USDT, USDC, Ethereum, Litecoin, and other major cryptocurrencies via Cryptomus. Card payments via Stripe are coming.',
+        q: 'Can I pay with crypto?',
+        a: 'Yes. We accept Bitcoin, USDT, USDC, Ethereum, Litecoin and other major coins through Cryptomus. No card or bank account needed.',
       };
 }
 
 export default function CreditsPage() {
-  const { user, cryptomusEnabled, stripeEnabled, customMin, customMax } = useLoaderData();
+  const { user, cryptomusEnabled, cardGateway, customCardOk, customMin, customMax } = useLoaderData();
+  const cardEnabled = Boolean(cardGateway);
   const actionData = useActionData();
   const navigation = useNavigation();
   const [searchParams] = useSearchParams();
@@ -186,7 +189,7 @@ export default function CreditsPage() {
     return fromQuery && VALID_PKG_IDS.has(fromQuery) ? fromQuery : 'growth';
   })();
 
-  const defaultGateway = cryptomusEnabled ? 'crypto' : (stripeEnabled ? 'card' : 'crypto');
+  const defaultGateway = cardEnabled ? 'card' : 'crypto';
 
   const [paymentMethod, setPaymentMethod] = useState(defaultGateway);
   const [selected, setSelected] = useState(initialPkg);
@@ -209,9 +212,9 @@ export default function CreditsPage() {
 
   const FAQ_ITEMS = useMemo(() => {
     const items = [...FAQ_ITEMS_BASE];
-    items.splice(1, 0, buildPaymentFaq(stripeEnabled));
+    items.splice(1, 0, buildPaymentFaq(cardEnabled));
     return items;
-  }, [stripeEnabled]);
+  }, [cardEnabled]);
 
   const selectedPackage = useMemo(() => {
     if (selected === 'custom') {
@@ -257,8 +260,9 @@ export default function CreditsPage() {
 
   const customAmountError = customRangeError || serverAmountError;
 
-  const gatewayKey = paymentMethod === 'crypto' ? 'cryptomus' : 'stripe';
-  const gatewayName = paymentMethod === 'crypto' ? 'Cryptomus' : 'Stripe';
+  const gatewayKey = paymentMethod === 'crypto' ? 'cryptomus' : cardGateway;
+  const gatewayName = paymentMethod === 'crypto' ? 'Cryptomus' : (cardGateway === 'polar' ? 'Polar' : 'Stripe');
+  const customNeedsCrypto = paymentMethod === 'card' && selected === 'custom' && !customCardOk;
 
   function toggleFaq(i) {
     setOpenFaq(openFaq === i ? null : i);
@@ -310,6 +314,16 @@ export default function CreditsPage() {
           <div className="container">
 
             <div className={styles.paymentToggle}>
+              {cardEnabled && (
+                <button
+                  type="button"
+                  className={paymentMethod === 'card' ? styles.toggleActive : styles.toggleBtn}
+                  onClick={() => setPaymentMethod('card')}
+                >
+                  <CardIcon size={16} />
+                  Card
+                </button>
+              )}
               <button
                 type="button"
                 className={paymentMethod === 'crypto' ? styles.toggleActive : styles.toggleBtn}
@@ -317,18 +331,7 @@ export default function CreditsPage() {
                 disabled={!cryptomusEnabled}
               >
                 <BitcoinIcon size={16} />
-                Crypto (Cryptomus)
-              </button>
-              <button
-                type="button"
-                className={paymentMethod === 'card' ? styles.toggleActive : styles.toggleBtn}
-                onClick={() => stripeEnabled && setPaymentMethod('card')}
-                disabled={!stripeEnabled}
-                title={!stripeEnabled ? 'Card payments coming soon' : undefined}
-              >
-                <CardIcon size={16} />
-                Card (Stripe)
-                {!stripeEnabled && <span className={styles.toggleSoonBadge}>Coming soon</span>}
+                Crypto
               </button>
             </div>
 
@@ -449,13 +452,13 @@ export default function CreditsPage() {
                     : 'Select a package'}
                 </span>
                 <span className={styles.checkoutPrice}>
-                  {selectedPackage ? `$${selectedPackage.price} via ${gatewayName}` : ''}
+                  {selectedPackage ? `$${selectedPackage.price} ${paymentMethod === 'card' ? 'by card' : 'in crypto'}` : ''}
                 </span>
               </div>
               <button
                 type="submit"
                 className={styles.buyBtn}
-                disabled={isSubmitting || !selectedPackage}
+                disabled={isSubmitting || !selectedPackage || customNeedsCrypto}
               >
                 {isSubmitting
                   ? 'Redirecting...'
@@ -466,6 +469,10 @@ export default function CreditsPage() {
                   : 'Pay with crypto'}
               </button>
             </Form>
+
+            {customNeedsCrypto && (
+              <p className={styles.checkoutNote}>Card payment covers the packs. For a custom amount, pay with crypto.</p>
+            )}
 
             {formError && (
               <div role="alert" className={styles.formError}>

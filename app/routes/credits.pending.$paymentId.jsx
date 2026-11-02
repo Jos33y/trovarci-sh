@@ -100,7 +100,9 @@ export default function PaymentPendingPage() {
             </div>
             <h1 className={styles.title}>Waiting for payment</h1>
             <p className={styles.subtitle}>
-              We're waiting for the blockchain to confirm your transaction. This usually takes 1-5 minutes depending on the network you chose.
+              {payment.gateway === 'cryptomus'
+                ? "We're waiting for the blockchain to confirm your transaction. This usually takes 1 to 5 minutes, depending on the network you chose."
+                : "We're confirming your card payment. This usually takes a few seconds."}
             </p>
 
             <div className={styles.details}>
