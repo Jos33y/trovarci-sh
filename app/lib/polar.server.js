@@ -6,7 +6,7 @@ import { POLAR_API_BASE, getPolarCredentials, getPublicUrl } from '~/utils/payme
 const WEBHOOK_TOLERANCE_SEC = 300;
 const REQUEST_TIMEOUT_MS = 15_000;
 
-export async function createPolarCheckout({ paymentId, productId, amountUsdCents, isCustom, userId, customerEmail, packageKey, credits }) {
+export async function createPolarCheckout({ paymentId, productId, amountUsdCents, isCustom, userId, customerEmail, packageKey, credits, country, ipAddress }) {
   const { accessToken } = getPolarCredentials();
   const base = getPublicUrl();
 
@@ -19,6 +19,9 @@ export async function createPolarCheckout({ paymentId, productId, amountUsdCents
     allow_discount_codes: false,
     metadata: { payment_id: paymentId, package_key: packageKey, credits },
   };
+  // Pre-fill the country Cloudflare saw, so Polar shows the right tax at once. The buyer can change it.
+  if (country) body.customer_billing_address = { country };
+  if (ipAddress) body.customer_ip_address = ipAddress;
   // The custom product is pay-what-you-want: pre-fill what the buyer chose on /credits.
   if (isCustom) body.amount = amountUsdCents;
 

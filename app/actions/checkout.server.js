@@ -20,7 +20,7 @@ import {
   POLAR_ENABLED,
   getPolarProductId,
 } from '~/utils/paymentsConfig.server';
-import { recordEvent, buildEventFromRequest } from '~/utils/analytics.server';
+import { recordEvent, buildEventFromRequest, getCountry, getClientIp } from '~/utils/analytics.server';
 
 // Fire payment_failed with code. Never throws.
 function recordCheckoutError(request, userId, code, extra = {}) {
@@ -32,6 +32,17 @@ function recordCheckoutError(request, userId, code, extra = {}) {
       metadata: { stage: 'checkout', code, ...extra },
     }));
   } catch { /* analytics failure must not block checkout */ }
+}
+
+// Cloudflare reports XX for unknown and T1 for Tor; neither is a country.
+function knownCountry(code) {
+  return /^[A-Z]{2}$/.test(code || '') && code !== 'XX' && code !== 'T1' ? code : null;
+}
+
+function publicIp(ip) {
+  if (!ip || ip === 'unknown') return null;
+  if (/^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$|fc|fd)/i.test(ip)) return null;
+  return ip;
 }
 
 export async function checkoutAction({ request }) {
@@ -200,6 +211,8 @@ export async function checkoutAction({ request }) {
         customerEmail: user.email,
         packageKey: pkg.key,
         credits: pkg.credits,
+        country: knownCountry(getCountry(request)),
+        ipAddress: publicIp(getClientIp(request)),
       });
 
       const updated = await markAwaitingPayment(payment.id, {

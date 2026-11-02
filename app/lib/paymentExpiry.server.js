@@ -2,7 +2,8 @@
 
 import { sql } from '../utils/db.server.js';
 
-const CARD_CHECKOUT_TTL_HOURS = 2;
+// Polar keeps a checkout payable for 24 hours.
+const CARD_CHECKOUT_TTL_HOURS = 25;
 
 export async function expireStaleCardCheckouts() {
   const r = await sql`
