@@ -3,7 +3,7 @@
 import { data, redirect } from 'react-router';
 import { authenticateUser } from '~/utils/auth.server.js';
 import { createSession, serializeSessionCookie, SESSION_REMEMBER_MS } from '~/utils/session.server.js';
-import { recordEvent, buildEventFromRequest } from '~/utils/analytics.server';
+import { recordEvent, buildEventFromRequest, internalCookieHeader, markSessionInternal } from '~/utils/analytics.server';
 import {
   checkAndIncrement,
   resetBucket,
@@ -117,19 +117,28 @@ export async function loginAction({ request }) {
     ...(remember ? { durationMs: SESSION_REMEMBER_MS } : {}),
   });
 
-  recordEvent(buildEventFromRequest(request, {
-    eventType: 'auth_success',
-    path: '/login',
-    userId: auth.user.id,
-    metadata: { kind: 'login', remember },
-  }));
+  const isAdminLogin = auth.user.role === 'admin';
+  recordEvent({
+    ...buildEventFromRequest(request, {
+      eventType: 'auth_success',
+      path: '/login',
+      userId: auth.user.id,
+      metadata: { kind: 'login', remember },
+    }),
+    ...(isAdminLogin ? { is_internal: true } : {}),
+  });
 
   const destination = safeRedirect(
     typeof redirectRaw === 'string' ? redirectRaw : null,
     '/dashboard',
   );
 
-  throw redirect(destination, {
-    headers: { 'Set-Cookie': serializeSessionCookie(session.token, session.expiresAt) },
-  });
+  const headers = new Headers();
+  headers.append('Set-Cookie', serializeSessionCookie(session.token, session.expiresAt));
+  if (isAdminLogin) {
+    headers.append('Set-Cookie', internalCookieHeader());
+    await markSessionInternal(request).catch((err) => console.error('[login] mark internal failed:', err.message));
+  }
+
+  throw redirect(destination, { headers });
 }

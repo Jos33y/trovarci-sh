@@ -104,6 +104,32 @@ export function parseReferrerAndUtm(request, { pageUrl = null, referrer } = {}) 
   };
 }
 
+// Browsers that have signed in as an admin carry this cookie; their visits are tagged internal,
+// kept in the table, and left out of every report.
+const INTERNAL_COOKIE = 'trov_internal';
+
+export function isInternalRequest(request) {
+  const cookie = request.headers.get('cookie') || '';
+  return cookie.split(/;\s*/).includes(`${INTERNAL_COOKIE}=1`);
+}
+
+export function internalCookieHeader() {
+  const parts = [`${INTERNAL_COOKIE}=1`, 'Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${400 * 24 * 60 * 60}`];
+  if (process.env.NODE_ENV === 'production') parts.push('Secure');
+  return parts.join('; ');
+}
+
+// Tags today's session of this browser as internal, including pages seen before signing in.
+export async function markSessionInternal(request) {
+  const hash = deriveSessionHash(request);
+  if (hash === 'bot') return 0;
+  const r = await sql`
+    UPDATE analytics_events SET is_internal = TRUE
+    WHERE session_hash = ${hash} AND is_internal = FALSE
+  `;
+  return r.count || 0;
+}
+
 export function buildEventFromRequest(request, { eventType, path, userId, metadata, pageUrl, referrer }) {
   const ua = request.headers.get('user-agent') || '';
   const isBot = isbot(ua);
@@ -118,6 +144,7 @@ export function buildEventFromRequest(request, { eventType, path, userId, metada
     country: getCountry(request),
     device_class: getDeviceClass(request),
     is_bot: isBot,
+    is_internal: isInternalRequest(request),
     metadata: metadata ?? {},
     created_at: new Date(),
   };
@@ -173,6 +200,7 @@ function normalise(r) {
     country: r.country ?? 'XX',
     device_class: r.device_class ?? 'unknown',
     is_bot: r.is_bot ?? false,
+    is_internal: r.is_internal ?? false,
     metadata: r.metadata ?? {},
   };
 }
@@ -180,7 +208,7 @@ function normalise(r) {
 const COLUMNS = [
   'created_at', 'event_type', 'session_hash', 'user_id', 'path',
   'referrer_domain', 'utm_source', 'utm_medium', 'utm_campaign',
-  'country', 'device_class', 'is_bot', 'metadata',
+  'country', 'device_class', 'is_bot', 'is_internal', 'metadata',
 ];
 
 async function insertOne(row) {
@@ -189,11 +217,11 @@ async function insertOne(row) {
     INSERT INTO analytics_events (
       created_at, event_type, session_hash, user_id, path,
       referrer_domain, utm_source, utm_medium, utm_campaign,
-      country, device_class, is_bot, metadata
+      country, device_class, is_bot, is_internal, metadata
     ) VALUES (
       ${r.created_at}, ${r.event_type}, ${r.session_hash}, ${r.user_id}, ${r.path},
       ${r.referrer_domain}, ${r.utm_source}, ${r.utm_medium}, ${r.utm_campaign},
-      ${r.country}, ${r.device_class}, ${r.is_bot}, ${sql.json(r.metadata)}
+      ${r.country}, ${r.device_class}, ${r.is_bot}, ${r.is_internal}, ${sql.json(r.metadata)}
     )
   `;
 }
@@ -226,7 +254,7 @@ export async function computeDailyRollup(dayIso) {
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
       AND event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY COALESCE(path, '/unknown')
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET
@@ -250,7 +278,7 @@ export async function computeDailyRollup(dayIso) {
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
       AND event_type LIKE 'tool_%'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY event_type
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET
@@ -274,7 +302,7 @@ export async function computeDailyRollup(dayIso) {
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
       AND (event_type LIKE 'auth_%' OR event_type IN ('credits_view','package_select','checkout_click','gateway_redirect','payment_pending','payment_confirmed','payment_failed','payment_abandoned'))
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY event_type
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET
@@ -297,7 +325,7 @@ export async function computeDailyRollup(dayIso) {
     FROM analytics_events
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY COALESCE(country, 'XX')
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET
@@ -321,7 +349,7 @@ export async function computeDailyRollup(dayIso) {
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
       AND referrer_domain IS NOT NULL
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY referrer_domain
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET
@@ -345,7 +373,7 @@ export async function computeDailyRollup(dayIso) {
     WHERE created_at >= ${dayIso}::date
       AND created_at <  (${dayIso}::date + INTERVAL '1 day')
       AND utm_source IS NOT NULL
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY utm_source
     ON CONFLICT (day, dimension, dimension_value)
     DO UPDATE SET

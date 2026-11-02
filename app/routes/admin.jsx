@@ -1,7 +1,8 @@
 // Admin layout - gates /admin/* via requireAdmin, renders shell chrome around Outlet.
 import { useState, useEffect } from 'react';
-import { Outlet, useLoaderData, useLocation } from 'react-router';
+import { Outlet, useLoaderData, useLocation, data } from 'react-router';
 import { requireAdmin, adminSystemStatus } from '~/utils/admin.server';
+import { isInternalRequest, internalCookieHeader, markSessionInternal } from '~/utils/analytics.server';
 import StatusRail from '~/components/admin/StatusRail';
 import Sidebar from '~/components/admin/shell/Sidebar';
 import Topbar from '~/components/admin/shell/Topbar';
@@ -15,7 +16,12 @@ export const meta = () => [
 export async function loader({ request }) {
   const user = await requireAdmin(request);
   const systemStatus = await adminSystemStatus();
-  return { user, systemStatus };
+
+  // Admin browsers are tagged internal so the owner's own visits stay out of the reports.
+  await markSessionInternal(request).catch((err) => console.error('[admin] mark internal failed:', err.message));
+  const headers = isInternalRequest(request) ? {} : { 'Set-Cookie': internalCookieHeader() };
+
+  return data({ user, systemStatus }, { headers });
 }
 
 export default function AdminLayout() {

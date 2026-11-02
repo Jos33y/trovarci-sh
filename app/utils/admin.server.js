@@ -1,6 +1,7 @@
 // Admin-side server helpers.
 
 import { redirect } from 'react-router';
+import { CRYPTOMUS_ENABLED, POLAR_ENABLED } from './paymentsConfig.server.js';
 import { requireUser } from './session.server.js';
 import { sql } from './db.server.js';
 
@@ -221,7 +222,7 @@ export async function adminAnalyticsOverview({ days = 7 } = {}) {
       COUNT(*) FILTER (WHERE event_type = 'payment_confirmed')::int AS payments
     FROM analytics_events
     WHERE created_at > now() - ${since}::interval
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
   `;
 
   const topPaths = await sql`
@@ -229,7 +230,7 @@ export async function adminAnalyticsOverview({ days = 7 } = {}) {
     FROM analytics_events
     WHERE created_at > now() - ${since}::interval
       AND event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
       AND path IS NOT NULL
     GROUP BY path
     ORDER BY n DESC
@@ -241,7 +242,7 @@ export async function adminAnalyticsOverview({ days = 7 } = {}) {
     FROM analytics_events
     WHERE created_at > now() - ${since}::interval
       AND event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
       AND referrer_domain IS NOT NULL
     GROUP BY referrer_domain
     ORDER BY n DESC
@@ -253,7 +254,7 @@ export async function adminAnalyticsOverview({ days = 7 } = {}) {
     FROM analytics_events
     WHERE created_at > now() - ${since}::interval
       AND event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
       AND country IS NOT NULL
     GROUP BY country
     ORDER BY n DESC
@@ -267,7 +268,7 @@ export async function adminAnalyticsOverview({ days = 7 } = {}) {
       COUNT(DISTINCT session_hash) FILTER (WHERE event_type = 'pageview')::int AS sessions
     FROM analytics_events
     WHERE created_at > now() - ${since}::interval
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY 1
     ORDER BY 1 ASC
   `;
@@ -301,7 +302,7 @@ export async function adminAnalyticsFunnel({ days = 7 } = {}) {
     FROM analytics_events
     WHERE event_type = ANY(${steps})
       AND created_at > now() - ${since}::interval
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY event_type
     ORDER BY array_position(${steps}::text[], event_type) ASC
   `;
@@ -332,7 +333,7 @@ export async function adminToolUsage({ days = 7 } = {}) {
     FROM analytics_events
     WHERE event_type ~ '^tool_(start|success|error)_'
       AND created_at > now() - ${since}::interval
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY 1
     ORDER BY successes DESC, starts DESC
   `;
@@ -345,7 +346,7 @@ export async function adminToolUsage({ days = 7 } = {}) {
     FROM analytics_events
     WHERE event_type LIKE 'tool_error_%'
       AND created_at > now() - ${since}::interval
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
     GROUP BY 1, 2
     ORDER BY n DESC
     LIMIT 12
@@ -366,7 +367,7 @@ export async function adminLandingSessions({ days = 7 } = {}) {
         COALESCE(utm_source, referrer_domain) AS source
       FROM analytics_events
       WHERE event_type = 'pageview'
-        AND is_bot = FALSE
+        AND is_bot = FALSE AND is_internal = FALSE
         AND session_hash NOT IN ('bot', 'system', 'webhook')
         AND created_at > now() - ${since}::interval
       ORDER BY session_hash, created_at ASC, id ASC
@@ -377,7 +378,7 @@ export async function adminLandingSessions({ days = 7 } = {}) {
         bool_or(event_type LIKE 'tool_success_%') AS ran_tool,
         bool_or(event_type = 'auth_signup_complete') AS signed_up
       FROM analytics_events
-      WHERE is_bot = FALSE
+      WHERE is_bot = FALSE AND is_internal = FALSE
         AND created_at > now() - ${since}::interval
       GROUP BY session_hash
     )
@@ -481,7 +482,7 @@ export async function adminKpiDeltas({ days = 7 } = {}) {
         COUNT(*) FILTER (WHERE created_at > now() - ${cur}::interval)::int AS current,
         COUNT(*) FILTER (WHERE created_at > now() - ${prev}::interval AND created_at <= now() - ${cur}::interval)::int AS previous
       FROM analytics_events
-      WHERE event_type = 'pageview' AND is_bot = FALSE
+      WHERE event_type = 'pageview' AND is_bot = FALSE AND is_internal = FALSE
         AND created_at > now() - ${prev}::interval
     `,
     sql`
@@ -548,7 +549,7 @@ export async function adminKpiSparklines({ days = 30 } = {}) {
       LEFT JOIN analytics_events e
         ON date_trunc('day', e.created_at) = s.day
        AND e.event_type = 'pageview'
-       AND e.is_bot = FALSE
+       AND e.is_bot = FALSE AND e.is_internal = FALSE
       GROUP BY s.day
       ORDER BY s.day ASC
     `,
@@ -642,7 +643,7 @@ export async function adminAnalyticsHeatmap({ days = 7 } = {}) {
       COUNT(*)::int AS n
     FROM analytics_events
     WHERE event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
       AND created_at > now() - ${since}::interval
     GROUP BY dow, hour
     ORDER BY dow, hour
@@ -656,7 +657,7 @@ export async function adminCountryTraffic({ days = 30, limit = 50 } = {}) {
     SELECT country, COUNT(*)::int AS n
     FROM analytics_events
     WHERE event_type = 'pageview'
-      AND is_bot = FALSE
+      AND is_bot = FALSE AND is_internal = FALSE
       AND country IS NOT NULL
       AND created_at > now() - ${since}::interval
     GROUP BY country
@@ -745,12 +746,12 @@ export async function adminSystemStatus() {
     postgresLatencyMs = -1;
   }
 
-  // Only Postgres is probed; the rest report ok until real liveness probes exist.
+  // Postgres is probed. Payment gateways show whether they are switched on; the rest are not probed yet.
   return {
     postgres: { status: postgresOk ? 'ok' : 'down', latency_ms: postgresLatencyMs },
     resend: { status: 'ok' },
-    cryptomus: { status: 'ok' },
-    stripe: { status: 'ok' },
+    cryptomus: { status: CRYPTOMUS_ENABLED ? 'ok' : 'unknown' },
+    polar: { status: POLAR_ENABLED ? 'ok' : 'unknown' },
     worker: { status: 'ok' },
   };
 }

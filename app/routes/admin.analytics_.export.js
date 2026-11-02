@@ -1,4 +1,4 @@
-// GET /admin/analytics/export?kind=events|daily&days=N - CSV download of analytics for analysis in a spreadsheet.
+// GET /admin/analytics/export?kind=events|daily&days=N - CSV download of analytics. Events include internal visits, marked in the internal column.
 
 import { requireAdmin } from '~/utils/admin.server';
 import { sql } from '~/utils/db.server';
@@ -35,7 +35,7 @@ function csvResponse(filename, body) {
 async function exportEvents(days) {
   const rows = await sql`
     SELECT created_at, event_type, session_hash, user_id, path, referrer_domain,
-           utm_source, utm_medium, utm_campaign, country, device_class, metadata
+           utm_source, utm_medium, utm_campaign, country, device_class, is_internal, metadata
     FROM analytics_events
     WHERE created_at > now() - make_interval(days => ${days})
       AND is_bot = FALSE
@@ -45,7 +45,7 @@ async function exportEvents(days) {
   const header = [
     'created_at', 'event_type', 'session_hash', 'user_id', 'path', 'referrer_domain',
     'source', 'source_type', 'utm_source', 'utm_medium', 'utm_campaign',
-    'country', 'device_class', 'metadata',
+    'country', 'device_class', 'internal', 'metadata',
   ];
   return toCsv(header, rows.map((r) => {
     // Source describes how a visit arrived, so only pageviews carry it.
@@ -53,7 +53,7 @@ async function exportEvents(days) {
     return [
       r.created_at, r.event_type, r.session_hash, r.user_id, r.path, r.referrer_domain,
       src.group, src.kind, r.utm_source, r.utm_medium, r.utm_campaign,
-      r.country, r.device_class, r.metadata,
+      r.country, r.device_class, r.is_internal ? 'yes' : '', r.metadata,
     ];
   }));
 }

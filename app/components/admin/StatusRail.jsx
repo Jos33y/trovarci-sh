@@ -5,7 +5,7 @@ const SERVICES = [
   { key: 'postgres',  label: 'Postgres'  },
   { key: 'resend',    label: 'Resend'    },
   { key: 'cryptomus', label: 'Cryptomus' },
-  { key: 'stripe',    label: 'Stripe'    },
+  { key: 'polar',     label: 'Polar'     },
   { key: 'worker',    label: 'Worker'    },
 ];
 
