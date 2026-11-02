@@ -19,10 +19,8 @@ export async function createPolarCheckout({ paymentId, productId, amountUsdCents
     allow_discount_codes: false,
     metadata: { payment_id: paymentId, package_key: packageKey, credits },
   };
-  // Custom amounts reuse one product with a price set for this checkout only.
-  if (isCustom) {
-    body.prices = { [productId]: [{ amount_type: 'fixed', price_amount: amountUsdCents, price_currency: 'usd' }] };
-  }
+  // The custom product is pay-what-you-want: pre-fill what the buyer chose on /credits.
+  if (isCustom) body.amount = amountUsdCents;
 
   const res = await fetch(`${POLAR_API_BASE}/v1/checkouts/`, {
     method: 'POST',

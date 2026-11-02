@@ -1,7 +1,7 @@
 // POST /api/webhooks/polar - grants Credits when Polar reports an order paid. Replays are safe: completePayment is idempotent.
 
 import { verifyPolarWebhook } from '~/lib/polar.server';
-import { completePayment, markPaymentTerminal, getPaymentById } from '~/lib/payments.server';
+import { completePayment, markPaymentTerminal, getPaymentById, resizeCustomPayment } from '~/lib/payments.server';
 import { getPackage } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
 import { sendPaymentReceiptEmail } from '~/utils/email.server';
@@ -35,7 +35,7 @@ async function findPayment(paymentId) {
 async function handleOrderPaid(event, order) {
   if (order.status !== 'paid' && order.paid !== true) return accepted('not_paid');
 
-  const payment = await findPayment(order.metadata?.payment_id);
+  let payment = await findPayment(order.metadata?.payment_id);
   if (!payment) return accepted('unknown_payment');
   if (order.checkout_id && payment.gateway_reference && order.checkout_id !== payment.gateway_reference) {
     console.warn(`[polar webhook] checkout mismatch on payment ${payment.id}`);
@@ -44,6 +44,14 @@ async function handleOrderPaid(event, order) {
   if (String(order.currency || '').toLowerCase() !== 'usd') {
     console.warn(`[polar webhook] non-USD order ${order.id} for payment ${payment.id}`);
     return accepted('wrong_currency');
+  }
+
+  // Custom is pay-what-you-want: the buyer can change the amount on Polar's page,
+  // so the Credits follow what was actually paid, 1 per cent.
+  if (payment.package_key === 'custom' && Number.isInteger(order.net_amount) && order.net_amount > 0
+      && order.net_amount !== payment.amount_usd_cents) {
+    await resizeCustomPayment(payment.id, order.net_amount, payment.amount_usd_cents);
+    payment = await getPaymentById(payment.id);
   }
 
   // net_amount is what was charged for the product, before tax and after discounts (which are off).

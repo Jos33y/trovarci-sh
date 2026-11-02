@@ -310,6 +310,22 @@ async function grantCreditsInTx(tx, { userId, amount, referenceId, metadata }) {
 // Mark expired / failed from webhook
 // -----------------------------------------------------------------------
 
+// Pay-what-you-want checkouts: the buyer may change the amount on the gateway's page,
+// so a custom payment is resized to what was actually paid before it completes.
+export async function resizeCustomPayment(paymentId, paidCents, requestedCents) {
+  const [row] = await sql`
+    UPDATE payments
+    SET credits = ${paidCents},
+        amount_usd_cents = ${paidCents},
+        metadata = metadata || ${sql.json({ requested_cents: requestedCents })}
+    WHERE id = ${paymentId}
+      AND package_key = 'custom'
+      AND status IN ('pending', 'awaiting_payment')
+    RETURNING id, credits, amount_usd_cents
+  `;
+  return row || null;
+}
+
 export async function markPaymentTerminal(paymentId, newStatus, { rawWebhook = null } = {}) {
   if (!['failed', 'expired'].includes(newStatus)) {
     throw new Error(`markPaymentTerminal only accepts failed|expired, got ${newStatus}`);
