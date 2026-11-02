@@ -46,16 +46,26 @@ async function handleOrderPaid(event, order) {
     return accepted('wrong_currency');
   }
 
-  // Custom is pay-what-you-want: the buyer can change the amount on Polar's page,
-  // so the Credits follow what was actually paid, 1 per cent.
-  if (payment.package_key === 'custom' && Number.isInteger(order.net_amount) && order.net_amount > 0
-      && order.net_amount !== payment.amount_usd_cents) {
-    await resizeCustomPayment(payment.id, order.net_amount, payment.amount_usd_cents);
+  // Polar's "location" tax setting includes tax in the price in some countries (UK, EU) and adds it
+  // on top in others (US, India), so an order's price is its total in one case and its net in the
+  // other. Whichever of the two matches what we expected is the price the buyer saw.
+  const { total_amount: total, net_amount: net } = order;
+  if (!Number.isInteger(total) || total <= 0) {
+    console.warn(`[polar webhook] order ${order.id} has no usable amount`);
+    return accepted('no_amount');
+  }
+  const expected = payment.amount_usd_cents;
+  let priceCents = total === expected || net === expected ? expected : Math.max(total, net || 0);
+
+  // Custom is pay-what-you-want: if the buyer changed the amount on Polar's page, the Credits follow
+  // the amount before any tax added on top (net), 1 per cent.
+  if (payment.package_key === 'custom' && priceCents !== expected) {
+    priceCents = Number.isInteger(net) && net > 0 ? net : total;
+    await resizeCustomPayment(payment.id, priceCents, expected);
     payment = await getPaymentById(payment.id);
   }
 
-  // net_amount is what was charged for the product, before tax and after discounts (which are off).
-  const paymentAmountUsd = Number.isFinite(order.net_amount) ? (order.net_amount / 100).toFixed(2) : null;
+  const paymentAmountUsd = (priceCents / 100).toFixed(2);
 
   const result = await completePayment(payment.id, {
     txid: order.id,
