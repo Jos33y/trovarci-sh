@@ -95,6 +95,7 @@ import {
 } from '../app/utils/analytics.server.js';
 import { cleanupOldErrorEvents, recordWorkerError } from '../app/utils/errors.server.js';
 import { expireCredits } from '../app/lib/creditExpiry.server.js';
+import { expireStaleCardCheckouts } from '../app/lib/paymentExpiry.server.js';
 
 import { processItem as processEmailItem } from './emailProcessor.js';
 import { processItem as processPhoneItem } from './phoneProcessor.js';
@@ -225,6 +226,8 @@ async function expiredCleanupLoop() {
     try {
       const dropped = await cleanupExpiredJobs();
       if (dropped > 0) console.log(`[worker] cleaned up ${dropped} expired job(s)`);
+      const closed = await expireStaleCardCheckouts();
+      if (closed > 0) console.log(`[worker] closed ${closed} unfinished card checkout(s)`);
     } catch (err) {
       console.error('[worker] expiredCleanupLoop error:', err);
     }

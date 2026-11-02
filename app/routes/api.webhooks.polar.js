@@ -103,13 +103,14 @@ async function handleOrderPaid(event, order) {
   return accepted('confirmed');
 }
 
-async function handleCheckoutUpdated(event, checkout) {
-  if (checkout.status !== 'expired' && checkout.status !== 'failed') return accepted('checkout_open');
+async function handleCheckoutClosed(event, checkout) {
+  const status = event.type === 'checkout.expired' ? 'expired' : checkout.status;
+  if (status !== 'expired' && status !== 'failed') return accepted('checkout_open');
   const payment = await findPayment(checkout.metadata?.payment_id);
   if (!payment) return accepted('unknown_payment');
-  await markPaymentTerminal(payment.id, checkout.status, { rawWebhook: event });
-  await funnel(checkout.status === 'expired' ? 'payment_abandoned' : 'payment_failed', payment, { status: checkout.status });
-  return accepted(checkout.status);
+  await markPaymentTerminal(payment.id, status, { rawWebhook: event });
+  await funnel(status === 'expired' ? 'payment_abandoned' : 'payment_failed', payment, { status });
+  return accepted(status);
 }
 
 export async function loader() {
@@ -143,7 +144,7 @@ export async function action({ request }) {
 
   try {
     if (event.type === 'order.paid') return await handleOrderPaid(event, data);
-    if (event.type === 'checkout.updated') return await handleCheckoutUpdated(event, data);
+    if (event.type === 'checkout.updated' || event.type === 'checkout.expired') return await handleCheckoutClosed(event, data);
     if (event.type === 'order.refunded') {
       console.warn(`[polar webhook] order.refunded for order ${data.id} (payment ${data.metadata?.payment_id || 'unknown'}); admin review required`);
       return accepted('refund_logged');

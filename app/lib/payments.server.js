@@ -167,7 +167,8 @@ export async function completePayment(paymentId, gatewayData = {}) {
       };
     }
 
-    if (['failed', 'expired', 'refunded'].includes(payment.status)) {
+    // An expired payment can still complete: money that arrives late is honoured, never dropped.
+    if (['failed', 'refunded'].includes(payment.status)) {
       throw new Error(`Cannot complete payment in terminal state: ${payment.status}`);
     }
 
