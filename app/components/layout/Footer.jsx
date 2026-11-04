@@ -10,6 +10,7 @@ const COLUMNS = [
       { label: "Pricing", href: "/#pricing" },
       { label: "Trovarcis Sender", href: "/sender" },
       { label: "Credits", href: "/credits" },
+      { label: "Pay with crypto", href: "/pay-with-crypto" },
     ],
   },
   {

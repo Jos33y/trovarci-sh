@@ -1,0 +1,232 @@
+/* /pay-with-crypto - what you can buy, the three steps, questions. Mobile first. */
+
+.page {
+  min-height: 100vh;
+  background: var(--trov-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding: 40px 0 72px;
+}
+
+.head {
+  max-width: 640px;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+  margin: 0 0 14px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.875rem, 6vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--trov-text);
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+
+.sub {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.products {
+  display: grid;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.product {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px 20px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+}
+
+.productName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+  margin: 0;
+}
+
+.productText {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+  margin: 0 0 6px;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.primary {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+}
+
+.primary:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+}
+
+.secondary {
+  border: 1px solid var(--trov-border);
+  color: var(--trov-text);
+}
+
+.secondary:hover {
+  border-color: var(--trov-border-hover);
+  color: var(--trov-text);
+}
+
+.primary:active,
+.secondary:active {
+  transform: scale(0.97);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.section {
+  margin-top: 48px;
+  max-width: 760px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+  margin: 0 0 16px;
+}
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.step {
+  counter-increment: step;
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding-left: 44px;
+}
+
+.step::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--trov-border);
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--trov-accent);
+}
+
+.stepTitle {
+  font-weight: 600;
+  color: var(--trov-text);
+  line-height: 1.4;
+}
+
+.stepBody {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+}
+
+.faq {
+  margin: 0;
+  display: grid;
+  border-top: 1px solid var(--trov-border);
+}
+
+.faqItem {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--trov-border);
+}
+
+.faqItem dt {
+  font-weight: 600;
+  color: var(--trov-text);
+  margin-bottom: 4px;
+}
+
+.faqItem dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: 64px 0 96px;
+  }
+
+  .products {
+    grid-template-columns: 1fr 1fr;
+    max-width: 880px;
+  }
+
+  .product {
+    padding: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary:active,
+  .secondary:active {
+    transform: none;
+  }
+}

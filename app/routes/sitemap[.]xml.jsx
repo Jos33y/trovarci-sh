@@ -21,6 +21,7 @@ const STATIC_URLS = [
     '/about/trovarcis-team',
     '/sender',
     '/credits',
+    '/pay-with-crypto',
     '/contact',
     '/privacy',
     '/terms',
