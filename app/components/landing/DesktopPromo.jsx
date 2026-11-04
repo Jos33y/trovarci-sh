@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { Link } from 'react-router';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/landing/DesktopPromo.module.css';
 
-// Future-product teaser - split panel, real mockup on the right
+// Trovarcis Sender on the homepage - split panel, mockup on the right, one button to /sender
 function DesktopMockup() {
   return (
     <div className={styles.mockupWrap}>
@@ -13,7 +13,7 @@ function DesktopMockup() {
             <span className={styles.dotYellow} />
             <span className={styles.dotGreen} />
           </div>
-          <span className={styles.mockupTitle}>Trovarcis Reach · Desktop</span>
+          <span className={styles.mockupTitle}>Trovarcis Sender</span>
         </div>
 
         <div className={styles.mockupSide}>
@@ -87,38 +87,7 @@ function DesktopMockup() {
 }
 
 export default function DesktopPromo() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle');
-  const [errorMsg, setErrorMsg] = useState('');
   const revealRef = useReveal();
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const trimmed = email.trim();
-    if (!trimmed) return;
-
-    setStatus('submitting');
-    setErrorMsg('');
-
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmed, source: 'desktop_promo' }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Could not add you to the list.');
-      }
-
-      setStatus('success');
-      setEmail('');
-    } catch (err) {
-      setStatus('error');
-      setErrorMsg(err.message || 'Could not add you to the list.');
-    }
-  }
 
   return (
     <section className={styles.section} id="desktop">
@@ -128,59 +97,26 @@ export default function DesktopPromo() {
           <div className={styles.content}>
             <span className={styles.kicker}>
               <span className="signal-dot signal-dot--sm" aria-hidden="true" />
-              COMING JUL 2026
+              TROVARCIS SENDER
             </span>
 
             <h2 className={styles.heading}>Send at scale, from your desk.</h2>
 
             <p className={styles.body}>
-              The bulk email sender, native and offline. Multi-SMTP failover,
-              local contact storage, no server in the middle. The toolkit you
-              already know, plus the sender it deserves.
+              The bulk email sender for Windows. Send through your own SMTP accounts,
+              with your lists and credentials stored on your computer.
             </p>
 
             <ul className={styles.bullets}>
-              <li>One-time purchase. No subscription.</li>
-              <li>Windows, macOS, Linux.</li>
-              <li>Same toolkit included.</li>
+              <li>One payment. No subscription.</li>
+              <li>Lifetime license for 3 computers.</li>
+              <li>Windows 10 and 11.</li>
             </ul>
 
-            {status === 'success' ? (
-              <div className={styles.success} role="status">
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" className={styles.successIcon} aria-hidden="true">
-                  <path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>You're on the list. We'll email you when it ships.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.inputRow}>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className={styles.input}
-                    required
-                    disabled={status === 'submitting'}
-                    aria-label="Email address for desktop launch notification"
-                  />
-                  <button
-                    type="submit"
-                    className={styles.button}
-                    disabled={status === 'submitting' || !email.trim()}
-                  >
-                    {status === 'submitting' ? 'Sending' : 'Notify me'}
-                  </button>
-                </div>
-
-                {status === 'error' && (
-                  <p className={styles.error} role="alert">{errorMsg}</p>
-                )}
-
-                <p className={styles.note}>One email when it ships. No spam, no marketing.</p>
-              </form>
-            )}
+            <div className={styles.cta}>
+              <Link to="/sender" className={styles.button}>Get Sender</Link>
+              <p className={styles.note}>15-day refund.</p>
+            </div>
           </div>
 
           <div className={styles.visual} aria-hidden="true">

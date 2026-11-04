@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Link, Form, useLoaderData, useFetcher, useNavigate } from 'react-router';
+import { useState, useMemo } from 'react';
+import { Link, Form, useLoaderData, useNavigate } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import { requireUser } from '~/utils/session.server';
 import { listTransactions, getCreditSummary } from '~/lib/credits.server';
 import { listJobsForUser } from '~/lib/jobQueue.server';
-import { isEmailOnWaitlist } from '~/lib/waitlist.server';
+import { listLicensesForUser } from '~/lib/licenseAdmin.server';
+import { currentSenderPrice } from '~/utils/senderConfig.server';
 import { LOW_BALANCE_THRESHOLD } from '~/utils/creditsConfig.server';
 import styles from '~/styles/modules/routes/dashboard';
 import { formatInt } from '~/utils/format';
@@ -112,19 +113,23 @@ function shapeJob(row) {
 export async function loader({ request }) {
   const user = await requireUser(request);
 
-  const [txResult, summary, jobRows, onWaitlist] = await Promise.all([
+  const [txResult, summary, jobRows, licenses] = await Promise.all([
     listTransactions(user.id, { limit: 500, offset: 0 }),
     getCreditSummary(user.id),
     listJobsForUser(user.id, { limit: 100 }),
-    isEmailOnWaitlist(user.email),
+    listLicensesForUser(user.id),
   ]);
+  const active = licenses.find((l) => l.status === 'active') || null;
 
   return {
     user,
     transactions: txResult.rows.map(shapeTransaction),
     summary,
     jobs: jobRows.map(shapeJob),
-    onWaitlist,
+    sender: {
+      license: active ? { id: active.id.slice(0, 8).toUpperCase(), devices: active.live_devices, maxDevices: active.max_devices } : null,
+      price: currentSenderPrice(),
+    },
     lowBalanceThreshold: LOW_BALANCE_THRESHOLD,
   };
 }
@@ -263,21 +268,6 @@ function MiniWindowsIcon({ size = 13 }) {
     </svg>
   );
 }
-function MiniAppleIcon({ size = 13 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.27.06 2.15.69 2.92.69.78 0 2.23-.85 3.74-.72 1.62.14 2.83.84 3.6 2.17-3.27 1.97-2.73 6.34.74 7.52zm-3.23-14c.07 1.62-1.26 2.98-2.73 3.11-.19-1.58 1.23-3.03 2.73-3.11z" fill="currentColor" />
-    </svg>
-  );
-}
-function MiniLinuxIcon({ size = 13 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 2C8.5 2 6 5 6 8c0 1.5.5 3 1.3 4.2-.3.8-.5 1.6-.5 2.4 0 1.7.8 3.2 2 4.2-.5.3-.8.8-.8 1.4 0 .9.8 1.8 2 1.8h4c1.2 0 2-.9 2-1.8 0-.6-.3-1.1-.8-1.4 1.2-1 2-2.5 2-4.2 0-.8-.2-1.6-.5-2.4C18.5 11 19 9.5 19 8c0-3-2.5-6-7-6zm-1.5 9.5c-.6 0-1-.5-1-1 0-.6.4-1 1-1s1 .4 1 1c0 .5-.4 1-1 1zm3 0c-.6 0-1-.5-1-1 0-.6.4-1 1-1s1 .4 1 1c0 .5-.4 1-1 1z" fill="currentColor" />
-    </svg>
-  );
-}
-
 /* STATIC CONFIG */
 
 const QUICK_TOOLS = [
@@ -374,7 +364,7 @@ function getPageWindow(current, total) {
 /* COMPONENT */
 
 export default function DashboardPage() {
-  const { user, transactions, jobs, onWaitlist, lowBalanceThreshold } = useLoaderData();
+  const { user, transactions, jobs, sender, lowBalanceThreshold } = useLoaderData();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('jobs');
@@ -519,9 +509,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── Mid row: Desktop waitlist panel + Quick tools ── */}
+          {/* ── Mid row: Trovarcis Sender panel + Quick tools ── */}
           <div className={styles.midGrid}>
-            <DesktopWaitlistPanel userEmail={user.email} onWaitlist={onWaitlist} />
+            <SenderPanel sender={sender} />
 
             <div className={styles.toolsCard}>
               <div className={styles.toolsTitle}>Quick access</div>
@@ -933,95 +923,47 @@ function Pager({ current, totalPages, totalItems, pageSize, pageWindow, onPageCh
   );
 }
 
-/* Sub-component: DesktopWaitlistPanel */
+/* Sub-component: SenderPanel */
 
-function DesktopWaitlistPanel({ userEmail, onWaitlist }) {
-  const fetcher = useFetcher();
-  const [email, setEmail] = useState(userEmail);
-
-  // Keep input synced if userEmail changes (shouldn't normally) and reset
-  // after a successful submission.
-  useEffect(() => {
-    if (fetcher.data?.ok) setEmail(userEmail);
-  }, [fetcher.data, userEmail]);
-
-  const justSubmitted = fetcher.data?.ok === true;
-  const errorMsg      = fetcher.data?.ok === false ? (fetcher.data.error || 'Could not save - try again') : null;
-  const loading       = fetcher.state === 'submitting';
-
-  // onWaitlist is the loader-derived "is THIS user's email already on the
-  // list?" boolean. justSubmitted covers the same state for "they hit
-  // submit just now" - either way, render success.
-  const isOnList = onWaitlist || justSubmitted;
+function SenderPanel({ sender }) {
+  const { license, price } = sender;
+  const until = price.launchEndsAt
+    ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${price.launchEndsAt}T00:00:00Z`))
+    : null;
 
   return (
     <div className={styles.desktopPanel}>
       <div className={styles.desktopPanelGlow} aria-hidden="true" />
 
       <div className={styles.desktopPanelHeader}>
-        <div className={styles.desktopPanelTitle}>Trovarcis Reach Desktop</div>
-        <span className={styles.desktopPanelTag}>Coming soon</span>
+        <div className={styles.desktopPanelTitle}>Trovarcis Sender</div>
+        {license && <span className={styles.desktopPanelTag}>Active</span>}
       </div>
 
-      {isOnList ? (
-        <div className={styles.desktopSuccess} role="status" aria-live="polite">
-          <div className={styles.desktopSuccessIcon}>
-            <CheckSmallIcon size={14} />
+      {license ? (
+        <>
+          <h2 className={styles.desktopHeadline}>License {license.id}</h2>
+          <p className={styles.desktopSub}>{license.devices} of {license.maxDevices} computers in use.</p>
+          <div className={styles.desktopForm}>
+            <a href="/download/windows" className={styles.desktopSubmit}>Download</a>
+            <Link to="/account/sender" className={styles.desktopSubmit}>View key</Link>
           </div>
-          <div>
-            <div className={styles.desktopSuccessTitle}>You're on the list</div>
-            <div className={styles.desktopSuccessSub}>We'll email you the moment it ships.</div>
-          </div>
-        </div>
+        </>
       ) : (
         <>
-          <h2 className={styles.desktopHeadline}>Be first when it ships</h2>
+          <h2 className={styles.desktopHeadline}>Send bulk email from your own computer</h2>
           <p className={styles.desktopSub}>
-            One-time purchase. Runs offline. Your contacts never leave your machine.
-            Early access list gets a 20% launch discount.
+            ${(price.cents / 100).toFixed(0)} {price.key === 'launch' ? (until ? `launch price until ${until}` : 'launch price') : 'once'}.
+            Lifetime license, 3 computers.
           </p>
-
-          <fetcher.Form method="post" action="/api/waitlist" className={styles.desktopForm}>
-            <input type="hidden" name="source" value="dashboard_panel" />
-            <label className={styles.desktopInputWrap}>
-              <span className={styles.visuallyHidden}>Your email address</span>
-              <input
-                className={styles.desktopInput}
-                name="email"
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                aria-invalid={errorMsg ? 'true' : undefined}
-                aria-describedby={errorMsg ? 'desktop-waitlist-error' : undefined}
-              />
-            </label>
-            <button
-              type="submit"
-              className={styles.desktopSubmit}
-              disabled={loading}
-              aria-busy={loading || undefined}
-            >
-              {loading ? 'Adding...' : 'Notify me'}
-            </button>
-          </fetcher.Form>
-
-          {errorMsg && (
-            <div id="desktop-waitlist-error" className={styles.desktopFormError} role="alert">
-              {errorMsg}
-            </div>
-          )}
+          <div className={styles.desktopForm}>
+            <Link to="/sender" className={styles.desktopSubmit}>Get Sender</Link>
+          </div>
         </>
       )}
 
-      <div className={styles.desktopPlatforms} aria-label="Supported platforms">
-        <span className={styles.desktopPlatformItem}><MiniWindowsIcon /> Windows</span>
-        <span className={styles.desktopPlatformDot} aria-hidden="true">·</span>
-        <span className={styles.desktopPlatformItem}><MiniAppleIcon /> macOS</span>
-        <span className={styles.desktopPlatformDot} aria-hidden="true">·</span>
-        <span className={styles.desktopPlatformItem}><MiniLinuxIcon /> Linux</span>
+      <div className={styles.desktopPlatforms}>
+        <span className={styles.desktopPlatformItem}><MiniWindowsIcon /> Windows 10 and 11</span>
       </div>
     </div>
   );

@@ -534,3 +534,18 @@
     justify-content: flex-end;
   }
 }
+
+/* The single call to action: the button keeps its own width */
+.cta {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cta .button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
