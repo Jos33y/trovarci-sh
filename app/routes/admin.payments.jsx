@@ -60,7 +60,7 @@ export default function AdminPayments() {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Payments</h1>
-          <p className={styles.pageSubtitle}>Crypto + card transactions across both gateways</p>
+          <p className={styles.pageSubtitle}>Credits and Sender license sales, crypto and card</p>
         </div>
       </header>
 
@@ -117,11 +117,11 @@ export default function AdminPayments() {
                 {payments.map((p) => (
                   <tr
                     key={p.id}
-                    onClick={() => navigate(`/admin/payments/${p.id}`)}
+                    onClick={() => navigate(p.admin_link)}
                     onKeyDown={(ev) => {
                       if (ev.key === 'Enter' || ev.key === ' ') {
                         ev.preventDefault();
-                        navigate(`/admin/payments/${p.id}`);
+                        navigate(p.admin_link);
                       }
                     }}
                     role="link"
@@ -135,8 +135,8 @@ export default function AdminPayments() {
                         : <span className={styles['td--muted']}>-</span>}
                     </td>
                     <td data-label="Gateway">{p.gateway}</td>
-                    <td data-label="Package">{p.package_key || '-'}</td>
-                    <td data-label="Credits" className={styles['td--num']}>{formatInt(p.credits)}</td>
+                    <td data-label="Package">{p.product === 'sender' ? 'Sender license' : (p.package_key || '-')}</td>
+                    <td data-label="Credits" className={styles['td--num']}>{p.credits == null ? '-' : formatInt(p.credits)}</td>
                     <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
                     <td data-label="Status">
                       <span className={`${styles.badge} ${styles[STATUS_BADGE[p.status] || 'badgeNeutral']}`}>{p.status}</span>

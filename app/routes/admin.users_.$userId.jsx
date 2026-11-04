@@ -447,7 +447,7 @@ export default function AdminUserDetail() {
                       <td data-label="When" className={styles['td--mono']}>{formatDate(p.created_at)}</td>
                       <td data-label="Gateway">{p.gateway}</td>
                       <td data-label="Package">
-                        <Link to={`/admin/payments/${p.id}`} className={styles.rowLink}>{p.package_key || '-'}</Link>
+                        <Link to={p.admin_link} className={styles.rowLink}>{p.product === 'sender' ? 'Sender license' : (p.package_key || '-')}</Link>
                       </td>
                       <td data-label="Amount" className={styles['td--num']}>{formatCents(p.amount_usd_cents)}</td>
                       <td data-label="Status">

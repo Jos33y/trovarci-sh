@@ -92,7 +92,7 @@ export async function adminGetUserDetail(userId) {
       COUNT(*) FILTER (WHERE status = 'confirmed')::int AS payments_confirmed,
       COUNT(*) FILTER (WHERE status IN ('failed', 'expired'))::int AS payments_failed,
       COALESCE(SUM(amount_usd_cents) FILTER (WHERE status = 'confirmed'), 0)::int AS revenue_usd_cents
-    FROM payments
+    FROM sales
     WHERE user_id = ${userId}
   `;
 
@@ -111,9 +111,9 @@ export async function adminListUserTransactions(userId, { limit = 100, offset = 
 
 export async function adminListUserPayments(userId) {
   return sql`
-    SELECT id, gateway, package_key, credits, amount_usd_cents, status,
-           created_at, completed_at
-    FROM payments
+    SELECT id, product, gateway, package_key, credits, amount_usd_cents, status,
+           created_at, completed_at, admin_link
+    FROM sales
     WHERE user_id = ${userId}
     ORDER BY created_at DESC
     LIMIT 100
@@ -143,9 +143,9 @@ export async function adminListPayments({
 } = {}) {
   return sql`
     SELECT
-      p.id, p.gateway, p.status, p.package_key, p.credits, p.amount_usd_cents,
-      p.created_at, p.completed_at, p.user_id, u.email AS user_email
-    FROM payments p
+      p.id, p.product, p.gateway, p.status, p.package_key, p.credits, p.amount_usd_cents,
+      p.created_at, p.completed_at, p.user_id, COALESCE(u.email, p.email) AS user_email, p.admin_link
+    FROM sales p
     LEFT JOIN users u ON u.id = p.user_id
     WHERE (${gateway}::text IS NULL OR p.gateway = ${gateway})
       AND (${status}::text  IS NULL OR p.status  = ${status})
@@ -496,14 +496,14 @@ export async function adminKpiDeltas({ days = 7 } = {}) {
       SELECT
         COUNT(*) FILTER (WHERE completed_at > now() - ${cur}::interval AND status = 'confirmed')::int AS current,
         COUNT(*) FILTER (WHERE completed_at > now() - ${prev}::interval AND completed_at <= now() - ${cur}::interval AND status = 'confirmed')::int AS previous
-      FROM payments
+      FROM sales
       WHERE completed_at > now() - ${prev}::interval
     `,
     sql`
       SELECT
         COALESCE(SUM(amount_usd_cents) FILTER (WHERE completed_at > now() - ${cur}::interval AND status = 'confirmed'), 0)::int AS current_cents,
         COALESCE(SUM(amount_usd_cents) FILTER (WHERE completed_at > now() - ${prev}::interval AND completed_at <= now() - ${cur}::interval AND status = 'confirmed'), 0)::int AS previous_cents
-      FROM payments
+      FROM sales
       WHERE completed_at > now() - ${prev}::interval
     `,
     sql`
@@ -581,7 +581,7 @@ export async function adminKpiSparklines({ days = 30 } = {}) {
       SELECT to_char(s.day, 'YYYY-MM-DD') AS day,
              COALESCE(COUNT(p.id), 0)::int AS n
       FROM spine s
-      LEFT JOIN payments p
+      LEFT JOIN sales p
         ON date_trunc('day', p.completed_at) = s.day
        AND p.status = 'confirmed'
       GROUP BY s.day
@@ -626,7 +626,7 @@ export async function adminRevenueSeries({ days = 30 } = {}) {
       COALESCE(COUNT(p.id) FILTER (WHERE p.status = 'confirmed'), 0)::int AS count_confirmed,
       COALESCE(COUNT(p.id) FILTER (WHERE p.status IN ('failed','expired')), 0)::int AS count_failed
     FROM spine s
-    LEFT JOIN payments p
+    LEFT JOIN sales p
       ON date_trunc('day', COALESCE(p.completed_at, p.created_at)) = s.day
     GROUP BY s.day
     ORDER BY s.day ASC
@@ -686,10 +686,12 @@ export async function adminRecentActivity({ limit = 30 } = {}) {
       SELECT
         'payment'::text                                              AS kind,
         COALESCE(p.completed_at, p.created_at)                       AS created_at,
-        COALESCE(u.email, 'unknown') || ' / ' || p.status            AS summary,
-        '/admin/payments/' || p.id::text                             AS link,
+        CASE p.product WHEN 'sender' THEN 'Sender ' ELSE '' END
+          || '$' || to_char(p.amount_usd_cents / 100.0, 'FM999990.00')
+          || ' ' || COALESCE(u.email, p.email, 'unknown') || ' / ' || p.status AS summary,
+        p.admin_link                                                 AS link,
         NULL::text                                                   AS severity
-      FROM payments p
+      FROM sales p
       LEFT JOIN users u ON u.id = p.user_id
       ORDER BY COALESCE(p.completed_at, p.created_at) DESC
       LIMIT ${limit}
