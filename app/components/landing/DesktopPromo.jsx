@@ -115,7 +115,7 @@ export default function DesktopPromo() {
 
             <div className={styles.cta}>
               <Link to="/sender" className={styles.button}>Get Sender</Link>
-              <p className={styles.note}>15-day refund.</p>
+              <p className={styles.note}>15-day refund if it doesn’t work for you.</p>
             </div>
           </div>
 

@@ -55,12 +55,13 @@ export default function Refund() {
 
             <h2 id="software-refunds">Software license refunds</h2>
             <p>
-              Trovarcis Sender licenses come with a <strong>15-day money-back guarantee</strong> from the
-              date of purchase.
+              Trovarcis Sender licenses come with a <strong>15-day refund if
+              Sender does not work for you</strong>, counted from the date of
+              purchase.
             </p>
             <ul>
-              <li>If you are not satisfied with the software for any reason, you may request a full refund within 15 days of purchase.</li>
-              <li>No questions asked. You do not need to give a reason.</li>
+              <li>Write to support first and tell us what is not working, so we can try to fix it with you.</li>
+              <li>If we cannot make it work for you, we refund the full price within 15 days of purchase.</li>
               <li>Refunds go back to the original payment method.</li>
               <li>On refund, your license key is revoked and Sender stops working on every computer it was activated on.</li>
               <li>For card payments, any sales tax Polar charged is refunded with the price.</li>

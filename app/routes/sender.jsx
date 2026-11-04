@@ -2,6 +2,7 @@
 
 import { Form, Link, useActionData, useLoaderData, useNavigation } from 'react-router';
 import { useState } from 'react';
+import ScreenshotViewer from '~/components/sender/ScreenshotViewer';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import { getSeo } from '~/utils/seo';
@@ -19,6 +20,8 @@ export const meta = ({ loaderData, data: legacy }) => {
     title: 'Trovarcis Sender: bulk email from your own computer',
     description: 'Send email campaigns from Windows through your own SMTP account. One payment, 3 computers, every 1.x update. Pay by card or crypto.',
     path: '/sender',
+    image: 'https://trovarci.sh/images/sender/sender-og.png',
+    imageAlt: 'Trovarcis Sender: the Overview screen with Getting started and daily sending capacity',
   });
   if (data?.price) {
     tags.push({
@@ -65,6 +68,8 @@ export const action = senderCheckoutAction;
 const usd = (cents) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 
+const dayAfter = (isoDate) => new Date(Date.parse(`${isoDate}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+
 const longDate = (iso) =>
   new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
 
@@ -109,11 +114,12 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
     <section className={styles.buy} id="buy" aria-labelledby="buy-title">
       <div className={styles.priceRow}>
         <span className={styles.price}>{usd(price.cents)}</span>
-        {price.listCents > price.cents && <s className={styles.listPrice}>{usd(price.listCents)}</s>}
       </div>
       <p className={styles.priceNote}>
-        {price.key === 'launch'
-          ? (price.launchEndsAt ? `Launch price until ${longDate(price.launchEndsAt)}.` : 'Launch price for the first buyers.')
+        {price.key === 'launch' && price.listCents > price.cents
+          ? (price.launchEndsAt
+              ? `Launch price until ${longDate(price.launchEndsAt)}. ${usd(price.listCents)} from ${longDate(dayAfter(price.launchEndsAt))}.`
+              : `Launch price. Then ${usd(price.listCents)}.`)
           : 'One payment.'}{' '}
         Lifetime license, 3 computers, every 1.x update. US dollars.
       </p>
@@ -183,7 +189,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
           </button>
           <p className={styles.after}>
             Your key appears on the next page as soon as the payment confirms, and comes by email.
-            15-day refund. <Link to="/refund">Refund policy</Link>
+            15-day refund if it doesn’t work for you. <Link to="/refund">Refund policy</Link>
           </p>
         </Form>
       )}
@@ -211,6 +217,8 @@ export default function SenderPage() {
             </div>
             <BuyPanel signedIn={signedIn} price={price} testCents={testCents} gateways={gateways} />
           </div>
+
+          <ScreenshotViewer />
 
           <section className={styles.section} aria-labelledby="does-title">
             <h2 id="does-title" className={styles.sectionTitle}>What it does</h2>
