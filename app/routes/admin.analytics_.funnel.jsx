@@ -24,6 +24,7 @@ const FUNNEL_LABELS = {
   payment_confirmed:    'Payment confirmed',
   payment_failed:       'Payment failed',
   payment_abandoned:    'Payment abandoned',
+  sender_download:      'Sender download',
 };
 
 const FUNNEL_KEYS = Object.keys(FUNNEL_LABELS);

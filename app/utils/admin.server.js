@@ -291,6 +291,7 @@ export async function adminAnalyticsFunnel({ days = 7 } = {}) {
     'payment_confirmed',
     'payment_failed',
     'payment_abandoned',
+    'sender_download',
   ];
 
   return sql`
