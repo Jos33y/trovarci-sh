@@ -156,22 +156,18 @@
 }
 
 .note {
-  padding: 12px 14px;
-  border-left: 2px solid var(--trov-warning);
-  background: var(--trov-warning-bg);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   margin-bottom: 16px;
 }
 
 .note p {
   font-size: 0.875rem;
   line-height: 1.55;
-  color: var(--trov-text);
+  color: var(--trov-text-secondary);
   margin: 0;
 }
 
-.note p + p {
-  margin-top: 8px;
+.note strong {
+  color: var(--trov-text);
 }
 
 .details {

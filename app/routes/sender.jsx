@@ -208,11 +208,7 @@ export default function SenderPage() {
                 Sender sends your campaigns through your own SMTP account. One payment, no monthly fee.
               </p>
               <p className={styles.claim}>{STORAGE_LINE}</p>
-              <ul className={styles.facts}>
-                <li>Mail goes straight from your computer to your own SMTP provider. Trovarcis is not on that path.</li>
-                <li>Uninstalling keeps your lists, accounts and license in <code>%APPDATA%\Trovarcis Sender</code>, so a reinstall picks up where you left off.</li>
-                <li>If an antivirus mail shield (Avast, AVG) blocks the usual mail port, Sender says so and offers your provider’s other port in one click.</li>
-              </ul>
+              <p className={styles.sub}>Mail goes straight from your computer to your own SMTP provider.</p>
             </div>
             <BuyPanel signedIn={signedIn} price={price} testCents={testCents} gateways={gateways} />
           </div>
@@ -229,25 +225,12 @@ export default function SenderPage() {
             </dl>
           </section>
 
-          <div className={styles.columns}>
-            <section className={styles.section} aria-labelledby="needs-title">
-              <h2 id="needs-title" className={styles.sectionTitle}>What you need</h2>
-              <ul className={styles.list}>
-                {NEEDS.map((n) => <li key={n}>{n}</li>)}
-              </ul>
-            </section>
-
-            <section className={styles.section} aria-labelledby="install-title">
-              <h2 id="install-title" className={styles.sectionTitle}>Before you install</h2>
-              <p className={styles.para}>
-                Windows will say it protected your PC, because Sender is new and not yet signed with a certificate.
-                Click <strong>More info</strong>, then <strong>Run anyway</strong>. You only do this once.
-              </p>
-              <p className={styles.para}>
-                If you use Avast or AVG, it may scan the installer for a minute before it opens. That is normal for new software.
-              </p>
-            </section>
-          </div>
+          <section className={styles.section} aria-labelledby="needs-title">
+            <h2 id="needs-title" className={styles.sectionTitle}>What you need</h2>
+            <ul className={styles.list}>
+              {NEEDS.map((n) => <li key={n}>{n}</li>)}
+            </ul>
+          </section>
 
           <section className={styles.download} aria-labelledby="download-title">
             <div>
@@ -258,6 +241,7 @@ export default function SenderPage() {
                   : ''}
                 Your key is on your <Link to="/account/sender">account page</Link> and in your email.
               </p>
+              <p className={styles.para}>When installing, if Windows shows a prompt, click <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
             </div>
             <a href="/download/windows" className={styles.downloadButton}>
               <WindowsIcon /> Download for Windows

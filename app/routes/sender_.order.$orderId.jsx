@@ -141,8 +141,7 @@ export default function SenderOrderPage() {
           <CopyKey value={d.license.key} />
         </div>
         <div className={styles.note}>
-          <p>Windows will say it protected your PC, because Sender is new and not yet signed with a certificate. Click <strong>More info</strong>, then <strong>Run anyway</strong>. You only do this once.</p>
-          <p>If you use Avast or AVG, it may scan the installer for a minute before it opens. That is normal for new software.</p>
+          <p>When installing, if Windows shows a prompt, click <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
         </div>
         <p className={styles.small} role="status">
           {d.emailSent && <>We also sent the key to <span className={styles.email}>{d.email}</span>. </>}

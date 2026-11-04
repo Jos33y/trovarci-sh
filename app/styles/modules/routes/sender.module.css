@@ -74,41 +74,6 @@
   max-width: 46ch;
 }
 
-.facts {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 10px;
-  max-width: 58ch;
-}
-
-.facts li {
-  position: relative;
-  padding-left: 18px;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--trov-text-secondary);
-}
-
-.facts li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.65em;
-  width: 6px;
-  height: 6px;
-  border-radius: 1px;
-  background: var(--trov-accent);
-}
-
-.facts code {
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  color: var(--trov-text);
-  overflow-wrap: anywhere;
-}
-
 .buy {
   min-width: 0;
   align-self: start;
@@ -377,10 +342,6 @@
   color: var(--trov-text-secondary);
 }
 
-.columns {
-  display: grid;
-}
-
 .list {
   margin: 0;
   padding-left: 18px;
@@ -447,11 +408,6 @@
 
   .does {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .columns {
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
   }
 
   .download {

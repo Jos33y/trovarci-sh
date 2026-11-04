@@ -725,8 +725,7 @@ function paymentReceiptHtml({ shortId, receiptUrl, packageName, creditsStr, amou
 
 // Sender license key. The key is the purchase, so this goes out once per paid order.
 
-const SMARTSCREEN_NOTE = 'Windows will say it protected your PC, because Sender is new and not yet signed with a certificate. Click More info, then Run anyway. You only do this once.';
-const ANTIVIRUS_NOTE = 'If you use Avast or AVG, it may scan the installer for a minute before it opens. That is normal for new software.';
+const INSTALL_NOTE = 'When installing, if Windows shows a prompt, click More info, then Run anyway.';
 
 export async function sendLicenseKeyEmail({ to, licenseKey, licenseId, orderId, createdAccount = false }) {
   const base = 'https://trovarci.sh';
@@ -745,9 +744,7 @@ export async function sendLicenseKeyEmail({ to, licenseKey, licenseId, orderId, 
     '',
     '1. Download Sender for Windows:',
     downloadUrl,
-    '2. Open the installer.',
-    `   ${SMARTSCREEN_NOTE}`,
-    `   ${ANTIVIRUS_NOTE}`,
+    `2. Open the installer. ${INSTALL_NOTE}`,
     '3. In Sender, paste the key when it asks for your license.',
     '',
     createdAccount
@@ -823,8 +820,7 @@ function licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl
         </tr>
         <tr>
           <td style="padding:16px 40px 0 40px;">
-            <p style="margin:0;font-size:13px;line-height:1.6;color:#A1A1AA;">${SMARTSCREEN_NOTE}</p>
-            <p style="margin:8px 0 0 0;font-size:13px;line-height:1.6;color:#A1A1AA;">${ANTIVIRUS_NOTE}</p>
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#A1A1AA;">${INSTALL_NOTE}</p>
           </td>
         </tr>
         <tr>
