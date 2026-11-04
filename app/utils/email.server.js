@@ -843,3 +843,26 @@ function licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl
 </body>
 </html>`;
 }
+
+// Sale and refund alerts to the owner. Plain text, no license key.
+
+export async function sendSaleAlertEmail({ kind, amountUsd, method, buyerEmail, orderShortId, licenseShortId }) {
+  const to = process.env.SALES_ALERT_EMAIL || 'hello@thebrickdev.com';
+  const sale = kind === 'sale';
+  const subject = sale
+    ? `New Sender sale: $${amountUsd} by ${method}`
+    : `Sender refund: $${amountUsd}, license revoked`;
+  const text = [
+    sale ? 'Someone bought Trovarcis Sender.' : 'A Sender order was refunded and its license revoked.',
+    '',
+    `Amount:   $${amountUsd}`,
+    `Paid by:  ${method}`,
+    `Buyer:    ${buyerEmail}`,
+    `Order:    ${orderShortId}`,
+    `License:  ${licenseShortId}`,
+    '',
+    `Admin: https://trovarci.sh/admin/licenses?q=${encodeURIComponent(buyerEmail)}`,
+  ].join('\n');
+  const html = `<pre style="font-family:Menlo,Consolas,monospace;font-size:14px;line-height:1.6;color:#111;">${escapeHtml(text)}</pre>`;
+  return send({ to, subject, html, text });
+}

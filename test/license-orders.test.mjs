@@ -142,6 +142,7 @@ test('Cryptomus paid, delivered twice, issues one license with a system audit ro
   assert.equal(s.audit[0].actor_id, null);
   assert.equal(s.audit[0].context.payment_reference, `cryptomus:${attempt.gateway_reference}`);
   assert.ok(s.order.key_email_sent_at, 'key email recorded as sent');
+  assert.ok(logged.some((l) => l.includes('to: hello@thebrickdev.com') && l.includes('New Sender sale: $79.00 by crypto')), 'owner sale alert sent');
 });
 
 test('the same paid webhook delivered at the same moment still issues one license', async () => {
@@ -226,6 +227,7 @@ test('a Cryptomus refund revokes the license, audited, and a replayed paid event
   await cryptomus(paid);
   const refund = await cryptomus({ ...paid, status: 'refund_paid' });
   assert.equal(refund.body.reason, 'license_refunded');
+  assert.ok(logged.some((l) => l.includes('Sender refund: $79.00')), 'owner refund alert sent');
   await cryptomus(paid);
 
   const s = await state(order.id);

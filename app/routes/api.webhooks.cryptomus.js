@@ -34,8 +34,8 @@ import {
 } from '~/lib/payments.server';
 import { getCryptomusCredentials, getPackage } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
-import { sendPaymentReceiptEmail, sendLicenseKeyEmail } from '~/utils/email.server';
-import { applyCryptomusEvent, deliverLicenseKey } from '~/lib/licenseOrders.server';
+import { sendPaymentReceiptEmail, sendLicenseKeyEmail, sendSaleAlertEmail } from '~/utils/email.server';
+import { applyCryptomusEvent, deliverLicenseKey, alertOwner } from '~/lib/licenseOrders.server';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -44,7 +44,11 @@ async function handleLicenseOrder(payload) {
   try {
     const result = await applyCryptomusEvent(payload);
     if (!result.handled) return null;
-    if (result.issued) await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+    if (result.issued) {
+      await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+      await alertOwner(result.orderId, 'sale', sendSaleAlertEmail);
+    }
+    if (result.outcome === 'refunded') await alertOwner(result.orderId, 'refund', sendSaleAlertEmail);
     return ok200(`license_${result.outcome}`);
   } catch (err) {
     console.error('[cryptomus webhook] license order processing error:', err.message);

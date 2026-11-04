@@ -4,8 +4,8 @@ import { verifyPolarWebhook } from '~/lib/polar.server';
 import { completePayment, markPaymentTerminal, getPaymentById, resizeCustomPayment } from '~/lib/payments.server';
 import { getPackage } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
-import { sendPaymentReceiptEmail, sendLicenseKeyEmail } from '~/utils/email.server';
-import { applyPolarOrderPaid, applyPolarCheckoutClosed, applyPolarRefund, deliverLicenseKey } from '~/lib/licenseOrders.server';
+import { sendPaymentReceiptEmail, sendLicenseKeyEmail, sendSaleAlertEmail } from '~/utils/email.server';
+import { applyPolarOrderPaid, applyPolarCheckoutClosed, applyPolarRefund, deliverLicenseKey, alertOwner } from '~/lib/licenseOrders.server';
 
 // Polar retries any non-2xx and disables the endpoint after 10 straight failures,
 // so only a bad signature or a transient error returns one.
@@ -41,11 +41,15 @@ async function handleLicenseEvent(event, data) {
     if (data.status !== 'paid' && data.paid !== true) return accepted('not_paid');
     const result = await applyPolarOrderPaid(data);
     if (!result.handled) return accepted('unknown_license_order');
-    if (result.issued) await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+    if (result.issued) {
+      await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+      await alertOwner(result.orderId, 'sale', sendSaleAlertEmail);
+    }
     return accepted(`license_${result.outcome}`);
   }
   if (event.type === 'order.refunded') {
     const result = await applyPolarRefund(data);
+    if (result.outcome === 'refunded') await alertOwner(result.orderId, 'refund', sendSaleAlertEmail);
     return accepted(result.handled ? `license_${result.outcome}` : 'unknown_license_order');
   }
   const status = event.type === 'checkout.expired' ? 'expired' : data.status;
