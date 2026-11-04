@@ -129,7 +129,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
             </p>
           ) : (
             <div className={styles.field}>
-              <label htmlFor="buy-email" className={styles.label}>Email for your license key</label>
+              <label htmlFor="buy-email" className={styles.label}>Your email</label>
               <input
                 id="buy-email"
                 name="email"
@@ -137,7 +137,6 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
                 inputMode="email"
                 autoComplete="email"
                 spellCheck="false"
-                placeholder="you@company.com…"
                 className={styles.input}
                 aria-invalid={errors.email ? 'true' : undefined}
                 aria-describedby={errors.email ? 'buy-email-error' : 'buy-email-hint'}
@@ -145,7 +144,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
               />
               {errors.email
                 ? <p id="buy-email-error" className={styles.fieldError}>{errors.email}</p>
-                : <p id="buy-email-hint" className={styles.hint}>Have an account? <Link to="/login?redirectTo=%2Fsender">Sign in</Link> to keep the key with it.</p>}
+                : <p id="buy-email-hint" className={styles.hint}>Any email you check, Gmail is fine. Have an account? <Link to="/login?redirectTo=%2Fsender">Sign in</Link> instead.</p>}
             </div>
           )}
 

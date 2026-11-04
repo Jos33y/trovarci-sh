@@ -135,7 +135,7 @@ export default function VerifyEmail() {
             <input type="hidden" name="intent" value="change" />
             <div className={styles.field}>
               <label htmlFor="new-email" className={styles.label}>Wrong email? Change it</label>
-              <input id="new-email" name="email" type="email" inputMode="email" autoComplete="email" spellCheck="false" className={styles.input} placeholder="you@company.com…" />
+              <input id="new-email" name="email" type="email" inputMode="email" autoComplete="email" spellCheck="false" className={styles.input}/>
               {a.emailError && <p className={styles.fieldError} role="alert">{a.emailError}</p>}
             </div>
             <button type="submit" className={styles.linkBtn} disabled={busy}>Change email and send code</button>
