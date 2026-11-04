@@ -559,3 +559,17 @@
     gap: 8px;
   }
 }
+
+/* Hidden field for bots: off screen, not display:none, which some bots skip */
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.turnstile {
+  min-height: 65px;
+  margin: 4px 0 8px;
+}

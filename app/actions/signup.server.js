@@ -27,6 +27,7 @@ import {
   safeRedirect,
 } from '~/utils/validation.server';
 import { safeFormData } from '~/utils/formData';
+import { HONEYPOT_FIELD, checkFormToken, checkTurnstile } from '~/utils/signupGuard.server';
 
 function clientIp(request) {
   const fwd = request.headers.get('x-forwarded-for');
@@ -74,6 +75,19 @@ export async function signupAction({ request }) {
 
 async function handleCreateAccount(request, form) {
   const ip = clientIp(request);
+
+  // Bots that post the form without loading the page, or fill the hidden field, get a plain
+  // error and no account. A person only sees this with a page left open for a day.
+  const botCode = String(form.get(HONEYPOT_FIELD) || '').trim() ? 'BOT_HONEYPOT' : checkFormToken(form.get('ft'));
+  if (botCode) {
+    recordSignupError(request, 'create_account', botCode);
+    return data({ errors: { _form: 'This page expired. Reload it and try again.' } }, { status: 400 });
+  }
+  const humanCode = await checkTurnstile(form.get('cf-turnstile-response'), ip);
+  if (humanCode) {
+    recordSignupError(request, 'create_account', humanCode);
+    return data({ errors: { _form: 'Confirm you are human, then try again.' } }, { status: 400 });
+  }
 
   if (ip) {
     const rl = await checkAndIncrement(

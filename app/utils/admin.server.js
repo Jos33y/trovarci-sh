@@ -490,7 +490,7 @@ export async function adminKpiDeltas({ days = 7 } = {}) {
         COUNT(*) FILTER (WHERE created_at > now() - ${cur}::interval)::int AS current,
         COUNT(*) FILTER (WHERE created_at > now() - ${prev}::interval AND created_at <= now() - ${cur}::interval)::int AS previous
       FROM users
-      WHERE created_at > now() - ${prev}::interval AND deleted_at IS NULL
+      WHERE created_at > now() - ${prev}::interval AND deleted_at IS NULL AND email_verified_at IS NOT NULL
     `,
     sql`
       SELECT
@@ -567,6 +567,7 @@ export async function adminKpiSparklines({ days = 30 } = {}) {
       LEFT JOIN users u
         ON date_trunc('day', u.created_at) = s.day
        AND u.deleted_at IS NULL
+       AND u.email_verified_at IS NOT NULL
       GROUP BY s.day
       ORDER BY s.day ASC
     `,

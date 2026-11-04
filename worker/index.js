@@ -265,9 +265,9 @@ async function authCleanupLoop() {
   while (!shutdownState.shutting) {
     try {
       const r = await runAuthCleanups();
-      if (r.rateLimits || r.sessions || r.evcs) {
+      if (r.rateLimits || r.sessions || r.evcs || r.unverified) {
         console.log(
-          `[worker] auth cleanup: rate_limits=${r.rateLimits} sessions=${r.sessions} evcs=${r.evcs} (${r.durationMs}ms)`
+          `[worker] auth cleanup: rate_limits=${r.rateLimits} sessions=${r.sessions} evcs=${r.evcs} unverified_closed=${r.unverified} (${r.durationMs}ms)`
         );
       }
       if (r.errors.length > 0) {

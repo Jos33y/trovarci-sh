@@ -14,7 +14,9 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const CSP_DIRECTIVES = [
   `default-src 'self'`,
   // 'unsafe-inline' required for RR v7 streaming hydration blocks; do not remove without threading a nonce.
-  `script-src 'self' 'unsafe-inline'`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com`,
+  // Cloudflare Turnstile on signup renders in its own frame.
+  `frame-src https://challenges.cloudflare.com`,
   // 'unsafe-inline' also covers inline style attributes on page-loader/ErrorBoundary; CSP2 conflates them with <style>.
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
   `font-src 'self' https://fonts.gstatic.com data:`,

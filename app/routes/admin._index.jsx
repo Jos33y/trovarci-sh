@@ -98,7 +98,7 @@ export default function AdminOverview() {
           delta={{ pct: deltas.pageviews.deltaPct }}
         />
         <KPICard
-          label="Signups (7d)"
+          label="Verified signups (7d)"
           value={formatInt(deltas.signups.current)}
           hint={`${formatInt(overview.totals.unique_users)} signed-in users`}
           icon={UsersIcon}

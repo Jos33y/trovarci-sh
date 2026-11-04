@@ -10,6 +10,10 @@ import {
 import { TrovarcisReachLogo } from '~/components/shared/Logo';
 import { requireGuest, pendingVerificationCookie } from '~/utils/session.server';
 import { safeRedirect } from '~/utils/validation.server';
+import { issueFormToken, turnstileSiteKey } from '~/utils/signupGuard.server';
+
+// Must match HONEYPOT_FIELD in signupGuard.server.js.
+const HONEYPOT_FIELD = 'company_site';
 import styles from '~/styles/modules/routes/signup.module.css';
 
 export { signupAction as action } from '~/actions/signup.server';
@@ -35,6 +39,8 @@ export async function loader({ request }) {
   return {
     pendingEmail: pending?.email || null,
     redirectTo: redirectTo || '',
+    formToken: issueFormToken(),
+    turnstileKey: turnstileSiteKey(),
   };
 }
 
@@ -71,8 +77,40 @@ function MailIcon() {
 
 const CODE_LENGTH = 6;
 
+// Cloudflare Turnstile, rendered explicitly so it also appears after a client-side visit to /signup.
+// Only on the page when TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY are set.
+function Turnstile({ siteKey }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!siteKey || !ref.current) return undefined;
+    let widgetId = null;
+    let cancelled = false;
+    const render = () => {
+      if (cancelled || !window.turnstile || !ref.current) return;
+      widgetId = window.turnstile.render(ref.current, { sitekey: siteKey, theme: 'dark', size: 'flexible' });
+    };
+    if (window.turnstile) render();
+    else {
+      let script = document.querySelector('script[data-turnstile]');
+      if (!script) {
+        script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.dataset.turnstile = 'true';
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', render, { once: true });
+    }
+    return () => {
+      cancelled = true;
+      if (widgetId !== null && window.turnstile) window.turnstile.remove(widgetId);
+    };
+  }, [siteKey]);
+  return siteKey ? <div ref={ref} className={styles.turnstile} /> : null;
+}
+
 export default function SignupPage() {
-  const { pendingEmail, redirectTo } = useLoaderData();
+  const { pendingEmail, redirectTo, formToken, turnstileKey } = useLoaderData();
   const actionData = useActionData();
   const navigation = useNavigation();
   const resendFetcher = useFetcher();
@@ -182,6 +220,12 @@ export default function SignupPage() {
 
             <Form method="post" className={styles.form} noValidate>
               <input type="hidden" name="intent" value="create_account" />
+              <input type="hidden" name="ft" value={formToken} />
+              {/* Left empty by people; bots that fill every field give themselves away. */}
+              <div className={styles.trap} aria-hidden="true">
+                <label htmlFor={HONEYPOT_FIELD}>Company website</label>
+                <input id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+              </div>
               {redirectTo && (
                 <input type="hidden" name="redirectTo" value={redirectTo} />
               )}
@@ -291,6 +335,8 @@ export default function SignupPage() {
                 </span>
               </label>
               {errors.terms && <p className={styles.fieldError}>{errors.terms}</p>}
+
+              <Turnstile siteKey={turnstileKey} />
 
               <button
                 className={styles.submitBtn}

@@ -124,6 +124,26 @@ export async function cleanupExpiredEmailVerificationCodes({ graceHours = 1 } = 
  *   errors: { stage: string, message: string }[]
  * }>}
  */
+// Accounts that never verified their email after 7 days, and never bought or ran anything, are closed.
+// Almost all are bots. A buyer's account made at checkout has a license, so it is never touched.
+export async function closeUnverifiedAccounts({ olderThanDays = 7 } = {}) {
+  const rows = await sql`
+    UPDATE users u
+    SET deleted_at = now()
+    WHERE u.deleted_at IS NULL
+      AND u.email_verified_at IS NULL
+      AND u.role = 'user'
+      AND u.created_at < now() - make_interval(days => ${olderThanDays})
+      AND NOT EXISTS (SELECT 1 FROM licenses l WHERE l.user_id = u.id)
+      AND NOT EXISTS (SELECT 1 FROM license_orders o WHERE o.user_id = u.id)
+      AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.user_id = u.id)
+      AND NOT EXISTS (SELECT 1 FROM verification_jobs j WHERE j.user_id = u.id)
+    RETURNING u.id
+  `;
+  if (rows.length) await sql`DELETE FROM sessions WHERE user_id = ANY(${rows.map((r) => r.id)}::uuid[])`;
+  return rows.length;
+}
+
 export async function runAuthCleanups(opts = {}) {
   const {
     rateLimitKeepHours = parseInt(process.env.AUTH_CLEANUP_RATE_LIMIT_KEEP_HOURS || '24', 10),
@@ -155,10 +175,18 @@ export async function runAuthCleanups(opts = {}) {
     errors.push({ stage: 'evcs', message: err.message });
   }
 
+  let unverified = 0;
+  try {
+    unverified = await closeUnverifiedAccounts();
+  } catch (err) {
+    errors.push({ stage: 'unverified', message: err.message });
+  }
+
   return {
     rateLimits,
     sessions,
     evcs,
+    unverified,
     durationMs: Date.now() - startedAt,
     errors,
   };
