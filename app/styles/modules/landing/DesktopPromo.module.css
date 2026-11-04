@@ -170,6 +170,7 @@
 
 .button:hover:not(:disabled) {
   background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
 }
 
 .button:disabled {

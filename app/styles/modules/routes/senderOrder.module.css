@@ -127,6 +127,7 @@
 
 .primary:hover {
   background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
 }
 
 .secondary {
@@ -137,6 +138,7 @@
 
 .secondary:hover {
   border-color: var(--trov-border-hover);
+  color: var(--trov-text);
 }
 
 .primary:active,

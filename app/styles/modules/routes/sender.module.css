@@ -272,6 +272,7 @@
 .buyButton:hover,
 .downloadButton:hover {
   background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
 }
 
 .buyButton:active,

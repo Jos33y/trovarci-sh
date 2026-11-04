@@ -28,9 +28,13 @@ export async function getLatestRelease() {
   const url = process.env.UPDATES_FEED_URL || `${getPublicUrl()}/updates/latest.yml`;
   let release = null;
   try {
-    const res = await fetch(url, { headers: { Accept: 'text/yaml, text/plain' }, signal: AbortSignal.timeout(5000) });
-    if (res.ok) release = parseFeed(await res.text());
-    else console.warn(`[update feed] ${url} answered HTTP ${res.status}`);
+    // A named client, so Cloudflare's bot rules do not treat the site's own request as a scraper.
+    const res = await fetch(url, { headers: { Accept: 'text/yaml, text/plain', 'User-Agent': 'trovarci.sh update-feed reader' }, signal: AbortSignal.timeout(5000) });
+    if (!res.ok) console.warn(`[update feed] ${url} answered HTTP ${res.status}`);
+    else {
+      release = parseFeed(await res.text());
+      if (!release) console.warn(`[update feed] ${url} has no valid version and .exe path`);
+    }
   } catch (err) {
     console.warn(`[update feed] could not read ${url}: ${err.message}`);
   }
