@@ -1,10 +1,10 @@
 // /about/:slug - author profile: who writes the posts and builds the tools, with their posts listed.
 
-import { useLoaderData, Link, data } from 'react-router';
+import { useLoaderData, Link, data, redirect } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import { getAllPosts } from '~/utils/markdown.server';
-import { AUTHORS, authorUrl, authorSchema } from '~/utils/authors';
+import { AUTHORS, RETIRED_AUTHORS, authorUrl, authorSchema } from '~/utils/authors';
 import { getSeo } from '~/utils/seo';
 import { formatDateShort } from '~/utils/format';
 import styles from '~/styles/modules/routes/author.module.css';
@@ -18,11 +18,12 @@ export function meta({ data: payload }) {
     path: authorUrl(author),
     type: 'profile',
     image: `https://trovarci.sh${author.image}`,
-    imageAlt: author.name,
+    imageAlt: `${author.name} logo`,
   });
 }
 
 export function loader({ params }) {
+  if (RETIRED_AUTHORS[params.slug]) throw redirect(`/about/${RETIRED_AUTHORS[params.slug]}`, 301);
   const author = AUTHORS[params.slug];
   if (!author) throw data(null, { status: 404, statusText: 'Author not found' });
   const posts = getAllPosts()
@@ -36,7 +37,7 @@ export default function AuthorPage() {
 
   const schemaData = {
     '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
+    '@type': 'AboutPage',
     mainEntity: authorSchema(author),
   };
 

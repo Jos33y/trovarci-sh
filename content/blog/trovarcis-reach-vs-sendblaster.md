@@ -3,7 +3,7 @@ title: "Trovarcis Reach vs SendBlaster - Which Bulk Email Tool Is Better?"
 slug: "trovarcis-reach-vs-sendblaster"
 description: "A direct comparison between Trovarcis Reach and SendBlaster. Pricing, platform support, features, and which one is worth your money in 2026."
 date: "2026-02-22"
-author: "joseph-lagbalu"
+author: "trovarcis-team"
 category: "Product Comparisons"
 tags: ["comparison", "sendblaster", "bulk email", "desktop email"]
 readingTime: 7

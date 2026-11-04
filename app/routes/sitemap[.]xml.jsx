@@ -18,7 +18,7 @@ const STATIC_URLS = [
     '/smtp-test',
     '/records',
     '/blog',
-    '/about/joseph-lagbalu',
+    '/about/trovarcis-team',
     '/sender',
     '/credits',
     '/contact',

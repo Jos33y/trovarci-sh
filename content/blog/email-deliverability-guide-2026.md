@@ -3,7 +3,7 @@ title: "The complete guide to email deliverability in 2026"
 slug: "email-deliverability-guide-2026"
 description: "What it takes to reach the inbox in 2026: authentication, reputation, the modern protocol layer, and inbox placement, with the fixes that actually work."
 date: "2026-07-12"
-author: "joseph-lagbalu"
+author: "trovarcis-team"
 category: "Email Deliverability"
 tags: ["deliverability", "spf", "dkim", "dmarc", "bimi", "mta-sts", "sender-reputation"]
 readingTime: 13

@@ -1,31 +1,32 @@
-// Authors shown on posts and on /about/<slug>. Public, verifiable facts only.
+// Authors shown on posts and on /about/<slug>. Posts are written by the Trovarcis team.
 
 const BASE_URL = 'https://trovarci.sh';
 
 export const AUTHORS = {
-  'joseph-lagbalu': {
-    slug: 'joseph-lagbalu',
-    name: 'Joseph Lagbalu',
-    role: 'Founder of Trovarcis',
-    short: 'Founder of Trovarcis. Builds email deliverability tools and the Trovarcis Sender desktop app.',
+  'trovarcis-team': {
+    slug: 'trovarcis-team',
+    name: 'Trovarcis Team',
+    role: 'Email tools and Trovarcis Sender',
+    short: 'The team behind the Trovarcis email tools and the Trovarcis Sender desktop app.',
     bio: [
-      'Joseph Lagbalu builds and runs Trovarcis on his own: the free email and phone tools on trovarci.sh, the Credits system behind them, and the Trovarcis Sender desktop app.',
-      'He has built software since 2020 and founded The Brick Dev Studios in 2023, building payment systems, online stores and backend infrastructure for clients in Nigeria, the UK and Portugal. He holds a B.Sc. in Computer Science from Kwara State University.',
+      'Trovarcis builds tools for people who send email: the free checks on trovarci.sh for domains, addresses, SMTP settings and DNS records, the Credits that pay for bulk checks, and Trovarcis Sender, a desktop app that sends campaigns through your own SMTP accounts.',
+      'Every guide here is written from what we see building and running those tools, and checked against the providers’ own pages.',
     ],
-    image: '/images/authors/joseph-lagbalu-400.webp',
-    imageSmall: '/images/authors/joseph-lagbalu-96.webp',
+    image: '/android-chrome-192x192.png',
+    imageSmall: '/favicon-192x192.png',
     links: [
-      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joseph-lagbalu/' },
-      { label: 'GitHub', href: 'https://github.com/Jos33y' },
-      { label: 'The Brick Dev Studios', href: 'https://thebrickdev.com' },
+      { label: 'Contact', href: 'https://trovarci.sh/contact' },
     ],
   },
 };
 
-export const DEFAULT_AUTHOR = 'joseph-lagbalu';
+export const DEFAULT_AUTHOR = 'trovarcis-team';
+
+// Earlier posts named a person; their pages now redirect to the team page.
+export const RETIRED_AUTHORS = { 'joseph-lagbalu': 'trovarcis-team' };
 
 export function getAuthor(slug) {
-  return AUTHORS[slug] || AUTHORS[DEFAULT_AUTHOR];
+  return AUTHORS[RETIRED_AUTHORS[slug] || slug] || AUTHORS[DEFAULT_AUTHOR];
 }
 
 export function authorUrl(author) {
@@ -34,13 +35,10 @@ export function authorUrl(author) {
 
 export function authorSchema(author) {
   return {
-    '@type': 'Person',
+    '@type': 'Organization',
     name: author.name,
     url: `${BASE_URL}${authorUrl(author)}`,
-    image: `${BASE_URL}${author.image}`,
-    jobTitle: 'Founder',
+    logo: `${BASE_URL}${author.image}`,
     description: author.short,
-    worksFor: { '@type': 'Organization', name: 'Trovarcis', url: BASE_URL },
-    sameAs: author.links.map((l) => l.href),
   };
 }
