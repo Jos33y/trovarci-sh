@@ -6,7 +6,7 @@ import styles from '~/styles/modules/routes/legal.module.css';
 
 export const meta = () => getSeo({
   title: 'Terms of Service',
-  description: 'Terms governing Trovarcis Reach, Trovarcis Mail, domain registration and the web tools at trovarci.sh.',
+  description: 'Terms governing Trovarcis Reach, Trovarcis Sender, Trovarcis Mail, domain registration and the web tools at trovarci.sh.',
   path: '/terms',
 });
 
@@ -14,7 +14,7 @@ const SECTIONS = [
   { id: 'agreement', label: 'Agreement to terms' },
   { id: 'services', label: 'Our services' },
   { id: 'accounts', label: 'Account registration' },
-  { id: 'license', label: 'Trovarcis Reach license' },
+  { id: 'license', label: 'Trovarcis Sender license' },
   { id: 'credits', label: 'Credits' },
   { id: 'mail', label: 'Trovarcis Mail' },
   { id: 'domains', label: 'Domain registration' },
@@ -60,7 +60,7 @@ export default function Terms() {
               These Terms of Service are an agreement between you and
               Trovarcis, operated by Remvolabs (&quot;Trovarcis&quot;, &quot;we&quot;,
               &quot;us&quot;). By creating an account, buying anything from us, or
-              using trovarci.sh, the Trovarcis Reach desktop app or Trovarcis
+              using trovarci.sh, the Trovarcis Sender desktop app or Trovarcis
               Mail, you agree to these terms, our{' '}
               <a href="/acceptable-use">Acceptable Use Policy</a>, our{' '}
               <a href="/privacy">Privacy Policy</a> and our{' '}
@@ -74,7 +74,8 @@ export default function Terms() {
 
             <h2 id="services">Our services</h2>
             <ul>
-              <li><strong>Trovarcis Reach</strong> - a desktop application (Windows, macOS, Linux) for sending email and SMS campaigns through SMTP servers and providers that you own or are authorised to use, plus web tools at trovarci.sh for email scoring, email and phone verification and domain checks. Reach does not provide sending infrastructure.</li>
+              <li><strong>Trovarcis Reach</strong> - web tools at trovarci.sh for email scoring, email and phone verification and domain checks, paid for with Credits.</li>
+              <li><strong>Trovarcis Sender</strong> - a Windows desktop application for sending email campaigns through SMTP servers and providers that you own or are authorized to use. Sender does not provide sending infrastructure.</li>
               <li><strong>Trovarcis Mail</strong> - hosted business email on your own domain: mailboxes, webmail, IMAP and SMTP access for your devices, and sending through our infrastructure, subject to sending limits.</li>
               <li><strong>Domain registration</strong> - registering and renewing domain names through our accredited registrar partner, so you can use them with Trovarcis Mail or anywhere else.</li>
             </ul>
@@ -92,63 +93,26 @@ export default function Terms() {
               <li>Tell us immediately at <a href="mailto:support@trovarcis.com">support@trovarcis.com</a> if you suspect unauthorised access.</li>
             </ul>
 
-            <h2 id="license">Trovarcis Reach license</h2>
+            <h2 id="license">Trovarcis Sender license</h2>
             <p>
-              When you buy Trovarcis Reach, you receive a perpetual,
+              When you buy Trovarcis Sender, you receive a perpetual,
               non-exclusive, non-transferable license to use the desktop
               software.
             </p>
             <ul>
-              <li><strong>Perpetual</strong> - your license does not expire. One-time purchase, lifetime use.</li>
-              <li><strong>Device limits</strong> - Free tier: 1 device. Paid licenses: up to 3 devices per license.</li>
-              <li><strong>Personal use</strong> - each license is for one person. You may not share, resell, sublicense or transfer your activation code.</li>
-              <li><strong>Updates</strong> - updates within the same major version are free. Major version upgrades may require a separate purchase at a discounted rate.</li>
+              <li><strong>Perpetual</strong> - your license does not expire. One payment, lifetime use.</li>
+              <li><strong>Devices</strong> - one license works on up to 3 computers at a time. Support can release a computer you no longer use.</li>
+              <li><strong>Personal use</strong> - each license is for one person or one business. You may not share, resell, sublicense or transfer your license key.</li>
+              <li><strong>Updates</strong> - every 1.x update is included. A future 2.0 may be sold separately, at a discount for existing buyers.</li>
+              <li><strong>Price</strong> - the price shown at checkout, in US dollars. Card payments are processed by Polar as merchant of record, which may add sales tax where it applies.</li>
             </ul>
-
-            <h3>License tiers</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Tier</th>
-                  <th>Price</th>
-                  <th>Devices</th>
-                  <th>Includes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Free</td>
-                  <td>$0</td>
-                  <td>1</td>
-                  <td>1 SMTP, 500 contacts, 1,000 emails/campaign</td>
-                </tr>
-                <tr>
-                  <td>Email Pro</td>
-                  <td>$79 one-time</td>
-                  <td>3</td>
-                  <td>Unlimited SMTP, contacts, emails, all features</td>
-                </tr>
-                <tr>
-                  <td>SMS Pro</td>
-                  <td>$49 one-time</td>
-                  <td>3</td>
-                  <td>SMS campaigns, multi-provider support</td>
-                </tr>
-                <tr>
-                  <td>Bundle</td>
-                  <td>$119 one-time</td>
-                  <td>3</td>
-                  <td>Everything in Email Pro + SMS Pro</td>
-                </tr>
-              </tbody>
-            </table>
 
             <h3>What you may not do</h3>
             <ul>
               <li>Reverse engineer, decompile or disassemble the software.</li>
               <li>Remove or alter copyright notices or branding.</li>
               <li>Use the software to build a competing product.</li>
-              <li>Share your activation code publicly or with others.</li>
+              <li>Share your license key publicly or with others.</li>
               <li>Circumvent license restrictions or device limits.</li>
             </ul>
 
@@ -239,11 +203,11 @@ export default function Terms() {
               <li>Complying with the laws that apply to you and your recipients.</li>
               <li>Keeping your account, mailbox and device credentials secure.</li>
             </ul>
-            <p>For Trovarcis Reach, which uses your own infrastructure, you are also responsible for:</p>
+            <p>For Trovarcis Sender, which uses your own infrastructure, you are also responsible for:</p>
             <ul>
               <li>Configuring your SMTP servers and API accounts and following their terms and limits.</li>
               <li>Managing your sender reputation, domain authentication (SPF, DKIM, DMARC) and IP warm-up.</li>
-              <li>Backing up your local data. Reach stores your data on your device and we cannot recover it.</li>
+              <li>Backing up your local data. Sender stores your data on your computer and we cannot recover it.</li>
               <li>Keeping the software updated for security fixes.</li>
             </ul>
 
@@ -301,7 +265,7 @@ export default function Terms() {
 
             <h2 id="termination">Termination</h2>
             <ul>
-              <li><strong>By you</strong> - you can stop using our services at any time. You can close mailboxes from your dashboard. To delete your account and data, contact <a href="mailto:support@trovarcis.com">support@trovarcis.com</a>. A Reach license remains valid even if you stop using the product.</li>
+              <li><strong>By you</strong> - you can stop using our services at any time. You can close mailboxes from your dashboard. To delete your account and data, contact <a href="mailto:support@trovarcis.com">support@trovarcis.com</a>. A Sender license remains valid even if you stop using the product.</li>
               <li><strong>By us</strong> - we may suspend or end your account if you break these terms or the Acceptable Use Policy. For serious violations this can be immediate and without refund. Otherwise we give notice and, where possible, time to export your mail and transfer your domains.</li>
             </ul>
             <p>
@@ -316,7 +280,7 @@ export default function Terms() {
               Continuing to use our services after the changes take effect means
               you accept them. If you disagree, you may stop using the services
               and, for Trovarcis Mail, ask for any refund the Refund Policy
-              allows. Your existing Reach license remains valid.
+              allows. Your existing Sender license remains valid.
             </p>
 
             <h2 id="contact">Contact</h2>

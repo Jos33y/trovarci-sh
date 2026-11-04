@@ -19,6 +19,7 @@ import { formatInt } from '~/utils/format';
 const NAV_LINKS = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Sender", href: "/sender" },
   { label: "Blog", href: "/blog" },
 ];
 

@@ -90,3 +90,31 @@ export async function logAdminAction(executor, {
     )
   `;
 }
+
+// System rows: a license issued by a payment webhook or revoked by a refund. No admin acted,
+// so there is no actor; actor_kind says the server did it.
+const SYSTEM_ACTION_TYPES = new Set(['license_issue', 'license_revoke']);
+
+export async function logSystemAction(executor, {
+  actionType,
+  targetUserId = null,
+  targetKind = null,
+  targetId = null,
+  reason = null,
+  context = {},
+}) {
+  if (!SYSTEM_ACTION_TYPES.has(actionType)) {
+    throw new Error(`logSystemAction: invalid actionType "${actionType}"`);
+  }
+  if (targetKind && !VALID_TARGET_KINDS.has(targetKind)) {
+    throw new Error(`logSystemAction: invalid targetKind "${targetKind}"`);
+  }
+  await executor`
+    INSERT INTO admin_actions (
+      actor_id, actor_kind, action_type, target_user_id, target_kind, target_id, reason, context
+    ) VALUES (
+      NULL, 'system', ${actionType}, ${targetUserId}, ${targetKind}, ${targetId},
+      ${reason}, ${executor.json(context)}
+    )
+  `;
+}

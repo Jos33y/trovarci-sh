@@ -1,4 +1,4 @@
-// Polar client: creates hosted checkouts for credit packs and verifies webhook signatures (Standard Webhooks).
+// Polar client: creates hosted checkouts for credit packs and Sender licenses, and verifies webhook signatures (Standard Webhooks).
 
 import crypto from 'node:crypto';
 import { POLAR_API_BASE, getPolarCredentials, getPublicUrl } from '~/utils/paymentsConfig.server';
@@ -25,6 +25,29 @@ export async function createPolarCheckout({ paymentId, productId, amountUsdCents
   // The custom product is pay-what-you-want: pre-fill what the buyer chose on /credits.
   if (isCustom) body.amount = amountUsdCents;
 
+  return postCheckout(accessToken, body);
+}
+
+// Sender license: a fixed-price product per price key. A guest has no account yet, so there is
+// no external customer id; the email is where the key goes.
+export async function createPolarLicenseCheckout({ orderId, productId, userId, customerEmail, priceKey, country, ipAddress }) {
+  const { accessToken } = getPolarCredentials();
+  const base = getPublicUrl();
+  const body = {
+    products: [productId],
+    success_url: `${base}/sender/order/${orderId}`,
+    return_url: `${base}/sender`,
+    customer_email: customerEmail,
+    allow_discount_codes: false,
+    metadata: { license_order_id: orderId, product: 'sender', price_key: priceKey },
+  };
+  if (userId) body.external_customer_id = userId;
+  if (country) body.customer_billing_address = { country };
+  if (ipAddress) body.customer_ip_address = ipAddress;
+  return postCheckout(accessToken, body);
+}
+
+async function postCheckout(accessToken, body) {
   const res = await fetch(`${POLAR_API_BASE}/v1/checkouts/`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', Accept: 'application/json' },

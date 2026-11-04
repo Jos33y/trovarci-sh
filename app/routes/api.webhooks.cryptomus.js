@@ -34,7 +34,23 @@ import {
 } from '~/lib/payments.server';
 import { getCryptomusCredentials, getPackage } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
-import { sendPaymentReceiptEmail } from '~/utils/email.server';
+import { sendPaymentReceiptEmail, sendLicenseKeyEmail } from '~/utils/email.server';
+import { applyCryptomusEvent, deliverLicenseKey } from '~/lib/licenseOrders.server';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Sender license orders. Issues only on paid or paid_over, inside applyCryptomusEvent's transaction.
+async function handleLicenseOrder(payload) {
+  try {
+    const result = await applyCryptomusEvent(payload);
+    if (!result.handled) return null;
+    if (result.issued) await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+    return ok200(`license_${result.outcome}`);
+  } catch (err) {
+    console.error('[cryptomus webhook] license order processing error:', err.message);
+    return new Response('Processing error', { status: 500 });
+  }
+}
 
 // IP allowlist parsed once at module load. Empty = no enforcement.
 // Cryptomus documented source: 91.227.144.54.
@@ -195,9 +211,9 @@ export async function action({ request }) {
   }
 
   // ─── Look up payment ──────────────────────────────────────────────
-  let payment;
+  let payment = null;
   try {
-    payment = await getPaymentById(orderId);
+    if (UUID_RE.test(orderId)) payment = await getPaymentById(orderId);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[cryptomus webhook] DB error on lookup:', err);
@@ -205,6 +221,8 @@ export async function action({ request }) {
   }
 
   if (!payment) {
+    const licenseResponse = await handleLicenseOrder(payload);
+    if (licenseResponse) return licenseResponse;
     // Order ID does not match anything in our DB. Could be a test webhook,
     // could be misconfigured merchant. Acknowledge without processing.
     return ok200('unknown_payment');

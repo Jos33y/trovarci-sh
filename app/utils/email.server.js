@@ -30,13 +30,15 @@ function getReplyToAddress() {
   return process.env.EMAIL_REPLY_TO_ADDRESS || 'support@trovarcis.com';
 }
 
-async function send({ to, subject, html, text }) {
+async function send({ to, subject, html, text, redact = [] }) {
   const client = getResend();
 
   if (!client) {
     const rule = '='.repeat(60);
+    // Secrets in the body (a license key) are masked, so dev logs never hold them.
+    const shown = redact.filter(Boolean).reduce((body, secret) => body.split(secret).join('[redacted]'), text);
     // eslint-disable-next-line no-console
-    console.log(`\n${rule}\n[EMAIL DEV MODE] to: ${to}\nsubject: ${subject}\n${rule}\n${text}\n${rule}\n`);
+    console.log(`\n${rule}\n[EMAIL DEV MODE] to: ${to}\nsubject: ${subject}\n${rule}\n${shown}\n${rule}\n`);
     return { ok: true, id: 'dev-console' };
   }
 
@@ -713,6 +715,131 @@ function paymentReceiptHtml({ shortId, receiptUrl, packageName, creditsStr, amou
       </table>
       <div style="margin-top:24px;font-size:12px;color:#52525B;">
         Trovarcis Reach &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
+      </div>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
+// Sender license key. The key is the purchase, so this goes out once per paid order.
+
+const SMARTSCREEN_NOTE = 'Windows will say it protected your PC, because Sender is new and not yet signed with a certificate. Click More info, then Run anyway. You only do this once.';
+const ANTIVIRUS_NOTE = 'If you use Avast or AVG, it may scan the installer for a minute before it opens. That is normal for new software.';
+
+export async function sendLicenseKeyEmail({ to, licenseKey, licenseId, orderId, createdAccount = false }) {
+  const base = 'https://trovarci.sh';
+  const orderUrl = `${base}/sender/order/${orderId}`;
+  const downloadUrl = `${base}/download/windows`;
+  const accountUrl = createdAccount ? `${base}/forgot-password` : `${base}/account/sender`;
+  const shortId = String(licenseId).slice(0, 8).toUpperCase();
+
+  const text = [
+    'Thanks for buying Trovarcis Sender.',
+    '',
+    'Your license key:',
+    licenseKey,
+    '',
+    `License ${shortId}. Use it on up to 3 computers.`,
+    '',
+    '1. Download Sender for Windows:',
+    downloadUrl,
+    '2. Open the installer.',
+    `   ${SMARTSCREEN_NOTE}`,
+    `   ${ANTIVIRUS_NOTE}`,
+    '3. In Sender, paste the key when it asks for your license.',
+    '',
+    createdAccount
+      ? `Your key is also saved to a Trovarcis account for this email. To sign in, set a password here: ${accountUrl}`
+      : `Your key is also on your account page: ${accountUrl}`,
+    `Your order: ${orderUrl}`,
+    '',
+    'Questions? Reply to this email.',
+    '',
+    '-- Trovarcis',
+    base,
+  ].join('\n');
+
+  return send({
+    to,
+    subject: 'Your Trovarcis Sender license key',
+    html: licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl, createdAccount }),
+    text,
+    redact: [licenseKey],
+  });
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl, createdAccount }) {
+  const label = "font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-weight:600;font-size:11px;letter-spacing:0.08em;color:#A1A1AA;text-transform:uppercase;";
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Trovarcis Sender license key</title>
+</head>
+<body style="margin:0;padding:0;background:#09090B;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#FAFAFA;-webkit-font-smoothing:antialiased;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#09090B;">
+  <tr>
+    <td align="center" style="padding:48px 24px;">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#131316;border:1px solid #27272A;border-radius:16px;">
+        <tr>
+          <td style="padding:40px 40px 8px 40px;">
+            <div style="font-family:'Anybody',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.02em;color:#FAFAFA;">
+              Trovar<span style="color:#D4A843;">cis</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 40px 0 40px;">
+            <h1 style="margin:0;font-family:'Anybody',sans-serif;font-weight:700;font-size:24px;line-height:1.2;letter-spacing:-0.02em;color:#FAFAFA;">
+              Your Sender license
+            </h1>
+            <p style="margin:8px 0 0 0;font-size:15px;line-height:1.6;color:#A1A1AA;">
+              Thanks for buying Trovarcis Sender. Paste this key into Sender when it asks for your license.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 40px 0 40px;">
+            <div style="background:#09090B;border:1px solid rgba(212,168,67,0.25);border-radius:10px;padding:18px;">
+              <div style="${label}">License key</div>
+              <div style="margin-top:8px;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:13px;line-height:1.6;color:#D4A843;word-break:break-all;">${escapeHtml(licenseKey)}</div>
+              <div style="margin-top:10px;font-size:13px;line-height:1.5;color:#A1A1AA;">License ${shortId}. Use it on up to 3 computers.</div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 40px 8px 40px;">
+            <a href="${downloadUrl}" style="display:inline-block;background:#D4A843;color:#09090B;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;text-decoration:none;padding:14px 32px;border-radius:10px;">
+              Download for Windows
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 40px 0 40px;">
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#A1A1AA;">${SMARTSCREEN_NOTE}</p>
+            <p style="margin:8px 0 0 0;font-size:13px;line-height:1.6;color:#A1A1AA;">${ANTIVIRUS_NOTE}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 40px 40px 40px;">
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#A1A1AA;">
+              ${createdAccount
+                ? `Your key is also saved to a Trovarcis account for this email. <a href="${accountUrl}" style="color:#FAFAFA;">Set a password</a> to sign in.`
+                : `Your key is also on <a href="${accountUrl}" style="color:#FAFAFA;">your account page</a>.`}
+              <a href="${orderUrl}" style="color:#FAFAFA;">View your order</a>. Questions? Reply to this email.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <div style="margin-top:24px;font-size:12px;color:#A1A1AA;">
+        Trovarcis &middot; <a href="https://trovarci.sh" style="color:#A1A1AA;text-decoration:underline;">trovarci.sh</a>
       </div>
     </td>
   </tr>

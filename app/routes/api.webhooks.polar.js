@@ -1,10 +1,11 @@
-// POST /api/webhooks/polar - grants Credits when Polar reports an order paid. Replays are safe: completePayment is idempotent.
+// POST /api/webhooks/polar - grants Credits, or issues a Sender license, when Polar reports an order paid. Replays are safe.
 
 import { verifyPolarWebhook } from '~/lib/polar.server';
 import { completePayment, markPaymentTerminal, getPaymentById, resizeCustomPayment } from '~/lib/payments.server';
 import { getPackage } from '~/utils/paymentsConfig.server';
 import { recordEventSync } from '~/utils/analytics.server';
-import { sendPaymentReceiptEmail } from '~/utils/email.server';
+import { sendPaymentReceiptEmail, sendLicenseKeyEmail } from '~/utils/email.server';
+import { applyPolarOrderPaid, applyPolarCheckoutClosed, applyPolarRefund, deliverLicenseKey } from '~/lib/licenseOrders.server';
 
 // Polar retries any non-2xx and disables the endpoint after 10 straight failures,
 // so only a bad signature or a transient error returns one.
@@ -30,6 +31,27 @@ async function findPayment(paymentId) {
   if (typeof paymentId !== 'string' || !UUID_RE.test(paymentId)) return null;
   const payment = await getPaymentById(paymentId);
   return payment && payment.gateway === 'polar' ? payment : null;
+}
+
+const isLicense = (data) => Boolean(data?.metadata?.license_order_id);
+
+// Sender license orders. Issues only here, inside applyPolarOrderPaid's transaction.
+async function handleLicenseEvent(event, data) {
+  if (event.type === 'order.paid') {
+    if (data.status !== 'paid' && data.paid !== true) return accepted('not_paid');
+    const result = await applyPolarOrderPaid(data);
+    if (!result.handled) return accepted('unknown_license_order');
+    if (result.issued) await deliverLicenseKey(result.orderId, sendLicenseKeyEmail);
+    return accepted(`license_${result.outcome}`);
+  }
+  if (event.type === 'order.refunded') {
+    const result = await applyPolarRefund(data);
+    return accepted(result.handled ? `license_${result.outcome}` : 'unknown_license_order');
+  }
+  const status = event.type === 'checkout.expired' ? 'expired' : data.status;
+  if (status !== 'expired' && status !== 'failed') return accepted('checkout_open');
+  const result = await applyPolarCheckoutClosed(data, status);
+  return accepted(result.handled ? `license_${result.outcome}` : 'unknown_license_order');
 }
 
 async function handleOrderPaid(event, order) {
@@ -148,6 +170,7 @@ export async function action({ request }) {
   if (!event?.type || !data) return accepted('missing_fields');
 
   try {
+    if (isLicense(data)) return await handleLicenseEvent(event, data);
     if (event.type === 'order.paid') return await handleOrderPaid(event, data);
     if (event.type === 'checkout.updated' || event.type === 'checkout.expired') return await handleCheckoutClosed(event, data);
     if (event.type === 'order.refunded') {

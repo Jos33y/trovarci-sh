@@ -12,7 +12,7 @@ import {
 import { TrovarcisReachLogo } from '~/components/shared/Logo';
 import { requireGuest } from '~/utils/session.server';
 import { peekResetToken, consumeResetToken } from '~/utils/passwordReset.server';
-import { updatePassword } from '~/utils/auth.server';
+import { updatePassword, markEmailVerified } from '~/utils/auth.server';
 import { revokeAllUserSessions } from '~/utils/session.server';
 import { validatePassword } from '~/utils/validation.server';
 import { safeFormData } from '~/utils/formData';
@@ -72,6 +72,8 @@ export async function action({ request }) {
 
   /* Apply new password, then revoke all sessions so any stolen device gets kicked out. */
   await updatePassword(result.userId, passwordResult.value);
+  // The reset link arrived at this address, which proves it, so a buyer's account opened this way is verified.
+  await markEmailVerified(result.userId);
   await revokeAllUserSessions(result.userId);
 
   /* Security notification email - failure is non-fatal, never block account recovery on email service issues. */

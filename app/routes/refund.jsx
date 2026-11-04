@@ -6,7 +6,7 @@ import styles from '~/styles/modules/routes/legal.module.css';
 
 export const meta = () => getSeo({
   title: 'Refund Policy',
-  description: 'Refunds for Trovarcis Reach licenses, Credits, Trovarcis Mail balances and domain registrations.',
+  description: 'Refunds for Trovarcis Sender licenses, Credits, Trovarcis Mail balances and domain registrations.',
   path: '/refund',
 });
 
@@ -55,16 +55,15 @@ export default function Refund() {
 
             <h2 id="software-refunds">Software license refunds</h2>
             <p>
-              All Trovarcis Reach license purchases (Email Pro, SMS Pro, Bundle)
-              come with a <strong>15-day money-back guarantee</strong> from the
+              Trovarcis Sender licenses come with a <strong>15-day money-back guarantee</strong> from the
               date of purchase.
             </p>
             <ul>
               <li>If you are not satisfied with the software for any reason, you may request a full refund within 15 days of purchase.</li>
               <li>No questions asked. You do not need to give a reason.</li>
               <li>Refunds go back to the original payment method.</li>
-              <li>On refund, your activation code is deactivated and the software reverts to the Free tier.</li>
-              <li>Any bonus Credits included with your license are removed from your balance.</li>
+              <li>On refund, your license key is revoked and Sender stops working on every computer it was activated on.</li>
+              <li>For card payments, any sales tax Polar charged is refunded with the price.</li>
             </ul>
 
             <h3>Early bird and promotional pricing</h3>
@@ -119,8 +118,8 @@ export default function Refund() {
             </p>
             <ul>
               <li>The email address on your account.</li>
-              <li>Your activation code, order reference or transaction ID.</li>
-              <li>Which product the refund is for: Reach license, Credits, Trovarcis Mail or a domain.</li>
+              <li>Your license id, order reference or transaction ID.</li>
+              <li>Which product the refund is for: Sender license, Credits, Trovarcis Mail or a domain.</li>
             </ul>
 
             <h2 id="processing">Processing time</h2>

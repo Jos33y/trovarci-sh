@@ -19,7 +19,7 @@ const STATIC_URLS = [
     '/records',
     '/blog',
     '/about/joseph-lagbalu',
-    '/download',
+    '/sender',
     '/credits',
     '/contact',
     '/privacy',

@@ -78,7 +78,7 @@ async function cryptomusPost(path, payload) {
  *   expiredAt: number,    // Unix timestamp
  * }>}
  */
-export async function createInvoice({ orderId, amountUsd, customerEmail }) {
+export async function createInvoice({ orderId, amountUsd, customerEmail, returnUrl = null, lifetimeSec = null, allowTopUp = false, refresh = false }) {
   const publicUrl = getPublicUrl();
 
   // Both url_return (manual "back to merchant") and url_success (auto on
@@ -86,7 +86,7 @@ export async function createInvoice({ orderId, amountUsd, customerEmail }) {
   // pending route's loader inspects the payment row and forwards to the
   // receipt on confirmed, the credits page on failed/expired, or renders
   // the spinner while still awaiting.
-  const pendingUrl = `${publicUrl}/credits/pending/${orderId}`;
+  const pendingUrl = returnUrl || `${publicUrl}/credits/pending/${orderId}`;
 
   const payload = {
     amount: String(amountUsd),
@@ -95,8 +95,11 @@ export async function createInvoice({ orderId, amountUsd, customerEmail }) {
     url_callback: `${publicUrl}/api/webhooks/cryptomus`,
     url_return:   pendingUrl,
     url_success:  pendingUrl,
-    lifetime: CRYPTOMUS_INVOICE_LIFETIME_SEC,
-    is_payment_multiple: false,
+    lifetime: lifetimeSec || CRYPTOMUS_INVOICE_LIFETIME_SEC,
+    // allowTopUp lets a buyer who sent too little pay the rest on the same invoice
+    // (status wrong_amount_waiting); refresh renews an expired invoice under the same order_id.
+    is_payment_multiple: allowTopUp,
+    ...(refresh ? { is_refresh: true } : {}),
     ...(customerEmail ? { additional_data: JSON.stringify({ customer_email: customerEmail }) } : {}),
   };
 
@@ -147,8 +150,10 @@ export function mapCryptomusStatus(status, isFinal) {
       return 'confirmed';
     case 'fail':
     case 'system_fail':
-    case 'cancel':
       return 'failed';
+    case 'cancel':
+      // "Payment cancelled, the client did not pay": the invoice ran out its lifetime.
+      return 'expired';
     case 'wrong_amount':
       // Underpayment on an invoice that does not allow multiple payments.
       // Treat as failed - customer did not complete.

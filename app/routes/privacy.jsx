@@ -55,14 +55,14 @@ export default function Privacy() {
             <h2 id="who-we-are">Who we are</h2>
             <p>
               Trovarcis, operated by Remvolabs (&quot;Trovarcis&quot;, &quot;we&quot;,
-              &quot;us&quot;), runs trovarci.sh, the Trovarcis Reach desktop app,
+              &quot;us&quot;), runs trovarci.sh, the Trovarcis Sender desktop app,
               Trovarcis Mail and our domain registration service. This policy
               explains what data each of them handles and why.
             </p>
             <p>
               Our products work very differently, so they handle data very
-              differently. <strong>Trovarcis Reach</strong> keeps your campaigns,
-              contacts and sending credentials on your own device.{' '}
+              differently. <strong>Trovarcis Sender</strong> keeps your campaigns,
+              lists and sending credentials on your own computer.{' '}
               <strong>Trovarcis Mail</strong> is hosted email, so it has to
               store your mailboxes on our servers. Each is described separately
               below.
@@ -97,16 +97,22 @@ export default function Privacy() {
               or phone numbers themselves.
             </p>
 
-            <h3>Desktop app</h3>
+            <h3>Trovarcis Sender, the desktop app</h3>
             <p>
-              The Trovarcis Reach desktop app (Windows, macOS, Linux) stores all
-              its data locally on your device:
+              Your lists and your SMTP credentials are stored locally. Trovarcis
+              never sees them.
+            </p>
+            <p>
+              Trovarcis Sender talks to your SMTP servers, a license check (your
+              license key, a device id and the app version), and an update check
+              that sends nothing about you. Only when you choose: support messages
+              you write in Message us, and a message&apos;s remote images when you
+              click Show remote images in a preview.
             </p>
             <ul>
-              <li>Contacts, campaigns, templates and settings are stored in a local SQLite database on your device.</li>
-              <li>SMTP credentials are encrypted using your operating system&apos;s secure storage.</li>
-              <li>The app connects to trovarci.sh only for license activation, update checks and Credit-based features. These requests contain the minimum data required.</li>
-              <li>Emails are sent directly from your device to your SMTP provider. They do not pass through our servers.</li>
+              <li>Mail goes straight from your computer to your own SMTP provider. Trovarcis is not on that path.</li>
+              <li>SMTP passwords are encrypted with your operating system&apos;s secure storage.</li>
+              <li>Uninstalling keeps your lists, accounts and license on your computer, so a reinstall picks up where you left off.</li>
             </ul>
 
             <h2 id="mail">Trovarcis Mail</h2>
@@ -185,6 +191,11 @@ export default function Privacy() {
                   <td>Bachs</td>
                   <td>Card and bank payments</td>
                   <td>Payment details and email address (handled by Bachs, not us)</td>
+                </tr>
+                <tr>
+                  <td>Polar</td>
+                  <td>Card payments, as merchant of record (Polar charges and pays any sales tax)</td>
+                  <td>Email address, country and IP address for tax, and the product bought (card details are handled by Polar, not us)</td>
                 </tr>
                 <tr>
                   <td>Cryptomus</td>
