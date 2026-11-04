@@ -150,7 +150,6 @@ export default function ForgotPasswordPage() {
                   name="email"
                   className={styles.input}
                   type="email"
-                  placeholder="you@company.com"
                   autoComplete="email"
                   required
                   autoFocus

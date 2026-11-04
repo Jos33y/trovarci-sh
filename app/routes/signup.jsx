@@ -237,7 +237,6 @@ export default function SignupPage() {
                   name="email"
                   className={styles.input}
                   type="email"
-                  placeholder="you@company.com"
                   autoComplete="email"
                   required
                   aria-invalid={errors.email ? true : undefined}
