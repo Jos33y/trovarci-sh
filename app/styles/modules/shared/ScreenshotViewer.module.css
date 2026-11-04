@@ -12,6 +12,13 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--trov-text);
+  margin: 0 0 6px;
+}
+
+.lead {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
   margin: 0 0 16px;
 }
 

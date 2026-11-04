@@ -953,7 +953,7 @@ function SenderPanel({ sender }) {
         <>
           <h2 className={styles.desktopHeadline}>Send bulk email from your own computer</h2>
           <p className={styles.desktopSub}>
-            ${(price.cents / 100).toFixed(0)} {price.key === 'launch' ? (until ? `launch price until ${until}` : 'launch price') : 'once'}.
+            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: price.cents % 100 ? 2 : 0 }).format(price.cents / 100)} {price.key === 'launch' ? (until ? `launch price until ${until}` : 'launch price') : 'once'}.
             Lifetime license, 3 computers.
           </p>
           <div className={styles.desktopForm}>
