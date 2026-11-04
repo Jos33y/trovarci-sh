@@ -606,3 +606,36 @@
     transform: none;
   }
 }
+
+/* Unverified accounts: one line under the header until the email is confirmed. */
+
+.verifyBar {
+  border-top: 1px solid var(--trov-border);
+  background: rgba(212, 168, 67, 0.06);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.verifyInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.verifyLink {
+  color: var(--trov-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.verifyLink:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}

@@ -361,6 +361,10 @@ export default function SignupPage() {
               </button>
             </Form>
 
+            <p className={styles.spamHint}>
+              Not in your inbox? Check spam or junk. It comes from relay.trovarci.sh.
+            </p>
+
             <div className={styles.resendRow}>
               Didn't get it?{' '}
               <resendFetcher.Form method="post" className={styles.inlineForm}>

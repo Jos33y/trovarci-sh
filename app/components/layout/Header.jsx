@@ -280,6 +280,15 @@ export default function Header() {
 
         </div>
       </nav>
+
+      {user && !user.emailVerifiedAt && location.pathname !== '/verify-email' && (
+        <div className={styles.verifyBar} role="status">
+          <div className={`container ${styles.verifyInner}`}>
+            <span>Verify your email to keep access to your account.</span>
+            <Link to="/verify-email" className={styles.verifyLink}>Verify now</Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
