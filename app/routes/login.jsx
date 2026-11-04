@@ -104,6 +104,7 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               required
+              placeholder="Your email"
             />
           </div>
 

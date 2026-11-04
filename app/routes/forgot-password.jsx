@@ -153,6 +153,7 @@ export default function ForgotPasswordPage() {
                   autoComplete="email"
                   required
                   autoFocus
+                  placeholder="Your email"
                 />
               </div>
 

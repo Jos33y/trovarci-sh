@@ -147,6 +147,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
                 aria-invalid={errors.email ? 'true' : undefined}
                 aria-describedby={errors.email ? 'buy-email-error' : 'buy-email-hint'}
                 required
+                placeholder="Your email"
               />
               {errors.email
                 ? <p id="buy-email-error" className={styles.fieldError}>{errors.email}</p>

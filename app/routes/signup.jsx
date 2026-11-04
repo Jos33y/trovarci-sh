@@ -240,6 +240,7 @@ export default function SignupPage() {
                   autoComplete="email"
                   required
                   aria-invalid={errors.email ? true : undefined}
+                  placeholder="Your email"
                 />
                 {errors.email && <p className={styles.fieldError}>{errors.email}</p>}
               </div>
