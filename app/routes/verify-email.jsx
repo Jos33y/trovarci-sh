@@ -131,17 +131,17 @@ export default function VerifyEmail() {
             </Form>
           )}
 
-          <Form method="post" className={styles.form}>
+          <Form method="post" className={`${styles.form} ${styles.changeBox}`}>
             <input type="hidden" name="intent" value="change" />
             <div className={styles.field}>
               <label htmlFor="new-email" className={styles.label}>Wrong email? Change it</label>
               <input id="new-email" name="email" type="email" inputMode="email" autoComplete="email" spellCheck="false" className={styles.input} placeholder="Your email" />
               {a.emailError && <p className={styles.fieldError} role="alert">{a.emailError}</p>}
             </div>
-            <button type="submit" className={styles.linkBtn} disabled={busy}>Change email and send code</button>
+            <button type="submit" className={styles.ghostBtn} disabled={busy}>Change email and send code</button>
           </Form>
 
-          <p className={styles.resendRow}><Link to="/dashboard" className={styles.footerLink}>Later</Link></p>
+          <p className={styles.laterRow}><Link to="/dashboard" className={styles.footerLink}>Later</Link></p>
         </div>
       </main>
       <Footer />

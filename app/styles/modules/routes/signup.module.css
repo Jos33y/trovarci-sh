@@ -573,3 +573,50 @@
   min-height: 65px;
   margin: 4px 0 8px;
 }
+
+/* /verify-email: changing the email sits apart from the main action */
+.changeBox {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--trov-border);
+}
+
+.ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--trov-text);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.ghostBtn:hover:not(:disabled) {
+  border-color: var(--trov-border-hover);
+}
+
+.ghostBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.ghostBtn:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.ghostBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.laterRow {
+  margin: 20px 0 0;
+  text-align: center;
+}
