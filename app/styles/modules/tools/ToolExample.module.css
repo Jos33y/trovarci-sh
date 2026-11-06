@@ -211,6 +211,21 @@
   color: var(--trov-text-secondary);
 }
 
+.rowCode {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--trov-bg);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--trov-accent);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .cost {
   padding: 12px 16px;
   border-top: 1px solid var(--trov-border);

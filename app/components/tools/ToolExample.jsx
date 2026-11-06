@@ -58,6 +58,7 @@ export default function ToolExample({ input, summary, stats, rows, rowsLabel, co
                       <span className={styles.rowLabel}>{r.label}</span>
                       {r.value && <span className={styles.rowValue}>{r.value}</span>}
                     </p>
+                    {r.code && <code className={styles.rowCode}>{r.code}</code>}
                     {r.note && <p className={styles.rowNote}>{r.note}</p>}
                   </div>
                 </li>

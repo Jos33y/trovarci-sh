@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import DnsGenerator from '~/components/tools/DnsGenerator';
+import ToolExample from '~/components/tools/ToolExample';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/routes/records.module.css';
@@ -17,10 +18,34 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'reference', num: '03', name: 'REFERENCE' },
   { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
+
+// The example on the page: the records for a made-up domain on Google Workspace.
+const EXAMPLE = {
+  input: 'northwind-shop.com \u00b7 Google Workspace',
+  summary: {
+    tone: 'pass',
+    title: 'Your records, ready to copy',
+    text: 'Add each one in your domain\u2019s DNS settings, often called \u201cDNS\u201d or \u201cManage DNS\u201d where you bought the domain.',
+  },
+  rows: [
+    { tone: 'pass', label: 'Allowed senders (SPF)', value: 'TXT \u00b7 @', code: 'v=spf1 include:_spf.google.com ~all', note: 'Lets Google send email for your domain.' },
+    { tone: 'pass', label: 'Email signature (DKIM)', value: 'TXT \u00b7 google._domainkey', code: 'v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0\u2026', note: 'Google creates this key in your Admin console. Paste the one it gives you.' },
+    { tone: 'pass', label: 'Fake-email protection (DMARC)', value: 'TXT \u00b7 _dmarc', code: 'v=DMARC1; p=none; rua=mailto:dmarc@northwind-shop.com', note: 'Starts in watch-only mode and sends you reports.' },
+    { tone: 'pass', label: 'Where your email arrives (MX)', value: 'MX \u00b7 @', code: 'smtp.google.com  (priority 1)', note: 'Only needed if you\u2019re moving your email to Google.' },
+  ],
+  cost: 'Free, no signup. Once they\u2019re added, the Domain Checker shows whether they work.',
+  meaningsTitle: 'Where each part goes',
+  meanings: [
+    { tone: 'info', result: 'Type', means: 'The kind of record. These are all TXT, except MX.' },
+    { tone: 'info', result: 'Name (or Host)', means: '@ means your domain itself. _dmarc means _dmarc.yourdomain.com.', todo: 'Many DNS panels add your domain for you, so type only the part shown.' },
+    { tone: 'info', result: 'Value', means: 'The record itself.', todo: 'Copy it exactly as shown.' },
+    { tone: 'warn', result: 'Already have an SPF record?', means: 'A domain can have only one, and two break both.', todo: 'Add the new service to the record you have instead of adding a second.' },
+  ],
+};
 
 const FAQ_ITEMS = [
   {
@@ -74,27 +99,6 @@ const FAQ_ITEMS = [
   {
     q: "How do I stay under the 10-lookup limit with many services?",
     a: "First remove services you no longer use. If you still need too many, split your sending across subdomains, such as news.yourdomain.com for newsletters, each with its own SPF record. “SPF flattening” replaces services with their addresses, but has to be redone whenever a provider changes them. The generator warns you as you get close to 10.",
-  },
-];
-
-const RECORD_EXPLAINERS = [
-  {
-    label: 'SPF',
-    title: 'SPF tells servers who can send for you',
-    icon: SpfIcon,
-    text: 'A TXT record that lists every IP address and service authorized to send email on behalf of your domain. If the sending server is not listed, the email fails SPF authentication.',
-  },
-  {
-    label: 'DKIM',
-    title: 'DKIM proves emails were not altered',
-    icon: DkimIcon,
-    text: 'Cryptographic signatures verify that an email was sent by an authorized server and was not modified during transit. Your provider signs messages with a private key; receivers verify with the public key in your DNS.',
-  },
-  {
-    label: 'DMARC',
-    title: 'DMARC enforces the rules',
-    icon: DmarcIcon,
-    text: 'Ties SPF and DKIM together and tells receiving servers what to do when checks fail. Without DMARC, servers make their own decisions. With DMARC, you control the policy.',
   },
 ];
 
@@ -175,7 +179,6 @@ function SectionStrip({ activeId }) {
 export default function RecordsPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const gridRef = useReveal();
   const referenceRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
@@ -185,7 +188,7 @@ export default function RecordsPage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     reference: useRef(null),
     answers: useRef(null),
   };
@@ -247,38 +250,17 @@ export default function RecordsPage() {
           </div>
         </section>
 
-        {/* Method - why authentication matters */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>Why email authentication matters</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                Every email you send is checked against your domain's DNS records before it reaches the inbox. If your domain lacks proper SPF, DKIM, and DMARC records, major providers like Gmail, Yahoo, and Microsoft will either send your emails to spam or reject them outright.
-              </p>
-              <p className={styles.methodIntro}>
-                As of February 2024, Google and Yahoo enforce strict authentication requirements for bulk senders. Domains sending more than 5,000 emails per day must have all three records configured correctly, with DMARC alignment passing.
+                Pick who sends your email and you get each record, where it goes and what to paste. Here is an example.
               </p>
             </div>
-
-            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
-              {RECORD_EXPLAINERS.map((item) => (
-                <div key={item.label} className={`${styles.explainerCard} reveal`}>
-                  <div className={styles.explainerTop}>
-                    <span className={styles.explainerIcon}>
-                      <item.icon />
-                    </span>
-                    <span className={styles.explainerLabel}>{item.label}</span>
-                  </div>
-                  <h3 className={styles.explainerTitle}>{item.title}</h3>
-                  <p className={styles.explainerText}>{item.text}</p>
-                </div>
-              ))}
-            </div>
-
-            <p className={styles.methodOutro}>
-              This generator creates SPF, DKIM, DMARC and MX records for every major email provider, plus optional BIMI and MTA-STS records for brand-led and security-conscious senders. Every record is formatted for your registrar's DNS panel with copy-ready values.
-            </p>
+            <ToolExample {...EXAMPLE} />
           </div>
         </section>
 
@@ -471,33 +453,5 @@ function ChevronIcon() {
   );
 }
 
-function SpfIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M12 3L4 7V12C4 16.4 7.4 20.5 12 21.5C16.6 20.5 20 16.4 20 12V7L12 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M8.5 12L11 14.5L15.5 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function DkimIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <circle cx="8" cy="15" r="4" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M11 12L20 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M17 3H20V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15 9L17 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function DmarcIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M6 10H18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M9 14H15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M11 18H13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
