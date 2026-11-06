@@ -468,12 +468,12 @@ export default function NumberVerifier({
   // Badge text mirrors EmailScorer's pattern - one freeBadge that adapts
   // to the auth and balance state so we never need a second pill.
   const badgeText = mode === 'bulk'
-    ? `${creditCost} CR / NUMBER`
+    ? `${creditCost} CR (${creditCost}\u00a2) / NUMBER`
     : !isAuthed
       ? `${welcomeBonus} free with signup`
       : balance !== null
-        ? `${creditCost} CR / lookup · ${balance} left`
-        : `${creditCost} CR / lookup`;
+        ? `${creditCost} CR (${creditCost}\u00a2) / lookup · ${balance} left`
+        : `${creditCost} CR (${creditCost}\u00a2) / lookup`;
 
   /*  Bulk handlers 
      Mirror EmailVerifier's bulk pattern. Phone bulk is paste-only - no

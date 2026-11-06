@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import DomainChecker from '~/components/tools/DomainChecker';
+import ToolExample from '~/components/tools/ToolExample';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/routes/domain.module.css';
@@ -17,10 +18,34 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'reference', num: '03', name: 'REFERENCE' },
   { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
+
+// The example on the page: a made-up domain with two problems and a warning.
+const EXAMPLE = {
+  input: 'northwind-shop.com',
+  summary: {
+    tone: 'fail',
+    title: '2 problems to fix, 1 warning',
+    text: 'Fix the problems first. Each result says what to do.',
+  },
+  rows: [
+    { tone: 'fail', label: 'DKIM', value: 'Not found', note: 'Your emails aren\u2019t signed. Turn on DKIM in your email provider\u2019s settings, then add the record it gives you.' },
+    { tone: 'fail', label: 'Encryption', value: 'Off', note: 'Email to your domain travels unencrypted, and some providers refuse it. Ask your host to turn on TLS.' },
+    { tone: 'warn', label: 'DMARC', value: 'p=none', note: 'Nothing stops someone from sending email pretending to be you yet. Tighten it once your own email passes.' },
+    { tone: 'pass', label: 'Blocklists', value: 'Not listed', note: 'Not on any of the 6 blocklists mail providers check.' },
+    { tone: 'pass', label: 'SPF', value: 'Found', note: 'Your record lists who may send email for your domain.' },
+    { tone: 'pass', label: 'Mail servers', value: '2 found', note: 'Email sent to your domain has somewhere to arrive.' },
+  ],
+  cost: 'Free, no signup. 25 checks in about ten seconds.',
+  meanings: [
+    { tone: 'pass', result: 'Passed', means: 'Set up correctly.', todo: 'Nothing to do.' },
+    { tone: 'warn', result: 'Warning', means: 'Works, but weaker than it should be.', todo: 'Fix it once the problems are done.' },
+    { tone: 'fail', result: 'Problem', means: 'Can send your email to spam or get it refused.', todo: 'Fix it first. The result says how.' },
+  ],
+};
 
 const FAQ_ITEMS = [
   {
@@ -62,39 +87,6 @@ const FAQ_ITEMS = [
   {
     q: 'What is a soft SPF fail vs hard fail?',
     a: 'The final mechanism in your SPF record decides what receivers do with unauthorized senders. ~all (soft fail) means unauthorized mail is accepted but marked, useful during setup. -all (hard fail) means unauthorized mail is rejected, the enforcement target after monitoring. ?all (neutral) provides no protection. +all allows any sender and should never be used.',
-  },
-];
-
-const CATEGORIES = [
-  {
-    label: 'Email Auth',
-    title: 'Authentication protects your domain from spoofing',
-    icon: ShieldIcon,
-    text: 'SPF, DKIM, DMARC, and BIMI work together to prove your emails are legitimate. Without them, anyone can send email pretending to be your domain.',
-  },
-  {
-    label: 'Mail Server',
-    title: 'Server health affects whether email can reach you',
-    icon: ServerIcon,
-    text: 'MX records tell the world where to deliver your email. SMTP connectivity, STARTTLS encryption, and reverse DNS all factor into whether other servers trust yours.',
-  },
-  {
-    label: 'Reputation',
-    title: 'Blacklists can block your email silently',
-    icon: ReputationIcon,
-    text: 'If your IP or domain appears on a blacklist, receiving servers may reject your email without telling you. We check 6 blocklists, 4 for your mail server\'s IP and 2 for your domain, including Spamhaus, Barracuda and SpamCop.',
-  },
-  {
-    label: 'Security',
-    title: 'SSL and security headers build trust',
-    icon: LockIcon,
-    text: 'A valid SSL certificate, HTTPS redirect, and security headers signal that your domain is professionally managed. This indirectly affects how email providers evaluate your trustworthiness.',
-  },
-  {
-    label: 'DNS Config',
-    title: 'DNS is the foundation everything else runs on',
-    icon: DnsIcon,
-    text: 'Nameserver redundancy, SOA configuration, DNSSEC, and CAA records form the infrastructure that supports all other checks. Weak DNS makes everything else unreliable.',
   },
 ];
 
@@ -171,7 +163,6 @@ function SectionStrip({ activeId }) {
 export default function DomainPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const gridRef = useReveal();
   const referenceRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
@@ -181,7 +172,7 @@ export default function DomainPage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     reference: useRef(null),
     answers: useRef(null),
   };
@@ -243,38 +234,17 @@ export default function DomainPage() {
           </div>
         </section>
 
-        {/* Method - what we check and why */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>What we check and why it matters</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                Your domain's email deliverability depends on more than just content. Authentication records, server configuration, blacklist status, and security setup all affect whether your emails reach the inbox or get silently dropped.
-              </p>
-              <p className={styles.methodIntro}>
-                This tool runs 25+ checks across five categories in seconds. Every result includes a plain-language explanation, not just a status code, so you know exactly what's wrong and how to fix it.
+                Every check gets a plain result and, when something is wrong, the fix. Here is an example domain.
               </p>
             </div>
-
-            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
-              {CATEGORIES.map((item) => (
-                <div key={item.label} className={`${styles.explainerCard} reveal`}>
-                  <div className={styles.explainerTop}>
-                    <span className={styles.explainerIcon}>
-                      <item.icon />
-                    </span>
-                    <span className={styles.explainerLabel}>{item.label}</span>
-                  </div>
-                  <h3 className={styles.explainerTitle}>{item.title}</h3>
-                  <p className={styles.explainerText}>{item.text}</p>
-                </div>
-              ))}
-            </div>
-
-            <p className={styles.methodOutro}>
-              Issues found link directly to the tool that fixes them. Missing DMARC? The <Link to="/records" className={styles.inlineLink}>DNS Generator</Link> creates the record. Blacklisted IP? We link to the removal page. Every result is actionable.
-            </p>
+            <ToolExample {...EXAMPLE} />
           </div>
         </section>
 
@@ -439,50 +409,7 @@ function ChevronIcon() {
   );
 }
 
-function ShieldIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M12 3L4 7v5c0 4.5 3.4 8.7 8 10 4.6-1.3 8-5.5 8-10V7l-8-4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function ServerIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="4" width="18" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="13" width="18" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="7" cy="7.5" r="1" fill="currentColor" />
-      <circle cx="7" cy="16.5" r="1" fill="currentColor" />
-      <path d="M11 7.5h6M11 16.5h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function ReputationIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function LockIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="12" cy="16" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
 
-function DnsIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3 12h18M12 3c-2.5 2.5-4 5.5-4 9s1.5 6.5 4 9c2.5-2.5 4-5.5 4-9s-1.5-6.5-4-9z" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}

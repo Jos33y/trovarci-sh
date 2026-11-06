@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import SmtpTester from '~/components/tools/SmtpTester';
+import ToolExample from '~/components/tools/ToolExample';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import styles from '~/styles/modules/routes/smtp-test.module.css';
@@ -17,17 +18,9 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'issues', num: '03', name: 'ISSUES' },
   { id: 'answers', num: '04', name: 'ANSWERS' },
-];
-
-const EXPLAINER_CARDS = [
-  { icon: PlugIcon, label: 'Step 1-2', title: 'TCP + Banner', desc: 'Connects to the server and waits for the 220 greeting. If this fails, the server is unreachable or the port is blocked.' },
-  { icon: ServerIcon, label: 'Step 3', title: 'EHLO Handshake', desc: 'Identifies our client to the server and discovers its capabilities: max message size, supported extensions, and TLS availability.' },
-  { icon: LockIcon, label: 'Step 4', title: 'STARTTLS / TLS', desc: 'Upgrades the connection to encrypted TLS. Without this, credentials and emails travel in plain text over the network.' },
-  { icon: KeyIcon, label: 'Step 5', title: 'Authentication', desc: 'Tests your username and password. The most common failure point. Gmail requires App Passwords, not your regular login.' },
-  { icon: MailCheckIcon, label: 'Step 6-8', title: 'Sender + Recipient + Close', desc: 'Verifies the server accepts your FROM address and a test recipient, then disconnects cleanly. No email is actually sent.' },
 ];
 
 const PORTS = [
@@ -98,6 +91,29 @@ const COMMON_ISSUES = [
   { code: 'Certificate error', title: 'TLS certificate expired or invalid', fix: 'Renew the server certificate. Self-signed certificates trigger this on clients that verify the chain. Use a certificate from a trusted authority.' },
 ];
 
+// The example on the page: Gmail settings with the normal password instead of an app password.
+const EXAMPLE = {
+  input: 'smtp.gmail.com \u00b7 port 587',
+  summary: {
+    tone: 'fail',
+    title: 'Connected, but the login failed',
+    text: 'The server and port are right. The password is the problem.',
+  },
+  rows: [
+    { tone: 'pass', label: 'Server found', value: 'smtp.gmail.com', note: 'The address points to a working mail server.' },
+    { tone: 'pass', label: 'Connected', value: 'Port 587', note: 'The port is open and the server answered.' },
+    { tone: 'pass', label: 'Encryption', value: 'STARTTLS', note: 'The connection was encrypted before your password was sent.' },
+    { tone: 'fail', label: 'Login', value: '535', note: '\u201cUsername and Password not accepted.\u201d Gmail needs an app password here, not your normal one.' },
+  ],
+  cost: 'Free, no signup.',
+  meanings: [
+    { tone: 'pass', result: 'Connected and logged in', means: 'Your settings work.', todo: 'Use them in your email app or sending software.' },
+    { tone: 'fail', result: 'Can\u2019t connect', means: 'The server name or port is wrong, or a firewall blocks it.', todo: 'Check the server name, then try port 587 or 465.' },
+    { tone: 'warn', result: 'No encryption', means: 'The server didn\u2019t encrypt the connection.', todo: 'Try port 465, or ask your provider which port to use.' },
+    { tone: 'fail', result: 'Login failed', means: 'The server refused the username or password.', todo: 'Gmail and Microsoft accounts need an app password.' },
+  ],
+};
+
 const FAQ_ITEMS = [
   { q: 'How do I test my SMTP connection?', a: 'Enter your SMTP host, port, username, and password above. The tester connects to your server and walks through every step of the SMTP handshake: TCP connection, server greeting, EHLO, TLS upgrade, authentication, sender verification, and recipient acceptance. You see the actual protocol exchange with plain-language explanations at each step.' },
   { q: 'What is SMTP port 587 vs 465 vs 25?', a: 'Port 587 is the standard submission port using STARTTLS (starts plain, upgrades to encrypted). Port 465 uses implicit SSL/TLS (encrypted from the start). Port 25 is the original SMTP relay port, often blocked by ISPs and cloud providers. For most users, port 587 with STARTTLS is the right choice.' },
@@ -147,7 +163,6 @@ function SectionStrip({ activeId }) {
 export default function SmtpTestPage() {
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const methodGridRef = useReveal();
   const portsRef = useReveal();
   const codesRef = useReveal();
   const issuesRef = useReveal();
@@ -160,7 +175,7 @@ export default function SmtpTestPage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     issues: useRef(null),
     answers: useRef(null),
   };
@@ -222,35 +237,44 @@ export default function SmtpTestPage() {
           </div>
         </section>
 
-        {/* Method - how SMTP works, ports, response codes */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>How SMTP connections work</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                SMTP (Simple Mail Transfer Protocol) is the standard mail servers use to hand off messages
-                to each other. Your client speaks SMTP to your outbound server, which then speaks SMTP to the
-                recipient's inbound server. Every step below has to succeed for a message to reach the mailbox.
+                Each step of the connection gets a pass or fail, and failures come with the reason in plain words. Here is an example.
+              </p>
+            </div>
+            <ToolExample {...EXAMPLE} />
+          </div>
+        </section>
+
+        {/* Issues - common SMTP errors and fixes */}
+        <section id="issues" ref={sectionRefs.issues} className={styles.issuesSection}>
+          <div className={`container ${styles.container}`}>
+            <SectionLabel num="03" name="ISSUES" />
+            <div ref={issuesRef} className={`${styles.issuesHead} reveal`}>
+              <h2 className={styles.issuesTitle}>Common SMTP issues and fixes</h2>
+              <p className={styles.issuesIntro}>
+                Most SMTP failures fall into a handful of patterns. Here are the ones we see the most.
               </p>
             </div>
 
-            <div ref={methodGridRef} className={`${styles.explainerGrid} stagger`}>
-              {EXPLAINER_CARDS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.title} className={`${styles.explainerCard} reveal`}>
-                    <div className={styles.explainerTop}>
-                      <span className={styles.explainerIcon}>
-                        <Icon />
-                      </span>
-                      <span className={styles.explainerLabel}>{item.label}</span>
+            <div ref={issuesGridRef} className={`${styles.issuesList} stagger`}>
+              {COMMON_ISSUES.map((issue) => (
+                <div key={issue.code} className={`${styles.issueCard} reveal`}>
+                  <div className={styles.issueRail} aria-hidden="true" />
+                  <div className={styles.issueBody}>
+                    <div className={styles.issueTop}>
+                      <span className={styles.issueCode}>{issue.code}</span>
+                      <span className={styles.issueTitle}>{issue.title}</span>
                     </div>
-                    <h3 className={styles.explainerTitle}>{item.title}</h3>
-                    <p className={styles.explainerText}>{item.desc}</p>
+                    <p className={styles.issueFix}>{issue.fix}</p>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
             {/* Ports subsection */}
@@ -299,34 +323,6 @@ export default function SmtpTestPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Issues - common SMTP errors and fixes */}
-        <section id="issues" ref={sectionRefs.issues} className={styles.issuesSection}>
-          <div className={`container ${styles.container}`}>
-            <SectionLabel num="03" name="ISSUES" />
-            <div ref={issuesRef} className={`${styles.issuesHead} reveal`}>
-              <h2 className={styles.issuesTitle}>Common SMTP issues and fixes</h2>
-              <p className={styles.issuesIntro}>
-                Most SMTP failures fall into a handful of patterns. Here are the ones we see the most.
-              </p>
-            </div>
-
-            <div ref={issuesGridRef} className={`${styles.issuesList} stagger`}>
-              {COMMON_ISSUES.map((issue) => (
-                <div key={issue.code} className={`${styles.issueCard} reveal`}>
-                  <div className={styles.issueRail} aria-hidden="true" />
-                  <div className={styles.issueBody}>
-                    <div className={styles.issueTop}>
-                      <span className={styles.issueCode}>{issue.code}</span>
-                      <span className={styles.issueTitle}>{issue.title}</span>
-                    </div>
-                    <p className={styles.issueFix}>{issue.fix}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
@@ -418,50 +414,7 @@ function ChevronIcon() {
   );
 }
 
-function PlugIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2v6M8 2v6M16 2v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <rect x="6" y="8" width="12" height="6" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 14v4M9 22h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function LockIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function KeyIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <circle cx="8" cy="15" r="5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 11l8-8M16 3l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function MailCheckIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M2 7l10 7 10-7" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function ServerIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="18" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="14" width="18" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="7" cy="6.5" r="1" fill="currentColor" />
-      <circle cx="7" cy="17.5" r="1" fill="currentColor" />
-    </svg>
-  );
-}

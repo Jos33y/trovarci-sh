@@ -3,6 +3,7 @@ import { Link, useLoaderData } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import EmailScorer from '~/components/tools/EmailScorer';
+import ToolExample from '~/components/tools/ToolExample';
 import { getSeo } from '~/utils/seo';
 import useReveal from '~/utils/useReveal';
 import { getOptionalUser } from '~/utils/session.server';
@@ -29,14 +30,39 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'answers', num: '03', name: 'ANSWERS' },
 ];
+
+// The example on the page: a made-up promotional email and what the scorer says about it.
+const EXAMPLE = {
+  input: 'Subject: Last chance: 50% off ends tonight',
+  summary: {
+    tone: 'warn',
+    title: '64 out of 100: needs work',
+    text: 'Three problems found. Fix them and score it again before you send.',
+  },
+  rowsLabel: 'What it found',
+  rows: [
+    { tone: 'fail', label: 'No unsubscribe link', value: 'Rules', note: 'Gmail and Yahoo expect one in bulk email. Add a link that unsubscribes in one click.' },
+    { tone: 'warn', label: 'Subject reads like an ad', value: 'Subject', note: '\u201cLast chance\u201d plus a discount is what promotions look like. Say what\u2019s inside instead.' },
+    { tone: 'warn', label: 'Shortened link', value: 'Links', note: 'Short links like bit.ly hide where they go, and spam filters distrust them. Use the full address.' },
+    { tone: 'pass', label: 'Text and images balanced', value: 'Layout', note: 'There\u2019s enough text that the email still reads well with images turned off.' },
+  ],
+  cost: '1 credit (1\u00a2) per email scored. New accounts get 10 free.',
+  meaningsTitle: 'What the score means',
+  meanings: [
+    { tone: 'pass', result: '90 to 100: excellent', means: 'Reads like an email people want.', todo: 'Send.' },
+    { tone: 'pass', result: '70 to 89: good', means: 'Small things could be better.', todo: 'Fix what\u2019s listed if it\u2019s quick, then send.' },
+    { tone: 'warn', result: '50 to 69: needs work', means: 'Some of it looks like spam to a filter.', todo: 'Fix the problems listed and score it again.' },
+    { tone: 'fail', result: 'Below 50: poor', means: 'Likely to land in spam.', todo: 'Rewrite it before you send.' },
+  ],
+};
 
 const FAQ_ITEMS = [
   {
     q: 'How does the email spam checker work?',
-    a: 'Paste your subject and your email. Arcis, our scoring engine, reads it the way a modern spam filter does: wording in context, structure, links and the details mail providers require. You get a score from 0 to 100, the problems it found, and how to fix each one.',
+    a: 'Paste your subject and your email. It is read the way a modern spam filter reads it: wording in context, structure, links and the details mail providers require. You get a score from 0 to 100, the problems it found, and how to fix each one.',
   },
   {
     q: 'What is a good email deliverability score?',
@@ -44,7 +70,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Why do my emails go to spam even with SPF and DKIM?',
-    a: 'Authentication (SPF, DKIM, DMARC) is only half the equation. Modern spam filters also evaluate your email content, structure, link patterns, and compliance. A fully authenticated domain can still land in spam if the email content triggers Bayesian filters. This tool checks the content side.',
+    a: 'Authentication (SPF, DKIM, DMARC) is only half the equation. Modern spam filters also evaluate your email content, structure, link patterns, and compliance. A fully authenticated domain can still land in spam if the content looks like spam to a filter. This tool checks the content side.',
   },
   {
     q: 'What words trigger spam filters?',
@@ -61,39 +87,6 @@ const FAQ_ITEMS = [
   {
     q: 'Does the email scorer store my email content?',
     a: 'No. Your email is scored and then discarded. We do not store or log its content.',
-  },
-];
-
-const CATEGORIES = [
-  {
-    label: 'Subject',
-    title: 'Subject lines get judged in milliseconds',
-    icon: SubjectIcon,
-    text: 'Length, urgency signals, ALL CAPS, and deceptive patterns like fake "RE:" prefixes. Spam filters evaluate your subject line before anything else.',
-  },
-  {
-    label: 'Content',
-    title: 'Body copy is read by machines first',
-    icon: ContentIcon,
-    text: 'Spam phrase density in context, reading level, personalization, and formatting abuse. Modern filters use ML to understand tone, not just keywords.',
-  },
-  {
-    label: 'Structure',
-    title: 'HTML ratio signals professionalism',
-    icon: StructureIcon,
-    text: 'Text-to-HTML ratio, image-to-text balance, alt text on images, and responsive design hints. Image-only emails are a strong spam signal.',
-  },
-  {
-    label: 'Links',
-    title: 'Every link is a trust signal',
-    icon: LinksIcon,
-    text: 'Number of links, URL shorteners, suspicious domains, and CTA clarity. Too many links in a short email pattern-matches promotional spam.',
-  },
-  {
-    label: 'Compliance',
-    title: 'Missing requirements trigger instant filtering',
-    icon: ComplianceIcon,
-    text: 'Unsubscribe link, physical address, from name consistency, and CAN-SPAM/GDPR signals. Gmail penalizes missing unsubscribe links directly.',
   },
 ];
 
@@ -134,7 +127,6 @@ export default function ScorePage() {
   const { user, creditCost, welcomeBonus } = useLoaderData();
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const gridRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
@@ -143,7 +135,7 @@ export default function ScorePage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     answers: useRef(null),
   };
 
@@ -209,35 +201,17 @@ export default function ScorePage() {
           </div>
         </section>
 
-        {/* Method - how spam filters evaluate your email */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>How spam filters evaluate your email</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                Modern spam filters are machine learning models, not keyword lists. They evaluate dozens of signals at once. A single "spam word" rarely matters. The combination of subject patterns, content structure, link behavior, and compliance determines whether your email reaches the inbox.
+                A score out of 100, every problem found and how to fix each one. Here is an example.
               </p>
             </div>
-
-            <div ref={gridRef} className={`${styles.explainerGrid} stagger`}>
-              {CATEGORIES.map((item) => (
-                <div key={item.label} className={`${styles.explainerCard} reveal`}>
-                  <div className={styles.explainerTop}>
-                    <span className={styles.explainerIcon}>
-                      <item.icon />
-                    </span>
-                    <span className={styles.explainerLabel}>{item.label}</span>
-                  </div>
-                  <h3 className={styles.explainerTitle}>{item.title}</h3>
-                  <p className={styles.explainerText}>{item.text}</p>
-                </div>
-              ))}
-            </div>
-
-            <p className={styles.methodOutro}>
-              Infrastructure matters too. If your domain lacks SPF, DKIM, or DMARC records, even a perfect email can land in spam. Use the <Link to="/domain" className={styles.inlineLink}>Domain Checker</Link> to verify your authentication setup.
-            </p>
+            <ToolExample {...EXAMPLE} />
           </div>
         </section>
 
@@ -328,47 +302,7 @@ function ChevronIcon() {
   );
 }
 
-function SubjectIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7 9h10M7 13h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function ContentIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M4 6h16M4 10h16M4 14h12M4 18h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function StructureIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="14" width="18" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
 
-function LinksIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function ComplianceIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M9 11l3 3L22 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}

@@ -398,8 +398,8 @@ export default function EmailScorer({
             : !isAuthed
             ? `${welcomeBonus} free with signup`
             : balance !== null
-            ? `${creditCost} Credit / scan · ${balance} left`
-            : `${creditCost} Credit / scan`}
+            ? `${creditCost} credit (${creditCost}\u00a2) / scan · ${balance} left`
+            : `${creditCost} credit (${creditCost}\u00a2) / scan`}
         </span>
       </div>
 
@@ -475,7 +475,7 @@ export default function EmailScorer({
                 </span>
               </div>
               <p className={styles.authPromptBody}>
-                Scoring uses the Arcis AI engine, which costs real money to run. New accounts get {welcomeBonus} free credits - enough for {welcomeBonus} scans. No credit card required. Your input is saved while you sign up.
+                Each email scored costs 1 credit (1¢). New accounts get {welcomeBonus} free credits, enough for {welcomeBonus} scans. No card needed, and what you typed is kept while you sign up.
               </p>
               <div className={styles.authPromptActions}>
                 <Link

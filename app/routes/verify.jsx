@@ -3,6 +3,7 @@ import { useLoaderData, Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import EmailVerifier from '~/components/tools/EmailVerifier';
+import ToolExample from '~/components/tools/ToolExample';
 import { getOptionalUser } from '~/utils/session.server';
 import { getCreditBalance } from '~/lib/credits.server';
 import { CREDIT_COSTS, WELCOME_BONUS_AMOUNT } from '~/utils/creditsConfig.server';
@@ -40,43 +41,41 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'tiers', num: '03', name: 'TIERS' },
   { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
 
-const METHOD_CARDS = [
-  {
-    icon: SyntaxIcon,
-    label: 'Step 1',
-    title: 'Format and domain check',
-    text: 'Catches typos, missing endings like .com, and domains that cannot receive email, before anything else.',
+// The example list on the page. Example addresses only; the numbers add up to 1,000.
+const EXAMPLE = {
+  input: 'customers.csv \u00b7 1,000 addresses',
+  summary: {
+    tone: 'warn',
+    title: '843 safe to send, 157 to sort out first',
+    text: 'Download only the safe addresses as a new list, or every address with its result and reason.',
   },
-  {
-    icon: ProbeIcon,
-    label: 'Step 2',
-    title: 'Mailbox check',
-    text: 'We ask the address\'s own mail server whether the mailbox exists, without sending an email.',
-  },
-  {
-    icon: TagIcon,
-    label: 'Step 3',
-    title: 'Classification',
-    text: 'Every result is tagged: valid, invalid, risky, or unknown. Risky covers role addresses (admin@, info@), free providers, disposable domains, and catch-all servers.',
-  },
-  {
-    icon: RetryIcon,
-    label: 'Step 4',
-    title: 'Retries slow servers',
-    text: 'Some servers ask senders to try again later. We retry automatically after 5, 15 and 60 minutes before giving a verdict.',
-  },
-  {
-    icon: RefundIcon,
-    label: 'Step 5',
-    title: 'Auto-refund on failure',
-    text: 'If a check fails on our side, its credit goes back to your balance automatically. You only pay for clear answers.',
-  },
-];
+  stats: [
+    { label: 'Valid', value: '843', tone: 'pass' },
+    { label: 'Invalid', value: '61', tone: 'fail' },
+    { label: 'Risky', value: '74', tone: 'warn' },
+    { label: 'Unknown', value: '22', tone: 'info' },
+  ],
+  rowsLabel: 'A few of the addresses',
+  rows: [
+    { tone: 'pass', label: 'anna.lee@northwind.example', value: 'Valid', note: 'The mailbox exists. Safe to send.' },
+    { tone: 'fail', label: 'j.smiht@northwind.example', value: 'Invalid', note: 'No such mailbox. Sending to it would bounce.' },
+    { tone: 'warn', label: 'info@harbor.example', value: 'Risky, shared inbox', note: 'A shared inbox like info@ or sales@. It works, but no one person reads it.' },
+    { tone: 'warn', label: 'sam@lakeside.example', value: 'Risky, accepts all', note: 'This company\u2019s server accepts any address, so this one can\u2019t be confirmed.' },
+    { tone: 'info', label: 'mia@quietmail.example', value: 'Unknown', note: 'The server wouldn\u2019t say yes or no. Check it again later, or leave it out.' },
+  ],
+  cost: 'This list costs 1,000 credits ($10.00). If a check fails on our side, its credit comes back automatically.',
+  meanings: [
+    { tone: 'pass', result: 'Valid', means: 'The mailbox exists and accepts email.', todo: 'Send.' },
+    { tone: 'fail', result: 'Invalid', means: 'A typo, a domain that can\u2019t receive email, or a mailbox that doesn\u2019t exist.', todo: 'Remove it. Every one would bounce.' },
+    { tone: 'warn', result: 'Risky', means: 'Real, but flagged: a shared inbox, a throwaway inbox, or a server that accepts any address.', todo: 'Keep the ones you know. Drop throwaway inboxes.' },
+    { tone: 'info', result: 'Unknown', means: 'The server wouldn\u2019t give a yes or no.', todo: 'Check again later, or leave it out of this send.' },
+  ],
+};
 
 const FAQ_ITEMS = [
   {
@@ -113,7 +112,7 @@ const TIERS = [
   {
     tier: 'Single',
     title: 'Single check',
-    badge: '1 CREDIT',
+    badge: '1 CREDIT = 1\u00a2',
     desc: 'Paste one address and get a verdict in seconds, with the reason.',
     icon: MailIcon,
     checks: [
@@ -126,7 +125,7 @@ const TIERS = [
   {
     tier: 'Bulk',
     title: 'Bulk verify',
-    badge: '1 CREDIT',
+    badge: '1 CREDIT = 1\u00a2',
     desc: 'Paste or upload up to 50,000 addresses. Watch the progress live, then download every result or only the valid addresses.',
     icon: StackIcon,
     checks: [
@@ -173,7 +172,6 @@ export default function VerifyPage() {
   const { user, balance, welcomeBonus, costs } = useLoaderData();
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const methodGridRef = useReveal();
   const tiersRef = useReveal();
   const tiersGridRef = useReveal();
   const faqRef = useReveal();
@@ -184,7 +182,7 @@ export default function VerifyPage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     tiers: useRef(null),
     answers: useRef(null),
   };
@@ -246,34 +244,17 @@ export default function VerifyPage() {
           </div>
         </section>
 
-        {/* Method - how verification works */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>How email verification works</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                We do not guess. Every address goes through five steps and gets a definitive verdict or a clear classification of why we could not confirm one.
+                Every address gets a result and a reason in plain words. Here is an example list of 1,000.
               </p>
             </div>
-
-            <div ref={methodGridRef} className={`${styles.explainerGrid} stagger`}>
-              {METHOD_CARDS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.title} className={`${styles.explainerCard} reveal`}>
-                    <div className={styles.explainerTop}>
-                      <span className={styles.explainerIcon}>
-                        <Icon />
-                      </span>
-                      <span className={styles.explainerLabel}>{item.label}</span>
-                    </div>
-                    <h3 className={styles.explainerTitle}>{item.title}</h3>
-                    <p className={styles.explainerText}>{item.text}</p>
-                  </div>
-                );
-              })}
-            </div>
+            <ToolExample {...EXAMPLE} />
           </div>
         </section>
 
@@ -413,51 +394,10 @@ function CheckIcon() {
   );
 }
 
-function SyntaxIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M8 7L3 12L8 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 7L21 12L16 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14 4L10 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function ProbeIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
-function TagIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 7l5-5h7l6 6-8 8-10-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <circle cx="10" cy="7" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
 
-function RetryIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 12a9 9 0 1 0 3-6.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M3 4v5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function RefundIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function MailIcon() {
   return (

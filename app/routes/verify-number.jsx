@@ -3,6 +3,7 @@ import { useLoaderData, Link } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import NumberVerifier from '~/components/tools/NumberVerifier';
+import ToolExample from '~/components/tools/ToolExample';
 import { getOptionalUser } from '~/utils/session.server';
 import { CREDIT_COSTS, WELCOME_BONUS_AMOUNT } from '~/utils/creditsConfig.server';
 import { getSeo } from '~/utils/seo';
@@ -30,43 +31,40 @@ export const meta = () => getSeo({
 
 const SECTIONS = [
   { id: 'tool', num: '01', name: 'TOOL' },
-  { id: 'method', num: '02', name: 'METHOD' },
+  { id: 'example', num: '02', name: 'EXAMPLE' },
   { id: 'tiers', num: '03', name: 'TIERS' },
   { id: 'answers', num: '04', name: 'ANSWERS' },
 ];
 
-const METHOD_CARDS = [
-  {
-    icon: FormatIcon,
-    label: 'Step 1',
-    title: 'Format validation',
-    text: 'Checks the number is valid for its country, detects the country and estimates the line type. Free for every check, no signup.',
+// The example on the page: a made-up list of 500 numbers. The rows use numbers reserved for examples.
+const EXAMPLE = {
+  input: 'sms-list.csv \u00b7 500 numbers',
+  summary: {
+    tone: 'warn',
+    title: '412 can receive your texts',
+    text: 'The other 88 would each cost you a text and never arrive. Download the mobiles as a new list.',
   },
-  {
-    icon: NormalizeIcon,
-    label: 'Step 2',
-    title: 'E.164 normalization',
-    text: 'Removes spaces, dashes and brackets, and gives the number in the international format SMS services expect.',
-  },
-  {
-    icon: CarrierIcon,
-    label: 'Step 3',
-    title: 'Live carrier lookup',
-    text: 'Optional. Contacts the actual phone network to confirm the current carrier, verified line type (mobile vs landline vs VoIP), and whether the number can receive SMS.',
-  },
-  {
-    icon: SmsIcon,
-    label: 'Step 4',
-    title: 'SMS capability flag',
-    text: 'Landlines and most VoIP numbers cannot receive SMS but appear valid in format checks. Carrier lookup flags this so you can remove them from your SMS campaigns before sending.',
-  },
-  {
-    icon: RefundIcon,
-    label: 'Step 5',
-    title: 'Auto-refund on failure',
-    text: 'If a carrier lookup fails, its credits go back to your balance automatically. You only pay for clear answers.',
-  },
-];
+  stats: [
+    { label: 'Mobile', value: '412', tone: 'pass' },
+    { label: 'Landline', value: '51', tone: 'warn' },
+    { label: 'VoIP', value: '14', tone: 'info' },
+    { label: 'Invalid', value: '23', tone: 'fail' },
+  ],
+  rowsLabel: 'A few of the numbers',
+  rows: [
+    { tone: 'pass', label: '+44 7700 900123', value: 'Mobile \u00b7 United Kingdom', note: 'A live mobile number. It can receive texts.' },
+    { tone: 'warn', label: '+1 202 555 0143', value: 'Landline \u00b7 United States', note: 'A real number, but landlines can\u2019t receive texts. Call or email instead.' },
+    { tone: 'info', label: '+1 415 555 0199', value: 'VoIP \u00b7 United States', note: 'An internet phone number. Some receive texts, some don\u2019t. Test a few first.' },
+    { tone: 'fail', label: '+33 6 12 34 5', value: 'Invalid \u00b7 France', note: 'Too short to be a French number. Fix the typo or remove it.' },
+  ],
+  cost: 'Format check: free. Line type and carrier: 2 credits (2\u00a2) per number, so this list costs $10.00.',
+  meanings: [
+    { tone: 'pass', result: 'Mobile', means: 'A real number that can receive texts.', todo: 'Send.' },
+    { tone: 'warn', result: 'Landline', means: 'A real number that can\u2019t receive texts.', todo: 'Move it to your call or email list.' },
+    { tone: 'info', result: 'VoIP', means: 'An internet phone number. It may or may not receive texts.', todo: 'Test with a few before a big send.' },
+    { tone: 'fail', result: 'Invalid', means: 'Can\u2019t exist in that country.', todo: 'Fix it if the typo is obvious, otherwise remove it.' },
+  ],
+};
 
 const FAQ_ITEMS = [
   {
@@ -115,13 +113,13 @@ const TIERS = [
       'Valid format for country',
       'Country detection and calling code',
       'Line type estimate (mobile, landline, VoIP)',
-      'E.164 and national formatting',
+      'International and local format',
     ],
   },
   {
     tier: 'Credits',
     title: 'Live carrier lookup',
-    badge: '2 CREDITS',
+    badge: '2 CREDITS = 2\u00a2',
     badgeVariant: 'paid',
     desc: 'Real-time lookup via the carrier network. Confirms actual carrier, verified line type, and SMS capability. Tells you whether a number can receive your message before you spend money sending it.',
     icon: PhoneIcon,
@@ -183,7 +181,6 @@ export default function VerifyNumberPage() {
   const { user, creditCost, welcomeBonus } = useLoaderData();
   const toolRef = useReveal();
   const methodRef = useReveal();
-  const methodGridRef = useReveal();
   const tiersRef = useReveal();
   const tiersGridRef = useReveal();
   const faqRef = useReveal();
@@ -194,7 +191,7 @@ export default function VerifyNumberPage() {
 
   const sectionRefs = {
     tool: useRef(null),
-    method: useRef(null),
+    example: useRef(null),
     tiers: useRef(null),
     answers: useRef(null),
   };
@@ -261,34 +258,17 @@ export default function VerifyNumberPage() {
           </div>
         </section>
 
-        {/* Method - how verification works */}
-        <section id="method" ref={sectionRefs.method} className={styles.methodSection}>
+        {/* Example - what a result looks like */}
+        <section id="example" ref={sectionRefs.example} className={styles.methodSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="02" name="METHOD" />
+            <SectionLabel num="02" name="EXAMPLE" />
             <div ref={methodRef} className={`${styles.methodHead} reveal`}>
-              <h2 className={styles.methodTitle}>How phone verification works</h2>
+              <h2 className={styles.methodTitle}>What you get back</h2>
               <p className={styles.methodIntro}>
-                Format check is the foundation. Carrier lookup is the upgrade when you need to spend SMS budget intelligently. Both surface the same information shape so you can trust the verdict.
+                Every number gets its country, its line type and whether it can receive a text. Here is an example list of 500.
               </p>
             </div>
-
-            <div ref={methodGridRef} className={`${styles.explainerGrid} stagger`}>
-              {METHOD_CARDS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.title} className={`${styles.explainerCard} reveal`}>
-                    <div className={styles.explainerTop}>
-                      <span className={styles.explainerIcon}>
-                        <Icon />
-                      </span>
-                      <span className={styles.explainerLabel}>{item.label}</span>
-                    </div>
-                    <h3 className={styles.explainerTitle}>{item.title}</h3>
-                    <p className={styles.explainerText}>{item.text}</p>
-                  </div>
-                );
-              })}
-            </div>
+            <ToolExample {...EXAMPLE} />
           </div>
         </section>
 
@@ -429,54 +409,10 @@ function CheckIcon() {
   );
 }
 
-function FormatIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
-function NormalizeIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="6" cy="6" r="2" fill="currentColor" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
-      <circle cx="18" cy="18" r="2" fill="currentColor" />
-    </svg>
-  );
-}
 
-function CarrierIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M5 12a7 7 0 0114 0M8 12a4 4 0 018 0M11 12a1 1 0 012 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="12" cy="20" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
 
-function SmsIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-5 4V5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <circle cx="9" cy="10" r="1" fill="currentColor" />
-      <circle cx="13" cy="10" r="1" fill="currentColor" />
-      <circle cx="17" cy="10" r="1" fill="currentColor" />
-    </svg>
-  );
-}
 
-function RefundIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <path d="M3 12a9 9 0 1 0 3-6.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M3 4v5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function ShieldCheckIcon() {
   return (

@@ -645,7 +645,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
           </div>
         </div>
         <span className={styles.freeBadge}>
-          {creditCost === 1 ? '1 CREDIT' : `${creditCost} CREDITS`}
+          {creditCost === 1 ? '1 CREDIT = 1\u00a2' : `${creditCost} CREDITS = ${creditCost}\u00a2`}
         </span>
       </div>
 
