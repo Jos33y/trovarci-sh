@@ -18,6 +18,8 @@ That spread exists because the four dominant pricing models in email are not var
 
 *Figures below verified August 2026. Vendor pricing changes often, so confirm before buying.*
 
+To run the numbers for your own list, use the [bulk email cost calculator](/bulk-email-cost-calculator).
+
 ## The four models
 
 **Per contact.** You pay for the size of your list, not for what you send. Mailchimp, ActiveCampaign, MailerLite, Klaviyo, Constant Contact. Send once a month or twenty times, the bill is identical. Add a contact who never opens anything and the bill goes up.

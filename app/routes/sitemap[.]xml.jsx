@@ -17,6 +17,7 @@ const STATIC_URLS = [
     '/verify-number',
     '/smtp-test',
     '/records',
+    '/bulk-email-cost-calculator',
     '/blog',
     '/about/trovarcis-team',
     '/sender',

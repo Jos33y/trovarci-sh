@@ -44,6 +44,7 @@ const COLUMNS = [
       { label: "SendBlaster alternatives", href: "/blog/sendblaster-alternatives" },
       { label: "MaxBulk Mailer alternatives", href: "/blog/maxbulk-mailer-alternatives" },
       { label: "Atomic Mail Sender alternatives", href: "/blog/atomic-mail-sender-alternatives" },
+      { label: "Bulk email cost calculator", href: "/bulk-email-cost-calculator" },
     ],
   },
   {
