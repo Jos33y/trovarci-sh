@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import Button from '~/components/shared/Button';
+import HeroNetwork from '~/components/landing/HeroNetwork';
 import { LockIcon } from '~/components/icons';
 import { STORAGE_LINE, SENDER_REFUND_LINE } from '~/utils/senderCopy';
 import styles from '~/styles/modules/landing/Hero.module.css';
@@ -15,6 +16,7 @@ export default function Hero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.heroGrid} aria-hidden="true" />
+      <HeroNetwork />
 
       <div className={`container ${styles.inner}`}>
         <div className={styles.content}>
@@ -52,7 +54,7 @@ export default function Hero() {
               className={styles.shot}
               src="/images/sender/sender-report-1600.webp"
               srcSet="/images/sender/sender-report-800.webp 800w, /images/sender/sender-report-1600.webp 1600w"
-              sizes="(min-width: 1200px) 960px, calc(100vw - 32px)"
+              sizes="(min-width: 1024px) 880px, calc(100vw - 32px)"
               width="1600"
               height="1179"
               alt="Trovarcis Sender sending a campaign: the campaign clock at 39%, 3,180 sent, and three SMTP accounts each sending within its own daily limit."
