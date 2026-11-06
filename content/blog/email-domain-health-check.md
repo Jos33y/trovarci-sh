@@ -1,168 +1,95 @@
 ---
-title: "Email domain health check: the 25 tests that matter and what each failure means"
+title: "Email domain health check: what each result means and how to fix it"
 slug: "email-domain-health-check"
-description: "What an email domain health check actually tests, what each failure costs you in inbox placement, and how to run the full audit on your own domain in under a minute."
+description: "Ran an email domain health check and got red marks? What each result means in plain words, which ones to fix first, and the exact fix for each."
 date: "2026-08-24"
+updated: "2026-11-06"
 author: "trovarcis-team"
 category: "Email Deliverability"
-tags: ["domain-health", "deliverability", "spf", "dkim", "dmarc", "blacklists", "dns"]
-readingTime: 10
+tags: ["domain-health", "spf", "dkim", "dmarc", "blacklist", "mx-records"]
+readingTime: 5
 ---
 
-An email domain health check tests whether your domain is configured to send and receive mail that mailbox providers will accept. It covers five areas: authentication records, mail server configuration, reputation and blacklist status, transport security, and DNS setup.
+**In short:** an email domain health check tells you whether your domain is set up so mail providers trust email from it. Fix problems in this order: a blocklist listing, then missing or broken SPF, then missing DKIM, then a missing or weak DMARC. Everything else can wait. Run the free [Domain Checker](/domain), then find your result below.
 
-It answers a question most senders cannot answer about their own domain: if Gmail looked at this domain right now, would anything about it give a reason to route mail to spam.
+<nav class="picker" aria-labelledby="picker-title">
+<p class="picker-title" id="picker-title">What did your check show?</p>
+<ul>
+<li><a href="#blacklisted"><strong>Listed on a blocklist</strong><span>Fix this first.</span></a></li>
+<li><a href="#no-spf"><strong>No SPF, or an SPF error</strong><span>Including "too many DNS lookups".</span></a></li>
+<li><a href="#no-dkim"><strong>No DKIM found</strong><span>Your emails aren't signed.</span></a></li>
+<li><a href="#dmarc"><strong>No DMARC, or "p=none"</strong><span>Anyone can pretend to be you.</span></a></li>
+<li><a href="#mail-server"><strong>Mail server problems</strong><span>No MX, no encryption, reverse DNS.</span></a></li>
+<li><a href="#no-mail"><strong>My domain doesn't send email</strong><span>Still needs three records.</span></a></li>
+</ul>
+</nav>
 
-Most people run one for a specific reason. Open rates dropped. A campaign bounced at a rate that made no sense. Someone forwarded a message that landed in the recipient's junk folder. Something changed and there is no obvious cause.
+## Listed on a blocklist {#blacklisted}
 
-This is the full list of what to test, what each failure actually costs, and which failures to fix first.
+Mail providers check these lists before accepting email. A listing on Spamhaus can stop most of your mail from arriving.
 
-## The five categories, and the 25 tests inside them
+1. Stop sending from that domain or server.
+2. Find the cause: a bought or old list, a hacked email account or website, or a sudden jump in volume.
+3. Fix it, then request removal on the list's own site. Spamhaus removal is always free.
 
-### Email authentication, 9 tests
+Full walkthrough: [Is my domain blacklisted?](/blog/domain-blacklisted-check-fix)
 
-This is the layer that proves the mail came from you.
+## No SPF, or an SPF error {#no-spf}
 
-1. **SPF record present.** A valid `v=spf1` TXT record on the root domain.
-2. **SPF lookup count.** The record and everything it includes must resolve in 10 DNS lookups or fewer, per RFC 7208 section 4.6.4.
-3. **SPF policy.** The final mechanism: `-all`, `~all`, or `?all`. Each behaves differently and only one is right for your situation.
-4. **DKIM selectors.** Public keys published at common selector paths.
-5. **DKIM key size.** 1024 bits or larger.
-6. **DMARC record present.** A valid `_dmarc` TXT record.
-7. **DMARC policy.** `p=none`, `p=quarantine`, or `p=reject`.
-8. **DMARC reporting.** A `rua` address so aggregate reports have somewhere to land.
-9. **BIMI.** Optional. A `_bimi` TXT record with a valid logo URL.
+SPF is a DNS record listing which services may send email for your domain.
 
-### Mail server, 5 tests
+- **No SPF:** add one. The [DNS Generator](/records) builds it for your email provider. You need **one** SPF record only; two break both.
+- **"Too many DNS lookups" or "PermError":** your SPF record names too many services, and SPF stops working after 10 lookups. It still looks fine in your DNS panel. Remove services you no longer use. Full fix: [SPF PermError: the 10 DNS lookup limit](/blog/spf-permerror-10-dns-lookups-fix).
+- **Ends in `+all`:** that lets anyone send as you. Change it to `~all`.
 
-10. **MX records present.** The domain publishes at least one mail exchanger.
-11. **MX not a CNAME.** An MX target pointing at a CNAME is a protocol violation that some receivers reject outright.
-12. **SMTP reachable.** The primary MX answers on port 25 inside a normal timeout.
-13. **STARTTLS supported.** The server advertises STARTTLS and completes the TLS handshake.
-14. **Reverse DNS.** The PTR record resolves forward again, confirming the hostname.
+## No DKIM found {#no-dkim}
 
-### Reputation, 3 tests
+DKIM signs every email so providers can check it came from you and wasn't changed. Your email provider creates the key: turn on DKIM in its settings, then add the record it gives you to your DNS.
 
-15. **IP blacklists.** The sending IP checked against public DNSBL zones.
-16. **Domain blacklists.** The domain checked against Spamhaus DBL and SURBL.
-17. **Safe Browsing.** Whether Google flags the domain as deceptive.
+- Google Workspace: Admin console, Apps, Gmail, Authenticate email.
+- Microsoft 365: Defender portal, Email authentication settings, DKIM.
+- Other providers: search their help for "DKIM".
 
-### Security, 4 tests
+If the check says DKIM is missing but you set it up, your provider may use a selector name the checker didn't try. Send yourself an email in Gmail, choose **Show original**, and look for `DKIM: PASS`.
 
-18. **SSL certificate.** Present, valid, and not expired.
-19. **HTTPS redirect.** HTTP requests redirect to HTTPS.
-20. **HSTS header.** Strict-Transport-Security present.
-21. **CAA records.** Restricting which certificate authorities can issue for the domain.
+## No DMARC, or "p=none" {#dmarc}
 
-### DNS configuration, 4 tests
+DMARC tells providers what to do with email that fails SPF and DKIM, and sends you reports.
 
-22. **Nameserver redundancy.** At least two authoritative nameservers.
-23. **Nameserver diversity.** Nameservers spanning more than one network prefix.
-24. **SOA record.** Present, with sensible refresh, retry, and expire values.
-25. **DNSSEC.** DS record present and the chain of trust validates.
+- **No DMARC:** add a TXT record at `_dmarc.yourdomain.com`. Start with `v=DMARC1; p=none; rua=mailto:you@yourdomain.com`. The [DNS Generator](/records) writes it for you.
+- **"p=none":** fine while you set up, because nothing is blocked yet. That also means someone can still send email pretending to be you. Once your own email passes for a couple of weeks, change it to `p=quarantine`, then `p=reject`.
 
-Run all 25 against your own domain with the [Domain Checker](/domain). It takes about ten seconds, needs no account, and returns each result with a plain-language explanation rather than a status code. If you want to see what a real report looks like before reading further, run it now and read the rest with your own results in front of you.
+Gmail, Yahoo and Outlook require DMARC from anyone sending in bulk.
 
-## What each failure actually costs
+## Mail server problems {#mail-server}
 
-Most checkers hand you a list of red items with no sense of which one is on fire. These are the failures ranked by what they actually do to your mail.
+- **No MX record:** email sent to your domain can't be delivered. Add the MX records your email provider gives you.
+- **No STARTTLS:** email to your server travels without encryption, and some providers refuse it. Ask your host to turn on TLS.
+- **Reverse DNS missing:** the server sending your email should have a name that matches its address. If you send through Gmail, Microsoft or an email service, they handle this. If you run your own server, ask your host to set the PTR record.
 
-### Critical, fix today
+## My domain doesn't send email {#no-mail}
 
-**No SPF record.** Receiving servers cannot verify which hosts are authorized to send for your domain. Anyone can send mail claiming to be from your domain and it will not fail authentication. Gmail, Yahoo, and Microsoft all deprioritize or reject unauthenticated mail.
-
-**SPF PermError from too many DNS lookups.** Worse than having no SPF at all, because the record looks correct in a DNS panel and fails in production. It appears the moment your fifth or sixth sending service pushes the recursive count past 10. Diagnosis and three ranked fixes: [SPF PermError: the 10 DNS lookup limit and how to fix it](/blog/spf-permerror-10-dns-lookups-fix).
-
-**No MX records on a domain that receives mail.** Every message sent to your domain fails. Depending on the sender's configuration it either bounces immediately or sits in a queue for days before failing. If you publish a support address on your website and the domain has no MX, every reply to it disappears.
-
-**Domain or sending IP on a blacklist.** Spamhaus ZEN and DBL are the two that matter most, because a large share of receivers query them directly. A ZEN listing can drop delivery to near zero within hours. Full diagnosis and the delisting workflow: [Is your domain blacklisted? How to check and fix it](/blog/domain-blacklisted-check-fix).
-
-### Serious, fix this week
-
-**No DKIM signing.** Messages carry no cryptographic proof they arrived unmodified. Without DKIM, DMARC can only pass through SPF, and SPF breaks on forwarding. Any mail that passes through a mailing list or a forwarding rule fails authentication end to end.
-
-**DMARC missing or set to `p=none`.** A monitoring-only policy means spoofed mail claiming to be from your domain still gets delivered. You receive reports about it. Nothing stops it. Moving to `p=quarantine` and then `p=reject` is what converts DMARC from a dashboard into a defense.
-
-**DMARC with no `rua` address.** No reports are generated, so you have no visibility into who is sending as your domain or which of your own senders are failing alignment.
-
-**STARTTLS not supported.** Mail arrives unencrypted in transit. Modern receivers increasingly require TLS, and some refuse plaintext delivery entirely.
-
-**Missing or mismatched reverse DNS.** One of the fastest paths to rate limiting. Receivers check that the sending IP's PTR record resolves forward to the same hostname the server announced in HELO.
-
-### Worth fixing, not urgent
-
-DKIM keys under 1024 bits. Missing CAA records. No HSTS header. Single nameserver. No DNSSEC. Missing BIMI. None of these will stop mail today. All of them are signals that a domain is casually maintained, and several of them matter more in a security review than in a mailbox.
-
-## The case nobody covers: domains that send no mail
-
-Most domain health advice assumes you are trying to send. A large share of domains are not. Marketing sites, redirect domains, landing page domains, and product domains where mail is handled somewhere else entirely.
-
-These domains are the most commonly spoofed and the least often protected, because their owners reasonably assume that a domain with no mailbox has nothing to attack.
-
-The opposite is true. A domain with no SPF record and no DMARC policy is an open invitation. An attacker sends invoices as `billing@yourdomain.com`, and because nothing in DNS says that is unauthorized, the mail is delivered. Your customers receive it. Your domain takes the reputation damage. You find out when someone calls to ask why they were asked to pay to a new bank account.
-
-The fix for a domain that sends and receives no mail is three records:
+A domain that never sends email is the easiest one to fake, because nothing says it doesn't send. Add these three records and anyone pretending to be it gets blocked:
 
 ```
 yourdomain.com          TXT   v=spf1 -all
-yourdomain.com          MX    .           priority 0
-_dmarc.yourdomain.com   TXT   v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com;
+yourdomain.com          MX    .   (priority 0)
+_dmarc.yourdomain.com   TXT   v=DMARC1; p=reject;
 ```
 
-`v=spf1 -all` says no host is authorized to send for this domain. Hard fail is correct here, not the softer `~all`, because there are no legitimate senders to accidentally block. Nothing is being hedged.
+The first says no one may send as this domain, the second says it receives no email, and the third tells providers to reject anything claiming to come from it.
 
-The single `.` MX at priority 0 is a null MX record, defined in RFC 7505. It tells sending servers that this domain accepts no mail, so a message addressed to it fails immediately and clearly rather than retrying for days.
+## The rest
 
-`p=reject` instructs receivers to drop anything claiming to be from the domain, which is every message, since nothing legitimate exists.
+Results like DNSSEC, CAA, HSTS, BIMI or a single nameserver won't stop your email today. Fix them when the important ones are clear.
 
-**One trap worth knowing.** If the `rua` address sits on a different domain than the one being reported on, DMARC treats it as cross-domain reporting and the receiving domain has to authorize it. Without this record, conformant reporters silently send nothing:
+## A clean result isn't the whole story
 
-```
-yourdomain.com._report._dmarc.reportdomain.com   TXT   v=DMARC1
-```
+A clean domain gets your email trusted. Whether it lands in the inbox also depends on your list and your message:
 
-Miss it and you have a domain that looks fully configured and collects no reports. It is invisible in most checkers.
+- **Your list:** remove dead addresses with the [Email Verifier](/verify).
+- **Your message:** score it with the [Email Scorer](/score).
 
-To generate any of these for your own stack, the [DNS Record Generator](/records) outputs SPF, DKIM, DMARC, MTA-STS, and BIMI records with the syntax already correct, and counts SPF lookups in real time against the 10-lookup cap. Free, no account.
+Run the check again whenever you add or remove an email service, move your DNS, or see more bounces than usual.
 
-## What a clean domain does not tell you
-
-This is the part that catches people out, and it is worth being direct about.
-
-A domain health check verifies your infrastructure. It says the envelope is addressed correctly and the sender is who they claim to be. It says nothing about whether the message inside will land in the inbox.
-
-Three things stay invisible to any domain-level audit:
-
-**The content of the message.** Gmail's Primary-versus-Promotions classifier reads the subject line, the HTML-to-text ratio, the image density, the link count, and the header stack. A perfectly authenticated message with a 60KB HTML template, four tracked links, and a subject line carrying a percent sign lands in Promotions with every DNS record green. Full breakdown of the signals: [Why your emails hit Gmail Promotions and how to move them to Primary](/blog/gmail-promotions-tab-fix).
-
-**The quality of the list.** Bounce rate above 2% damages reputation regardless of how clean your DNS is. A list that was accurate eighteen months ago is not accurate now. Addresses churn at roughly 2% a month.
-
-**Per-recipient engagement history.** The single strongest signal in inbox placement, and entirely outside your DNS. A recipient who has never opened you gets sorted on volume alone.
-
-So the sequence that actually works is: fix the domain, then fix the message, then fix the list. Skipping the first makes the other two pointless. Stopping at the first is the most common mistake, because a green report feels like completion.
-
-Once your domain reports clean, run the specific message you are about to send through the [Email Scorer](/score). It grades content, structure, and authentication signals together and returns the two or three factors dragging placement, rather than a generic score. New accounts get 10 free credits, one score costs one credit, and no card is required to sign up. Ten free runs is enough to test a subject line variant, compare a plain-text version against your HTML, and confirm the fix before the campaign goes out.
-
-## How often to run the check
-
-Monthly for any domain you send from. Quarterly for domains you do not.
-
-More importantly, run it after any of these:
-
-- Adding a new sending service, which almost always changes SPF and often pushes the lookup count over the cap
-- Removing a sending service, which usually leaves a dead `include:` behind
-- Migrating DNS providers, where records get transcribed by hand and one selector loses a character
-- Any unexplained drop in open rates or spike in bounces
-- Any DKIM key rotation, since some providers rotate and expect you to republish
-
-Silent DKIM failure from a stale key is one of the most common causes of slow reputation decay. Nobody notices until DMARC reports show a rising failure rate, and by then the damage has been accumulating for weeks.
-
-## Where to start
-
-Three steps, in order:
-
-1. **Run the [Domain Checker](/domain) against your domain.** Ten seconds, no account. Write down anything marked critical.
-2. **Fix the critical items first.** If SPF, MX, or a blacklist listing is flagged, nothing else matters until those are clear. If you need the records generated, the [DNS Record Generator](/records) outputs them correctly for your specific stack.
-3. **Score the next message you plan to send** with the [Email Scorer](/score). A clean domain is the floor, not the finish. The message still has to survive the classifier.
-
-If your authentication setup is missing entirely rather than misconfigured, start with the setup guide instead: [How to set up SPF, DKIM, and DMARC](/blog/spf-dkim-dmarc-setup). For the full picture of what sits on top of authentication, [the complete guide to email deliverability in 2026](/blog/email-deliverability-guide-2026) covers reputation, inbox placement, and the 2026 protocol layer.
+Sending to a big list from your own accounts? [Trovarcis Sender](/sender) checks the list before sending and keeps every account inside its limits.

@@ -3,22 +3,35 @@ title: "SPF PermError: the 10 DNS lookup limit and how to fix it"
 slug: "spf-permerror-10-dns-lookups-fix"
 description: "Your SPF just broke. Every email from your domain is failing authentication. Here's why the 10-lookup cap exists, how to count yours, and three ways to fix it."
 date: "2026-07-11"
+updated: "2026-11-06"
 author: "trovarcis-team"
 category: "SMTP Guides"
 tags: ["spf", "dns", "email-authentication", "dmarc", "permerror"]
 readingTime: 10
 ---
 
+**In short:** SPF stops working when checking your record needs more than 10 DNS lookups, and every service you add with `include:` uses at least one. When that happens, SPF fails for every email you send, even though the record looks fine in your DNS panel. Fix it by removing services you no longer use. If that's not enough, send some email from a subdomain, which gets its own 10. The free [Domain Checker](/domain) tells you if your record is over the limit.
+
+<nav class="picker" aria-labelledby="picker-title">
+<p class="picker-title" id="picker-title">What do you need?</p>
+<ul>
+<li><a href="#count"><strong>How do I count my lookups?</strong><span>Why 3 includes can be 6 lookups.</span></a></li>
+<li><a href="#fix-prune"><strong>The quick fix</strong><span>Remove services you no longer use.</span></a></li>
+<li><a href="#fix-subdomain"><strong>Still over 10</strong><span>Split senders across subdomains.</span></a></li>
+<li><a href="#verify"><strong>Check that it's fixed</strong><span>Three places to look.</span></a></li>
+</ul>
+</nav>
+
 If SPF is suddenly failing with `permerror`, the root cause is almost never syntax. It's lookup budget. RFC 7208 caps SPF evaluation at 10 DNS-querying terms. Cross that cap and every email from your domain fails authentication, silently, until someone reads the DMARC reports.
 
 You're probably here because of one of these:
 
-- MXToolbox SPF check reporting "Too many DNS lookups"
+- An SPF checker, such as our [Domain Checker](/domain), reporting "Too many DNS lookups"
 - DMARC aggregate report showing `spf=permerror` on a rising share of your volume
 - `Authentication-Results: spf=permerror` in a message header you copied out of Gmail's "Show original"
 - Google Postmaster Tools showing a drop in SPF pass rate over the last week
 
-The business impact: every message from your domain fails SPF. If DMARC alignment relied on SPF, that message now also fails DMARC. If your DMARC policy is `p=quarantine` or `p=reject`, you are losing mail right now. If your policy is `p=none`, you are not losing mail yet, but you are one policy tightening away from a full outage, and Gmail already treats permerror as a heavy negative signal.
+The business impact: every message from your domain fails SPF. If DMARC alignment relied on SPF, that message now also fails DMARC. If your DMARC policy is `p=quarantine` or `p=reject`, you are losing mail right now. If your policy is `p=none`, you are not losing mail yet, but you are one policy change away from it.
 
 Fix path below. Read all three sections before touching DNS.
 
@@ -46,7 +59,7 @@ There is also a second, separate cap most articles miss. RFC 7208 section 4.6.4 
 
 **Why the limit exists.** SPF is evaluated at message receipt. A receiving mail server processing tens of thousands of messages per second cannot afford to chase an unbounded chain of DNS lookups per message. The 10-lookup cap bounds the worst case. Without it, a maliciously crafted SPF record with a chain of nested includes could force a receiving server into hundreds of DNS queries per inbound message. The cap is a DoS prevention measure that all compliant receivers enforce.
 
-## How to count the lookups in YOUR record
+## How to count the lookups in your record {#count}
 
 Look at a typical multi-sender record:
 
@@ -90,7 +103,7 @@ Free, no signup, no rate limit for individual checks. Paste your current TXT rec
 
 Three viable approaches. Try them in this order.
 
-### Fix 1: Prune (fastest, free, do this first)
+### Fix 1: Remove services you no longer use (fastest, do this first) {#fix-prune}
 
 Audit your senders. Remove includes for services you no longer use.
 
@@ -104,7 +117,7 @@ Concrete steps:
 
 Pruning often solves the problem on its own. A domain that grew from 6 to 12 includes over 3 years typically has 3 to 4 stale ones. Removing them returns you to 8 or 9. Under the cap.
 
-### Fix 2: Subdomain delegation (structural, no ongoing maintenance)
+### Fix 2: Send from subdomains (no upkeep) {#fix-subdomain}
 
 Split senders across subdomains. Each subdomain has its own SPF record and its own independent 10-lookup budget.
 
@@ -122,7 +135,7 @@ DMARC alignment continues to work because DMARC allows relaxed alignment by defa
 
 This is the fix you want if pruning got you close but not under the cap, or if your business genuinely uses that many sending services. It's structural. No ongoing maintenance beyond routing new senders to the correct subdomain.
 
-### Fix 3: SPF flattening (last resort, requires monitoring)
+### Fix 3: SPF flattening (last resort, needs monitoring) {#fix-flatten}
 
 Replace `include:` mechanisms with the resolved `ip4:` and `ip6:` ranges. IP literals don't count against the lookup cap.
 
@@ -140,7 +153,7 @@ Under the lookup cap. But now you own the maintenance.
 
 Provider IP ranges change. Google adds a new netblock. SendGrid rotates an IP range. If your flattened record goes stale, mail from the new IP fails SPF, silently, until someone reads a DMARC report or a recipient complains.
 
-Only flatten when Fix 1 and Fix 2 cannot solve the problem. If you flatten manually, set a calendar reminder every 30 days to re-flatten. If you use an automated flattening service (dmarcian, EasyDMARC, ValiMail, and similar), configure a monitoring alert that fires the moment resolved IPs drift from your published record. Silent staleness is the single most common cause of "SPF was passing yesterday and is failing today with no changes on our end" incidents.
+Only flatten when Fix 1 and Fix 2 cannot solve the problem. If you flatten manually, set a calendar reminder every 30 days to re-flatten. If you use an automated flattening service, configure a monitoring alert that fires the moment resolved IPs drift from your published record. Silent staleness is the single most common cause of "SPF was passing yesterday and is failing today with no changes on our end" incidents.
 
 ## Common mistakes to avoid
 
@@ -151,11 +164,11 @@ Four traps that produce the same symptom (permerror) with different root causes:
 - **Ignoring void lookups.** Every mechanism pointing to a domain that returns NXDOMAIN counts against the 2-void-lookup cap. This bites when a sending service shuts down and their include target stops resolving. The tool passes on lookup count but fails on void count. Check both.
 - **Flattening without a monitoring plan.** Covered in Fix 3. If you flatten, you must monitor for drift. Otherwise it's a delayed outage.
 
-## Verify the fix
+## Verify the fix {#verify}
 
 After any change to your SPF record, verify in three places:
 
-**1. Lookup count.** Re-run the [DNS Record Generator](/records) against your published record. Confirm the total is under 10 and void lookups are under 2. Both must be true. A record at 10/10 is technically compliant but has zero headroom for a provider adding one more nested include.
+**1. Lookup count.** Run your domain through the [Domain Checker](/domain), which counts the lookups in your published record. Confirm the total is under 10 and void lookups are under 2. Both must be true. A record at 10/10 is technically compliant but has zero headroom for a provider adding one more nested include.
 
 **2. Live send test.** Send a message from every sending source to a personal Gmail or Yahoo address. Open "Show Original." Look for the Authentication-Results header:
 
@@ -177,8 +190,8 @@ Run the [Domain Checker](/domain) after step 1 to verify SPF, DKIM, and DMARC al
 
 Fix path in three moves:
 
-1. Count the lookups on your current record with the [DNS Record Generator](/records). Note whether you're over on lookups, void lookups, or both.
+1. Count the lookups on your current record with the [Domain Checker](/domain). Note whether you're over on lookups, void lookups, or both.
 2. Prune first. Delegate to subdomains second. Flatten only if the first two can't get you there.
 3. Verify with a live send test and a fresh DMARC report cycle before assuming the fix stuck.
 
-If SPF is now passing but your emails are still landing in Gmail Promotions instead of Primary, authentication alone won't move them. Content, structural, and engagement signals decide Primary vs Promotions after authentication passes. Read the [Gmail Promotions tab fix guide](/blog/gmail-promotions-tab-fix) for the diagnostic and the five fixes that actually move messages back to Primary.
+If SPF is now passing but your emails are still landing in Gmail Promotions instead of Primary, authentication alone won't move them. Content, structural, and engagement signals decide Primary vs Promotions after authentication passes. See [Gmail Promotions tab: why emails go there and how to move them](/blog/gmail-promotions-tab-fix).

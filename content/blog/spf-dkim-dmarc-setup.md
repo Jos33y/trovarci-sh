@@ -3,11 +3,24 @@ title: "How to set up SPF, DKIM, and DMARC: a step-by-step guide"
 slug: "spf-dkim-dmarc-setup"
 description: "A step-by-step guide to setting up SPF, DKIM, and DMARC for your domain in 2026. Record formats for the major sending services, the alignment traps that cause silent failures, and how to verify the setup."
 date: "2026-07-12"
+updated: "2026-11-06"
 author: "trovarcis-team"
 category: "SMTP Guides"
 tags: ["spf", "dkim", "dmarc", "dns", "email-authentication", "alignment", "sender-requirements"]
 readingTime: 11
 ---
+
+**In short:** SPF, DKIM and DMARC are three DNS records that prove your email really comes from you. Add one SPF record listing the services that send your email, turn on DKIM in your email provider and paste its record into your DNS, then add a DMARC record starting with `p=none`. Gmail, Yahoo and Outlook require all three from bulk senders. The free [DNS Generator](/records) writes the records for your provider, and the [Domain Checker](/domain) confirms they work.
+
+<nav class="picker" aria-labelledby="picker-title">
+<p class="picker-title" id="picker-title">Jump to</p>
+<ul>
+<li><a href="#step-1-set-up-spf"><strong>Step 1: SPF</strong><span>Which services may send for you.</span></a></li>
+<li><a href="#step-2-set-up-dkim"><strong>Step 2: DKIM</strong><span>Signing your email.</span></a></li>
+<li><a href="#step-3-set-up-dmarc"><strong>Step 3: DMARC</strong><span>What to do when checks fail.</span></a></li>
+<li><a href="#testing-the-complete-setup"><strong>Check it works</strong><span>Test before you send.</span></a></li>
+</ul>
+</nav>
 
 Every email you send is judged before it's read. Gmail, Yahoo, and Outlook check three things: is this sender who they claim to be? Did the email arrive unmodified? What should we do if the checks fail?
 
