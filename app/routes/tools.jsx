@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLoaderData } from 'react-router';
 import { getSeo } from '~/utils/seo';
+import { currentSenderPrice } from '~/utils/senderConfig.server';
+import { formatSenderPrice } from '~/utils/senderCopy';
 import useReveal from '~/utils/useReveal';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
@@ -31,6 +33,7 @@ export const meta = () => getSeo({
 export async function loader() {
   return {
     welcomeBonus: WELCOME_BONUS_AMOUNT,
+    priceLabel: formatSenderPrice(currentSenderPrice().cents),
     costs: {
       score: CREDIT_COSTS.email_score,
       verify: CREDIT_COSTS.email_verify,
@@ -42,15 +45,15 @@ export async function loader() {
 const SECTIONS = [
   { id: 'toolkit', num: '01', name: 'TOOLKIT' },
   { id: 'workflow', num: '02', name: 'WORKFLOW' },
-  { id: 'more', num: '03', name: 'MORE POWER' },
+  { id: 'more', num: '03', name: 'SEND' },
 ];
 
-const DESKTOP_SPECS = [
-  'Multi-SMTP failover',
-  'AI email scoring',
-  'Unlimited contacts',
-  'One-time purchase',
-  'Works offline',
+const SENDER_SPECS = [
+  'Checks the list before sending',
+  'Several accounts, each inside its limits',
+  'Pauses itself if addresses are refused',
+  'Lists stay on your computer',
+  'One payment, 3 computers',
 ];
 
 // Inline section label (numbered mono). Shown on mobile + tablet, hidden on desktop where strip takes over.
@@ -460,7 +463,7 @@ function HeroDemo() {
 // Page
 
 export default function Tools() {
-  const { welcomeBonus, costs } = useLoaderData();
+  const { welcomeBonus, costs, priceLabel } = useLoaderData();
   const heroRef = useReveal();
   const gridRef = useReveal(0.02);
   const ctaRef = useReveal();
@@ -592,28 +595,28 @@ export default function Tools() {
           </div>
         </section>
 
-        {/* Bottom CTA: desktop app */}
+        {/* Bottom CTA: Trovarcis Sender */}
         <section id="more" ref={sectionRefs.more} className={styles.ctaSection}>
           <div className={`container ${styles.container}`}>
-            <SectionLabel num="03" name="MORE POWER" />
+            <SectionLabel num="03" name="SEND" />
             <div ref={ctaRef} className={`${styles.ctaCard} reveal`}>
               <div className={styles.ctaLeft}>
                 <h3 className={styles.ctaTitle}>
-                  Want more than tools?
+                  Ready to send?
                 </h3>
                 <p className={styles.ctaText}>
-                  Trovarcis Reach desktop app. One-time purchase. Works offline.
+                  Trovarcis Sender sends your campaign through your own email accounts. {priceLabel} once, no monthly fee.
                 </p>
                 <div className={styles.ctaButtons}>
-                  <a href="/#desktop" className={styles.ctaButtonPrimary}>Get early access</a>
-                  <Link to="/credits" className={styles.ctaButtonSecondary}>See pricing</Link>
+                  <Link to="/sender" className={styles.ctaButtonPrimary}>Get Sender</Link>
+                  <Link to="/sender#screens" className={styles.ctaButtonSecondary}>See every screen</Link>
                 </div>
               </div>
 
               <div className={styles.ctaRight} aria-hidden="true">
                 <div className={styles.ctaPanelLabel}>WHAT YOU GET</div>
                 <ul className={styles.ctaSpecList}>
-                  {DESKTOP_SPECS.map((spec) => (
+                  {SENDER_SPECS.map((spec) => (
                     <li key={spec} className={styles.ctaSpecItem}>
                       <span className={styles.ctaSpecMark} aria-hidden="true" />
                       <span>{spec}</span>

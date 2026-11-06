@@ -2,6 +2,8 @@ import { useLoaderData, Link, data } from 'react-router';
 import { getPost, getAdjacentPosts, getRelatedPosts } from '~/utils/markdown.server';
 import { formatDate, formatDateShort } from '~/utils/format';
 import { getSeo } from '~/utils/seo';
+import { currentSenderPrice } from '~/utils/senderConfig.server';
+import { formatSenderPrice, STORAGE_LINE } from '~/utils/senderCopy';
 import { getAuthor, authorUrl, authorSchema } from '~/utils/authors';
 import useReveal from '~/utils/useReveal';
 import Header from '~/components/layout/Header';
@@ -37,11 +39,11 @@ export function loader({ params }) {
   }
   const { prev, next } = getAdjacentPosts(params.slug);
   const related = getRelatedPosts(params.slug, 3);
-  return { post, prev, next, related };
+  return { post, prev, next, related, priceLabel: formatSenderPrice(currentSenderPrice().cents) };
 }
 
 export default function BlogPost() {
-  const { post, prev, next, related } = useLoaderData();
+  const { post, prev, next, related, priceLabel } = useLoaderData();
   const headerRef = useReveal();
   const contentRef = useReveal(0.01);
   const ctaRef = useReveal();
@@ -201,18 +203,18 @@ export default function BlogPost() {
                 <path d="M3 7l9 6 9-6M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7l2-2h14l2 2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-            <p className={styles.bottomCtaEyebrow}>Trovarcis Reach Desktop</p>
-            <h2 className={styles.bottomCtaHeading}>Bulk email from your own machine</h2>
+            <p className={styles.bottomCtaEyebrow}>Trovarcis Sender</p>
+            <h2 className={styles.bottomCtaHeading}>Send bulk email from your own computer</h2>
             <p className={styles.bottomCtaText}>
-              One-time purchase. Runs offline. Multi-SMTP failover, AI scoring, contacts that never leave your machine. Launching mid-July 2026.
+              {priceLabel} once. Sends through your own email accounts, checks the list first and keeps every account inside its limits. {STORAGE_LINE}
             </p>
             <div className={styles.bottomCtaActions}>
-              <a href="/#cta" className={styles.bottomCtaButton}>
-                Get Early Access
+              <Link to="/sender" className={styles.bottomCtaButton}>
+                Get Sender
                 <ArrowRightIcon size={14} />
-              </a>
-              <Link to="/score" className={styles.bottomCtaSecondary}>
-                Try the web tools
+              </Link>
+              <Link to="/tools" className={styles.bottomCtaSecondary}>
+                Try the free checks
               </Link>
             </div>
           </aside>
