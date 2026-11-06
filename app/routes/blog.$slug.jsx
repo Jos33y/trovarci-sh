@@ -92,7 +92,11 @@ export default function BlogPost() {
               <h1 className={styles.title}>{post.title}</h1>
 
               <div className={styles.meta}>
-                {post.date && <time dateTime={post.date}>{formatDate(post.date)}</time>}
+                {post.updated && post.updated !== post.date ? (
+                  <span>Updated <time dateTime={post.updated}>{formatDate(post.updated)}</time></span>
+                ) : (
+                  post.date && <time dateTime={post.date}>{formatDate(post.date)}</time>
+                )}
                 <span className={styles.dot} aria-hidden="true" />
                 <span>{post.readingTime} min read</span>
               </div>

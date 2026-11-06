@@ -31,6 +31,8 @@
      yours is not registered, you will get a "not allowed" response; we
      treat that as an error (not a clean result) so it surfaces honestly.
 
+   SORBS was removed: it shut down on June 5, 2024, so its zone no longer means anything.
+
    Future work:
    - Add a cache (Redis or in-memory TTL) so repeated scans of the same
      domain within a few minutes do not re-query every zone.
@@ -68,14 +70,6 @@ export const IP_BLACKLISTS = [
     type: 'specific',
     delistUrl: 'https://www.spamcop.net/bl.shtml',
     notes: 'Report-based; highly reactive to complaints.',
-  },
-  {
-    id: 'sorbs',
-    name: 'SORBS',
-    zone: 'dnsbl.sorbs.net',
-    type: 'combined',
-    delistUrl: 'http://www.sorbs.net/lookup.shtml',
-    notes: 'Aggregate of multiple SORBS sub-zones.',
   },
   {
     id: 'psbl',

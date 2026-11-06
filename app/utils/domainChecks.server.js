@@ -15,7 +15,7 @@ import {
   isLikelyDomain,
 } from './dnsLookup.server.js';
 
-import { checkIpBlacklists, checkDomainBlacklists } from './blacklistCheck.server.js';
+import { checkIpBlacklists, checkDomainBlacklists, IP_BLACKLISTS } from './blacklistCheck.server.js';
 import { probeSmtp } from './smtpProbe.server.js';
 import { probeSsl } from './sslCheck.server.js';
 import { probeHttpsRedirect, probeWebsite } from './httpProbe.server.js';
@@ -720,7 +720,7 @@ async function buildIpBlacklistCheck(mxResult) {
       name: 'IP Blacklists',
       status: 'pass',
       title: `Not listed on any of ${result.totalChecked} IP blacklists`,
-      detail: `Checked ${ip} against Spamhaus ZEN, SpamCop, SORBS, PSBL, Barracuda${result.totalErrors > 0 ? ` (${result.totalErrors} zone${result.totalErrors !== 1 ? 's' : ''} errored)` : ''}.`,
+      detail: `Checked ${ip} against ${IP_BLACKLISTS.map((z) => z.name).join(', ')}${result.totalErrors > 0 ? ` (${result.totalErrors} zone${result.totalErrors !== 1 ? 's' : ''} errored)` : ''}.`,
       issues: [],
     };
   }

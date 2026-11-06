@@ -221,3 +221,87 @@
     overflow: visible;
   }
 }
+
+/* "What do you see?" picker - plain anchor links to the answer sections, so it works
+   without JavaScript and every answer stays in the page for readers and agents. */
+
+.content :global(.picker) {
+  margin: var(--space-xl) 0 var(--space-2xl);
+  padding: var(--space-md);
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-md);
+  background: var(--trov-surface);
+}
+
+.content :global(.picker-title) {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+}
+
+.content :global(.picker ul) {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.content :global(.picker li) {
+  display: flex;
+  margin: 0;
+  list-style: none;
+}
+
+.content :global(.picker a) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-sm);
+  background: var(--trov-bg);
+  text-decoration: none;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.content :global(.picker a:hover) {
+  border-color: rgba(212, 168, 67, 0.4);
+  background: rgba(212, 168, 67, 0.04);
+}
+
+.content :global(.picker a:active) {
+  transform: scale(0.98);
+}
+
+.content :global(.picker a strong) {
+  font-size: 0.9375rem;
+  color: var(--trov-text);
+}
+
+.content :global(.picker a span) {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+@media (min-width: 640px) {
+  .content :global(.picker) {
+    padding: var(--space-lg);
+  }
+
+  .content :global(.picker ul) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content :global(.picker a:active) {
+    transform: none;
+  }
+}

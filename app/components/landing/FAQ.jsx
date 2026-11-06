@@ -37,7 +37,7 @@ function buildQuestions(priceLabel) {
     },
     {
       q: 'Do you store the data I upload to the tools?',
-      a: 'Verification results are saved to your account so you can download them again. Delete a job to remove its data. We do not sell or share your data.',
+      a: 'Bulk lists and their results are kept for 48 hours so you can download them, then deleted automatically. Single checks are not saved. No one at Trovarcis looks at your lists, and we never sell or share your data.',
     },
     {
       q: 'What payment methods do you accept?',

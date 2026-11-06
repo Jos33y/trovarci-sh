@@ -35,7 +35,7 @@ export default function Privacy() {
         <div className={`container ${styles.inner}`}>
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.title}>Privacy Policy</h1>
-            <p className={styles.updated}>Last updated: October 30, 2026</p>
+            <p className={styles.updated}>Last updated: November 6, 2026</p>
           </header>
 
           <hr className={styles.divider} />
@@ -84,7 +84,7 @@ export default function Privacy() {
               <li><strong>Email content</strong> - your subject lines, email bodies and templates are composed and stored on your device only. They are sent directly from your device to your SMTP provider. Our servers never see them.</li>
               <li><strong>Contact lists</strong> - your imported contacts, groups, tags and segments live in a local database on your device. They are never uploaded to our servers.</li>
               <li><strong>SMTP and API credentials</strong> - your SMTP passwords, API keys and provider settings are encrypted and stored locally on your device. They are never sent to or stored on our servers.</li>
-              <li><strong>Email addresses submitted for verification</strong> - processed, results delivered, then deleted. Bulk verification results are deleted automatically 48 hours after completion.</li>
+              <li><strong>Email addresses submitted for verification</strong> - processed, results delivered, then deleted. Bulk verification lists and results are deleted automatically 48 hours after the job is created.</li>
               <li><strong>Phone numbers submitted for verification</strong> - the same: processed, delivered, deleted.</li>
               <li><strong>Domains checked</strong> - DNS lookups are performed server-side but the domain you check is not logged or stored.</li>
               <li><strong>Email content scored by Arcis</strong> - sent to the Anthropic Claude API for analysis, then discarded. We do not keep the content or the scores.</li>
@@ -312,7 +312,7 @@ export default function Privacy() {
               <li><strong>Mailboxes suspended for non-payment</strong> - kept while the account is in grace or suspension. We email you before deleting anything.</li>
               <li><strong>Mail delivery and security logs</strong> - kept for 90 days.</li>
               <li><strong>Domain registrant data</strong> - kept while the domain is registered with us and as long afterwards as registry rules require.</li>
-              <li><strong>Bulk verification results</strong> - deleted 48 hours after job completion.</li>
+              <li><strong>Bulk verification lists and results</strong> - deleted 48 hours after the job is created.</li>
               <li><strong>Session data</strong> - expired sessions are purged daily.</li>
               <li><strong>Server logs</strong> - rotated every 30 days. They contain request metadata (IP, timestamp, route), not message content.</li>
             </ul>

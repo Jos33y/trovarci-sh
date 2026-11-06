@@ -1,122 +1,81 @@
 ---
-title: "Is your domain blacklisted? How to check and fix it"
+title: "Is my domain blacklisted? Checks, causes and subdomains"
 slug: "domain-blacklisted-check-fix"
-description: "Your emails might be landing in Spam because your domain or sending IP is on a blacklist. Here's how to find out, what caused it, and how to get removed."
+description: "How to check if your domain or mail server is blacklisted, what gets a whole domain listed, whether subdomains are covered, and how to get removed for free."
 date: "2026-07-12"
+updated: "2026-11-06"
 author: "trovarcis-team"
 category: "Email Deliverability"
-tags: ["blacklist", "domain-reputation", "spam", "deliverability", "postmaster-tools", "dnsbl"]
-readingTime: 8
+tags: ["blacklist", "spamhaus", "dnsbl", "deliverability", "subdomains"]
+readingTime: 5
 ---
 
-You're sending emails. Your SMTP is configured. SPF, DKIM, DMARC all pass. But your emails still land in Spam or never appear at all. The most common hidden cause: your domain or your sending IP is on a blacklist.
+A blacklist, also called a blocklist or DNSBL, is a public list that mail servers check before accepting email. There are two kinds, and they work differently. **IP blocklists** list the addresses of servers that send mail. **Domain blocklists** list domain names, wherever they appear: in the sender address or in a link inside the email.
 
-First, a distinction. This post is about actual blacklists (also called DNSBLs or blocklists) that reject or spam-fold your mail at receipt. That is a different failure mode from Gmail's Promotions tab, where your mail is technically delivered but silently routed away from the recipient's Primary inbox. If your mail is arriving in Promotions rather than Spam, delisting won't help - the fix is [content signal cleanup for Gmail's inbox placement classifier](/blog/gmail-promotions-tab-fix).
+<nav class="picker" aria-labelledby="picker-title">
+<p class="picker-title" id="picker-title">What do you need?</p>
+<ul>
+<li><a href="#check"><strong>Check if my domain is listed</strong><span>Free, in one pass, no signup.</span></a></li>
+<li><a href="#subdomains"><strong>Does a listing cover my subdomains?</strong><span>Usually yes. Here is how it works.</span></a></li>
+<li><a href="#why-listed"><strong>What gets a whole domain listed?</strong><span>What the lists say they look for.</span></a></li>
+<li><a href="#get-delisted"><strong>I'm listed. How do I get off?</strong><span>Fix the cause, then request removal.</span></a></li>
+<li><a href="#not-listed"><strong>Mail is rejected, but I'm not listed</strong><span>Where to look next.</span></a></li>
+</ul>
+</nav>
 
-If your mail is genuinely landing in Spam or getting rejected at receipt, keep reading.
+## Check if my domain is listed {#check}
 
-## What is a domain blacklist
+Paste your domain into the free [Domain Checker](/domain). In one pass it checks:
 
-A blacklist (also called a DNSBL or blocklist) is a database of IP addresses and domains that have been flagged for sending spam or malicious email. Mailbox providers like Gmail, Yahoo, and Outlook check these lists when deciding whether to accept your email.
+- **Your domain** on Spamhaus DBL and SURBL, the two main domain blocklists.
+- **Your mail server's IP address** on Spamhaus ZEN, SpamCop, PSBL and Barracuda.
 
-If your domain or sending IP appears on a major blacklist, your emails get rejected outright or sent to Spam automatically. It doesn't matter how good your content is. Authentication passing doesn't override a blacklist listing.
+It also checks SPF, DKIM, DMARC and your mail server setup, because those cause rejections too. Every listing it finds links to that list's own lookup or removal page.
 
-## How domains end up on blacklists
+To check Spamhaus by hand, use their [reputation checker](https://check.spamhaus.org/). Technical users can also run `dig yourdomain.com.dbl.spamhaus.org`: an answer starting with `127.0.1.` means listed, no answer means not listed. An answer starting with `127.255.255.` means Spamhaus refused the lookup, which happens through big public DNS services, so use the website instead.
 
-Most blacklistings happen for one of these reasons:
+If another tool tells you that you're listed on **SORBS**, ignore it. SORBS shut down on June 5, 2024, and its results no longer mean anything.
 
-- **Sending to bad addresses.** High bounce rates signal that you're not maintaining your list. A bounce rate above 2% is a red flag. Above 5% and you're actively hurting your reputation on every send.
-- **Spam complaints.** Recipients marking your emails as spam feeds back to your reputation. Google's February 2024 sender requirements set the hard cap at 0.3% - that's 3 complaints per 1,000 messages. Above that, Gmail throttles you. Sustained above 0.5% and you get delisted from Gmail's accepted sender pool. Yahoo enforces similar limits. Blacklists like Spamhaus watch aggregated complaint feeds and use them to trigger listings.
-- **Compromised sending infrastructure.** If someone gains access to your SMTP credentials and sends spam through your server, your IP gets blacklisted fast. Rotating credentials monthly and monitoring for unusual send volume catches this early.
-- **Shared IP reputation.** If you're on a shared SMTP server (SendGrid, Mailgun, Postmark on shared tier), someone else's bad behavior can affect your deliverability. You inherit the reputation of everyone on the block.
-- **Purchased email lists.** Buying lists almost guarantees blacklisting. Purchased addresses frequently include spam traps: addresses seeded specifically by anti-spam operators to catch senders using non-consented lists. Hit one trap and you're on Spamhaus within hours.
-- **Authentication failures.** Domains publishing SPF, DKIM, or DMARC that fail evaluation get flagged more aggressively than domains with no authentication at all - "trying but broken" reads as compromise or misconfiguration to blacklist operators. If your SPF is failing with `permerror` because you crossed the 10 DNS lookup cap, that alone can put your domain on watchlists. Full diagnostic: [SPF PermError: the 10 DNS lookup limit and how to fix it](/blog/spf-permerror-10-dns-lookups-fix).
+## Does a listing cover my subdomains? {#subdomains}
 
-## The major blacklists that matter
+On Spamhaus DBL, **usually yes**. Spamhaus lists domains at the main domain level, for example `example.com`, and every subdomain under it, such as `mail.example.com` or `news.example.com`, then shows as listed too.
 
-Not all blacklists carry the same weight. These are the ones that mailbox providers actually check:
+There is one exception. When a legitimate website gets hacked and abused, Spamhaus may list only the hacked hostname, so the rest of the domain keeps working.
 
-| Blacklist | Impact | Used By |
-|-----------|--------|---------|
-| Spamhaus (SBL, XBL, PBL) | Critical | Gmail, Outlook, Yahoo, most providers |
-| Barracuda (BRBL) | High | Corporate mail servers, Barracuda appliances |
-| SORBS | Medium | Some corporate filters |
-| SpamCop | Medium | Various providers |
-| CBL (Composite Blocking List) | High | Part of Spamhaus XBL |
-| UCEPROTECT (Levels 1, 2, 3) | Low to Medium | Small corporate filters |
+What this means for you:
 
-Spamhaus is by far the most impactful. If you're on Spamhaus SBL or XBL, almost nothing gets through to Gmail, Outlook, or Yahoo. Listings on smaller lists (UCEPROTECT L2/L3, some SORBS categories) cause less real-world damage because major providers don't consult them. Prioritize Spamhaus first.
+- **Sending from a subdomain does not protect your main domain.** If the main domain gets listed, the subdomain goes with it.
+- **A listed subdomain usually means the main domain is listed.** Check both, and fix the cause on whichever part of the domain was abused.
 
-## How to check if you're blacklisted
+## What gets a whole domain listed? {#why-listed}
 
-You can check manually by visiting each blacklist's lookup tool. Spamhaus has check.spamhaus.org, Barracuda has barracudacentral.org/lookups, and so on. Each takes 30 seconds, so covering the 6 major lists is 3 to 5 minutes of work.
+Spamhaus does not publish its exact criteria, and it re-checks listings all the time. What it does say is that the DBL lists domains with a poor reputation, including domains used in:
 
-The faster approach: run one aggregate check that queries multiple blacklists in a single pass. The [Domain Checker](/domain) queries Spamhaus ZEN and DBL, SpamCop, Barracuda, SORBS, PSBL and SURBL in a single pass, plus SPF, DKIM, DMARC, mail server configuration, SSL/TLS, and DNS setup. Paste a domain, wait 10 seconds, get the full report. Free, no signup.
+- spam, as the sender or as a link in the message
+- phishing pages
+- malware
+- control servers for infected computers
 
-## Monitor Gmail-specific reputation with Postmaster Tools
+A domain can be listed **without ever sending email**. If your domain appears in links inside other people's spam, or a hacked page on your site hosts phishing, that alone can get it listed. Brand new domains also start with little reputation, so they get less benefit of the doubt.
 
-Before you go hunting through generic blacklists, check whether Gmail itself has flagged you. [Google Postmaster Tools](https://postmaster.google.com) is the single most important reputation monitoring surface if any real percentage of your recipients are on Gmail (which in 2026 is roughly 30% of global email addresses).
+IP blocklists work on the sending server instead. Common causes are mail hitting spam traps (addresses that exist only to catch senders using bought or scraped lists), many spam complaints, and infected computers sending mail. If you use a shared sending service, the IP is shared with other customers, and its listing is the service's to fix.
 
-Postmaster Tools shows you:
+## I'm listed. How do I get off? {#get-delisted}
 
-- **Domain reputation** across four buckets (Bad, Low, Medium, High). Anything below High affects your inbox placement.
-- **IP reputation** for each sending IP you've used with your domain.
-- **Spam rate** measured over rolling 7-day windows. Gmail's 0.3% hard cap enforcement uses this number.
-- **Authentication pass rates** for SPF, DKIM, and DMARC broken down separately, so you can see which one is silently failing on which sender.
-- **Delivery errors** aggregated by rejection reason.
-- **Feedback loop data** on complaints - which recipients complained and which messages triggered it.
+1. **Find and fix the cause first.** Remove bought or old addresses from your list, clean any hacked pages on your website, and change your email passwords if someone may have sent mail through your account. A removal request without a fix usually ends in a new listing.
+2. **Request removal on the list's own site.** For Spamhaus, look up your domain or IP in their [reputation checker](https://check.spamhaus.org/) and follow the steps it shows. Once approved, removal is immediate, though some mail servers can take up to 24 hours to see it.
+3. **Never pay for removal.** Spamhaus says removal is always free. Anyone charging a fee to delist you is not connected to the list.
 
-Setup takes 10 minutes:
+Many listings also expire on their own once the problem stops.
 
-1. Go to postmaster.google.com and add your domain.
-2. Verify ownership via a DNS TXT record (Google gives you the exact value to publish).
-3. Wait 24 to 48 hours for the first data point to appear.
-4. Check the dashboard weekly.
+## Mail is rejected, but I'm not listed {#not-listed}
 
-If any score is red or trending down, that's your first fix regardless of what any generic blacklist says. Gmail is the largest single mailbox provider - fixing your Gmail reputation typically resolves the underlying issues that got you blacklisted elsewhere too, because the causes overlap.
+Public blocklists are only one reason mail gets refused. Gmail, Outlook and Yahoo also use their own reputation systems, which you can't look up on a public list. Read the bounce message: it usually names the reason.
 
-## How to get removed from a blacklist
+The most common causes after blocklists:
 
-Each blacklist has its own removal process:
+- **SPF, DKIM or DMARC fails.** The [Domain Checker](/domain) shows which, and the [DNS Generator](/records) builds the records to fix it. If SPF fails with a PermError, see [the 10 DNS lookup limit](/blog/spf-permerror-10-dns-lookups-fix).
+- **Too many complaints.** Google asks bulk senders to keep their spam complaint rate below 0.1% and never reach 0.3%.
+- **Your login or server is set up wrong.** The free [SMTP Tester](/smtp-test) shows exactly what your mail server answers.
 
-**Spamhaus (SBL, XBL, PBL).** Visit their removal center at check.spamhaus.org. Enter your IP or domain. The lookup returns the specific listing category and a reason. Fix the underlying issue first (see prevention section below), then submit a delisting request through their web form. Spamhaus typically processes requests within 24 to 48 hours if the underlying issue is verifiably resolved. Repeated re-listings extend the required cooldown period.
-
-**Barracuda (BRBL).** Submit a removal request at barracudacentral.org/rbl/removal-request. Provide the sending IP, describe what caused the listing, and explain what you fixed. Barracuda reviews manually and typically responds within 12 hours.
-
-**SORBS.** Some SORBS categories (spam-source, spam-relay) auto-expire 48 hours after the source of the listing stops. For persistent categories, submit a delisting request via their website. SORBS is known for being slow and sometimes unresponsive - if you're only listed on SORBS and no major providers are affecting your deliverability, it may not be worth pursuing.
-
-**SpamCop.** Listings expire automatically within 24 hours after spam reports stop. No manual removal process. Fix the source, wait a day, re-check.
-
-**CBL (via Spamhaus XBL).** CBL is part of Spamhaus XBL and shares the same removal flow. Fix the underlying issue (usually a compromised device or open relay) and request delisting through check.spamhaus.org.
-
-**The key rule:** fix the problem before you request removal. If you request delisting without addressing the cause, most blacklists will re-list you within days and increase the cooldown period. Some (Spamhaus in particular) permanently blackmark repeat offenders.
-
-## Preventing future blacklistings
-
-Prevention is far easier than removal. These practices keep you off blacklists:
-
-**Clean your list regularly.** Remove bounced addresses immediately. Run your list through the [Email Verifier](/verify) before campaigns to catch invalid addresses before they bounce. Cleaning before sending prevents most bounce-driven blacklistings.
-
-**Monitor Google Postmaster Tools weekly.** Covered above. React to any score dropping from High to Medium before it drops further. This is your early warning system.
-
-**Warm up new IPs gradually.** Don't send 50,000 emails on day one from a new IP. Start with 100 per day and ramp up 20% weekly over 4 to 6 weeks. Sudden volume spikes look identical to compromised accounts to blacklist operators, and the algorithmic response is delisting first, questions later.
-
-**Authenticate everything and align it.** SPF, DKIM, and DMARC should all be configured, passing, AND aligning to your From: header domain. Alignment is where most silent failures happen. Full walkthrough: [how to set up SPF, DKIM, and DMARC](/blog/spf-dkim-dmarc-setup).
-
-**Use double opt-in.** Require email confirmation before adding contacts to your list. Double opt-in eliminates spam traps almost entirely (nobody accidentally confirms a trap address) and reduces complaints dramatically because the recipient explicitly asked for your mail.
-
-**Watch your domain health monthly.** Reputation degrades from small issues that compound over time: expired DKIM keys, stale SPF includes for services you no longer use, misconfigured MTA settings, MX records pointing at hosts that stopped responding. Run your domain through the [Domain Checker](/domain) monthly to catch these before a blacklist does. Reputation loss to compounding neglect is entirely preventable and entirely common.
-
-**Segment sending by intent.** Cold outreach, transactional, and marketing should ideally send from different subdomains (`mail.yourdomain.com`, `notify.yourdomain.com`) so a reputation hit on one doesn't take down the others. This is the same subdomain-delegation pattern that solves the SPF 10-lookup problem, and it protects reputation the same way.
-
-## What to do right now
-
-Three actions ranked by impact:
-
-1. **Check your current domain health.** Run your sending domain through the [Domain Checker](/domain). It checks SPF, DKIM, DMARC, mail server config, SSL/TLS, and blacklist status across the major IP and domain blacklists in one pass. Free, no signup.
-2. **Verify Google Postmaster Tools.** If Gmail is a meaningful percentage of your recipients (in 2026, it usually is), this is the first monitoring surface to configure. Reading the dashboards weekly catches issues before they escalate into blacklistings.
-3. **Clean your next send before it goes out.** Run the recipient list through the [Email Verifier](/verify) to remove invalid addresses that would bounce and hurt your reputation on every send.
-
-If you're already blacklisted, work through the removal process for the specific list you're on (see above). If your domain checks clean today, keep it that way with monthly monitoring and disciplined list hygiene.
-
-For the broader context on why domains land on blacklists in the first place - reputation mechanics, the 2024 sender requirements, and how modern authentication interacts with blocklist scoring - see [the complete guide to email deliverability in 2026](/blog/email-deliverability-guide-2026).
+For the full list of reasons mail ends up in spam, see [why emails go to spam](/blog/why-emails-go-to-spam).

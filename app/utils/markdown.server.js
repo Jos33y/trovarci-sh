@@ -10,6 +10,33 @@ const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
 
 marked.setOptions({ gfm: true, breaks: false });
 
+// Headings get ids so any section can be linked to, by readers, search engines and AI agents.
+// "## Some heading {#custom-id}" sets the id explicitly; otherwise it comes from the heading text.
+const ID_SUFFIX = /\s*\{#([a-z0-9][a-z0-9-]*)\}\s*$/;
+
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/&[a-z#0-9]+;/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+marked.use({
+  renderer: {
+    heading({ tokens, depth, text }) {
+      let html = this.parser.parseInline(tokens);
+      const explicit = text.match(ID_SUFFIX);
+      if (explicit) html = html.replace(ID_SUFFIX, '');
+      const id = explicit ? explicit[1] : slugify(text);
+      return id ? `<h${depth} id="${id}">${html}</h${depth}>\n` : `<h${depth}>${html}</h${depth}>\n`;
+    },
+  },
+});
+
 function mapFrontmatter(filename, data) {
   return {
     slug: data.slug || filename.replace(/\.md$/, ''),
