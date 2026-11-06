@@ -3,17 +3,18 @@ title: "What bulk email really costs (and why you pay for contacts you never ema
 slug: "bulk-email-cost"
 description: "Four pricing models, real 2026 numbers at three list sizes, and the three-year totals nobody publishes. Plus the one lever that cuts the bill on every model."
 date: "2026-08-29"
+updated: "2026-11-06"
 author: "trovarcis-team"
 category: "Email Marketing"
 tags: ["pricing", "email-marketing", "bulk-email", "cost-comparison", "list-hygiene"]
 readingTime: 12
 ---
 
+**In short:** sending 100,000 emails a month costs anywhere from about $10 to about $700, depending on how you pay. Mailchimp-style plans charge for every contact you keep, Brevo charges per email, Amazon SES and other sending services charge fractions of a cent, and software you own, like [Trovarcis Sender](/sender), costs {{sender_price}} once and sends through accounts you already have. Cleaning dead addresses off your list lowers the bill on every model.
+
 Sending 100,000 emails a month costs somewhere between about $10 and about $700, depending entirely on which pricing model you happen to be on. Same messages, same recipients, same result in the inbox. Seventy times the price.
 
 That spread exists because the four dominant pricing models in email are not variations on a theme. They meter completely different things, and the one that is cheapest for your sending pattern can be the most expensive for someone with a list the same size as yours.
-
-Almost every comparison of this online is published by a company selling one of the options. This is the arithmetic without that.
 
 *Figures below verified August 2026. Vendor pricing changes often, so confirm before buying.*
 
@@ -25,7 +26,7 @@ Almost every comparison of this online is published by a company selling one of 
 
 **Per message infrastructure.** Raw sending APIs and SMTP relays: Amazon SES, Resend, Postmark, Mailgun, SendGrid. Cheapest per unit by a wide margin, priced in fractions of a cent. You get no campaign builder, no list management, no templates, and no reporting beyond delivery events. You are buying pipe, not a platform.
 
-**Software you own.** A one-time license for an application that runs on your machine and sends through SMTP credentials you already have. No subscription and no per-message charge, because the vendor is not in the sending path. You supply the sending accounts and you carry the deliverability responsibility yourself.
+**Software you own.** A one-time license for an application that runs on your machine and sends through SMTP accounts you already have, such as Gmail, Zoho, Amazon SES or your own server. No subscription and no per-message charge, because the vendor is not in the sending path. [Trovarcis Sender](/sender) works this way: {{sender_price}} once, on 3 computers, with your lists kept on your computer.
 
 Most people never compare across models. They compare Mailchimp to ActiveCampaign, which are the same model, and never ask whether the model is right.
 
@@ -71,7 +72,7 @@ At 100,000 contacts sending monthly:
 | Mailchimp Standard | ~$25,200 |
 | Brevo | ~$2,484 |
 | Amazon SES | ~$360 |
-| Owned software plus your own SMTP | one-time license plus SMTP costs |
+| Trovarcis Sender plus your own SMTP | {{sender_price}} once, plus what your SMTP account costs |
 
 Those are the same 3.6 million messages.
 
@@ -103,7 +104,7 @@ On infrastructure pricing the unit cost is low enough that the waste barely regi
 
 The arithmetic is unusually clean. Verifying 10,000 addresses is a one-time cost of a few tens of dollars. If it drops you one Mailchimp tier, it pays for itself in the first month and keeps paying every month after. If it does not drop you a tier, it still removes the bounces that were suppressing delivery to everyone else.
 
-Run the list you are actually paying for through the [Email Verifier](/verify) and see the category breakdown before your next billing date. New accounts get 10 free credits, one credit checks one address, and no card is required to sign up. Addresses that cost nothing to determine are refunded rather than billed, so a badly decayed list is cheaper to clean than a healthy one.
+Run the list you are actually paying for through the [Email Verifier](/verify) and see the category breakdown before your next billing date. New accounts get 10 free credits, one credit checks one address, and no card is required to sign up.
 
 The full process, including what to do with results that come back neither valid nor invalid: [How to clean an email list before sending](/blog/clean-email-list-before-sending).
 
@@ -117,7 +118,7 @@ Match the model to the shape of your sending, not to the brand you have heard of
 
 **Ecommerce with behavioral automation.** Abandoned cart, post-purchase sequences, product recommendations tied to a store. The suite is doing real work and the per-contact price buys something. Stay on it.
 
-**Plain campaigns to a list you already own.** No automation, no store integration, no template library needed. This is where people overpay most, because they bought a marketing suite to use its send button. Infrastructure pricing or owned software costs a fraction of it.
+**Plain campaigns to a list you already own.** No automation, no store integration, no template library needed. This is where people overpay most, because they bought a marketing suite to use its send button. Owned software costs a fraction of it: [Trovarcis Sender](/sender) is {{sender_price}} once and sends through the accounts you already pay for.
 
 **Cold outreach.** None of the mainstream platforms want this traffic and most will suspend you for it. Their terms exist because your list quality becomes their reputation problem. If this is your use case you need infrastructure you control, and every safeguard becomes yours to run: [How to send bulk email without getting blacklisted](/blog/send-bulk-email-without-blacklist).
 
@@ -129,9 +130,15 @@ On a subscription, your list, your templates, your automation logic, and your se
 
 With infrastructure or owned software, the list is a file on your machine and the sending accounts are yours. The reputation you build attaches to your domain rather than to a shared pool. Nobody else's list can damage your delivery, and no one can suspend you for a campaign that was fine.
 
-The tradeoff is real and worth stating plainly. When you own the infrastructure, every safeguard is yours. Nothing catches a bad list before it reaches a receiver. The volume ramp, the pacing, the list hygiene, and the authentication all become your responsibility, and the platform charging you $700 a month was doing some of that work quietly.
+Owning it doesn't mean sending blind. [Trovarcis Sender](/sender) sets aside typos, duplicates and broken addresses before anything goes out, keeps each account inside the daily limits you set, pauses a campaign by itself if too many addresses are refused, and never mails anyone on your Do not send list. Your lists and your SMTP credentials are stored locally. Trovarcis never sees them.
 
-That is the actual decision, and it is not really about price. It is about whether you would rather rent a system that protects you from your own mistakes, or own one that does exactly what you tell it.
+<div class="product-card">
+<img src="/images/sender/sender-report-800.webp" width="800" height="589" alt="Trovarcis Sender sending a campaign across three SMTP accounts, each within its daily limit." loading="lazy">
+<div class="product-card-body">
+<p class="product-card-price">{{sender_price}} <span>one payment, 3 computers, every 1.x update</span></p>
+<a class="product-card-cta" href="/sender">Get Sender</a>
+</div>
+</div>
 
 ## Before you switch anything
 
