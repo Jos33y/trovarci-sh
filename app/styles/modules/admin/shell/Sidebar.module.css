@@ -11,7 +11,7 @@
   border-right: 1px solid var(--trov-border);
   padding: 14px 12px 12px;
   z-index: 60;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* Brand */
@@ -37,6 +37,10 @@
   padding: 18px 0 12px;
   flex: 1;
   min-height: 0;
+  /* On short screens the links scroll; the signed-in block below always keeps its own space. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .navGroup {
@@ -109,6 +113,23 @@
   gap: 8px;
   padding-top: 12px;
   border-top: 1px solid var(--trov-border);
+  flex-shrink: 0;
+}
+
+/* Short laptop screens: tighter spacing so every link fits without scrolling where possible. */
+@media (max-height: 760px) {
+  .nav {
+    gap: 10px;
+    padding: 12px 0 8px;
+  }
+
+  .navItem {
+    height: 28px;
+  }
+
+  .navGroupLabel {
+    padding-bottom: 4px;
+  }
 }
 
 .footUser {
