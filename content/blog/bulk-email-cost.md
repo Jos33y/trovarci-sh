@@ -144,7 +144,7 @@ Owning it doesn't mean sending blind. [Trovarcis Sender](/sender) sets aside typ
 
 Changing pricing model does not help if the underlying setup is broken. Two checks first, both free:
 
-1. **The sending domain.** Authentication passing and aligning, no blacklist listing, mail server configured correctly. The [Domain Checker](/domain) runs 25 tests in about ten seconds with no account. What each result means: [Email domain health check](/blog/email-domain-health-check).
+1. **The sending domain.** Authentication passing and aligning, no blacklist listing, mail server configured correctly. The [Domain Checker](/domain) checks all of it in about ten seconds, with no account. What each result means: [Email domain health check](/blog/email-domain-health-check).
 2. **The list.** Size it honestly before you price it. Paying per contact for addresses that bounce is the most expensive line on any plan.
 
 Then price the model against your actual pattern: your list size, your real send frequency, and which platform features you use rather than which you were sold.

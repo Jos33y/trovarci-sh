@@ -79,15 +79,15 @@ const PROVIDER_FINGERPRINTS = [
 function buildSpfCheck(domain, txtResult) {
   if (!txtResult.ok) {
     return {
-      name: 'SPF',
+      name: 'SPF (allowed senders)',
       status: 'critical',
-      title: 'SPF lookup failed',
+      title: 'Couldn’t read the record',
       detail: `DNS error: ${txtResult.error}`,
       issues: [
         {
           severity: 'critical',
-          title: 'Could not query SPF record',
-          message: 'The TXT record lookup for this domain did not complete. Check that the domain exists and its nameservers are responding.',
+          title: 'We couldn’t read your SPF record',
+          message: 'We couldn’t read this domain’s records. Check the domain is spelled right and still registered, then try again.',
           fix: null,
         },
       ],
@@ -97,15 +97,15 @@ function buildSpfCheck(domain, txtResult) {
   const spfRecord = findRecordStartingWith(txtResult.value, 'v=spf1');
   if (!spfRecord) {
     return {
-      name: 'SPF',
+      name: 'SPF (allowed senders)',
       status: 'critical',
-      title: 'No SPF record found',
+      title: 'Missing',
       detail: `Checked TXT records at ${domain}`,
       issues: [
         {
           severity: 'critical',
-          title: 'Domain has no SPF record',
-          message: 'Without SPF, receiving servers cannot verify which hosts are authorised to send email for this domain. Gmail, Yahoo, and Microsoft deprioritise or reject unauthenticated mail.',
+          title: 'Your domain doesn’t say who may send its email',
+          message: 'Nothing says which services may send email for your domain, so Gmail, Yahoo and Microsoft trust it less and may refuse it. Add an SPF record: the DNS Generator writes it for your provider.',
           fix: { type: 'tool', label: 'Generate SPF record', path: '/records' },
         },
       ],
@@ -168,16 +168,16 @@ function buildSpfCheck(domain, txtResult) {
     status = 'critical';
     issues.push({
       severity: 'critical',
-      title: `SPF uses ${lookupCount} of 10 allowed DNS lookups`,
-      message: 'RFC 7208 caps SPF at 10 DNS lookups. Over the limit, SPF evaluation returns PermError and the record fails entirely. Remove unused includes or consolidate sending services.',
+      title: `Too many lookups: ${lookupCount} of 10`,
+      message: 'Your SPF record names too many services. Past 10 lookups, SPF stops working completely, even though the record looks fine. Remove services you no longer use.',
       fix: { type: 'tool', label: 'Rebuild SPF record', path: '/records' },
     });
   } else if (lookupCount > 8) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: `SPF uses ${lookupCount} of 10 lookups`,
-      message: 'Close to the RFC 7208 limit. One more service with nested includes could push the record over the line.',
+      title: `Close to the limit: ${lookupCount} of 10 lookups`,
+      message: 'Your SPF record is close to the 10-lookup limit. One more service could break it.',
       fix: null,
     });
   }
@@ -185,16 +185,16 @@ function buildSpfCheck(domain, txtResult) {
   if (!terminal && !redirectTarget) {
     issues.push({
       severity: 'warning',
-      title: 'SPF has no terminal mechanism',
-      message: 'The record should end with ~all (soft fail) or -all (hard fail). Without a terminal, the default policy is neutral, which weakens SPF enforcement.',
+      title: 'Doesn’t end with ~all or -all',
+      message: 'Your SPF record should end with ~all or -all. Without it, the record doesn’t say what to do with other senders, which weakens it.',
       fix: null,
     });
     if (status === 'pass') status = 'warning';
   } else if (terminal === '+all') {
     issues.push({
       severity: 'critical',
-      title: 'SPF terminal is +all',
-      message: '+all authorises every host on the internet to send mail for this domain. This is a dangerous misconfiguration. Change it to ~all or -all.',
+      title: 'Lets anyone send as you (+all)',
+      message: '+all lets anyone in the world send email as your domain. Change it to ~all or -all now.',
       fix: { type: 'tool', label: 'Fix SPF record', path: '/records' },
     });
     status = 'critical';
@@ -207,10 +207,10 @@ function buildSpfCheck(domain, txtResult) {
   }
 
   return {
-    name: 'SPF',
+    name: 'SPF (allowed senders)',
     status,
     title: status === 'pass'
-      ? `SPF record found, ${lookupCount} of 10 lookups`
+      ? `Set up, ${lookupCount} of 10 lookups used`
       : `SPF record uses ${lookupCount} of 10 lookups`,
     detail,
     issues,
@@ -237,25 +237,25 @@ async function buildDkimCheck(domain) {
 
   if (foundSelectors.length === 0) {
     return {
-      name: 'DKIM',
+      name: 'DKIM (email signature)',
       status: 'warning',
-      title: 'No DKIM record found for common selectors',
+      title: 'Not found',
       detail: `Checked ${DKIM_SELECTORS.length} selectors including google, selector1, default, k1, zmail.`,
       issues: [
         {
           severity: 'warning',
-          title: 'Emails are not cryptographically signed',
-          message: 'Without DKIM, receiving servers cannot verify that messages claiming to be from this domain are genuine and unmodified. Enable DKIM in your email provider\'s admin console. This check scans common selector names; your provider may use a custom selector that was not detected.',
-          fix: { type: 'tool', label: 'DKIM setup guide', path: '/records' },
+          title: 'Your emails aren’t signed',
+          message: 'Your emails aren’t signed, so providers can’t prove they came from you and weren’t changed. Turn on DKIM in your email provider’s settings, then add the record it gives you. Already did? Your provider may use a name this check doesn’t try: send yourself an email in Gmail, choose Show original and look for DKIM: PASS.',
+          fix: { type: 'tool', label: 'Set up DKIM', path: '/records' },
         },
       ],
     };
   }
 
   return {
-    name: 'DKIM',
+    name: 'DKIM (email signature)',
     status: 'pass',
-    title: `DKIM configured (${foundSelectors.length} selector${foundSelectors.length !== 1 ? 's' : ''})`,
+    title: `Set up (${foundSelectors.length} key${foundSelectors.length !== 1 ? 's' : ''} found)`,
     detail: `Active selectors: ${foundSelectors.map((s) => s.selector).join(', ')}`,
     issues: [],
   };
@@ -266,15 +266,15 @@ async function buildDkimCheck(domain) {
 function buildDmarcCheck(domain, txtResult) {
   if (!txtResult.ok && !txtResult.isNoRecord) {
     return {
-      name: 'DMARC',
+      name: 'DMARC (fake-email protection)',
       status: 'critical',
-      title: 'DMARC lookup failed',
+      title: 'Couldn’t read the record',
       detail: `DNS error on _dmarc.${domain}: ${txtResult.error}`,
       issues: [
         {
           severity: 'critical',
-          title: 'Could not query DMARC record',
-          message: 'The lookup at _dmarc.' + domain + ' did not complete. Retry the scan; if it persists, check that your DNS provider is responding.',
+          title: 'We couldn’t read your DMARC record',
+          message: 'We couldn’t read your DMARC record. Try again in a minute; if it keeps happening, check your DNS provider is working.',
           fix: null,
         },
       ],
@@ -283,15 +283,15 @@ function buildDmarcCheck(domain, txtResult) {
 
   if (!txtResult.ok || !txtResult.value) {
     return {
-      name: 'DMARC',
+      name: 'DMARC (fake-email protection)',
       status: 'critical',
-      title: 'No DMARC record found',
+      title: 'Missing',
       detail: `Checked _dmarc.${domain}`,
       issues: [
         {
           severity: 'critical',
-          title: 'Anyone can spoof this domain',
-          message: 'Without a DMARC record, receiving servers have no instructions on how to handle email that fails SPF or DKIM. Spoofed mail may land in the inbox.',
+          title: 'Anyone can send email pretending to be you',
+          message: 'Nothing tells mail providers what to do with email pretending to be from you, so fakes can reach inboxes. Add a DMARC record: the DNS Generator writes it.',
           fix: { type: 'tool', label: 'Generate DMARC record', path: '/records' },
         },
       ],
@@ -301,15 +301,15 @@ function buildDmarcCheck(domain, txtResult) {
   const record = findRecordStartingWith(txtResult.value, 'v=DMARC1');
   if (!record) {
     return {
-      name: 'DMARC',
+      name: 'DMARC (fake-email protection)',
       status: 'critical',
-      title: 'TXT records exist but no valid DMARC record',
+      title: 'A record is there, but it isn’t valid',
       detail: `_dmarc.${domain} returned TXT values but none start with v=DMARC1.`,
       issues: [
         {
           severity: 'critical',
-          title: 'DMARC record is malformed',
-          message: 'The first DMARC tag must be v=DMARC1. Receiving servers will treat the record as invalid and fall back to no-policy behaviour.',
+          title: 'Your DMARC record is written wrong',
+          message: 'Your DMARC record must start with v=DMARC1. Until it does, mail providers ignore it.',
           fix: { type: 'tool', label: 'Rebuild DMARC record', path: '/records' },
         },
       ],
@@ -329,26 +329,26 @@ function buildDmarcCheck(domain, txtResult) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: 'DMARC is monitor-only',
-      message: 'Policy is p=none, so nothing is quarantined or rejected. Spoofed email may still reach recipients. Review aggregate reports for 2-4 weeks, then move to p=quarantine with a low pct.',
+      title: 'Watching only (p=none)',
+      message: 'Your DMARC is set to p=none, so fake email pretending to be you isn’t stopped yet. Once your own email has passed for 2 to 4 weeks, change it to p=quarantine.',
       fix: { type: 'tool', label: 'Strengthen DMARC', path: '/records' },
     });
   } else if (policy === 'reject' && pct < 100) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: `DMARC rejects only ${pct}% of failing mail`,
-      message: 'The rest is treated as p=none. Increase pct gradually to 100 as you gain confidence that legitimate mail passes authentication.',
+      title: `Applies to only ${pct}% of failing email`,
+      message: 'Only part of failing email gets this policy; the rest is let through. Raise pct to 100 step by step once your own email passes.',
       fix: null,
     });
   }
 
-  const titleParts = [`DMARC record found (p=${policy}`];
+  const titleParts = [`Set up (p=${policy}`];
   if (pct < 100) titleParts.push(`pct=${pct}`);
   titleParts[titleParts.length - 1] += ')';
 
   return {
-    name: 'DMARC',
+    name: 'DMARC (fake-email protection)',
     status,
     title: titleParts.join(', '),
     detail: record,
@@ -361,9 +361,9 @@ function buildDmarcCheck(domain, txtResult) {
 function buildBimiCheck(domain, txtResult) {
   if (!txtResult.ok) {
     return {
-      name: 'BIMI',
+      name: 'BIMI (logo in inbox)',
       status: 'info',
-      title: 'BIMI not configured',
+      title: 'Not set up (optional)',
       detail: 'Optional. Displays your brand logo in supported email clients.',
       issues: [],
     };
@@ -372,9 +372,9 @@ function buildBimiCheck(domain, txtResult) {
   const record = findRecordStartingWith(txtResult.value, 'v=BIMI1');
   if (!record) {
     return {
-      name: 'BIMI',
+      name: 'BIMI (logo in inbox)',
       status: 'info',
-      title: 'BIMI not configured',
+      title: 'Not set up (optional)',
       detail: 'Optional. Displays your brand logo in supported email clients.',
       issues: [],
     };
@@ -387,27 +387,27 @@ function buildBimiCheck(domain, txtResult) {
   if (!hasLogo) {
     issues.push({
       severity: 'warning',
-      title: 'BIMI record has no logo URL',
-      message: 'A BIMI record without an l= tag cannot display a logo. Add the HTTPS URL of your SVG Tiny P/S logo file.',
+      title: 'No logo link',
+      message: 'Your BIMI record has no logo link (l=). Add the web address of your logo file.',
       fix: { type: 'tool', label: 'Rebuild BIMI', path: '/records' },
     });
   }
   if (!hasVmc) {
     issues.push({
       severity: 'info',
-      title: 'No Verified Mark Certificate referenced',
-      message: 'Gmail and Yahoo require a VMC to display the logo in the inbox. Without one, the BIMI record is published but most inboxes will ignore it.',
+      title: 'No mark certificate (VMC)',
+      message: 'Gmail and Yahoo only show your logo with a paid mark certificate (VMC). Without one, most inboxes ignore BIMI.',
       fix: null,
     });
   }
 
   return {
-    name: 'BIMI',
+    name: 'BIMI (logo in inbox)',
     status: hasLogo ? (hasVmc ? 'pass' : 'info') : 'warning',
     title: hasLogo && hasVmc
-      ? 'BIMI configured with VMC'
+      ? 'Set up, with a mark certificate'
       : hasLogo
-      ? 'BIMI configured, no VMC'
+      ? 'Set up, without a mark certificate'
       : 'BIMI record incomplete',
     detail: record,
     issues,
@@ -420,24 +420,24 @@ function buildMxCheck(mxResult, detectedProvider) {
   if (!mxResult.ok) {
     if (mxResult.isNoRecord) {
       return {
-        name: 'MX Records',
+        name: 'Mail servers (MX)',
         status: 'critical',
-        title: 'No MX records found',
+        title: 'No mail servers',
         detail: 'This domain cannot receive email.',
         issues: [
           {
             severity: 'critical',
-            title: 'Domain has no mail exchangers',
-            message: 'Without MX records, no mail server knows where to deliver email addressed to this domain. If this domain is only used for sending (not receiving), this may be intentional; otherwise it is a critical misconfiguration.',
+            title: 'Email sent to this domain has nowhere to go',
+            message: 'Email sent to this domain has nowhere to go. If the domain only sends email, that’s fine; otherwise add the MX records your email provider gives you.',
             fix: null,
           },
         ],
       };
     }
     return {
-      name: 'MX Records',
+      name: 'Mail servers (MX)',
       status: 'warning',
-      title: 'MX lookup failed',
+      title: 'Couldn’t look up your mail servers',
       detail: mxResult.error,
       issues: [],
     };
@@ -451,11 +451,11 @@ function buildMxCheck(mxResult, detectedProvider) {
   const extra = sorted.length > 3 ? `, +${sorted.length - 3} more` : '';
 
   return {
-    name: 'MX Records',
+    name: 'Mail servers (MX)',
     status: 'pass',
     title: detectedProvider
-      ? `MX records configured. ${detectedProvider} detected`
-      : `${sorted.length} MX record${sorted.length !== 1 ? 's' : ''} configured`,
+      ? `Set up, using ${detectedProvider}`
+      : `${sorted.length} mail server${sorted.length !== 1 ? 's' : ''} set up`,
     detail: summary + extra,
     issues: [],
   };
@@ -466,9 +466,9 @@ function buildMxCheck(mxResult, detectedProvider) {
 async function buildReverseDnsCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
     return {
-      name: 'Reverse DNS',
+      name: 'Server name (reverse DNS)',
       status: 'info',
-      title: 'Reverse DNS not checked',
+      title: 'Not checked',
       detail: 'Needs at least one MX record to resolve.',
       issues: [],
     };
@@ -479,9 +479,9 @@ async function buildReverseDnsCheck(mxResult) {
   const aResult = await resolve4(topMx.exchange);
   if (!aResult.ok || aResult.value.length === 0) {
     return {
-      name: 'Reverse DNS',
+      name: 'Server name (reverse DNS)',
       status: 'info',
-      title: 'Could not resolve MX host to IP',
+      title: 'Couldn’t find your mail server’s address',
       detail: `${topMx.exchange} did not return an A record. Reverse DNS check skipped.`,
       issues: [],
     };
@@ -491,15 +491,15 @@ async function buildReverseDnsCheck(mxResult) {
   const ptrResult = await reverse(ip);
   if (!ptrResult.ok) {
     return {
-      name: 'Reverse DNS',
+      name: 'Server name (reverse DNS)',
       status: 'warning',
-      title: 'No PTR record for primary MX IP',
+      title: 'Your mail server has no name',
       detail: `${ip} has no reverse DNS. Receiving servers may flag or reject mail.`,
       issues: [
         {
           severity: 'warning',
-          title: 'Missing PTR record on mail server IP',
-          message: 'Many receivers require the sending mail server\'s IP to have a reverse DNS record that maps back to a forward-confirmed hostname. This is typically managed by the hosting provider or by your ISP; not by the domain owner.',
+          title: 'Your mail server’s address has no name attached',
+          message: 'The server that handles your email has no name attached to its address, and some providers distrust that. Your email or hosting provider sets this, not you: ask them to add a reverse DNS (PTR) record.',
           fix: null,
         },
       ],
@@ -507,9 +507,9 @@ async function buildReverseDnsCheck(mxResult) {
   }
 
   return {
-    name: 'Reverse DNS',
+    name: 'Server name (reverse DNS)',
     status: 'pass',
-    title: 'PTR record configured on primary MX IP',
+    title: 'Your mail server has a name',
     detail: `${ip} -> ${ptrResult.value[0]}`,
     issues: [],
   };
@@ -522,13 +522,13 @@ async function buildNameserversCheck(nsResult) {
     return {
       name: 'Nameservers',
       status: 'critical',
-      title: 'No nameservers found',
+      title: 'No nameservers',
       detail: 'Domain may be misconfigured or expired.',
       issues: [
         {
           severity: 'critical',
-          title: 'Domain has no authoritative nameservers',
-          message: 'NS records are missing or unresolvable. Without NS records, no DNS queries can be answered for this domain.',
+          title: 'Nothing answers for this domain',
+          message: 'No nameservers answer for this domain, so nothing about it can be looked up. Check the domain hasn’t expired and its DNS is set up.',
           fix: null,
         },
       ],
@@ -543,8 +543,8 @@ async function buildNameserversCheck(nsResult) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: 'Only one nameserver configured',
-      message: 'Best practice is at least two nameservers on different networks. A single nameserver is a single point of failure.',
+      title: 'Only one nameserver',
+      message: 'Your domain has only one nameserver. If it goes down, your email and website stop working. Use at least two.',
       fix: null,
     });
   }
@@ -572,8 +572,8 @@ async function buildNameserversCheck(nsResult) {
     if (status === 'pass') status = 'warning';
     issues.push({
       severity: 'warning',
-      title: 'All nameservers on the same /16 network',
-      message: 'If that network has an outage, DNS for your domain goes dark. Managed DNS providers like Cloudflare, Route 53, and NS1 spread nameservers across multiple networks.',
+      title: 'All nameservers on one network',
+      message: 'All your nameservers are on one network, so one outage takes everything down. DNS providers like Cloudflare spread them out for you.',
       fix: null,
     });
   }
@@ -602,18 +602,18 @@ async function buildNameserversCheck(nsResult) {
 function buildSoaCheck(soaResult) {
   if (!soaResult.ok) {
     return {
-      name: 'SOA Record',
+      name: 'DNS zone settings (SOA)',
       status: 'warning',
-      title: 'SOA lookup failed',
+      title: 'Couldn’t read the zone settings',
       detail: soaResult.error,
       issues: [],
     };
   }
   const soa = soaResult.value;
   return {
-    name: 'SOA Record',
+    name: 'DNS zone settings (SOA)',
     status: 'pass',
-    title: 'SOA record properly configured',
+    title: 'Set up correctly',
     detail: `Serial: ${soa.serial}, Refresh: ${soa.refresh}s, Retry: ${soa.retry}s`,
     issues: [],
   };
@@ -628,26 +628,26 @@ async function buildDnssecCheck(domain) {
   const res = await resolveGeneric(domain, 'DNSKEY', 3000);
   if (res.ok && Array.isArray(res.value) && res.value.length > 0) {
     return {
-      name: 'DNSSEC',
+      name: 'DNSSEC (signed DNS)',
       status: 'pass',
-      title: `DNSSEC configured (${res.value.length} DNSKEY record${res.value.length !== 1 ? 's' : ''})`,
+      title: `Turned on`,
       detail: 'Zone is cryptographically signed. Resolvers can verify the integrity of DNS responses.',
       issues: [],
     };
   }
   if (res.code === 'EBADRESP' || res.code === 'ENOTIMP' || res.code === 'EUNKNOWN') {
     return {
-      name: 'DNSSEC',
+      name: 'DNSSEC (signed DNS)',
       status: 'info',
-      title: 'DNSSEC status could not be determined',
+      title: 'Couldn’t check',
       detail: 'This runtime does not support DNSKEY queries directly. A DNSSEC-aware resolver is needed for an authoritative check.',
       issues: [],
     };
   }
   return {
-    name: 'DNSSEC',
+    name: 'DNSSEC (signed DNS)',
     status: 'info',
-    title: 'DNSSEC not configured',
+    title: 'Not turned on (optional)',
     detail: 'Optional security enhancement. Protects against DNS spoofing by signing the zone cryptographically.',
     issues: [],
   };
@@ -658,9 +658,9 @@ async function buildDnssecCheck(domain) {
 function buildCaaCheck(caaResult) {
   if (!caaResult.ok) {
     return {
-      name: 'CAA Record',
+      name: 'Certificate rules (CAA)',
       status: 'info',
-      title: 'No CAA record',
+      title: 'Not set (optional)',
       detail: 'Optional. Restricts which certificate authorities can issue SSL certificates for this domain.',
       issues: [],
     };
@@ -668,9 +668,9 @@ function buildCaaCheck(caaResult) {
   const records = caaResult.value;
   if (!records || records.length === 0) {
     return {
-      name: 'CAA Record',
+      name: 'Certificate rules (CAA)',
       status: 'info',
-      title: 'No CAA record',
+      title: 'Not set (optional)',
       detail: 'Optional. Restricts which certificate authorities can issue SSL certificates for this domain.',
       issues: [],
     };
@@ -679,9 +679,9 @@ function buildCaaCheck(caaResult) {
     .map((r) => r.issue || r.issuewild)
     .filter(Boolean);
   return {
-    name: 'CAA Record',
+    name: 'Certificate rules (CAA)',
     status: 'pass',
-    title: `CAA record configured (${records.length} entr${records.length !== 1 ? 'ies' : 'y'})`,
+    title: `Set (${records.length} entr${records.length !== 1 ? 'ies' : 'y'})`,
     detail: issuers.length > 0 ? `Authorised CAs: ${issuers.join(', ')}` : `${records.length} CAA record(s) present`,
     issues: [],
   };
@@ -692,9 +692,9 @@ function buildCaaCheck(caaResult) {
 async function buildIpBlacklistCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
     return {
-      name: 'IP Blacklists',
+      name: 'Mail server blocklists',
       status: 'info',
-      title: 'No MX to check',
+      title: 'No mail server to check',
       detail: 'IP blacklist check skipped because no mail exchanger was found.',
       issues: [],
     };
@@ -704,9 +704,9 @@ async function buildIpBlacklistCheck(mxResult) {
   const aResult = await resolve4(topMx.exchange);
   if (!aResult.ok || aResult.value.length === 0) {
     return {
-      name: 'IP Blacklists',
+      name: 'Mail server blocklists',
       status: 'info',
-      title: 'Could not resolve MX to IP',
+      title: 'Couldn’t find your mail server’s address',
       detail: `${topMx.exchange} did not return an A record. Blacklist check skipped.`,
       issues: [],
     };
@@ -717,9 +717,9 @@ async function buildIpBlacklistCheck(mxResult) {
 
   if (result.totalListed === 0) {
     return {
-      name: 'IP Blacklists',
+      name: 'Mail server blocklists',
       status: 'pass',
-      title: `Not listed on any of ${result.totalChecked} IP blacklists`,
+      title: `Not listed on any of ${result.totalChecked} lists`,
       detail: `Checked ${ip} against ${IP_BLACKLISTS.map((z) => z.name).join(', ')}${result.totalErrors > 0 ? ` (${result.totalErrors} zone${result.totalErrors !== 1 ? 's' : ''} errored)` : ''}.`,
       issues: [],
     };
@@ -728,14 +728,14 @@ async function buildIpBlacklistCheck(mxResult) {
   const issues = result.listedOn.map((hit) => ({
     severity: 'critical',
     title: `Listed on ${hit.zone.name}`,
-    message: `${ip} is listed on ${hit.zone.name} (${hit.zone.zone}). ${hit.zone.notes} Mail sent from this IP may be rejected or filtered by receivers that consult this list.`,
-    fix: { type: 'external', label: `Check ${hit.zone.name} lookup`, url: hit.zone.delistUrl },
+    message: `The server that sends your email (${ip}) is on ${hit.zone.name}. ${hit.zone.notes} Providers that check this list may refuse or filter your email.`,
+    fix: { type: 'external', label: `Removal at ${hit.zone.name}`, url: hit.zone.delistUrl },
   }));
 
   return {
-    name: 'IP Blacklists',
+    name: 'Mail server blocklists',
     status: 'critical',
-    title: `Listed on ${result.totalListed} of ${result.totalChecked} blacklists`,
+    title: `Listed on ${result.totalListed} of ${result.totalChecked} lists`,
     detail: `${ip} appears on: ${result.listedOn.map((h) => h.zone.name).join(', ')}`,
     issues,
   };
@@ -746,9 +746,9 @@ async function buildDomainBlacklistCheck(domain) {
 
   if (result.totalListed === 0) {
     return {
-      name: 'Domain Blacklists',
+      name: 'Domain blocklists',
       status: 'pass',
-      title: 'Not listed on domain blacklists',
+      title: 'Not listed',
       detail: `Checked ${result.totalChecked} zones including Spamhaus DBL and SURBL${result.totalErrors > 0 ? ` (${result.totalErrors} errored)` : ''}.`,
       issues: [],
     };
@@ -757,14 +757,14 @@ async function buildDomainBlacklistCheck(domain) {
   const issues = result.listedOn.map((hit) => ({
     severity: 'critical',
     title: `Listed on ${hit.zone.name}`,
-    message: `${domain} is listed on ${hit.zone.name}. ${hit.zone.notes}`,
-    fix: { type: 'external', label: `${hit.zone.name} lookup`, url: hit.zone.delistUrl },
+    message: `${domain} is on ${hit.zone.name}. ${hit.zone.notes} Providers that check this list may refuse or filter your email.`,
+    fix: { type: 'external', label: `Removal at ${hit.zone.name}`, url: hit.zone.delistUrl },
   }));
 
   return {
-    name: 'Domain Blacklists',
+    name: 'Domain blocklists',
     status: 'critical',
-    title: `Listed on ${result.totalListed} of ${result.totalChecked} domain blacklists`,
+    title: `Listed on ${result.totalListed} of ${result.totalChecked} lists`,
     detail: `Appears on: ${result.listedOn.map((h) => h.zone.name).join(', ')}`,
     issues,
   };
@@ -775,9 +775,9 @@ async function buildDomainBlacklistCheck(domain) {
 async function buildSmtpConnectivityCheck(mxResult) {
   if (!mxResult.ok || mxResult.value.length === 0) {
     return {
-      name: 'SMTP Connectivity',
+      name: 'Mail server reachable',
       status: 'info',
-      title: 'No MX to probe',
+      title: 'No mail server to check',
       detail: 'SMTP check skipped because no mail exchanger was found.',
       issues: [],
     };
@@ -794,15 +794,15 @@ async function buildSmtpConnectivityCheck(mxResult) {
     const isTimeout = /timed out|ETIMEDOUT|ETIMEOUT/i.test(probe.error || '');
     if (isTimeout) {
       return {
-        name: 'SMTP Connectivity',
+        name: 'Mail server reachable',
         status: 'info',
-        title: 'SMTP probe could not reach the mail server',
+        title: 'Couldn’t reach your mail server',
         detail: `${topMx.exchange}:25 did not respond. The scanner may be blocked from outbound port 25.`,
         issues: [
           {
             severity: 'info',
-            title: 'Port 25 probe timed out',
-            message: 'Most residential ISPs and cloud providers block outbound port 25 to prevent spam. The probe timed out, which usually means the scanner itself cannot reach the server, not that the server is broken. Real mail delivery from other providers is almost certainly unaffected.',
+            title: 'Your mail server didn’t answer us',
+            message: 'We couldn’t reach your mail server on port 25, but many networks block that port for checks like this one. Email from other providers almost certainly still reaches you.',
             fix: null,
           },
         ],
@@ -811,15 +811,15 @@ async function buildSmtpConnectivityCheck(mxResult) {
     // Non-timeout failures (connection refused, DNS error, protocol error)
     // are more likely to reflect a real remote problem.
     return {
-      name: 'SMTP Connectivity',
+      name: 'Mail server reachable',
       status: 'warning',
-      title: 'SMTP handshake failed',
+      title: 'Your mail server didn’t finish answering',
       detail: `${topMx.exchange}:25 - ${probe.error}`,
       issues: [
         {
           severity: 'warning',
-          title: 'Mail server refused or closed the connection',
-          message: 'The server is reachable but did not complete a clean SMTP exchange. Could indicate greylisting of unknown clients, a misconfigured listener, or a temporary outage. Retry the scan in a few minutes.',
+          title: 'Your mail server cut the connection',
+          message: 'Your mail server answered but didn’t finish the conversation. It may slow down unknown visitors on purpose, or be having a brief problem. Try again in a few minutes.',
           fix: null,
         },
       ],
@@ -833,28 +833,28 @@ async function buildSmtpConnectivityCheck(mxResult) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: 'Server does not advertise STARTTLS',
+      title: 'Email to you isn’t encrypted',
       message:
-        'Without STARTTLS, mail between servers travels in plaintext and can be intercepted. Modern receivers may deprioritise or refuse plaintext delivery from senders. Contact your mail provider to enable STARTTLS.',
+        'Email sent to your server isn’t encrypted, so it could be read on the way, and some providers refuse to deliver it. Ask your email host to turn on encryption (STARTTLS).',
       fix: null,
     });
   } else if (probe.tlsVersion && /TLSv1(\.0|\.1)?$/i.test(probe.tlsVersion)) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: `Outdated TLS version: ${probe.tlsVersion}`,
+      title: `Old encryption version: ${probe.tlsVersion}`,
       message:
-        'TLS 1.0 and 1.1 are deprecated and considered insecure. Mail delivery may be rejected by modern receivers. Upgrade the mail server to support TLS 1.2 or 1.3.',
+        'Your mail server uses an old encryption version that modern providers may refuse. Ask your email host to support TLS 1.2 or newer.',
       fix: null,
     });
   }
 
-  const titleParts = [`SMTP responding, ${probe.connectTimeMs}ms connect`];
-  if (probe.tlsVersion) titleParts.push(`${probe.tlsVersion} supported`);
-  else if (probe.supportsStarttls) titleParts.push('STARTTLS advertised');
+  const titleParts = [`Reachable`];
+  if (probe.tlsVersion) titleParts.push(`encrypted (${probe.tlsVersion})`);
+  else if (probe.supportsStarttls) titleParts.push('offers encryption');
 
   return {
-    name: 'SMTP Connectivity',
+    name: 'Mail server reachable',
     status,
     title: titleParts.join(', '),
     detail: `${topMx.exchange}:25${probe.tlsCipher ? ` via ${probe.tlsCipher}` : ''}`,
@@ -869,16 +869,16 @@ async function buildSslCheck(domain) {
 
   if (!probe.ok) {
     return {
-      name: 'SSL/TLS',
+      name: 'Website certificate (SSL)',
       status: 'warning',
-      title: 'Could not retrieve SSL certificate',
+      title: 'No certificate found',
       detail: `${domain}:443 - ${probe.error}`,
       issues: [
         {
           severity: 'warning',
-          title: 'No HTTPS response on port 443',
+          title: 'Your website doesn’t answer securely',
           message:
-            'Either the domain has no web server configured or port 443 is blocked. If this domain is only used for email, HTTPS is optional; if it hosts a website, receivers may view the lack of HTTPS as a trust signal.',
+            'Your website doesn’t answer securely (HTTPS). If the domain is only for email, that’s fine; if it has a website, set up a certificate.',
           fix: null,
         },
       ],
@@ -893,17 +893,17 @@ async function buildSslCheck(domain) {
     status = 'critical';
     issues.push({
       severity: 'critical',
-      title: 'SSL certificate is expired',
-      message: `The certificate expired ${Math.abs(daysUntilExpiry)} days ago. Browsers and email clients will show warnings. Renew it immediately.`,
+      title: 'Expired',
+      message: `Your website’s certificate expired ${Math.abs(daysUntilExpiry)} days ago, so browsers show a warning. Renew it now.`,
       fix: null,
     });
   } else if (daysUntilExpiry !== null && daysUntilExpiry < 14) {
     status = 'warning';
     issues.push({
       severity: 'warning',
-      title: `Certificate expires in ${daysUntilExpiry} days`,
+      title: `Expires in ${daysUntilExpiry} days`,
       message:
-        'Set up automatic renewal or renew manually before expiry. Let\'s Encrypt certificates are free and support automation.',
+        'Turn on automatic renewal, or renew it before it expires. Let’s Encrypt certificates are free and renew themselves.',
       fix: null,
     });
   }
@@ -912,8 +912,8 @@ async function buildSslCheck(domain) {
     status = 'critical';
     issues.push({
       severity: 'critical',
-      title: 'Certificate does not cover this hostname',
-      message: `The certificate is issued for ${cert.subjectCn || 'a different domain'}, not ${domain}. Browsers will reject the connection as a trust error. Reissue the certificate with ${domain} in the Subject Alternative Names.`,
+      title: 'The certificate is for a different name',
+      message: `Your website’s certificate is for ${cert.subjectCn || 'a different domain'}, not ${domain}, so browsers show a warning. Get a certificate that includes ${domain}.`,
       fix: null,
     });
   }
@@ -922,8 +922,8 @@ async function buildSslCheck(domain) {
     if (status === 'pass') status = 'warning';
     issues.push({
       severity: 'warning',
-      title: `Outdated TLS version: ${tlsVersion}`,
-      message: 'TLS 1.0 and 1.1 are deprecated. Upgrade the web server to TLS 1.2 or 1.3.',
+      title: `Old encryption version: ${tlsVersion}`,
+      message: 'Your website uses an old encryption version. Ask your host to support TLS 1.2 or newer.',
       fix: null,
     });
   }
@@ -936,10 +936,10 @@ async function buildSslCheck(domain) {
   const issuerText = cert.issuerCn || 'unknown issuer';
 
   return {
-    name: 'SSL/TLS',
+    name: 'Website certificate (SSL)',
     status,
     title: status === 'pass'
-      ? `Valid SSL certificate, ${expiryText}`
+      ? `Valid, ${expiryText}`
       : 'SSL certificate has issues',
     detail: `${issuerText}, ${tlsVersion || 'TLS version unknown'}, ${expiryText}`,
     issues,
@@ -953,9 +953,9 @@ async function buildHttpsRedirectCheck(domain) {
 
   if (!probe.ok) {
     return {
-      name: 'HTTPS Redirect',
+      name: 'Secure website redirect',
       status: 'info',
-      title: 'HTTP port not reachable',
+      title: 'Not reachable',
       detail: probe.error || 'No response on port 80.',
       issues: [],
     };
@@ -963,16 +963,16 @@ async function buildHttpsRedirectCheck(domain) {
 
   if (!probe.redirectsToHttps) {
     return {
-      name: 'HTTPS Redirect',
+      name: 'Secure website redirect',
       status: 'warning',
-      title: 'HTTP does not redirect to HTTPS',
+      title: 'Not sent to the secure version',
       detail: `Final URL: ${probe.finalUrl}`,
       issues: [
         {
           severity: 'warning',
-          title: 'Visitors can reach the site over plain HTTP',
+          title: 'Visitors can land on the unsecured version',
           message:
-            'Configure a 301 redirect from http://' + domain + ' to https://' + domain + ' so every request is upgraded to HTTPS. This also strengthens HSTS enforcement.',
+            'Visitors who type http://' + domain + ' aren’t sent to the secure https:// version. Ask your host to redirect them.',
           fix: null,
         },
       ],
@@ -983,10 +983,10 @@ async function buildHttpsRedirectCheck(domain) {
   const isPermanent = firstHop === 301 || firstHop === 308;
 
   return {
-    name: 'HTTPS Redirect',
+    name: 'Secure website redirect',
     status: 'pass',
     title: isPermanent
-      ? `HTTP redirects to HTTPS (${firstHop})`
+      ? `Sends visitors to the secure version`
       : `HTTP redirects to HTTPS (${firstHop || 'non-permanent'})`,
     detail: `Final URL: ${probe.finalUrl}`,
     issues: [],
@@ -998,9 +998,9 @@ async function buildHttpsRedirectCheck(domain) {
 function buildSecurityHeadersCheck(websiteProbe) {
   if (!websiteProbe || !websiteProbe.ok) {
     return {
-      name: 'Security Headers',
+      name: 'Website security settings',
       status: 'info',
-      title: 'Headers not analysed',
+      title: 'Not checked',
       detail: 'Website probe failed; security header analysis skipped.',
       issues: [],
     };
@@ -1020,8 +1020,8 @@ function buildSecurityHeadersCheck(websiteProbe) {
     status = present <= 1 ? 'warning' : 'info';
     issues.push({
       severity: status,
-      title: `${missing.length} security header${missing.length !== 1 ? 's' : ''} missing`,
-      message: `Missing: ${missing.join(', ')}. These headers protect against common web attacks and signal a well-maintained domain to email receivers. Configure them at the web server or CDN layer.`,
+      title: `${missing.length} security setting${missing.length !== 1 ? 's' : ''} missing`,
+      message: `Missing: ${missing.join(', ')}. These settings protect your website from common attacks. Your host or CDN can add them.`,
       fix: null,
     });
   }
@@ -1034,9 +1034,9 @@ function buildSecurityHeadersCheck(websiteProbe) {
   if (sh.referrerPolicy.present) summaryParts.push('Referrer-Policy: yes');
 
   return {
-    name: 'Security Headers',
+    name: 'Website security settings',
     status,
-    title: `${present} of ${sh.criticalTotal} critical headers present`,
+    title: `${present} of ${sh.criticalTotal} security settings in place`,
     detail: summaryParts.join(', '),
     issues,
   };
@@ -1049,7 +1049,7 @@ function buildWebsiteCheck(websiteProbe) {
     return {
       name: 'Website',
       status: 'info',
-      title: 'No HTTPS website responding',
+      title: 'No website answering',
       detail: websiteProbe?.error || 'Could not reach the site.',
       issues: [],
     };
@@ -1063,24 +1063,24 @@ function buildWebsiteCheck(websiteProbe) {
     checkStatus = 'critical';
     issues.push({
       severity: 'critical',
-      title: `Server returned HTTP ${status}`,
-      message: 'The web server is responding but with a server-side error. This may affect how email clients and recipients perceive the domain.',
+      title: `Your website shows an error (${status})`,
+      message: 'Your website is returning an error. Fix it if the domain should have a website.',
       fix: null,
     });
   } else if (status >= 400) {
     checkStatus = 'warning';
     issues.push({
       severity: 'warning',
-      title: `Server returned HTTP ${status}`,
-      message: 'The homepage returns a client error. If the domain is intentionally unused for web, this is not critical; if it should have a site, check server routing.',
+      title: `Your homepage shows an error (${status})`,
+      message: 'Your homepage can’t be found. If the domain isn’t used for a website, ignore this; otherwise check your site.',
       fix: null,
     });
   } else if (responseTimeMs > 3000) {
     checkStatus = 'warning';
     issues.push({
       severity: 'warning',
-      title: `Slow response time: ${responseTimeMs}ms`,
-      message: 'Responses over 3 seconds can signal instability to email receivers that crawl sender websites. Check server performance and CDN configuration.',
+      title: `Slow: ${(responseTimeMs / 1000).toFixed(1)} seconds`,
+      message: 'Your website takes over 3 seconds to answer. Ask your host to look at its speed.',
       fix: null,
     });
   }
@@ -1088,7 +1088,7 @@ function buildWebsiteCheck(websiteProbe) {
   return {
     name: 'Website',
     status: checkStatus,
-    title: `Site responding, HTTP ${status}, ${responseTimeMs}ms`,
+    title: `Working (${(responseTimeMs / 1000).toFixed(1)} seconds)`,
     detail: `GET https://${websiteProbe.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}/`,
     issues,
   };
@@ -1100,7 +1100,7 @@ function pendingInfo(name, reason) {
   return {
     name,
     status: 'info',
-    title: 'Check pending',
+    title: 'Not checked yet',
     detail: reason,
     issues: [],
   };
@@ -1211,7 +1211,7 @@ export async function runDomainCheck(rawDomain) {
   const categories = [
     {
       id: 'authentication',
-      label: 'Email Authentication',
+      label: 'Proof it\u2019s really you',
       icon: 'shield',
       checks: [
         buildSpfCheck(domain, apexTxt),
@@ -1222,7 +1222,7 @@ export async function runDomainCheck(rawDomain) {
     },
     {
       id: 'mailServer',
-      label: 'Mail Server',
+      label: 'Mail server',
       icon: 'server',
       checks: [
         buildMxCheck(mxResult, detectedProvider),
@@ -1232,20 +1232,16 @@ export async function runDomainCheck(rawDomain) {
     },
     {
       id: 'reputation',
-      label: 'Domain Reputation',
+      label: 'Blocklists',
       icon: 'reputation',
       checks: [
         ipBlacklistCheck,
         domainBlacklistCheck,
-        pendingInfo(
-          'Google Safe Browsing',
-          'Safe Browsing check requires a Google API key. Will be enabled once credentials are configured.'
-        ),
       ],
     },
     {
       id: 'webSecurity',
-      label: 'Web & Security',
+      label: 'Website',
       icon: 'lock',
       checks: [
         sslCheckPromise,
@@ -1256,7 +1252,7 @@ export async function runDomainCheck(rawDomain) {
     },
     {
       id: 'dnsConfig',
-      label: 'DNS Configuration',
+      label: 'DNS setup',
       icon: 'dns',
       checks: [
         nameserversCheck,

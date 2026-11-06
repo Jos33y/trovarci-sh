@@ -117,7 +117,7 @@ export async function verifyOneEmail(email, opts = {}) {
     }
     result.email = syntax.value;
     result.domain = syntax.domain;
-    pushStep(result, 'syntax', 'pass', 'Properly formatted');
+    pushStep(result, 'syntax', 'pass', 'Written correctly');
 
     //  Steps 2-4: cheap tags (no I/O)
     try {
@@ -135,11 +135,11 @@ export async function verifyOneEmail(email, opts = {}) {
       result.category = 'invalid';
       result.subcategory = 'no_mx';
       pushStep(result, 'domain', 'fail',
-        mx.isNoRecord ? 'Domain has no MX records' : 'Could not resolve MX records');
+        mx.isNoRecord ? 'This domain can’t receive email' : 'Couldn’t find where this domain receives email');
       result.durationMs = Date.now() - start;
       return { ok: true, result };
     }
-    pushStep(result, 'domain', 'pass', `${mx.value.length} MX record(s)`);
+    pushStep(result, 'domain', 'pass', mx.value.length === 1 ? 'Can receive email (1 mail server)' : `Can receive email (${mx.value.length} mail servers)`);
 
     const primaryMx = mx.value[0].exchange;
     result.mxHost = primaryMx;
@@ -148,7 +148,7 @@ export async function verifyOneEmail(email, opts = {}) {
     const guard = await assertSafeHost(primaryMx);
     if (!guard.ok) {
       result.category = 'unknown';
-      pushStep(result, 'mx_safety', 'fail', guard.reason);
+      pushStep(result, 'mx_safety', 'fail', 'This domain’s mail server can’t be checked');
       result.durationMs = Date.now() - start;
       return {
         ok: false,
@@ -160,7 +160,7 @@ export async function verifyOneEmail(email, opts = {}) {
 
     if (opts.skipProbe) {
       result.category = 'unknown';
-      pushStep(result, 'mailbox', 'warn', 'Probe skipped by caller');
+      pushStep(result, 'mailbox', 'warn', 'Mailbox not checked');
       result.durationMs = Date.now() - start;
       return { ok: true, result };
     }
@@ -173,7 +173,7 @@ export async function verifyOneEmail(email, opts = {}) {
       result.category = 'risky';
       result.subcategory = 'catchall';
       result.smtpResponse = 'Domain accepts all addresses';
-      pushStep(result, 'mailbox', 'warn', 'Server accepts all addresses (cached catch-all)');
+      pushStep(result, 'mailbox', 'warn', 'Server accepts any address, so this one can’t be confirmed');
       result.durationMs = Date.now() - start;
       return { ok: true, result };
     }
@@ -183,7 +183,7 @@ export async function verifyOneEmail(email, opts = {}) {
 
       if (!mv.ok) {
         result.category = 'unknown';
-        pushStep(result, 'mailbox', 'warn', 'Verification provider did not return a verdict');
+        pushStep(result, 'mailbox', 'warn', 'No clear answer from the mail server');
         result.durationMs = Date.now() - start;
         return { ok: false, code: mv.code, error: mv.error, result };
       }
@@ -197,7 +197,7 @@ export async function verifyOneEmail(email, opts = {}) {
         result.category = 'risky';
         result.subcategory = 'catchall';
         result.smtpResponse = 'Domain accepts all addresses';
-        pushStep(result, 'mailbox', 'warn', 'Server accepts all addresses (catch-all)');
+        pushStep(result, 'mailbox', 'warn', 'Server accepts any address, so this one can’t be confirmed');
         // Cache it so the next address on this domain costs nothing.
         await setCatchall(result.domain, true, { detectedVia: 'external_api' }).catch(() => {});
       } else if (mv.verdict === 'invalid') {
@@ -216,10 +216,10 @@ export async function verifyOneEmail(email, opts = {}) {
         result.isDisposable = true;
         result.category = 'risky';
         result.subcategory = 'disposable';
-        pushStep(result, 'mailbox', 'warn', 'Disposable address');
+        pushStep(result, 'mailbox', 'warn', 'Throwaway inbox');
       } else if (mv.verdict === 'unknown') {
         result.category = 'unknown';
-        pushStep(result, 'mailbox', 'warn', 'Server response was inconclusive');
+        pushStep(result, 'mailbox', 'warn', 'The mail server didn’t give a clear answer');
       } else {
         pushStep(result, 'mailbox', 'pass', 'Mailbox exists');
         classifyAccepted(result);
@@ -252,7 +252,7 @@ export async function verifyOneEmail(email, opts = {}) {
       result.category = 'risky';
       result.subcategory = 'catchall';
       result.smtpResponse = 'Domain accepts all addresses';
-      pushStep(result, 'mailbox', 'warn', 'Server accepts all addresses (catch-all)');
+      pushStep(result, 'mailbox', 'warn', 'Server accepts any address, so this one can’t be confirmed');
       result.durationMs = Date.now() - start;
       return { ok: true, result };
     }
@@ -265,7 +265,7 @@ export async function verifyOneEmail(email, opts = {}) {
       // Caller refunds. We pass the partial info so the UI can still
       // show what we did get (syntax pass, MX records found, etc).
       result.category = 'unknown';
-      pushStep(result, 'mailbox', 'warn', 'Could not complete SMTP probe');
+      pushStep(result, 'mailbox', 'warn', 'Couldn’t reach the mail server to ask');
       result.durationMs = Date.now() - start;
       return {
         ok: false,
@@ -282,7 +282,7 @@ export async function verifyOneEmail(email, opts = {}) {
       result.category = 'unknown';
       result.subcategory = 'greylist';
       result.smtpResponse = probe.smtpResponse || null;
-      pushStep(result, 'mailbox', 'warn', 'Server delayed (greylisted) - try again later');
+      pushStep(result, 'mailbox', 'warn', 'The mail server asked us to try later');
       result.durationMs = Date.now() - start;
       return { ok: true, result, greylisted: true };
     }
@@ -299,7 +299,7 @@ export async function verifyOneEmail(email, opts = {}) {
     } else {
       // Server returned something we couldn't classify (rare 5xx on RCPT
       // that's not a clear rejection). Treat as unknown.
-      pushStep(result, 'mailbox', 'warn', 'Server response was inconclusive');
+      pushStep(result, 'mailbox', 'warn', 'The mail server didn’t give a clear answer');
       result.category = 'unknown';
       result.billable = false;
     }

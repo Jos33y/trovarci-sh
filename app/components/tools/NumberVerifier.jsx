@@ -157,7 +157,7 @@ function getSmsVerdict(t) {
       cssVariant: 'smsNone',
       icon: '\u2717',
       title: 'Delivery not possible',
-      detail: 'No carrier data returned.',
+      detail: 'The phone network had no record of this number.',
     };
   }
   if (t.partial) {
@@ -166,7 +166,7 @@ function getSmsVerdict(t) {
       cssVariant: 'smsUncertain',
       icon: '?',
       title: 'Delivery uncertain',
-      detail: 'Carrier could not be classified. Test with a single SMS before sending in volume.',
+      detail: 'The network didn\u2019t say what kind of number this is. Send one test text before a big send.',
     };
   }
   const bucket = getLineTypeBucket(t.lineType);
@@ -184,8 +184,8 @@ function getSmsVerdict(t) {
       kind: 'flaky',
       cssVariant: 'smsFlaky',
       icon: '!',
-      title: 'SMS works but is unreliable',
-      detail: 'VoIP carriers route SMS inconsistently. Some messages will deliver, others will fail silently. Test before sending in volume.',
+      title: 'Texts may or may not arrive',
+      detail: 'This is an internet phone number (VoIP). Some texts to these arrive and some quietly don\u2019t. Test before a big send.',
     };
   }
   return {
@@ -193,7 +193,7 @@ function getSmsVerdict(t) {
     cssVariant: 'smsNone',
     icon: '\u2717',
     title: 'Cannot receive SMS',
-    detail: `This is a ${(t.lineTypeLabel || 'landline').toLowerCase()}. SMS delivery will fail silently.`,
+    detail: `This is a ${(t.lineTypeLabel || 'landline').toLowerCase()}. A text would show as sent but never arrive. Call or email instead.`,
   };
 }
 
@@ -206,33 +206,33 @@ function friendlyError(err) {
     case 'AUTH_REQUIRED':
       return 'Sign in for carrier lookup.';
     case 'INSUFFICIENT_CREDITS':
-      return 'Not enough credits. Top up to continue.';
+      return 'Not enough credits. Add credits to continue.';
     case 'RATE_LIMITED':
       if (err?.retryAfterSeconds) {
         const mins = Math.ceil(err.retryAfterSeconds / 60);
-        return `Rate limit reached. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
+        return `Too many checks in a short time. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
       }
-      return 'Rate limit reached. Try again shortly.';
+      return 'Too many checks in a short time. Try again in a minute.';
     case 'INPUT_TOO_LONG':
       return 'Phone number is too long.';
     case 'BAD_REQUEST':
-      return 'Could not parse the request. Try again.';
+      return 'Something went wrong. Try again.';
     case 'TWILIO_NO_CREDENTIALS':
     case 'TWILIO_AUTH_FAILED':
-      return 'Carrier lookup is not configured. Contact support.';
+      return 'Carrier lookup isn\u2019t available right now. Your credits were returned. Try again later.';
     case 'TWILIO_RATE_LIMITED':
-      return 'Carrier lookup is busy. Your credit was refunded. Try again.';
+      return 'Carrier lookup is busy. Your credits were returned. Try again.';
     case 'TWILIO_TIMEOUT':
-      return 'Carrier lookup timed out. Your credit was refunded.';
+      return 'The phone network took too long to answer. Your credits were returned.';
     case 'TWILIO_NOT_FOUND':
-      return 'Carrier data is not available for this number. Your credit was refunded.';
+      return 'The phone network has no details for this number. Your credits were returned.';
     case 'TWILIO_TLS_FAILED':
-      return 'TLS validation failed. Your credit was refunded.';
+      return 'The lookup couldn\u2019t connect securely. Your credits were returned.';
     case 'TWILIO_BAD_SHAPE':
     case 'TWILIO_API_ERROR':
-      return 'Carrier lookup returned an unexpected response. Your credit was refunded.';
+      return 'The lookup returned something we couldn\u2019t read. Your credits were returned.';
     default:
-      return err?.message || 'Verification failed. Try again in a moment.';
+      return err?.message || 'The check didn\u2019t finish. Try again in a moment.';
   }
 }
 
@@ -528,7 +528,7 @@ export default function NumberVerifier({
       return;
     }
     if (lines.length > MAX_BULK_PHONES) {
-      setBulkError(`Too many numbers. Max ${formatInt(MAX_BULK_PHONES)} per job`);
+      setBulkError(`Too many numbers. Up to ${formatInt(MAX_BULK_PHONES)} per list.`);
       return;
     }
 
@@ -638,7 +638,7 @@ export default function NumberVerifier({
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok || !body.ok) {
-        setBulkError(body.error || `Could not start job (${res.status})`);
+        setBulkError(body.error || 'Could not start checking the list. Try again.');
         setBulkPhase('preview');
         return;
       }
@@ -650,7 +650,7 @@ export default function NumberVerifier({
       }
       startTracking(body.jobId, startedAt);
     } catch (err) {
-      setBulkError('Network error - try again');
+      setBulkError('Connection problem. Try again.');
       setBulkPhase('preview');
     }
   }, [bulkPhones, country, balance, startTracking]);
@@ -679,7 +679,7 @@ export default function NumberVerifier({
         setBulkError(body.error || 'Could not cancel');
       }
     } catch {
-      setBulkError('Could not cancel - check progress to confirm');
+      setBulkError('Could not stop the list. Check its progress to see where it is.');
     }
   }, [bulkJobId, balance, bulkStats, bulkStartedAt, cleanupBulkChannels]);
 
@@ -833,11 +833,11 @@ export default function NumberVerifier({
               </div>
               <div className={styles.formatCard}>
                 <div className={styles.formatRow}>
-                  <span className={styles.formatLabel}>E.164</span>
+                  <span className={styles.formatLabel}>International</span>
                   <span className={styles.formatValue}>{tier1Result.e164}</span>
                 </div>
                 <div className={styles.formatRow}>
-                  <span className={styles.formatLabel}>National</span>
+                  <span className={styles.formatLabel}>Local</span>
                   <span className={styles.formatValue}>{tier1Result.national}</span>
                 </div>
               </div>
@@ -961,7 +961,7 @@ export default function NumberVerifier({
                   </span>
                 </div>
                 <div className={styles.carrierDetail}>
-                  <span className={styles.carrierDetailLabel}>SMS capable</span>
+                  <span className={styles.carrierDetailLabel}>Can receive texts</span>
                   <span className={styles.carrierDetailValue}>
                     {(() => {
                       const v = getSmsVerdict(tier2Result);
@@ -1066,7 +1066,7 @@ export default function NumberVerifier({
             </div>
 
             <p className={styles.bulkUploadHint}>
-              Max {formatInt(MAX_BULK_PHONES)} numbers per job &middot; E.164 (+15...) or national format with country
+              Up to {formatInt(MAX_BULK_PHONES)} numbers &middot; with the country code (+44…), or pick the country above
             </p>
             {bulkError && <p className={styles.bulkErrorText}>{bulkError}</p>}
 

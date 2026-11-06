@@ -92,11 +92,11 @@ function friendlyError(err) {
         const mins = Math.ceil(err.retryAfterSeconds / 60);
         return `Rate limit reached. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
       }
-      return 'Rate limit reached. Try again shortly.';
+      return 'Too many tests in a short time. Try again in a minute.';
     case 'BAD_REQUEST':
-      return 'Request could not be processed. Check your inputs.';
+      return 'Something in the form isn\u2019t right. Check the details and try again.';
     default:
-      return err?.message || 'SMTP test failed. Check your inputs and try again.';
+      return err?.message || 'The test didn\u2019t finish. Check the details and try again.';
   }
 }
 
@@ -174,7 +174,7 @@ export default function SmtpTester() {
   }, []);
 
   const validate = useCallback(() => {
-    if (!host.trim()) return 'Enter an SMTP host';
+    if (!host.trim()) return 'Enter your SMTP server, like smtp.gmail.com';
     if (!username.trim()) return 'Enter a username';
     if (!password.trim()) return 'Enter a password';
     return '';
@@ -312,7 +312,7 @@ export default function SmtpTester() {
           <div className={styles.toolIcon}><TerminalIcon size={22} /></div>
           <div>
             <h1 className={styles.toolTitle}>SMTP tester</h1>
-            <p className={styles.toolDesc}>Test your SMTP connection step by step</p>
+            <p className={styles.toolDesc}>Check your email account\u2019s server, port and password before you send</p>
           </div>
         </div>
         <span className={styles.freeBadge}>FREE</span>
@@ -321,12 +321,12 @@ export default function SmtpTester() {
       {/* Input */}
       {phase === 'input' && (
         <div className={styles.inputSection}>
-          <p className={styles.privacyNote}>Credentials are used for this test only. Never stored, never logged.</p>
+          <p className={styles.privacyNote}>Your password is used for this test only, and never saved. Nothing is sent.</p>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>SMTP Host</label>
+            <label className={styles.fieldLabel} htmlFor="smtp-host">SMTP server</label>
             <div className={styles.hostWrapper}>
-              <input type="text" className={styles.textInput} placeholder="smtp.gmail.com" value={host}
+              <input id="smtp-host" type="text" spellCheck={false} className={styles.textInput} placeholder="smtp.gmail.com" value={host}
                 autoComplete="off"
                 onChange={(e) => handleHostChange(e.target.value)}
                 onFocus={() => host.length >= 2 && suggestions.length > 0 && setShowSuggestions(true)}
@@ -348,35 +348,35 @@ export default function SmtpTester() {
 
           <div className={styles.fieldRow}>
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Port</label>
-              <select className={styles.selectInput} value={port} onChange={(e) => handlePortChange(e.target.value)}>
+              <label className={styles.fieldLabel} htmlFor="smtp-port">Port</label>
+              <select id="smtp-port" className={styles.selectInput} value={port} onChange={(e) => handlePortChange(e.target.value)}>
                 <option value={587}>587 (STARTTLS)</option>
                 <option value={465}>465 (SSL/TLS)</option>
-                <option value={25}>25 (Plain)</option>
+                <option value={25}>25 (server to server)</option>
               </select>
             </div>
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Security</label>
-              <select className={styles.selectInput} value={security} onChange={(e) => handleSecurityChange(e.target.value)}>
+              <label className={styles.fieldLabel} htmlFor="smtp-security">Security</label>
+              <select id="smtp-security" className={styles.selectInput} value={security} onChange={(e) => handleSecurityChange(e.target.value)}>
                 <option value="starttls">STARTTLS</option>
                 <option value="ssl">SSL/TLS</option>
-                <option value="none">None</option>
+                <option value="none">None (unencrypted)</option>
               </select>
             </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>Username</label>
-            <input type="text" className={styles.textInput} placeholder="user@example.com" value={username}
+            <label className={styles.fieldLabel} htmlFor="smtp-user">Username</label>
+            <input id="smtp-user" type="text" spellCheck={false} className={styles.textInput} placeholder="user@example.com" value={username}
               autoComplete="off" name="smtp-user"
               onChange={(e) => { setUsername(e.target.value); setInputError(''); }} onKeyDown={handleKeyDown} />
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>Password</label>
+            <label className={styles.fieldLabel} htmlFor="smtp-pass">Password</label>
             <div className={styles.passwordWrapper}>
-              <input type={showPassword ? 'text' : 'password'} className={`${styles.textInput} ${styles.passwordInput}`}
-                placeholder="App password or SMTP key" value={password}
+              <input id="smtp-pass" type={showPassword ? 'text' : 'password'} className={`${styles.textInput} ${styles.passwordInput}`}
+                placeholder="App password for Gmail or Microsoft" value={password}
                 autoComplete="new-password" name="smtp-pass"
                 onChange={(e) => { setPassword(e.target.value); setInputError(''); }} onKeyDown={handleKeyDown} />
               <button type="button" className={styles.eyeButton} onClick={() => setShowPassword(!showPassword)}
@@ -393,19 +393,19 @@ export default function SmtpTester() {
           {showAdvanced && (
             <div className={styles.advancedPanel}>
               <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel}>From address</label>
-                <input type="text" className={styles.textInput} placeholder={username || 'user@example.com'}
+                <label className={styles.fieldLabel} htmlFor="smtp-from">From address</label>
+                <input id="smtp-from" type="text" spellCheck={false} className={styles.textInput} placeholder={username || 'user@example.com'}
                   value={fromAddr} onChange={(e) => setFromAddr(e.target.value)} />
               </div>
               <div className={styles.fieldRow}>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel}>Test recipient</label>
-                  <input type="text" className={styles.textInput} value={testRecipient}
+                  <label className={styles.fieldLabel} htmlFor="smtp-to">Test recipient</label>
+                  <input id="smtp-to" type="text" spellCheck={false} className={styles.textInput} value={testRecipient}
                     onChange={(e) => setTestRecipient(e.target.value)} />
                 </div>
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel}>Timeout (sec)</label>
-                  <input type="number" className={styles.textInput} min={5} max={30} value={timeoutSec}
+                  <label className={styles.fieldLabel} htmlFor="smtp-timeout">Timeout (seconds)</label>
+                  <input id="smtp-timeout" type="number" className={styles.textInput} min={5} max={30} value={timeoutSec}
                     onChange={(e) => setTimeoutSec(parseInt(e.target.value, 10) || 10)} />
                 </div>
               </div>
@@ -455,7 +455,7 @@ export default function SmtpTester() {
             {phase === 'testing' && !summary && (
               <div className={styles.termLoading}>
                 <span className={styles.loadingDot} />
-                <span>Testing next step...</span>
+                <span>Testing next step\u2026</span>
               </div>
             )}
           </div>
@@ -468,7 +468,7 @@ export default function SmtpTester() {
           <div className={`${styles.summaryCard} ${styles['summary_' + summary.verdict]}`}>
             <div className={styles.summaryHeader}>
               <span className={styles.summaryIcon}>{allPassed ? '\u2713' : '\u2717'}</span>
-              <span className={styles.summaryTitle}>{allPassed ? 'Connection Successful' : 'Connection Failed'}</span>
+              <span className={styles.summaryTitle}>{allPassed ? 'Your settings work' : 'Something didn\u2019t work'}</span>
             </div>
             <div className={styles.summaryGrid}>
               <div className={styles.summaryItem}>
@@ -501,7 +501,7 @@ export default function SmtpTester() {
               </div>
             </div>
             {allPassed
-              ? <p className={styles.summaryMessage}>Your SMTP server is ready to send email.</p>
+              ? <p className={styles.summaryMessage}>You can use these settings in your email app or sending software.</p>
               : summary.message && <p className={styles.summaryMessage}>{summary.message}</p>
             }
           </div>
@@ -517,7 +517,7 @@ export default function SmtpTester() {
           )}
 
           <div className={styles.resultActions}>
-            <button className={styles.retestButton} onClick={handleRetest}>Test Again</button>
+            <button className={styles.retestButton} onClick={handleRetest}>Test again</button>
             <button className={styles.newTestButton} onClick={handleNewTest}>Test a different server</button>
           </div>
 

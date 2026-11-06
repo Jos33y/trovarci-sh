@@ -85,7 +85,7 @@ function prettifyStepName(name) {
   if (!name) return '';
   const lower = String(name).toLowerCase();
   const map = {
-    syntax:         'Syntax',
+    syntax:         'Format',
     mx:             'Domain',
     mx_lookup:      'Domain',
     dns:            'Domain',
@@ -96,15 +96,15 @@ function prettifyStepName(name) {
     connect:        'Server',
     tcp:            'Server',
     proxy:          'Server',
-    helo:           'SMTP',
-    ehlo:           'SMTP',
-    smtp:           'SMTP',
+    helo:           'Mail server',
+    ehlo:           'Mail server',
+    smtp:           'Mail server',
     mail_from:      'Sender',
     rcpt:           'Mailbox',
     rcpt_to:        'Mailbox',
     mailbox:        'Mailbox',
-    catchall:       'Catch-all',
-    catchall_check: 'Catch-all',
+    catchall:       'Accepts all',
+    catchall_check: 'Accepts all',
   };
   return map[lower] || (name.charAt(0).toUpperCase() + name.slice(1));
 }
@@ -112,37 +112,37 @@ function prettifyStepName(name) {
 function buildMessage(r) {
   const { category, subcategory, isDisposable, isRole, isFreeProvider, isCatchall } = r;
   if (category === 'valid') {
-    if (isDisposable)    return 'Deliverable, but the inbox is disposable / temporary. The user may not check it.';
-    if (isRole)          return 'Deliverable, but this is a role address (info@, admin@, etc.) - not a personal mailbox.';
-    if (isFreeProvider)  return 'Valid and deliverable. Free-mail provider.';
-    return 'This email address is valid and deliverable.';
+    if (isDisposable)    return 'The mailbox exists, but it\u2019s a throwaway inbox. The person may never read it.';
+    if (isRole)          return 'The mailbox exists, but it\u2019s a shared inbox like info@ or admin@, not one person.';
+    if (isFreeProvider)  return 'The mailbox exists and accepts email. It\u2019s a free address, like Gmail or Yahoo.';
+    return 'The mailbox exists and accepts email. Safe to send.';
   }
   if (category === 'invalid') {
-    if (subcategory === 'syntax')  return 'The address is not properly formatted.';
-    if (subcategory === 'no_mx')   return 'The domain has no mail server. Email cannot be delivered.';
-    if (subcategory === 'mailbox') return 'Do not send to this address. The mailbox does not exist and will hard bounce.';
-    return 'This address cannot receive email.';
+    if (subcategory === 'syntax')  return 'The address isn\u2019t written correctly.';
+    if (subcategory === 'no_mx')   return 'This domain can\u2019t receive email. Every message would bounce.';
+    if (subcategory === 'mailbox') return 'This mailbox doesn\u2019t exist. Sending to it would bounce, so remove it.';
+    return 'This address can\u2019t receive email.';
   }
   if (category === 'risky') {
     if (subcategory === 'catchall' || isCatchall) {
-      return 'This server accepts email for any address. The specific mailbox may or may not exist.';
+      return 'This company\u2019s server accepts any address, so this one can\u2019t be confirmed. It may or may not exist.';
     }
     if (subcategory === 'disposable' || isDisposable) {
-      return 'This is a disposable / temporary inbox. The user may not check it.';
+      return 'A throwaway inbox. The person may never read it.';
     }
     if (subcategory === 'role' || isRole) {
-      return 'This is a role address (info@, admin@, etc.) - not a personal mailbox.';
+      return 'A shared inbox like info@ or admin@, not one person.';
     }
     if (subcategory === 'free_provider' || isFreeProvider) {
-      return 'Free-mail provider. Deliverable, but flagged for B2B campaigns.';
+      return 'A free address, like Gmail or Yahoo. Fine for people, but flagged in a business list.';
     }
-    return 'This address is deliverable but flagged as risky.';
+    return 'Real, but flagged as risky.';
   }
   if (category === 'unknown') {
     if (subcategory === 'greylist') {
-      return 'The destination server temporarily deferred us (graylisting). Try again in a few minutes.';
+      return 'The mail server asked us to try again later. Check it again in a few minutes.';
     }
-    return 'The destination server did not commit to a yes or no.';
+    return 'The mail server wouldn\u2019t say yes or no.';
   }
   return '';
 }
@@ -159,8 +159,8 @@ function shapeServerResult(r) {
     verdict,
     category: r.category,
     steps,
-    provider: r.mxHost ? `MX: ${r.mxHost}` : null,
-    response: r.smtpResponse || '(no SMTP response captured)',
+    provider: r.mxHost || null,
+    response: r.smtpResponse || 'No reply recorded',
     message:  buildMessage(r),
     isDisposable:   r.isDisposable,
     isRole:         r.isRole,
@@ -178,16 +178,16 @@ const FRIENDLY_ERROR = {
   EMAILS_REQUIRED:            'Add at least one email to verify.',
   EMAILS_NOT_STRINGS:         'Every entry must be plain text.',
   BULK_TOO_LARGE:             `Bulk uploads cap at ${formatInt(MAX_BULK_SIZE)} emails per job.`,
-  BULK_CREATE_FAILED:         'Could not start the bulk job. Your credits were refunded.',
-  PROXY_NO_CREDENTIALS:       'Verification infrastructure is being configured. Try again later.',
-  EMAIL_VERIFY_PROXY_TIMEOUT: 'Connection to the destination server timed out.',
-  EMAIL_VERIFY_PROXY_AUTH:    'Verification network authentication issue. Try again later.',
-  EMAIL_VERIFY_UNSAFE_MX:     'This domain blocks verification or has no usable mail server.',
-  EMAIL_VERIFY_TIMEOUT:       'The destination server took too long to respond.',
-  EMAIL_VERIFY_PROBE_FAILED:  'Could not complete the SMTP probe. Try again.',
-  JOB_NOT_FOUND:              'This job no longer exists.',
-  JOB_NOT_TERMINAL:           'The job is still running.',
-  JOB_NOT_CANCELLABLE:        'The job already finished.',
+  BULK_CREATE_FAILED:         'Could not start checking the list. Your credits were returned.',
+  PROXY_NO_CREDENTIALS:       'Checking isn\u2019t available right now. Try again in a few minutes.',
+  EMAIL_VERIFY_PROXY_TIMEOUT: 'The mail server took too long to answer. Try again.',
+  EMAIL_VERIFY_PROXY_AUTH:    'Checking isn\u2019t available right now. Try again in a few minutes.',
+  EMAIL_VERIFY_UNSAFE_MX:     'This domain\u2019s mail server can\u2019t be checked.',
+  EMAIL_VERIFY_TIMEOUT:       'The mail server took too long to answer. Try again.',
+  EMAIL_VERIFY_PROBE_FAILED:  'Couldn\u2019t reach the mail server to ask. Try again.',
+  JOB_NOT_FOUND:              'This list is no longer available. Lists are deleted after 48 hours.',
+  JOB_NOT_TERMINAL:           'This list is still being checked.',
+  JOB_NOT_CANCELLABLE:        'This list has already finished.',
 };
 
 function friendlyError(code, fallback) {
@@ -672,7 +672,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
                   onClick={handleSingleVerify}
                   disabled={phase === 'verifying'}
                 >
-                  {phase === 'verifying' ? 'Verifying...' : 'Verify'}
+                  {phase === 'verifying' ? 'Checking…' : 'Verify'}
                 </button>
               </div>
               {inputError && <p className={styles.errorText}>{inputError}</p>}
@@ -722,12 +722,12 @@ export default function EmailVerifier({ creditCost = 1 }) {
                 <div className={styles.resultMeta}>
                   {singleResult.provider && (
                     <div className={styles.metaRow}>
-                      <span className={styles.metaLabel}>Provider</span>
+                      <span className={styles.metaLabel}>Mail server</span>
                       <span className={styles.metaValue}>{singleResult.provider}</span>
                     </div>
                   )}
                   <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>Response</span>
+                    <span className={styles.metaLabel}>Server’s reply</span>
                     <span className={`${styles.metaValue} ${styles.mono}`}>{singleResult.response}</span>
                   </div>
                   <p className={styles.resultMessage} style={{ color: getVerdictColor(singleResult.verdict) }}>
@@ -787,7 +787,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
               </div>
 
               <div className={styles.pasteSection}>
-                <p className={styles.pasteLabel}>Or paste emails, one per line:</p>
+                <p className={styles.pasteLabel}>Or paste addresses, one per line:</p>
                 <textarea
                   className={styles.pasteArea}
                   rows={4}
@@ -801,7 +801,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
                 </button>
               </div>
 
-              <p className={styles.uploadHint}>Accepted: .csv, .txt - Max {formatInt(MAX_BULK_SIZE)} emails per job</p>
+              <p className={styles.uploadHint}>A .csv or .txt file, up to {formatInt(MAX_BULK_SIZE)} addresses</p>
               {inputError && <p className={styles.errorText}>{inputError}</p>}
             </div>
           )}
@@ -823,12 +823,12 @@ export default function EmailVerifier({ creditCost = 1 }) {
                 <div className={styles.previewCost}>
                   <span className={styles.costLabel}>Cost:</span>
                   <span className={styles.costValue}>{formatInt(bulkEmails.length * creditCost)} Credits</span>
-                  <span className={styles.costCalc}>({creditCost} per email, same as single)</span>
+                  <span className={styles.costCalc}>(${(bulkEmails.length * creditCost / 100).toFixed(2)}, {creditCost}\u00a2 per address)</span>
                 </div>
               </div>
               <div className={styles.previewActions}>
                 <button className={styles.verifyBulkButton} onClick={handleBulkVerify}>
-                  Verify {formatInt(bulkEmails.length)} emails
+                  Check {formatInt(bulkEmails.length)} addresses
                 </button>
                 <button className={styles.resetButton} onClick={handleBulkReset}>Cancel</button>
               </div>
@@ -840,7 +840,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
           {phase === 'verifying' && (
             <div className={styles.progressSection}>
               <div className={styles.progressHeader}>
-                <span>Verifying {formatInt(bulkTotal)} emails...</span>
+                <span>Checking {formatInt(bulkTotal)} addresses\u2026</span>
                 <span className={styles.progressPct}>{bulkPct}%</span>
               </div>
               <div className={styles.progressBar}>
@@ -871,13 +871,13 @@ export default function EmailVerifier({ creditCost = 1 }) {
                 <div className={styles.errorInfoRow}>
                   <span className={styles.errorInfoCount}>{formatInt(bulkStats.error)}</span>
                   <span className={styles.errorInfoText}>
-                    infrastructure {bulkStats.error === 1 ? 'failure' : 'failures'} so far - the worker could not reach these mailboxes
+                    {bulkStats.error === 1 ? 'address' : 'addresses'} we couldn\u2019t check so far. Their credits come back to you
                   </span>
                 </div>
               )}
-              <p className={styles.progressNote}>Results update live as the worker processes your list.</p>
+              <p className={styles.progressNote}>Results update as each address is checked. You can leave this page: the list keeps going, and you’ll find it on your dashboard.</p>
               <div className={styles.resultActions}>
-                <button className={styles.resetButton} onClick={handleBulkCancel}>Cancel job</button>
+                <button className={styles.resetButton} onClick={handleBulkCancel}>Stop checking</button>
               </div>
             </div>
           )}
@@ -894,7 +894,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
               countsHint={bulkResults.counts || null}
               onNewJob={handleBulkReset}
               toolChainHref="/smtp-test"
-              toolChainLabel="Your list is verified. Test your SMTP connection"
+              toolChainLabel="List checked. Next, test your email account\u2019s settings"
               toolChainBadge="SMTP Tester"
             />
           )}

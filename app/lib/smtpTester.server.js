@@ -20,8 +20,8 @@
        appended to step.lines.
      - Nodemailer's built-in debug output is captured into our transcript
        (not routed to process.stdout), so server logs stay clean.
-     - No email is ever sent. We abort the conversation cleanly at QUIT after
-       RCPT TO is accepted or refused.
+     - No email is ever sent. The sender and recipient check (smtpEnvelope.server.js)
+       stops after RCPT TO with RSET and QUIT; DATA is never issued.
      - Hard timeout caps: per-stage and overall.
 
    Why not write the SMTP state machine by hand:
@@ -34,6 +34,7 @@
 
 import nodemailer from 'nodemailer';
 import { assertSafeHost } from '../utils/ssrfGuard.server.js';
+import { checkEnvelope } from './smtpEnvelope.server.js';
 
 /* ─── Config ───────────────────────────────────────────────────────────── */
 
@@ -186,14 +187,14 @@ export async function runSmtpTest(config) {
   /* Build steps in the order the spec defines. Each step starts as 'skip'
      and gets promoted to 'pass' or 'fail' as the handshake progresses. */
   const steps = {
-    tcp_connect: makeStep('tcp_connect', 'TCP Connection'),
-    banner:      makeStep('banner',      'Server Banner'),
-    ehlo:        makeStep('ehlo',        'EHLO Handshake'),
-    starttls:    makeStep('starttls',    'STARTTLS'),
-    auth:        makeStep('auth',        'Authentication'),
-    mail_from:   makeStep('mail_from',   'Sender Accepted'),
-    rcpt_to:     makeStep('rcpt_to',     'Recipient Accepted'),
-    quit:        makeStep('quit',        'Connection Close'),
+    tcp_connect: makeStep('tcp_connect', 'Connect to server'),
+    banner:      makeStep('banner',      'Server greeting'),
+    ehlo:        makeStep('ehlo',        'Introduce (EHLO)'),
+    starttls:    makeStep('starttls',    'Encryption (STARTTLS)'),
+    auth:        makeStep('auth',        'Log in'),
+    mail_from:   makeStep('mail_from',   'Sender accepted'),
+    rcpt_to:     makeStep('rcpt_to',     'Recipient accepted'),
+    quit:        makeStep('quit',        'Disconnect'),
   };
 
   // Initial info line for TCP connect step.
@@ -352,26 +353,41 @@ export async function runSmtpTest(config) {
     finishStep(steps.ehlo,        'pass', describeEhlo(capabilities, maxSize), bannerStarted);
 
     if (secure) {
-      finishStep(steps.starttls, 'skip', 'Implicit TLS (port uses SSL from the start)', bannerStarted);
+      finishStep(steps.starttls, 'skip', 'Encrypted from the start (port 465)', bannerStarted);
     } else if (requireTLS) {
       // Inspect the underlying socket for TLS info via a follow-up SMTP NOOP.
       // Nodemailer exposes the socket through the pool; simplest reliable path
       // is to infer from capabilities.
       if (capabilities.has('STARTTLS')) {
-        finishStep(steps.starttls, 'pass', 'STARTTLS negotiated', bannerStarted);
+        finishStep(steps.starttls, 'pass', 'Encryption switched on', bannerStarted);
       } else {
-        finishStep(steps.starttls, 'skip', 'Server did not advertise STARTTLS', bannerStarted);
+        finishStep(steps.starttls, 'skip', 'The server doesn\u2019t offer encryption', bannerStarted);
       }
     } else {
-      finishStep(steps.starttls, 'skip', 'Not requested (security=none)', bannerStarted);
+      finishStep(steps.starttls, 'skip', 'Not requested', bannerStarted);
     }
 
-    finishStep(steps.auth, 'pass', authMethod ? `${authMethod} method accepted` : 'Accepted', bannerStarted);
+    finishStep(steps.auth, 'pass', 'Logged in', bannerStarted);
 
-    /* MAIL FROM + RCPT TO probe. sendMail with a header-only message and no
-       actual DATA would send mail; instead we use the lower-level SMTP
-       connection to run just the envelope commands and then QUIT. */
-    const envProbe = await probeEnvelope(transporter, fromAddr, toAddr, stageTimeoutMs);
+    /* MAIL FROM + RCPT TO on a fresh connection, then RSET and QUIT. DATA is
+       never sent, so the test can't deliver anything. */
+    const envProbe = await withTimeout(checkEnvelope({
+      address: safe.ips[0],
+      host,
+      port,
+      secure,
+      requireTLS,
+      ignoreTLS,
+      username,
+      password,
+      from: fromAddr,
+      to: toAddr,
+      ehloName: OUR_EHLO_NAME,
+      timeoutMs: stageTimeoutMs,
+    }), OVERALL_TIMEOUT_MS, 'Sender and recipient check timed out');
+    for (const line of envProbe.transcript) {
+      if (steps[line.step]) steps[line.step].lines.push({ type: line.type, text: line.text });
+    }
 
     if (envProbe.mailFrom.ok) {
       finishStep(steps.mail_from, 'pass', `${fromAddr} accepted`, bannerStarted);
@@ -384,7 +400,7 @@ export async function runSmtpTest(config) {
     } else if (envProbe.mailFrom.ok) {
       finishStep(steps.rcpt_to, 'fail', envProbe.rcptTo.error || 'Rejected', bannerStarted);
     } else {
-      finishStep(steps.rcpt_to, 'skip', 'Skipped: sender was rejected', bannerStarted);
+      finishStep(steps.rcpt_to, 'skip', 'Not checked: the sender was refused', bannerStarted);
     }
 
     finishStep(steps.quit, 'pass', 'Connection closed', bannerStarted);
@@ -448,83 +464,6 @@ export async function runSmtpTest(config) {
   };
 }
 
-/* ─── Envelope probe (MAIL FROM + RCPT TO + QUIT) ──────────────────────── */
-
-/**
- * Nodemailer doesn't expose a "just probe the envelope without sending" API,
- * so we use sendMail with a very small SMTP-level interception: we attempt to
- * send a 0-byte DATA. If that fails cleanly on DATA (which most servers do
- * for empty mail), the envelope was still validated. We catch the DATA error
- * and report only MAIL/RCPT as the useful signal.
- *
- * In practice, most providers (Gmail, SES, SendGrid) will 550 on empty DATA.
- * The resulting error includes the envelope response codes, which we parse.
- */
-async function probeEnvelope(transporter, from, to, timeoutMs) {
-  const result = {
-    mailFrom: { ok: false, error: null },
-    rcptTo: { ok: false, error: null },
-  };
-
-  try {
-    await withTimeout(
-      transporter.sendMail({
-        from,
-        to,
-        subject: 'SMTP connectivity test (no content)',
-        text: '.',
-        envelope: { from, to: [to] },
-      }),
-      timeoutMs,
-      'Envelope probe timed out',
-    );
-    // If sendMail actually succeeded, both are good.
-    result.mailFrom.ok = true;
-    result.rcptTo.ok = true;
-  } catch (err) {
-    // Common paths:
-    // - EENVELOPE with response like "550 5.1.1 No such user" => RCPT failed
-    // - code 'EENVELOPE' with rejected array => both ok, DATA failed
-    // - code 'EAUTH' or similar if upstream AUTH recycling broke (rare here)
-    const resp = String(err?.response || '');
-    const code = err?.code || '';
-
-    if (err?.rejected?.length && !err?.rejectedErrors) {
-      // MAIL FROM ok, RCPT TO rejected.
-      result.mailFrom.ok = true;
-      result.rcptTo.error = resp || 'Recipient rejected';
-      return result;
-    }
-
-    // If sendMail failed at DATA (common for empty-content probes), envelope
-    // was still validated. Check the response code: 354 means "start DATA",
-    // which means MAIL + RCPT already passed.
-    if (/\b354\b/.test(resp) || code === 'EMESSAGE' || /data/i.test(resp)) {
-      result.mailFrom.ok = true;
-      result.rcptTo.ok = true;
-      return result;
-    }
-
-    // Sender rejected (MAIL FROM stage)
-    if (/mail from/i.test(resp) || /^5\d\d\b.*sender/i.test(resp)) {
-      result.mailFrom.error = resp || 'Sender rejected';
-      return result;
-    }
-
-    // Recipient rejected
-    if (/rcpt to/i.test(resp) || /^5\d\d\b.*recipient/i.test(resp)) {
-      result.mailFrom.ok = true;
-      result.rcptTo.error = resp || 'Recipient rejected';
-      return result;
-    }
-
-    // Generic: treat as MAIL FROM failure to be safe.
-    result.mailFrom.error = resp || err?.message || 'Envelope probe failed';
-  }
-
-  return result;
-}
-
 /* ─── Helpers ──────────────────────────────────────────────────────────── */
 
 function withTimeout(promise, ms, msg) {
@@ -551,14 +490,14 @@ function deriveVerdict(steps) {
 
 function summaryMessage(steps) {
   const v = deriveVerdict(steps);
-  if (v === 'pass') return 'Your SMTP connection is working. Ready to send.';
+  if (v === 'pass') return 'Your settings work. Ready to send.';
   const firstFail = Object.values(steps).find((s) => s.status === 'fail');
   if (firstFail) return `Test stopped at ${firstFail.label}: ${firstFail.detail}`;
   return 'Some steps did not complete';
 }
 
 function nodemailerErrorToMessage(err) {
-  if (!err) return 'Unknown failure';
+  if (!err) return 'Something went wrong';
   const resp = err?.response;
   const code = err?.code;
   const syscall = err?.syscall;
@@ -571,20 +510,20 @@ function nodemailerErrorToMessage(err) {
   const combined = underlying ? `${code} / ${underlying}` : code;
 
   const byCode = {
-    ECONNREFUSED: 'Connection refused by the server',
-    ETIMEDOUT:    'Connection timed out. This usually means outbound port is blocked at the network level (ISP, VPN, or firewall), not that the server is down.',
-    ECONNECTION:  'Could not reach the server. This usually means outbound port is blocked at the network level.',
-    EDNS:         'Could not resolve the hostname',
+    ECONNREFUSED: 'The server refused the connection. Check the server name and port.',
+    ETIMEDOUT:    'No answer from the server. Usually the port is blocked on the way (a firewall or network), not that the server is down. Try 587 or 465.',
+    ECONNECTION:  'Couldn\u2019t reach the server. The port may be blocked on the way. Try 587 or 465.',
+    EDNS:         'That server name doesn\u2019t exist. Check the spelling.',
     ESOCKET:      syscall === 'connect'
-      ? 'Could not establish TCP connection. Usually caused by the outbound port being blocked (ISP, VPN, or firewall), not by the remote server.'
-      : 'Socket error during connection',
-    EAUTH:        'Authentication rejected',
-    EENVELOPE:    'Envelope rejected',
-    ETLS:         'TLS handshake failed',
+      ? 'Couldn\u2019t connect. Usually the port is blocked on the way, not a problem with the server. Try 587 or 465.'
+      : 'The connection dropped.',
+    EAUTH:        'The server refused the username or password. Gmail and Microsoft accounts need an app password.',
+    EENVELOPE:    'The server refused the sender or recipient.',
+    ETLS:         'Encryption failed. Try the other port (587 or 465), or check the server\u2019s certificate.',
   };
   if (byCode[code]) return byCode[code];
 
-  return (err.message || `Unknown failure (${combined})`).slice(0, 300);
+  return (err.message || `Something went wrong (${combined})`).slice(0, 300);
 }
 
 function promoteEarlierStepsOnFail(steps, failedStepName) {
@@ -605,21 +544,21 @@ function promoteEarlierStepsOnFail(steps, failedStepName) {
   for (let i = failIdx + 1; i < order.length; i++) {
     const s = steps[order[i]];
     if (s.status === 'skip' && !s.detail) {
-      s.detail = 'Not reached (prior step failed)';
+      s.detail = 'Not reached: an earlier step failed';
     }
   }
 }
 
 function buildFailure(host, port, failStep, detail, startedAt, code = 'VALIDATION') {
   const steps = {
-    tcp_connect: makeStep('tcp_connect', 'TCP Connection'),
-    banner:      makeStep('banner',      'Server Banner'),
-    ehlo:        makeStep('ehlo',        'EHLO Handshake'),
-    starttls:    makeStep('starttls',    'STARTTLS'),
-    auth:        makeStep('auth',        'Authentication'),
-    mail_from:   makeStep('mail_from',   'Sender Accepted'),
-    rcpt_to:     makeStep('rcpt_to',     'Recipient Accepted'),
-    quit:        makeStep('quit',        'Connection Close'),
+    tcp_connect: makeStep('tcp_connect', 'Connect to server'),
+    banner:      makeStep('banner',      'Server greeting'),
+    ehlo:        makeStep('ehlo',        'Introduce (EHLO)'),
+    starttls:    makeStep('starttls',    'Encryption (STARTTLS)'),
+    auth:        makeStep('auth',        'Log in'),
+    mail_from:   makeStep('mail_from',   'Sender accepted'),
+    rcpt_to:     makeStep('rcpt_to',     'Recipient accepted'),
+    quit:        makeStep('quit',        'Disconnect'),
   };
   const now = Date.now();
   const failKey = failStep in steps ? failStep : 'tcp_connect';

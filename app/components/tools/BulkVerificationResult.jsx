@@ -130,7 +130,7 @@ const TYPE_CONFIG = {
       { key: 'unknown', label: 'Unknown', dotClass: 'dotUnknown' },
     ],
     columns: ['email', 'type', 'reason'],
-    columnHeaders: { email: 'Email', type: 'Status', reason: 'Reason / SMTP' },
+    columnHeaders: { email: 'Email', type: 'Result', reason: 'Reason' },
     txtFilenameHint: 'emails',
     cleanCsvLabel:   'valid-only list',
     showHealth:      true,
@@ -201,11 +201,11 @@ function buildHeadline(counts, total, type) {
     (counts.valid || 0) + (counts.risky || 0) + (counts.invalid || 0) +
     (counts.unknown || 0) + (counts.mobile || 0);
 
-  if (total === 0) return `No ${cfg.rowNoun} processed`;
+  if (total === 0) return `No ${cfg.rowNoun} checked`;
 
   // 100% errors - the situation that broke the old EmailVerifier UI
   if (errs === total) {
-    return `All ${formatInt(total)} ${cfg.rowNoun} hit infrastructure errors`;
+    return `None of the ${formatInt(total)} ${cfg.rowNoun} could be checked`;
   }
 
   // Mixed - lead with deliverable count, then breakdown
@@ -215,16 +215,16 @@ function buildHeadline(counts, total, type) {
   if (primary > 0) parts.push(`${formatInt(primary)} ${cfg.primaryLabel}`);
 
   if (type === 'phone') {
-    if (counts.risky > 0)   parts.push(`${formatInt(counts.risky)} landline`);
+    if (counts.risky > 0)   parts.push(`${formatInt(counts.risky)} landline or internet`);
     if (counts.invalid > 0) parts.push(`${formatInt(counts.invalid)} invalid`);
   } else {
     if (counts.risky > 0)   parts.push(`${formatInt(counts.risky)} risky`);
     if (counts.invalid > 0) parts.push(`${formatInt(counts.invalid)} invalid`);
     if (counts.unknown > 0) parts.push(`${formatInt(counts.unknown)} unknown`);
   }
-  if (errs > 0) parts.push(`${formatInt(errs)} errored`);
+  if (errs > 0) parts.push(`${formatInt(errs)} not checked`);
 
-  if (parts.length === 0) return `${formatInt(total)} ${cfg.rowNoun} processed`;
+  if (parts.length === 0) return `${formatInt(total)} ${cfg.rowNoun} checked`;
 
   // Special case: all rows are deliverable
   if (verdictTotal > 0 && primary === verdictTotal && errs === 0) {
@@ -258,27 +258,27 @@ function getListHealth(counts) {
     return {
       verdict: 'Healthy',
       cls: 'healthHealthy',
-      message: `Of ${formatInt(verdictTotal)} verdicts, only ${invalidPct.toFixed(1)}% are invalid. Safe to send.`,
+      message: `Only ${invalidPct.toFixed(1)}% of ${formatInt(verdictTotal)} addresses are invalid. Safe to send.`,
     };
   }
   if (riskPct <= 5) {
     return {
       verdict: 'Acceptable',
       cls: 'healthAcceptable',
-      message: `${invalidPct.toFixed(1)}% invalid. Consider removing them before sending.`,
+      message: `${invalidPct.toFixed(1)}% invalid. Remove them before you send.`,
     };
   }
   if (riskPct <= 10) {
     return {
       verdict: 'Needs cleaning',
       cls: 'healthWarning',
-      message: `${invalidPct.toFixed(1)}% invalid. Send rate above this hurts your sender reputation.`,
+      message: `${invalidPct.toFixed(1)}% invalid. That many bounces makes mail providers trust you less. Remove them before you send.`,
     };
   }
   return {
     verdict: 'Dangerous',
     cls: 'healthDanger',
-    message: `${invalidPct.toFixed(1)}% invalid. Do not send to this list. Clean it first.`,
+    message: `${invalidPct.toFixed(1)}% invalid. Don\u2019t send to this list until you\u2019ve removed them.`,
   };
 }
 
@@ -326,17 +326,25 @@ function formatDuration(ms) {
   return `${m}m ${s}s`;
 }
 
+// Error codes are for us; customers see what happened in plain words.
+function plainError(code) {
+  if (!code) return '';
+  if (/TIMEOUT/.test(code)) return 'Mail server too slow to answer';
+  if (/UNSAFE_MX/.test(code)) return 'Mail server can\u2019t be checked';
+  return 'Couldn\u2019t be checked. Credit returned';
+}
+
 function emailSubcategoryLabel(sub) {
   if (!sub) return '';
   const map = {
-    catchall:      'Catch-all',
-    disposable:    'Disposable',
-    role:          'Role',
-    free_provider: 'Free',
-    syntax:        'Syntax',
-    no_mx:         'No MX',
-    mailbox:       'Mailbox',
-    greylist:      'Greylisted',
+    catchall:      'Accepts all',
+    disposable:    'Throwaway',
+    role:          'Shared inbox',
+    free_provider: 'Free address',
+    syntax:        'Typo',
+    no_mx:         'Can\u2019t receive email',
+    mailbox:       'No such mailbox',
+    greylist:      'Try later',
   };
   return map[sub] || sub;
 }
@@ -528,10 +536,10 @@ export default function BulkVerificationResult({
 
   const statusBadge =
     status === 'cancelled' ? { label: 'Cancelled',    cls: styles.statusCancelled } :
-    status === 'partial'   ? { label: 'With errors',  cls: styles.statusPartial } :
+    status === 'partial'   ? { label: 'Some not checked', cls: styles.statusPartial } :
     status === 'failed'    ? { label: 'Failed',       cls: styles.statusFailed } :
     errorCount === totalItems && totalItems > 0
-                           ? { label: 'All errored',  cls: styles.statusFailed } :
+                           ? { label: 'Not checked',  cls: styles.statusFailed } :
                              { label: 'Complete',     cls: styles.statusComplete };
 
   const primaryCount = counts[cfg.primaryBucket] || 0;
@@ -546,7 +554,7 @@ export default function BulkVerificationResult({
               {statusBadge.label}
             </span>
             <span className={styles.heroMeta}>
-              {formatInt(processedRows) || formatInt(totalItems)} processed
+              {formatInt(processedRows) || formatInt(totalItems)} checked
               {durationMs && ` · ${formatDuration(durationMs)}`}
             </span>
           </div>
@@ -564,7 +572,7 @@ export default function BulkVerificationResult({
           )}
           {creditsRefunded > 0 && (
             <p className={styles.refundNote}>
-              Refunded {formatInt(creditsRefunded)} credits for unprocessed {cfg.rowNoun}
+              {formatInt(creditsRefunded)} credits returned for {cfg.rowNoun} we didn\u2019t check
             </p>
           )}
           {loadError && <p className={styles.errorNote}>{loadError}</p>}
@@ -578,17 +586,16 @@ export default function BulkVerificationResult({
           <div className={styles.allErrorsBody}>
             <p className={styles.allErrorsTitle}>None of your {cfg.rowNoun} could be verified</p>
             <p className={styles.allErrorsText}>
-              All {formatInt(totalItems)} hit an infrastructure failure. The verification network
-              may be temporarily unavailable. Your credits were not consumed for failed verifications -
-              you can retry safely.
+              Something went wrong on our side, not with your list. You weren\u2019t charged for
+              any of them, so you can try again in a few minutes.
             </p>
             <div className={styles.allErrorsActions}>
               <button className={styles.allErrorsCopyBtn} onClick={copyErrors} type="button">
                 {copyState.errors ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-                {copyState.errors ? 'Copied' : `Copy ${formatInt(errorCount)} ${cfg.rowNoun} for retry`}
+                {copyState.errors ? 'Copied' : `Copy ${formatInt(errorCount)} ${cfg.rowNoun} to try again`}
               </button>
               <button className={styles.allErrorsRetryBtn} onClick={onNewJob} type="button">
-                Start a new job
+                Start again
               </button>
             </div>
           </div>
@@ -608,8 +615,8 @@ export default function BulkVerificationResult({
         <div className={styles.partialErrorsNotice}>
           <span className={styles.partialErrorsIcon}><WarningIcon size={14} /></span>
           <span className={styles.partialErrorsText}>
-            {formatInt(errorCount)} {cfg.rowNoun} could not be verified due to infrastructure issues.
-            Filter to &ldquo;Errored&rdquo; below to copy them and retry later.
+            {formatInt(errorCount)} {cfg.rowNoun} couldn\u2019t be checked, and their credits were returned.
+            Choose &ldquo;Not checked&rdquo; below to copy them and try again later.
           </span>
         </div>
       )}
@@ -653,7 +660,7 @@ export default function BulkVerificationResult({
           <FilterTab
             active={activeTab === 'error'}
             onClick={() => { setTab('error'); setShowAll(false); }}
-            label="Errored"
+            label="Not checked"
             count={errorCount}
             dot={styles.dotError}
           />
@@ -709,7 +716,7 @@ export default function BulkVerificationResult({
                         Email {sortIndicator('input')}
                       </th>
                       <th className={styles.thType}>Status</th>
-                      <th className={styles.thCarrier}>Reason / SMTP</th>
+                      <th className={styles.thCarrier}>Reason</th>
                     </>
                   )}
                   <th className={styles.thAction}></th>
@@ -825,7 +832,7 @@ export default function BulkVerificationResult({
       {/* ─── FOOTER ACTIONS ─── */}
       <div className={styles.footerActions}>
         <button className={styles.newJobBtn} onClick={onNewJob} type="button">
-          New bulk job
+          Check another list
         </button>
         {onBackToSingle && (
           <button className={styles.backBtn} onClick={onBackToSingle} type="button">
@@ -904,7 +911,7 @@ function ResultRow({ item, type, onCopy, copied }) {
           </td>
           <td className={styles.tdCarrier}>
             {item.errorCode
-              ? <span className={styles.errCode}>{item.errorCode}</span>
+              ? <span className={styles.errCode}>{plainError(item.errorCode)}</span>
               : item.smtpResponse
                 ? <span className={styles.smtpResp}>{item.smtpResponse}</span>
                 : <span className={styles.dim}>-</span>}
@@ -974,7 +981,7 @@ function ResultCard({ item, type, onCopy, copied }) {
         )}
         {type === 'email' && item.subcategory && (
           <div className={styles.cardField}>
-            <span className={styles.cardFieldLabel}>Subtype</span>
+            <span className={styles.cardFieldLabel}>Type</span>
             <span className={styles.cardFieldValue}>{emailSubcategoryLabel(item.subcategory)}</span>
           </div>
         )}
@@ -982,7 +989,7 @@ function ResultCard({ item, type, onCopy, copied }) {
           <div className={styles.cardField}>
             <span className={styles.cardFieldLabel}>Reason</span>
             <span className={styles.cardFieldValue}>
-              {item.errorCode || item.smtpResponse}
+              {item.errorCode ? plainError(item.errorCode) : item.smtpResponse}
             </span>
           </div>
         )}

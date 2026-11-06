@@ -9,7 +9,7 @@
 
 ## Tools
 
-- [Domain Checker](https://trovarci.sh/domain): Checks whether a domain is set up so mail providers trust its email: SPF, DKIM, DMARC, mail servers, encryption, and blocklists (Spamhaus, SpamCop, Barracuda, PSBL, SURBL and the Spamhaus domain list). 25 checks with a plain fix for each. Free, no signup.
+- [Domain Checker](https://trovarci.sh/domain): Checks whether a domain is set up so mail providers trust its email: SPF, DKIM, DMARC, mail servers, encryption, and blocklists (Spamhaus, SpamCop, Barracuda, PSBL, SURBL and the Spamhaus domain list). a plain fix for each problem. Free, no signup.
 - [SMTP Tester](https://trovarci.sh/smtp-test): Tests an email account's server, port and password, and shows in plain words where a connection fails. Free, no signup.
 - [DNS Record Generator](https://trovarci.sh/records): Writes the SPF, DKIM, DMARC and MX records for your domain and email provider, ready to copy into your DNS. Free, no signup.
 - [Email Verifier](https://trovarci.sh/verify): Finds the addresses on a list that would bounce. One address or up to 50,000 per list. Results: valid, invalid, catch-all, disposable, role-based. 1 credit per address, and addresses that can't be billed are refunded.

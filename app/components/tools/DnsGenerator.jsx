@@ -702,7 +702,7 @@ function StepTwo({
     <div className={styles.stepContent} role="tabpanel" id="dns-panel-2" aria-labelledby="dns-tab-2">
       {/* Registrar */}
       <div className={styles.fieldGroup}>
-        <label className={styles.label}>DNS registrar</label>
+        <label className={styles.label}>Where your domain’s DNS is managed</label>
         <div className={styles.optionGrid}>
           {REGISTRARS.map((r) => (
             <button
@@ -1281,7 +1281,7 @@ function StepThree({
 
       {/* Footer */}
       <div className={styles.resultActions}>
-        <button className={styles.backBtn} onClick={onBack}>Edit Settings</button>
+        <button className={styles.backBtn} onClick={onBack}>Change settings</button>
         <Link to="/domain" className={styles.verifyLink}>
           Verify with Domain Checker
           <ArrowRight />

@@ -59,10 +59,10 @@ function ArrowRightSmall({ size = 14 }) {
 
 const ANALYSIS_STEPS = [
   'Checking subject line',
-  'Analyzing body content',
-  'Evaluating structure',
-  'Scanning links & CTAs',
-  'Checking compliance',
+  'Reading the email',
+  'Checking the layout',
+  'Checking the links',
+  'Checking the unsubscribe and address',
 ];
 
 /* -- Verdict config -- */
@@ -92,27 +92,27 @@ function friendlyError(err) {
     case 'AUTH_REQUIRED':
       return 'Sign in to score emails.';
     case 'INSUFFICIENT_CREDITS':
-      return 'Not enough credits. Top up to continue scoring.';
+      return 'Not enough credits. Add credits to keep scoring.';
     case 'RATE_LIMITED':
       if (err?.retryAfterSeconds) {
         const mins = Math.ceil(err.retryAfterSeconds / 60);
         return `Rate limit reached. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
       }
-      return 'Rate limit reached. Try again shortly.';
+      return 'Too many emails scored in a short time. Try again in a minute.';
     case 'VALIDATION':
     case 'ARCIS_VALIDATION':
       return err.message || 'Check your input and try again.';
     case 'ARCIS_RATE_LIMITED':
-      return 'Scoring engine is busy. Retry in a moment.';
+      return 'Scoring is busy right now. Try again in a moment.';
     case 'ARCIS_TIMEOUT':
-      return 'Scoring engine timed out. Your credit was refunded. Try again.';
+      return 'Scoring took too long. Your credit was returned. Try again.';
     case 'ARCIS_BAD_SHAPE':
     case 'ARCIS_API_ERROR':
-      return 'Scoring engine returned an unexpected response. Your credit was refunded.';
+      return 'Scoring didn\u2019t finish. Your credit was returned. Try again.';
     case 'ARCIS_NO_API_KEY':
-      return 'Scoring engine is not configured. Contact support.';
+      return 'Scoring isn\u2019t available right now. Try again later.';
     default:
-      return err?.message || 'Scoring failed. Try again in a moment.';
+      return err?.message || 'Scoring didn\u2019t finish. Try again in a moment.';
   }
 }
 
@@ -188,7 +188,7 @@ export default function EmailScorer({
   const validate = useCallback(() => {
     if (!subject.trim()) return 'Enter a subject line';
     if (!body.trim()) {
-      return inputMode === 'html' ? 'Paste your email HTML' : 'Enter email body content';
+      return inputMode === 'html' ? 'Paste your email\u2019s HTML' : 'Paste the text of your email';
     }
     if (body.trim().length < 10) {
       return inputMode === 'html' ? 'Email content is too short to analyze' : 'Email body is too short to analyze';
@@ -389,7 +389,7 @@ export default function EmailScorer({
           </div>
           <div>
             <h1 className={styles.toolTitle}>Email spam checker</h1>
-            <p className={styles.toolDesc}>Score your email for deliverability before you send</p>
+            <p className={styles.toolDesc}>See if your email will land in spam, and what to fix, before you send</p>
           </div>
         </div>
         <span className={styles.freeBadge}>
@@ -517,7 +517,7 @@ export default function EmailScorer({
       {/* Processing Animation */}
       {phase === 'processing' && (
         <div className={styles.processingSection}>
-          <p className={styles.processingLabel}>Analyzing your email...</p>
+          <p className={styles.processingLabel}>Reading your email\u2026</p>
           <div className={styles.stepList}>
             {ANALYSIS_STEPS.map((step, i) => {
               const done = completedSteps.includes(i);
@@ -626,8 +626,8 @@ export default function EmailScorer({
                 ) : (
                   <Link to="/domain" className={styles.toolChainLink}>
                     {hasCritical
-                      ? 'Address the critical issues above. Domain setup also matters.'
-                      : 'Your domain setup might also be affecting deliverability'}
+                      ? 'Fix the problems above first. Your domain setup matters too.'
+                      : 'Your domain setup can also send email to spam'}
                     <ArrowRightSmall />
                     <span className={styles.toolChainTarget}>Domain Checker</span>
                   </Link>

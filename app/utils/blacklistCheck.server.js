@@ -61,7 +61,7 @@ export const IP_BLACKLISTS = [
     zone: 'zen.spamhaus.org',
     type: 'combined',
     delistUrl: 'https://check.spamhaus.org/',
-    notes: 'Combined SBL + XBL + PBL. Most widely used by mailbox providers.',
+    notes: 'It is the list most mail providers check. Removal is free at check.spamhaus.org.',
   },
   {
     id: 'spamcop',
@@ -69,7 +69,7 @@ export const IP_BLACKLISTS = [
     zone: 'bl.spamcop.net',
     type: 'specific',
     delistUrl: 'https://www.spamcop.net/bl.shtml',
-    notes: 'Report-based; highly reactive to complaints.',
+    notes: 'It lists servers people reported for spam, and listings expire on their own once the reports stop.',
   },
   {
     id: 'psbl',
@@ -77,7 +77,7 @@ export const IP_BLACKLISTS = [
     zone: 'psbl.surriel.com',
     type: 'specific',
     delistUrl: 'https://psbl.org/remove',
-    notes: 'Passive Spam Block List. Automated listing and delisting.',
+    notes: 'Listing and removal are automatic, and removal is free on its site.',
   },
   {
     id: 'barracuda',
@@ -85,7 +85,7 @@ export const IP_BLACKLISTS = [
     zone: 'b.barracudacentral.org',
     type: 'specific',
     delistUrl: 'https://www.barracudacentral.org/rbl/removal-request',
-    notes: 'Requires registering the querying resolver at barracudacentral.org.',
+    notes: 'Barracuda spam filters use it. You can ask for removal free on its site.',
   },
 ];
 
@@ -101,7 +101,7 @@ export const DOMAIN_BLACKLISTS = [
     zone: 'dbl.spamhaus.org',
     type: 'domain',
     delistUrl: 'https://check.spamhaus.org/',
-    notes: 'Domain block list for spammed URLs and malicious domains.',
+    notes: 'Spamhaus lists domains seen in spam here. Removal is free at check.spamhaus.org.',
   },
   {
     id: 'surbl',
@@ -109,7 +109,7 @@ export const DOMAIN_BLACKLISTS = [
     zone: 'multi.surbl.org',
     type: 'domain',
     delistUrl: 'https://www.surbl.org/surbl-analysis',
-    notes: 'Combined SURBL zones; covers phish, malware, and abuse.',
+    notes: 'It lists domains seen in spam, phishing or malware. Removal is free on its site.',
   },
 ];
 

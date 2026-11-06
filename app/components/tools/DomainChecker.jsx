@@ -74,28 +74,28 @@ function ArrowRightSmall({ size = 14 }) {
 const SCAN_PHASES = [
   {
     categoryId: 'authentication',
-    label: 'Email Authentication',
-    steps: ['SPF', 'DKIM', 'DMARC', 'BIMI'],
+    label: 'Proof it\u2019s really you',
+    steps: ['Allowed senders (SPF)', 'Email signature (DKIM)', 'Fake-email protection (DMARC)', 'Logo in inbox (BIMI)'],
   },
   {
     categoryId: 'mailServer',
-    label: 'Mail Server',
-    steps: ['MX Records', 'SMTP', 'Reverse DNS'],
+    label: 'Mail server',
+    steps: ['Mail servers', 'Reachable', 'Server name'],
   },
   {
     categoryId: 'reputation',
-    label: 'Domain Reputation',
-    steps: ['IP Blacklists (15)', 'Domain Blacklists', 'Safe Browsing'],
+    label: 'Blocklists',
+    steps: ['Mail server blocklists', 'Domain blocklists'],
   },
   {
     categoryId: 'webSecurity',
-    label: 'Web & Security',
-    steps: ['SSL/TLS', 'HTTPS Redirect', 'Security Headers', 'Website'],
+    label: 'Website',
+    steps: ['Certificate', 'Secure redirect', 'Security settings', 'Website'],
   },
   {
     categoryId: 'dnsConfig',
-    label: 'DNS Configuration',
-    steps: ['Nameservers', 'SOA', 'DNSSEC', 'CAA'],
+    label: 'DNS setup',
+    steps: ['Nameservers', 'Zone settings', 'Signed DNS', 'Certificate rules'],
   },
 ];
 
@@ -120,10 +120,10 @@ function getWorstStatus(checks) {
 }
 
 const PILL_LABELS = {
-  authentication: 'Auth',
+  authentication: 'Proof',
   mailServer: 'Mail',
-  reputation: 'Reputation',
-  webSecurity: 'Security',
+  reputation: 'Blocklists',
+  webSecurity: 'Website',
   dnsConfig: 'DNS',
 };
 
@@ -225,7 +225,7 @@ export default function DomainChecker() {
         setDomainError(
           err?.message?.includes('fetch') || err?.message?.includes('Network')
             ? 'Network error. Check your connection and try again.'
-            : err?.message || 'Scan failed. Try again in a moment.'
+            : err?.message || 'The check didn’t finish. Try again in a moment.'
         );
       });
   }, [domain, validateDomain]);
@@ -296,7 +296,7 @@ export default function DomainChecker() {
           </div>
           <div>
             <h1 className={styles.toolTitle}>Domain health and blacklist checker</h1>
-            <p className={styles.toolDesc}>Check your domain's email, DNS, and reputation health</p>
+            <p className={styles.toolDesc}>Find out why your emails go to spam, and how to fix it</p>
           </div>
         </div>
         <span className={styles.freeBadge}>Free</span>
@@ -509,7 +509,7 @@ export default function DomainChecker() {
           {getAllIssues().some((i) => i.severity === 'critical' || i.severity === 'warning') && (
             <div className={styles.toolChain}>
               {getAllIssues().some(
-                (i) => i.categoryLabel === 'Email Authentication' && (i.severity === 'critical' || i.severity === 'warning')
+                (i) => i.categoryLabel === 'Proof it\u2019s really you' && (i.severity === 'critical' || i.severity === 'warning')
               ) && (
                 <Link to="/records" className={styles.toolChainLink}>
                   Fix authentication issues

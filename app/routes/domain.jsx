@@ -39,7 +39,7 @@ const EXAMPLE = {
     { tone: 'pass', label: 'Allowed senders (SPF)', value: 'Set up', note: 'Your domain lists which services may send email for you.' },
     { tone: 'pass', label: 'Mail servers', value: '2 found', note: 'Email sent to your domain has somewhere to arrive.' },
   ],
-  cost: 'Free, no signup. 25 checks in about ten seconds.',
+  cost: 'Free, no signup. Takes about ten seconds.',
   meanings: [
     { tone: 'pass', result: 'Passed', means: 'Set up correctly.', todo: 'Nothing to do.' },
     { tone: 'warn', result: 'Warning', means: 'Works, but weaker than it should be.', todo: 'Fix it once the problems are done.' },
@@ -107,7 +107,6 @@ const CHECKS_BY_CATEGORY = [
   { category: 'Mail Server', check: 'Reverse DNS', validates: 'PTR record forward-confirms the hostname (FCrDNS)' },
   { category: 'Reputation', check: 'IP blacklists', validates: 'Sending IPs checked against public DNSBLs' },
   { category: 'Reputation', check: 'Domain blacklists', validates: 'Domain checked against Spamhaus DBL and SURBL' },
-  { category: 'Reputation', check: 'Safe Browsing', validates: 'Domain not flagged as deceptive by Google' },
   { category: 'Security', check: 'SSL certificate', validates: 'Certificate chain complete and not expired' },
   { category: 'Security', check: 'HTTPS redirect', validates: 'HTTP requests redirect to HTTPS' },
   { category: 'Security', check: 'HSTS header', validates: 'Strict-Transport-Security header is present' },
@@ -261,7 +260,7 @@ export default function DomainPage() {
 
             <div id="checks" className={styles.refBlock}>
               <div className={styles.refBlockHead}>
-                <h3 className={styles.refBlockTitle}>25+ checks by category</h3>
+                <h3 className={styles.refBlockTitle}>Every check, by category</h3>
                 <p className={styles.refBlockDesc}>
                   Every check ships with a plain-language result: pass, warning, or critical, plus a fix path.
                 </p>

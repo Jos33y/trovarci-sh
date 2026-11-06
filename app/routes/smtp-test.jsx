@@ -153,7 +153,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Does the test send a real email?",
-    a: "It can. To check that your server accepts your sender and recipient, the tester hands it a tiny message with the subject “SMTP connectivity test (no content)”. Many servers stop it there, but if yours accepts it, it is delivered to the test recipient, which is test@trovarci.sh unless you change it.",
+    a: "No. The tester asks your server whether it would accept your sender and your recipient, then cancels before any message exists. Nothing is delivered, and the test recipient never receives anything.",
   },
 ];
 
