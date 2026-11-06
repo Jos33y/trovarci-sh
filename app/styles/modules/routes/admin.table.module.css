@@ -201,7 +201,7 @@
   white-space: nowrap;
 }
 
-.th--right { text-align: right; }
+.table th.th--right { text-align: right; }
 
 .table td {
   padding: 14px var(--space-md);
@@ -210,9 +210,9 @@
   vertical-align: middle;
 }
 
-.td--right { text-align: right; }
+.table td.td--right { text-align: right; }
 .td--mono  { font-family: var(--font-mono); font-size: 12px; }
-.td--num   { font-family: var(--font-mono); font-size: 12px; text-align: right; }
+.table td.td--num { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; }
 .td--muted { color: var(--trov-text-secondary); }
 
 .table tbody tr {
@@ -278,7 +278,7 @@
     margin-bottom: var(--space-sm);
   }
   .table td:first-child::before { display: none; }
-  .table td--right { text-align: left; justify-content: space-between; }
+  .table td.td--right { text-align: left; justify-content: space-between; }
 }
 
 /* Report tables (analytics): the label column takes the room, number columns stay tight

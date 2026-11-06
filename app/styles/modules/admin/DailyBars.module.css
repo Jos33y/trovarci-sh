@@ -4,22 +4,39 @@
   gap: var(--space-sm);
 }
 
+/* Same columns for the header and every day, so each number sits under its label. */
 .row {
   display: grid;
-  grid-template-columns: 92px 1fr 70px 50px;
-  gap: var(--space-sm);
+  grid-template-columns: 112px minmax(0, 1fr) 84px 72px;
+  gap: var(--space-md);
   align-items: center;
   font-family: var(--font-mono);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.head {
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--trov-border);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+/* The bar column needs no header text; the numbers say what it shows. */
+.barHead {
+  visibility: hidden;
 }
 
 .day {
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
+  white-space: nowrap;
 }
 
 .bar {
   position: relative;
-  height: 10px;
+  height: 8px;
   background: var(--trov-surface-light);
   border-radius: 999px;
   overflow: hidden;
@@ -30,22 +47,24 @@
   height: 100%;
   background: var(--trov-accent);
   border-radius: 999px;
-  transition: width var(--transition-normal);
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .value {
-  text-align: right;
   color: var(--trov-text);
 }
 
 .sessions {
-  text-align: right;
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
 }
 
 @media (max-width: 640px) {
   .row {
-    grid-template-columns: 72px 1fr 60px 36px;
+    grid-template-columns: 84px minmax(0, 1fr) 64px 56px;
     gap: 8px;
     font-size: 11px;
   }

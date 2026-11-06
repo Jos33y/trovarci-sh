@@ -174,6 +174,21 @@
   .twoCol   { grid-template-columns: 2fr 1fr; }
 }
 
+/* Page flow - vertical rhythm for a report page. Every block below the header sits
+   one --space-lg apart, so panels never touch and spacing never depends on each block's margins. */
+
+.pageFlow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.pageFlow > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 /* Panel - bordered card used inside page sections */
 
 .panel {

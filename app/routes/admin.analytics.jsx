@@ -125,252 +125,254 @@ export default function AdminAnalytics() {
         </div>
       </header>
 
-      <Form method="get" className={styles.tableToolbar}>
-        <div className={styles.filterField}>
-          <label className={styles.filterLabel} htmlFor="days">Window</label>
-          <select id="days" name="days" defaultValue={String(days)} onChange={onFilterChange} className={styles.filterSelect}>
-            <option value="1">Last 24h</option>
-            <option value="7">Last 7d</option>
-            <option value="30">Last 30d</option>
-            <option value="90">Last 90d</option>
-            <option value="180">Last 180d</option>
-            <option value="365">Last 365d</option>
-          </select>
-        </div>
-      </Form>
+      <div className={styles.pageFlow}>
+        <Form method="get" className={styles.tableToolbar}>
+          <div className={styles.filterField}>
+            <label className={styles.filterLabel} htmlFor="days">Window</label>
+            <select id="days" name="days" defaultValue={String(days)} onChange={onFilterChange} className={styles.filterSelect}>
+              <option value="1">Last 24h</option>
+              <option value="7">Last 7d</option>
+              <option value="30">Last 30d</option>
+              <option value="90">Last 90d</option>
+              <option value="180">Last 180d</option>
+              <option value="365">Last 365d</option>
+            </select>
+          </div>
+        </Form>
 
-      <div className={styles.kpiStrip}>
-        <KPICard
-          label="Pageviews"
-          value={formatInt(overview.totals.pageviews)}
-          hint={`${formatInt(overview.totals.unique_sessions)} sessions`}
-          spark={sparks.pageviews}
-        />
-        <KPICard
-          label="Unique users"
-          value={formatInt(overview.totals.unique_users)}
-          hint="signed-in only"
-        />
-        <KPICard
-          label="Signups"
-          value={formatInt(overview.totals.signups)}
-          spark={sparks.signups}
-        />
-        <KPICard
-          label="Payments"
-          value={formatInt(overview.totals.payments)}
-          spark={sparks.payments}
-          variant="hero"
-        />
-      </div>
-
-      <section className={styles.panel}>
-        <header className={styles.panelHead}>
-          <h2 className={styles.panelTitle}>Daily pageviews</h2>
-          <span className={styles.panelSub}>{days}d window</span>
-        </header>
-        {series.length === 0 ? (
-          <EmptyState
-            title="No data in this window"
-            body="Once visitors arrive, daily pageviews will show up here."
+        <div className={styles.kpiStrip}>
+          <KPICard
+            label="Pageviews"
+            value={formatInt(overview.totals.pageviews)}
+            hint={`${formatInt(overview.totals.unique_sessions)} sessions`}
+            spark={sparks.pageviews}
           />
-        ) : (
-          <DailyBars series={series} />
-        )}
-      </section>
-
-      <div className={styles.threeCol}>
-        <section className={styles.panel}>
-          <header className={styles.panelHead}>
-            <h2 className={styles.panelTitle}>Top paths</h2>
-          </header>
-          {overview.topPaths.length === 0 ? (
-            <EmptyState title="No paths yet" body="Paths visited will rank here as traffic comes in." />
-          ) : (
-            <ul className={styles.rankList}>
-              {overview.topPaths.map((r) => (
-                <li key={r.path} className={styles.rankListItem}>
-                  <span className={styles.rankListLabel}>{r.path}</span>
-                  <span className={styles.rankListValue}>{formatInt(r.n)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+          <KPICard
+            label="Unique users"
+            value={formatInt(overview.totals.unique_users)}
+            hint="signed-in only"
+          />
+          <KPICard
+            label="Signups"
+            value={formatInt(overview.totals.signups)}
+            spark={sparks.signups}
+          />
+          <KPICard
+            label="Payments"
+            value={formatInt(overview.totals.payments)}
+            spark={sparks.payments}
+            variant="hero"
+          />
+        </div>
 
         <section className={styles.panel}>
           <header className={styles.panelHead}>
-            <h2 className={styles.panelTitle}>Top referrers</h2>
-          </header>
-          {overview.topReferrers.length === 0 ? (
-            <EmptyState title="Direct traffic only" body="No external referrers in this window. All visits are direct or organic." />
-          ) : (
-            <ul className={styles.rankList}>
-              {overview.topReferrers.map((r) => (
-                <li key={r.referrer_domain} className={styles.rankListItem}>
-                  <span className={styles.rankListLabel}>{r.referrer_domain}</span>
-                  <span className={styles.rankListValue}>{formatInt(r.n)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <CountryMap rows={countries} limit={10} />
-      </div>
-
-      <section className={styles.panel}>
-        <header className={styles.panelHead}>
-          <h2 className={styles.panelTitle}>Where visitors come from</h2>
-          <span className={styles.panelSub}>by the page each session started on</span>
-        </header>
-        {sources.length === 0 ? (
-          <EmptyState title="No sessions yet" body="Sources appear once visitors land with the updated tracking." />
-        ) : (
-          <>
-            <Takeaway>
-              <strong>{plural(sum.total, 'session', 'sessions')}</strong> in {days} days.
-              {' '}Search brought {formatInt(sum.search)}, AI tools {formatInt(sum.ai)}, direct {formatInt(sum.direct)}.
-              {' '}{plural(sum.ranTool, 'session', 'sessions')} ran a tool and {formatInt(sum.signedUp)} signed up.
-            </Takeaway>
-            <div className={styles.tableWrap}>
-              <table className={`${styles.table} ${styles['table--report']}`}>
-                <thead>
-                  <tr>
-                    <th>Source</th>
-                    <th>Sessions</th>
-                    <th title="Sessions that ran at least one tool">Ran a tool</th>
-                    <th title="Sessions that created an account">Signed up</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sources.map((s) => (
-                    <tr key={s.key}>
-                      <td data-label="Source">
-                        <ShareLabel label={s.key} value={s.sessions} max={sources[0].sessions} tag={s.kind === 'other' || s.kind === 'direct' ? null : s.kind} />
-                      </td>
-                      <td data-label="Sessions"><Count n={s.sessions} /></td>
-                      <td data-label="Ran a tool"><Rate part={s.ranTool} whole={s.sessions} /></td>
-                      <td data-label="Signed up"><Rate part={s.signedUp} whole={s.sessions} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </section>
-
-      <section className={styles.panel}>
-        <header className={styles.panelHead}>
-          <h2 className={styles.panelTitle}>Landing pages</h2>
-          <span className={styles.panelSub}>where sessions start, and what they did next</span>
-        </header>
-        {landingPages.length === 0 ? (
-          <EmptyState title="No landing pages yet" body="Each session's first page will rank here." />
-        ) : (
-          <>
-            <Takeaway>
-              {landedFromSearch.length === 0
-                ? 'No visitor from search or an AI tool started on a page in this window.'
-                : <>Search and AI visitors started on{' '}
-                    {landedFromSearch.map((p, i) => (
-                      <span key={p.key}>
-                        {i > 0 ? (i === landedFromSearch.length - 1 ? ' and ' : ', ') : ''}
-                        <strong>{p.key}</strong> ({formatInt(p.fromSearch + p.fromAi)})
-                      </span>
-                    ))}.
-                  </>}
-            </Takeaway>
-            <div className={styles.tableWrap}>
-              <table className={`${styles.table} ${styles['table--report']}`}>
-                <thead>
-                  <tr>
-                    <th>Page</th>
-                    <th>Sessions</th>
-                    <th title="Sessions that arrived from a search engine">From search</th>
-                    <th title="Sessions that arrived from ChatGPT, Copilot, Perplexity and similar">From AI</th>
-                    <th title="Sessions that ran at least one tool">Ran a tool</th>
-                    <th title="Sessions that created an account">Signed up</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {landingPages.map((p) => (
-                    <tr key={p.key}>
-                      <td data-label="Page">
-                        <ShareLabel label={p.key} value={p.sessions} max={landingPages[0].sessions} mono />
-                      </td>
-                      <td data-label="Sessions"><Count n={p.sessions} /></td>
-                      <td data-label="From search"><Count n={p.fromSearch} /></td>
-                      <td data-label="From AI"><Count n={p.fromAi} /></td>
-                      <td data-label="Ran a tool"><Rate part={p.ranTool} whole={p.sessions} /></td>
-                      <td data-label="Signed up"><Rate part={p.signedUp} whole={p.sessions} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </section>
-
-      <div className={styles.twoCol}>
-        <section className={styles.panel}>
-          <header className={styles.panelHead}>
-            <h2 className={styles.panelTitle}>Free tool usage</h2>
+            <h2 className={styles.panelTitle}>Daily pageviews</h2>
             <span className={styles.panelSub}>{days}d window</span>
           </header>
-          {toolUsage.tools.length === 0 ? (
-            <EmptyState title="No tool runs yet" body="Every check, test and generation is counted here, signed in or not." />
+          {series.length === 0 ? (
+            <EmptyState
+              title="No data in this window"
+              body="Once visitors arrive, daily pageviews will show up here."
+            />
           ) : (
-            <div className={styles.tableWrap}>
-              <table className={`${styles.table} ${styles['table--report']}`}>
-                <thead>
-                  <tr>
-                    <th>Tool</th>
-                    <th>Started</th>
-                    <th>Finished</th>
-                    <th>Errors</th>
-                    <th title="Runs stopped because the tool needs an account">Hit sign-in</th>
-                    <th>Sessions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {toolUsage.tools.map((t) => (
-                    <tr key={t.tool}>
-                      <td data-label="Tool">
-                        <ShareLabel label={TOOL_LABELS[t.tool] || t.tool} value={t.starts} max={toolMax} />
-                      </td>
-                      <td data-label="Started"><Count n={t.starts} /></td>
-                      <td data-label="Finished"><Rate part={t.successes} whole={t.starts} /></td>
-                      <td data-label="Errors"><Count n={t.errors} /></td>
-                      <td data-label="Hit sign-in"><Count n={t.auth_walls} /></td>
-                      <td data-label="Sessions"><Count n={t.sessions} /></td>
+            <DailyBars series={series} />
+          )}
+        </section>
+
+        <div className={styles.threeCol}>
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Top paths</h2>
+            </header>
+            {overview.topPaths.length === 0 ? (
+              <EmptyState title="No paths yet" body="Paths visited will rank here as traffic comes in." />
+            ) : (
+              <ul className={styles.rankList}>
+                {overview.topPaths.map((r) => (
+                  <li key={r.path} className={styles.rankListItem}>
+                    <span className={styles.rankListLabel}>{r.path}</span>
+                    <span className={styles.rankListValue}>{formatInt(r.n)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Top referrers</h2>
+            </header>
+            {overview.topReferrers.length === 0 ? (
+              <EmptyState title="Direct traffic only" body="No external referrers in this window. All visits are direct or organic." />
+            ) : (
+              <ul className={styles.rankList}>
+                {overview.topReferrers.map((r) => (
+                  <li key={r.referrer_domain} className={styles.rankListItem}>
+                    <span className={styles.rankListLabel}>{r.referrer_domain}</span>
+                    <span className={styles.rankListValue}>{formatInt(r.n)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <CountryMap rows={countries} limit={10} />
+        </div>
+
+        <section className={styles.panel}>
+          <header className={styles.panelHead}>
+            <h2 className={styles.panelTitle}>Where visitors come from</h2>
+            <span className={styles.panelSub}>by the page each session started on</span>
+          </header>
+          {sources.length === 0 ? (
+            <EmptyState title="No sessions yet" body="Sources appear once visitors land with the updated tracking." />
+          ) : (
+            <>
+              <Takeaway>
+                <strong>{plural(sum.total, 'session', 'sessions')}</strong> in {days} days.
+                {' '}Search brought {formatInt(sum.search)}, AI tools {formatInt(sum.ai)}, direct {formatInt(sum.direct)}.
+                {' '}{plural(sum.ranTool, 'session', 'sessions')} ran a tool and {formatInt(sum.signedUp)} signed up.
+              </Takeaway>
+              <div className={styles.tableWrap}>
+                <table className={`${styles.table} ${styles['table--report']}`}>
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Sessions</th>
+                      <th title="Sessions that ran at least one tool">Ran a tool</th>
+                      <th title="Sessions that created an account">Signed up</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {sources.map((s) => (
+                      <tr key={s.key}>
+                        <td data-label="Source">
+                          <ShareLabel label={s.key} value={s.sessions} max={sources[0].sessions} tag={s.kind === 'other' || s.kind === 'direct' ? null : s.kind} />
+                        </td>
+                        <td data-label="Sessions"><Count n={s.sessions} /></td>
+                        <td data-label="Ran a tool"><Rate part={s.ranTool} whole={s.sessions} /></td>
+                        <td data-label="Signed up"><Rate part={s.signedUp} whole={s.sessions} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
 
         <section className={styles.panel}>
           <header className={styles.panelHead}>
-            <h2 className={styles.panelTitle}>Top tool errors</h2>
+            <h2 className={styles.panelTitle}>Landing pages</h2>
+            <span className={styles.panelSub}>where sessions start, and what they did next</span>
           </header>
-          {toolUsage.errors.length === 0 ? (
-            <EmptyState title="No tool errors" body="Error codes from tool runs rank here." />
+          {landingPages.length === 0 ? (
+            <EmptyState title="No landing pages yet" body="Each session's first page will rank here." />
           ) : (
-            <ul className={styles.rankList}>
-              {toolUsage.errors.map((e) => (
-                <li key={`${e.tool}-${e.code}`} className={styles.rankListItem}>
-                  <span className={styles.rankListLabel}>{TOOL_LABELS[e.tool] || e.tool} · {e.code}</span>
-                  <span className={styles.rankListValue}>{formatInt(e.n)}</span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <Takeaway>
+                {landedFromSearch.length === 0
+                  ? 'No visitor from search or an AI tool started on a page in this window.'
+                  : <>Search and AI visitors started on{' '}
+                      {landedFromSearch.map((p, i) => (
+                        <span key={p.key}>
+                          {i > 0 ? (i === landedFromSearch.length - 1 ? ' and ' : ', ') : ''}
+                          <strong>{p.key}</strong> ({formatInt(p.fromSearch + p.fromAi)})
+                        </span>
+                      ))}.
+                    </>}
+              </Takeaway>
+              <div className={styles.tableWrap}>
+                <table className={`${styles.table} ${styles['table--report']}`}>
+                  <thead>
+                    <tr>
+                      <th>Page</th>
+                      <th>Sessions</th>
+                      <th title="Sessions that arrived from a search engine">From search</th>
+                      <th title="Sessions that arrived from ChatGPT, Copilot, Perplexity and similar">From AI</th>
+                      <th title="Sessions that ran at least one tool">Ran a tool</th>
+                      <th title="Sessions that created an account">Signed up</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {landingPages.map((p) => (
+                      <tr key={p.key}>
+                        <td data-label="Page">
+                          <ShareLabel label={p.key} value={p.sessions} max={landingPages[0].sessions} mono />
+                        </td>
+                        <td data-label="Sessions"><Count n={p.sessions} /></td>
+                        <td data-label="From search"><Count n={p.fromSearch} /></td>
+                        <td data-label="From AI"><Count n={p.fromAi} /></td>
+                        <td data-label="Ran a tool"><Rate part={p.ranTool} whole={p.sessions} /></td>
+                        <td data-label="Signed up"><Rate part={p.signedUp} whole={p.sessions} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
+
+        <div className={styles.twoCol}>
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Free tool usage</h2>
+              <span className={styles.panelSub}>{days}d window</span>
+            </header>
+            {toolUsage.tools.length === 0 ? (
+              <EmptyState title="No tool runs yet" body="Every check, test and generation is counted here, signed in or not." />
+            ) : (
+              <div className={styles.tableWrap}>
+                <table className={`${styles.table} ${styles['table--report']}`}>
+                  <thead>
+                    <tr>
+                      <th>Tool</th>
+                      <th>Started</th>
+                      <th>Finished</th>
+                      <th>Errors</th>
+                      <th title="Runs stopped because the tool needs an account">Hit sign-in</th>
+                      <th>Sessions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {toolUsage.tools.map((t) => (
+                      <tr key={t.tool}>
+                        <td data-label="Tool">
+                          <ShareLabel label={TOOL_LABELS[t.tool] || t.tool} value={t.starts} max={toolMax} />
+                        </td>
+                        <td data-label="Started"><Count n={t.starts} /></td>
+                        <td data-label="Finished"><Rate part={t.successes} whole={t.starts} /></td>
+                        <td data-label="Errors"><Count n={t.errors} /></td>
+                        <td data-label="Hit sign-in"><Count n={t.auth_walls} /></td>
+                        <td data-label="Sessions"><Count n={t.sessions} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>Top tool errors</h2>
+            </header>
+            {toolUsage.errors.length === 0 ? (
+              <EmptyState title="No tool errors" body="Error codes from tool runs rank here." />
+            ) : (
+              <ul className={styles.rankList}>
+                {toolUsage.errors.map((e) => (
+                  <li key={`${e.tool}-${e.code}`} className={styles.rankListItem}>
+                    <span className={styles.rankListLabel}>{TOOL_LABELS[e.tool] || e.tool} · {e.code}</span>
+                    <span className={styles.rankListValue}>{formatInt(e.n)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </div>
     </>
   );
