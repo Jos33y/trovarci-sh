@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/NumberVerifier.module.css';
 import BulkVerificationResult from './BulkVerificationResult';
 import { formatInt } from '~/utils/format';
+import ToolVote from './ToolVote';
 
 /* NumberVerifier */
 
@@ -998,6 +999,8 @@ export default function NumberVerifier({
               </button>
             </div>
           )}
+
+          {(phase === 'tier1' || phase === 'tier2') && <ToolVote tool="phone_verify" />}
         </div>
       )}
 

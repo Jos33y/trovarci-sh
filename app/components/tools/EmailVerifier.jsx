@@ -5,6 +5,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import styles from '~/styles/modules/tools/EmailVerifier.module.css';
 import BulkVerificationResult from './BulkVerificationResult';
 import { formatInt } from '~/utils/format';
+import ToolVote from './ToolVote';
 
 const MAX_BULK_SIZE = 50_000;
 const STEP_REVEAL_INTERVAL_MS = 350;
@@ -744,6 +745,8 @@ export default function EmailVerifier({ creditCost = 1 }) {
               <button className={styles.resetButton} onClick={handleSingleReset}>Clear</button>
             </div>
           )}
+
+          {phase === 'result' && <ToolVote tool="email_verify" />}
 
           {/* Upsell to bulk */}
           {(phase === 'input' || phase === 'result') && (

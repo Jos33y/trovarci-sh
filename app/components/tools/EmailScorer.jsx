@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/EmailScorer.module.css';
+import ToolVote from './ToolVote';
 
 /* -- Icons -- */
 
@@ -644,6 +645,8 @@ export default function EmailScorer({
               Score a different email
             </button>
           </div>
+
+          <ToolVote tool="email_score" />
         </div>
       )}
     </div>

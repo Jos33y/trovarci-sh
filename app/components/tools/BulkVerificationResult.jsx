@@ -43,6 +43,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from '~/styles/modules/tools/BulkVerificationResult.module.css';
 import { formatInt } from '~/utils/format';
+import ToolVote from './ToolVote';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ICONS - inline, no library
@@ -818,6 +819,8 @@ export default function BulkVerificationResult({
           {toolChainBadge && <span className={styles.toolChainBadge}>{toolChainBadge}</span>}
         </a>
       )}
+
+      <ToolVote tool={type === 'phone' ? 'phone_verify' : 'email_verify'} />
 
       {/* ─── FOOTER ACTIONS ─── */}
       <div className={styles.footerActions}>

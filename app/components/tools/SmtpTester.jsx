@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/SmtpTester.module.css';
+import ToolVote from './ToolVote';
 
 /* -- Icons -- */
 
@@ -519,6 +520,8 @@ export default function SmtpTester() {
             <button className={styles.retestButton} onClick={handleRetest}>Test Again</button>
             <button className={styles.newTestButton} onClick={handleNewTest}>Test a different server</button>
           </div>
+
+          <ToolVote tool="smtp_test" />
         </div>
       )}
     </div>

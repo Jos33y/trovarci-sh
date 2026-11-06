@@ -82,3 +82,10 @@
     transform: none;
   }
 }
+
+/* Under a tool result: closer to the result, and quieter than under a post. */
+.boxTool {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+}

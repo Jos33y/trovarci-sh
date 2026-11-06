@@ -7,6 +7,7 @@ import {
   adminCountryTraffic,
   adminToolUsage,
   adminLandingSessions,
+  adminToolVotes,
 } from '~/utils/admin.server';
 import { classifySource } from '~/utils/trafficSource';
 import KPICard from '~/components/admin/KPICard';
@@ -27,15 +28,17 @@ export async function loader({ request }) {
   const url = new URL(request.url);
   const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') || '7', 10) || 7));
 
-  const [overview, sparks, countries, toolUsage, landingRows] = await Promise.all([
+  const [overview, sparks, countries, toolUsage, landingRows, voteRows] = await Promise.all([
     adminAnalyticsOverview({ days }),
     adminKpiSparklines({ days: Math.min(30, Math.max(7, days)) }),
     adminCountryTraffic({ days, limit: 30 }),
     adminToolUsage({ days }),
     adminLandingSessions({ days }),
+    adminToolVotes({ days }),
   ]);
 
-  return { overview, sparks, countries, toolUsage, ...summariseLanding(landingRows), days };
+  const toolVotes = Object.fromEntries(voteRows.map((r) => [r.tool, { yes: r.yes, no: r.no }]));
+  return { overview, sparks, countries, toolUsage, toolVotes, ...summariseLanding(landingRows), days };
 }
 
 const TOOL_LABELS = {
@@ -98,7 +101,7 @@ function searchLandings(pages) {
 }
 
 export default function AdminAnalytics() {
-  const { overview, sparks, countries, toolUsage, sources, landingPages, days } = useLoaderData();
+  const { overview, sparks, countries, toolUsage, toolVotes, sources, landingPages, days } = useLoaderData();
   const submit = useSubmit();
   const onFilterChange = (ev) => submit(ev.currentTarget.form, { replace: true });
 
@@ -318,7 +321,7 @@ export default function AdminAnalytics() {
         <div className={styles.twoCol}>
           <section className={styles.panel}>
             <header className={styles.panelHead}>
-              <h2 className={styles.panelTitle}>Free tool usage</h2>
+              <h2 className={styles.panelTitle}>Tool usage</h2>
               <span className={styles.panelSub}>{days}d window</span>
             </header>
             {toolUsage.tools.length === 0 ? (
@@ -334,6 +337,7 @@ export default function AdminAnalytics() {
                       <th>Errors</th>
                       <th title="Runs stopped because the tool needs an account">Hit sign-in</th>
                       <th>Sessions</th>
+                      <th className={styles['cell--text']} title='Answers to "Did this check help?" under the result'>Helpful</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -347,6 +351,9 @@ export default function AdminAnalytics() {
                         <td data-label="Errors"><Count n={t.errors} /></td>
                         <td data-label="Hit sign-in"><Count n={t.auth_walls} /></td>
                         <td data-label="Sessions"><Count n={t.sessions} /></td>
+                        <td data-label="Helpful" className={`${styles['cell--text']} ${toolVotes[t.tool] ? '' : styles.muted}`}>
+                          {toolVotes[t.tool] ? `${formatInt(toolVotes[t.tool].yes)} yes, ${formatInt(toolVotes[t.tool].no)} no` : 'No votes'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

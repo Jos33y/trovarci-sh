@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import styles from '~/styles/modules/tools/DomainChecker.module.css';
+import ToolVote from './ToolVote';
 
 /* ── Icons (inline SVG, no library) ── */
 
@@ -528,6 +529,8 @@ export default function DomainChecker() {
           <button className={styles.resetButton} onClick={handleReset}>
             Check another domain
           </button>
+
+          <ToolVote tool="domain_check" />
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import ToolVote from './ToolVote';
 import { Link } from 'react-router';
 import { CopyIcon, CheckIcon, DnsIcon } from '~/components/icons';
 import styles from '~/styles/modules/tools/DnsGenerator.module.css';
@@ -1286,6 +1287,8 @@ function StepThree({
           <ArrowRight />
         </Link>
       </div>
+
+      <ToolVote tool="dns_generate" />
     </div>
   );
 }

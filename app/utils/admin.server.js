@@ -896,6 +896,21 @@ export async function adminPickerChoices({ days = 30 } = {}) {
   `;
 }
 
+// "Did this check help?" answers per tool.
+export async function adminToolVotes({ days = 7 } = {}) {
+  const interval = `${days} days`;
+  return sql`
+    SELECT metadata->>'tool' AS tool,
+           COUNT(*) FILTER (WHERE metadata->>'v' = 'yes')::int AS yes,
+           COUNT(*) FILTER (WHERE metadata->>'v' = 'no')::int AS no
+    FROM analytics_events
+    WHERE event_type = 'helpful_vote' AND metadata ? 'tool'
+      AND is_bot = FALSE AND is_internal = FALSE
+      AND created_at > now() - ${interval}::interval
+    GROUP BY 1
+  `;
+}
+
 // What readers said was missing, newest first.
 export async function adminHelpfulNotes({ days = 90, limit = 30 } = {}) {
   const interval = `${days} days`;
