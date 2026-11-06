@@ -1,6 +1,6 @@
-/* /bulk-email-cost-calculator: inputs on the left, three-year totals on the right, then the
-   two "before you send" notes, the Sender call to action and questions. Mobile first; side by
-   side from 960. */
+/* /bulk-email-cost-calculator: a printed form slip, the two totals set like a cheque stub,
+   then a ledger of every bill for three years (one mark per month), the before-you-send notes,
+   the Sender call to action and questions. Mobile first. No gradients, no glow: ink on paper. */
 
 .page {
   min-height: 100vh;
@@ -16,6 +16,15 @@
 
 .head {
   max-width: 640px;
+}
+
+.kickerRule {
+  display: inline-block;
+  width: 22px;
+  height: 1px;
+  margin-right: 10px;
+  vertical-align: middle;
+  background: var(--trov-accent);
 }
 
 .kicker {
@@ -47,26 +56,30 @@
   text-wrap: pretty;
 }
 
-.layout {
+/* The form slip: contacts and frequency, framed with a double rule like a printed form. */
+
+.slip {
+  position: relative;
   display: grid;
-  gap: 20px;
+  gap: 28px;
   margin-top: 32px;
-}
-
-/* Inputs */
-
-.form {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px 20px;
+  padding: 26px 20px 22px;
   background: var(--trov-surface);
-  border: 1px solid var(--trov-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--trov-border-hover);
+  border-radius: 14px;
 }
 
-.field {
+.slip::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 0.5px solid var(--trov-border-hover);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.slipField {
+  position: relative;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -75,101 +88,167 @@
 
 .label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--trov-text);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
 }
 
 .input {
   width: 100%;
-  min-height: 52px;
-  padding: 10px 14px;
-  background: var(--trov-bg);
-  border: 1px solid var(--trov-border-hover);
-  border-radius: var(--radius-md);
+  padding: 2px 0 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--trov-border-hover);
+  border-radius: 0;
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: clamp(2.25rem, 8vw, 3rem);
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   color: var(--trov-text);
-  transition: border-color 150ms ease;
 }
 
 .input:focus-visible {
-  outline: 2px solid var(--trov-accent);
-  outline-offset: 2px;
-  border-color: var(--trov-accent);
+  outline: none;
+  border-bottom-color: var(--trov-accent);
 }
 
-.presets {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+.slider {
+  position: relative;
+  margin-top: 18px;
+  padding-bottom: 22px;
 }
 
-.preset {
-  min-height: 36px;
-  padding: 6px 12px;
+:global(html:not(.js)) .slider {
+  display: none;
+}
+
+.range {
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin: 0;
   background: transparent;
-  border: 1px solid var(--trov-border);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--trov-text-secondary);
+  appearance: none;
   cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease, transform 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
 }
 
-.preset:hover {
-  border-color: var(--trov-border-hover);
-  color: var(--trov-text);
+.range::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--trov-border-hover);
 }
 
-.preset:active {
-  transform: scale(0.97);
+.range::-moz-range-track {
+  height: 1px;
+  background: var(--trov-border-hover);
 }
 
-.presetOn {
-  border-color: var(--trov-accent);
-  color: var(--trov-accent);
+.range::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background: var(--trov-accent);
+  border: 3px solid var(--trov-surface);
+  border-radius: 50%;
+  outline: 1px solid var(--trov-accent);
+  appearance: none;
 }
 
-.sends {
+.range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--trov-accent);
+  border: 3px solid var(--trov-surface);
+  border-radius: 50%;
+  outline: 1px solid var(--trov-accent);
+}
+
+.range:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 4px;
+}
+
+.ticks {
+  display: block;
+  width: 100%;
+  height: 10px;
+  margin-top: 2px;
+}
+
+.tick,
+.tickMajor {
+  stroke: var(--trov-border-hover);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.tickMajor {
+  stroke: var(--trov-text-secondary);
+}
+
+.scale {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 14px;
+}
+
+.scale span {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-secondary);
+}
+
+.scale span:first-child { transform: none; }
+.scale span:last-child { transform: translateX(-100%); }
+
+/* Frequency: one panel split by hairlines. */
+
+.segments {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-.send {
+.segment {
   position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--trov-border);
-  border-radius: var(--radius-md);
+  padding: 12px 4px 10px;
   cursor: pointer;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
-.send:hover {
-  border-color: var(--trov-border-hover);
+.segment + .segment {
+  border-left: 1px solid var(--trov-border-hover);
 }
 
-.sendOn {
-  border-color: var(--trov-accent);
-  background: rgba(212, 168, 67, 0.06);
+.segment:hover {
+  background: var(--trov-bg);
 }
 
-.send:has(.radio:focus-visible) {
+.segmentOn,
+.segmentOn:hover {
+  background: var(--trov-accent);
+}
+
+.segment:has(.radio:focus-visible) {
   outline: 2px solid var(--trov-accent);
-  outline-offset: 2px;
+  outline-offset: -4px;
 }
 
 .radio {
@@ -178,20 +257,30 @@
   pointer-events: none;
 }
 
-.sendName {
-  font-size: 0.875rem;
-  font-weight: 600;
+.segNum {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--trov-text);
 }
 
-.sendNote {
+.segWord {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.02em;
   color: var(--trov-text-secondary);
+  white-space: nowrap;
+}
+
+.segmentOn .segNum,
+.segmentOn .segWord {
+  color: var(--trov-text-on-accent);
 }
 
 .calc {
-  align-self: flex-start;
+  margin-top: 14px;
   min-height: 44px;
   padding: 10px 20px;
   background: var(--trov-accent);
@@ -210,71 +299,130 @@
 
 .volume {
   margin: 0;
-  padding-top: 16px;
+  padding-top: 14px;
   border-top: 1px dashed var(--trov-border-hover);
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--trov-text-secondary);
 }
 
-.volume strong {
-  color: var(--trov-text);
+.volumeNum {
+  color: var(--trov-accent);
+  font-weight: 600;
 }
 
-/* Results */
+/* The verdict: two totals set like a cheque stub, with a double rule under them. */
 
-.results {
+.verdict {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 40px;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 
-.resultsTitle {
-  margin: 0 0 10px;
+.sideName {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--trov-accent);
-}
-
-.lead {
-  margin: 0 0 20px;
-  font-size: 1.125rem;
-  line-height: 1.5;
-  font-variant-numeric: tabular-nums;
   color: var(--trov-text-secondary);
-  text-wrap: pretty;
 }
 
-.lead strong {
+.sideAmount {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 9vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
   color: var(--trov-text);
-  font-weight: 600;
 }
 
-.lead .save {
+.sideOurs .sideName,
+.sideOurs .sideAmount {
   color: var(--trov-accent);
+}
+
+.sideNote {
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+}
+
+.vs {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.keep {
+  margin: 4px 0 0;
+  padding-top: 14px;
+  border-top: 3px double var(--trov-accent);
+  font-size: 1.125rem;
+  color: var(--trov-text-secondary);
+}
+
+.keep strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+}
+
+.quoted {
+  margin: 40px 0 0;
+  font-size: 1rem;
+  color: var(--trov-text-secondary);
+}
+
+/* The ledger: every bill for three years, one mark per month. */
+
+.ledger {
+  margin-top: 48px;
+}
+
+.ledgerHead {
+  margin-bottom: 8px;
+}
+
+.ledgerTitle {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+}
+
+.ledgerSub {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
 }
 
 .rows {
-  margin: 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--trov-border);
+  border-top: 1px solid var(--trov-border-hover);
 }
 
 .row {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--trov-border);
-}
-
-.rowOurs {
   position: relative;
-  margin: 0 -12px;
-  padding: 16px 12px;
-  background: rgba(212, 168, 67, 0.05);
-  border-radius: var(--radius-md);
-  border-bottom-color: transparent;
+  padding: 18px 0 16px;
+  border-bottom: 1px solid var(--trov-border);
 }
 
 .rowHead {
@@ -317,17 +465,20 @@
 
 .total {
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
   color: var(--trov-text);
+}
+
+.rowOurs .total {
+  color: var(--trov-accent);
 }
 
 .per {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  font-variant-numeric: tabular-nums;
   color: var(--trov-text-secondary);
   white-space: nowrap;
 }
@@ -337,39 +488,98 @@
   color: var(--trov-text-secondary);
 }
 
-.bar {
-  height: 6px;
-  margin-top: 12px;
-  overflow: hidden;
-  background: var(--trov-border);
-  border-radius: 999px;
-}
-
-.barFill {
+.strip {
   display: block;
-  height: 100%;
-  background: var(--trov-text-secondary);
-  border-radius: 999px;
-  transform-origin: 0 50%;
-  transition: transform 240ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  width: 100%;
+  height: 56px;
+  margin-top: 14px;
 }
 
-.rowOurs .barFill {
-  background: var(--trov-accent);
+.stripRule {
+  stroke: var(--trov-border-hover);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.stubMark {
+  fill: var(--trov-text-secondary);
+  opacity: 0.55;
+}
+
+.stripOurs .stubMark {
+  fill: var(--trov-ink-deep, #8c6a1f);
+  opacity: 1;
+}
+
+.stubFirst {
+  fill: var(--trov-accent);
+}
+
+.stubEmpty {
+  fill: var(--trov-border);
+}
+
+.stripQuoted {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  margin-top: 14px;
+  border: 1px dashed var(--trov-border-hover);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
 }
 
 .note {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--trov-text-secondary);
 }
+
+/* On phones the stamp sits under the row, so it never covers the words. */
+.stampAt {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+.axis {
+  position: relative;
+  height: 18px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--trov-text-secondary);
+}
+
+.axis span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.axis span:nth-child(1) { left: 0; }
+.axis span:nth-child(2) { left: 33.3%; transform: translateX(-50%); }
+.axis span:nth-child(3) { left: 66.6%; transform: translateX(-50%); }
+.axis span:nth-child(4) { right: 0; }
 
 .fine {
   margin: 14px 0 0;
   font-size: 0.75rem;
   line-height: 1.5;
   color: var(--trov-text-secondary);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* Before you send */
@@ -525,10 +735,6 @@
 }
 
 @media (min-width: 640px) {
-  .form {
-    padding: 28px;
-  }
-
   .extras {
     grid-template-columns: 1fr 1fr;
   }
@@ -542,21 +748,72 @@
 }
 
 @media (min-width: 960px) {
-  .layout {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: 40px;
-    align-items: start;
+  .slip {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    column-gap: 48px;
+    padding: 32px 36px 26px;
   }
 
-  .form {
-    position: sticky;
-    top: 88px;
+  .volume {
+    grid-column: 1 / -1;
+  }
+
+  .verdict {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: 32px;
+  }
+
+  .vs {
+    padding-bottom: 30px;
+  }
+
+  .keep {
+    grid-column: 1 / -1;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: center;
+  }
+
+  .rowHead {
+    grid-row: 1 / span 2;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rowTotal {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .strip,
+  .stripQuoted {
+    margin-top: 0;
+  }
+
+  .note {
+    grid-column: 2;
+  }
+
+  .stampAt {
+    position: absolute;
+    top: -4px;
+    right: 22%;
+    z-index: 1;
+    margin: 0;
+  }
+
+  .axis {
+    margin-left: calc(300px + 32px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .barFill,
-  .preset,
+  .segment,
   .ctaButton {
     transition: none;
   }

@@ -135,9 +135,14 @@ export function calculate({ contacts, sends, senderPrice }) {
     },
   ];
 
-  const priced = rows.filter((r) => r.total != null);
-  const max = Math.max(...priced.map((r) => r.total), 1);
-  for (const r of rows) r.share = r.total == null ? 0 : Math.max(r.total / max, 0.004);
+  // Every bill for three years: one amount per month, the one-time payment in month 1.
+  for (const r of rows) {
+    if (r.total == null) { r.months = null; continue; }
+    r.months = Array.from({ length: MONTHS }, (_, i) => (i === 0 && r.oneTime ? r.oneTime : 0) + (r.monthly || 0));
+    r.bills = r.oneTime != null ? (r.monthly ? 1 + MONTHS : 1) : MONTHS;
+  }
+  const peak = Math.max(...rows.filter((r) => r.months).flatMap((r) => r.months), 1);
+  for (const r of rows) r.heights = r.months ? r.months.map((m) => (m > 0 ? Math.max(m / peak, 0.03) : 0)) : null;
 
   const perDay = Math.ceil(emails / 30);
   const workspaceAccounts = Math.max(1, Math.ceil(perDay / 2000));

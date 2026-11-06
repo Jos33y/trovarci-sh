@@ -1,19 +1,36 @@
-// /bulk-email-cost-calculator - what a list costs to email on each pricing model, monthly
-// and over three years. Works without JavaScript (a GET form), and every result has a URL
+// /bulk-email-cost-calculator - what a list costs to email on each pricing model over three
+// years, drawn as every bill you would pay. Subscriptions are 36 bills; Sender is one.
+// Works without JavaScript (a GET form), and every result has a URL
 // (?contacts=10000&sends=4) that people and AI agents can open directly.
 
 import { useEffect, useMemo, useState } from 'react';
 import { Form, Link, useLoaderData } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
+import PaidStamp from '~/components/calculator/PaidStamp';
 import { getSeo } from '~/utils/seo';
 import { currentSenderPrice } from '~/utils/senderConfig.server';
 import { formatSenderPrice, STORAGE_LINE } from '~/utils/senderCopy';
-import { calculate, clampInputs, count, money, PRICES_CHECKED, SEND_OPTIONS } from '~/utils/costCalculator';
+import { calculate, clampInputs, count, money, MONTHS, PRICES_CHECKED, SEND_OPTIONS } from '~/utils/costCalculator';
 import styles from '~/styles/modules/routes/calculator.module.css';
 
-const PRESETS = [1000, 5000, 10000, 50000, 100000];
-const SEND_LABELS = { 1: 'Monthly', 2: 'Twice', 4: 'Weekly', 8: 'Twice a week', 12: '3 a week' };
+const SEND_LABELS = { 1: 'monthly', 2: 'twice', 4: 'weekly', 8: '2× a week', 12: '3× a week' };
+
+// The slider runs on a log scale, 100 to 1,000,000 contacts, so small lists get room too.
+const SLIDER_MAX = 1000;
+const toSlider = (c) => Math.round(250 * Math.log10(c / 100));
+function fromSlider(pos) {
+  const raw = 100 * 10 ** (pos / 250);
+  const step = raw < 1000 ? 10 : raw < 10000 ? 100 : raw < 100000 ? 1000 : 10000;
+  return Math.round(raw / step) * step;
+}
+const SCALE = [
+  [0, '100'],
+  [250, '1k'],
+  [500, '10k'],
+  [750, '100k'],
+  [1000, '1M'],
+];
 
 const QUESTIONS = [
   [
@@ -65,11 +82,36 @@ export const meta = () => {
 
 export function loader({ request }) {
   const url = new URL(request.url);
-  // Without JavaScript, a preset button submits as ?preset=, alongside the typed number.
-  const raw = url.searchParams.get('preset') || url.searchParams.get('contacts');
-  const { contacts, sends } = clampInputs(raw, url.searchParams.get('sends'));
+  const { contacts, sends } = clampInputs(url.searchParams.get('contacts'), url.searchParams.get('sends'));
   const cents = currentSenderPrice().cents;
   return { contacts, sends, senderPrice: cents / 100, priceLabel: formatSenderPrice(cents) };
+}
+
+function billsLabel(r) {
+  if (r.oneTime == null) return `${MONTHS} monthly bills`;
+  return r.monthly ? 'Paid once, then SES per email' : 'Paid once';
+}
+
+// One mark per month; the first month of a Sender row carries the one-time payment.
+function BillStrip({ heights, ours }) {
+  const W = 10;
+  return (
+    <svg className={`${styles.strip} ${ours ? styles.stripOurs : ''}`} viewBox={`0 0 ${MONTHS * W} 60`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <line className={styles.stripRule} x1="0" x2={MONTHS * W} y1="59.5" y2="59.5" />
+      {heights.map((h, i) => (h > 0 ? (
+        <rect
+          key={i}
+          className={i === 0 && ours ? styles.stubFirst : styles.stubMark}
+          x={i * W + 1.5}
+          width={W - 3}
+          y={59 - h * 56}
+          height={h * 56}
+        />
+      ) : (
+        <rect key={i} className={styles.stubEmpty} x={i * W + 1.5} width={W - 3} y="57" height="2" />
+      )))}
+    </svg>
+  );
 }
 
 export default function CostCalculator() {
@@ -89,13 +131,9 @@ export default function CostCalculator() {
     if (window.location.search !== qs) window.history.replaceState(window.history.state, '', qs);
   }, [inputs.contacts, inputs.sends]);
 
-  const pick = (n) => (event) => {
-    event.preventDefault();
-    setContactsText(count(n));
-  };
-
-  const mailchimp = result.rows.find((r) => r.id === 'mailchimp');
-  const senderSes = result.rows.find((r) => r.id === 'sender-ses');
+  const them = result.rows.find((r) => (r.id === 'mailchimp' || r.id === 'brevo') && r.total != null);
+  const us = result.rows.find((r) => r.id === 'sender-ses');
+  const keep = them ? them.total - us.total : null;
 
   return (
     <div className={styles.page}>
@@ -103,118 +141,148 @@ export default function CostCalculator() {
       <main className={styles.main}>
         <div className="container">
           <header className={styles.head}>
-            <p className={styles.kicker}>Calculator</p>
+            <p className={styles.kicker}><span className={styles.kickerRule} aria-hidden="true" />Calculator</p>
             <h1 className={styles.headline}>Bulk email cost calculator</h1>
             <p className={styles.sub}>
-              Enter your list size and how often you send. See what each way of sending costs a month and over three years.
+              A subscription bills you every month. Trovarcis Sender bills you once. Enter your list and see every bill you&rsquo;d pay over three years.
             </p>
           </header>
 
-          <div className={styles.layout}>
-            <Form method="get" className={styles.form} onSubmit={(e) => e.preventDefault()} aria-label="Your sending">
-              <div className={styles.field}>
-                <label htmlFor="contacts" className={styles.label}>How many contacts?</label>
+          <Form method="get" className={styles.slip} onSubmit={(e) => e.preventDefault()} aria-label="Your sending">
+            <div className={styles.slipField}>
+              <label htmlFor="contacts" className={styles.label}>Contacts on your list</label>
+              <input
+                id="contacts"
+                name="contacts"
+                className={styles.input}
+                inputMode="numeric"
+                autoComplete="off"
+                spellCheck={false}
+                value={contactsText}
+                onChange={(e) => setContactsText(e.target.value)}
+                onBlur={() => setContactsText(count(inputs.contacts))}
+              />
+              <div className={styles.slider}>
                 <input
-                  id="contacts"
-                  name="contacts"
-                  className={styles.input}
-                  inputMode="numeric"
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={contactsText}
-                  onChange={(e) => setContactsText(e.target.value)}
-                  onBlur={() => setContactsText(count(inputs.contacts))}
+                  type="range"
+                  min="0"
+                  max={SLIDER_MAX}
+                  step="1"
+                  value={toSlider(inputs.contacts)}
+                  onChange={(e) => setContactsText(count(fromSlider(Number(e.target.value))))}
+                  className={styles.range}
+                  aria-label="Contacts on your list, from 100 to 1,000,000"
+                  aria-valuetext={`${count(inputs.contacts)} contacts`}
                 />
-                <div className={styles.presets}>
-                  {PRESETS.map((n) => (
-                    <button
-                      key={n}
-                      type="submit"
-                      name="preset"
-                      value={n}
-                      className={`${styles.preset} ${inputs.contacts === n ? styles.presetOn : ''}`}
-                      aria-pressed={inputs.contacts === n}
-                      onClick={pick(n)}
-                    >
-                      {count(n)}
-                    </button>
+                <svg className={styles.ticks} viewBox="0 0 400 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                  {Array.from({ length: 41 }, (_, i) => (
+                    <line key={i} x1={i * 10} x2={i * 10} y1="0" y2={i % 10 === 0 ? 10 : 4} className={i % 10 === 0 ? styles.tickMajor : styles.tick} />
+                  ))}
+                </svg>
+                <div className={styles.scale} aria-hidden="true">
+                  {SCALE.map(([pos, label]) => (
+                    <span key={label} style={{ left: `${pos / 10}%` }}>{label}</span>
                   ))}
                 </div>
               </div>
+            </div>
 
-              <fieldset className={styles.field}>
-                <legend className={styles.label}>How often do you email them?</legend>
-                <div className={styles.sends}>
-                  {SEND_OPTIONS.map((n) => (
-                    <label key={n} className={`${styles.send} ${inputs.sends === n ? styles.sendOn : ''}`}>
-                      <input
-                        type="radio"
-                        name="sends"
-                        value={n}
-                        checked={inputs.sends === n}
-                        onChange={() => setSends(n)}
-                        className={styles.radio}
-                      />
-                      <span className={styles.sendName}>{SEND_LABELS[n]}</span>
-                      <span className={styles.sendNote}>{n} a month</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <button type="submit" className={styles.calc}>Calculate</button>
-
-              <p className={styles.volume}>
-                {count(result.contacts)} contacts &times; {result.sends} = <strong>{count(result.emails)} emails a month</strong>, about {count(result.perDay)} a day.
-              </p>
-            </Form>
-
-            <section className={styles.results} aria-labelledby="results-title" aria-live="polite">
-              <h2 id="results-title" className={styles.resultsTitle}>Over three years</h2>
-              {result.savings > 0 && mailchimp.total != null && (
-                <p className={styles.lead}>
-                  Mailchimp Standard costs {mailchimp.approx ? 'about ' : ''}<strong>{money(mailchimp.total)}</strong>.
-                  {' '}Trovarcis Sender with Amazon SES costs <strong>{money(senderSes.total)}</strong>, which is{' '}
-                  <strong className={styles.save}>{money(result.savings)} less</strong>.
-                </p>
-              )}
-
-              <ol className={styles.rows}>
-                {result.rows.map((r) => (
-                  <li key={r.id} className={`${styles.row} ${r.ours ? styles.rowOurs : ''}`}>
-                    <div className={styles.rowHead}>
-                      <div className={styles.rowName}>
-                        <span className={styles.name}>{r.name}</span>
-                        <span className={styles.model}>{r.model}</span>
-                      </div>
-                      <div className={styles.rowTotal}>
-                        {r.total == null ? (
-                          <span className={styles.quote}>Quoted</span>
-                        ) : (
-                          <>
-                            <span className={styles.total}>{r.approx ? '~' : ''}{money(r.total)}</span>
-                            <span className={styles.per}>
-                              {r.oneTime != null
-                                ? (r.monthly ? `${money(r.oneTime)} once + ${money(r.monthly)}/mo` : 'once')
-                                : `${money(r.monthly)}/mo`}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className={styles.bar} aria-hidden="true">
-                      <span className={styles.barFill} style={{ transform: `scaleX(${r.share})` }} />
-                    </div>
-                    <p className={styles.note}>{r.note}</p>
-                  </li>
+            <fieldset className={styles.slipField}>
+              <legend className={styles.label}>Emails each contact gets a month</legend>
+              <div className={styles.segments}>
+                {SEND_OPTIONS.map((n) => (
+                  <label key={n} className={`${styles.segment} ${inputs.sends === n ? styles.segmentOn : ''}`}>
+                    <input
+                      type="radio"
+                      name="sends"
+                      value={n}
+                      checked={inputs.sends === n}
+                      onChange={() => setSends(n)}
+                      className={styles.radio}
+                    />
+                    <span className={styles.segNum}>{n}</span>
+                    <span className={styles.segWord}>{SEND_LABELS[n]}</span>
+                  </label>
                 ))}
-              </ol>
+              </div>
+              <button type="submit" className={styles.calc}>Calculate</button>
+            </fieldset>
 
-              <p className={styles.fine}>
-                Monthly billing, US dollars, prices as published in {PRICES_CHECKED}. ~ means estimated between Mailchimp&rsquo;s published tiers.
+            <p className={styles.volume}>
+              <span className={styles.volumeNum}>{count(result.emails)}</span> emails a month, about {count(result.perDay)} a day
+            </p>
+          </Form>
+
+          {them ? (
+            <section className={styles.verdict} aria-labelledby="verdict">
+              <h2 id="verdict" className={styles.visuallyHidden}>Three-year totals</h2>
+              <div className={styles.side}>
+                <span className={styles.sideName}>{them.name}</span>
+                <span className={styles.sideAmount}>{them.approx ? '~' : ''}{money(them.total)}</span>
+                <span className={styles.sideNote}>{MONTHS} monthly bills of {money(them.monthly)}</span>
+              </div>
+              <span className={styles.vs} aria-hidden="true">vs</span>
+              <div className={`${styles.side} ${styles.sideOurs}`}>
+                <span className={styles.sideName}>Trovarcis Sender + Amazon SES</span>
+                <span className={styles.sideAmount}>{money(us.total)}</span>
+                <span className={styles.sideNote}>{money(us.oneTime)} once, then about {money(us.monthly)} a month</span>
+              </div>
+              <p className={styles.keep}>
+                Over three years you keep <strong>{money(keep)}</strong>
               </p>
             </section>
-          </div>
+          ) : (
+            <p className={styles.quoted}>At this size, Mailchimp and Brevo quote a price. Amazon SES and Sender are below.</p>
+          )}
+
+          <section className={styles.ledger} aria-labelledby="ledger-title">
+            <div className={styles.ledgerHead}>
+              <h2 id="ledger-title" className={styles.ledgerTitle}>Every bill for three years</h2>
+              <p className={styles.ledgerSub}>Each mark is one month. The taller it is, the bigger the bill.</p>
+            </div>
+
+            <ol className={styles.rows}>
+              {result.rows.map((r) => (
+                <li key={r.id} className={`${styles.row} ${r.ours ? styles.rowOurs : ''}`}>
+                  <div className={styles.rowHead}>
+                    <div className={styles.rowName}>
+                      <span className={styles.name}>{r.name}</span>
+                      <span className={styles.model}>{r.model}</span>
+                    </div>
+                    <div className={styles.rowTotal}>
+                      {r.total == null ? (
+                        <span className={styles.quote}>Quoted</span>
+                      ) : (
+                        <>
+                          <span className={styles.total}>{r.approx ? '~' : ''}{money(r.total)}</span>
+                          <span className={styles.per}>{billsLabel(r)}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {r.heights ? (
+                    <BillStrip heights={r.heights} ours={r.ours} />
+                  ) : (
+                    <div className={styles.stripQuoted}>Price on request</div>
+                  )}
+                  <p className={styles.note}>{r.note}</p>
+                  {r.id === 'sender-own' && (
+                    <div className={styles.stampAt}><PaidStamp price={initial.priceLabel} /></div>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <div className={styles.axis} aria-hidden="true">
+              <span>Month 1</span>
+              <span>Month 12</span>
+              <span>Month 24</span>
+              <span>Month 36</span>
+            </div>
+
+            <p className={styles.fine}>
+              Monthly billing, US dollars, prices as published in {PRICES_CHECKED}. ~ means estimated between Mailchimp&rsquo;s published tiers.
+            </p>
+          </section>
 
           <section className={styles.extras} aria-label="Before you send">
             <div className={styles.extra}>
