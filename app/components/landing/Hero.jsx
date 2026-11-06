@@ -4,8 +4,14 @@ import { LockIcon } from '~/components/icons';
 import { STORAGE_LINE, SENDER_REFUND_LINE } from '~/utils/senderCopy';
 import styles from '~/styles/modules/landing/Hero.module.css';
 
-// The homepage leads with Sender. The tools section below picks up the "checks" the sub mentions.
-export default function Hero({ priceLabel }) {
+// The route a campaign takes. Trovarcis sits outside it, which is the privacy promise drawn out.
+const ROUTE = [
+  { name: 'Your computer', note: 'Trovarcis Sender' },
+  { name: 'Your SMTP account', note: 'Gmail, Zoho, Amazon SES…' },
+  { name: 'Their inbox', note: 'Delivered from your account' },
+];
+
+export default function Hero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.heroGrid} aria-hidden="true" />
@@ -25,22 +31,15 @@ export default function Hero({ priceLabel }) {
           </p>
 
           <div className={styles.ctas}>
-            <Button href="/sender" variant="primary">Get Sender, {priceLabel}</Button>
+            <Button href="/sender" variant="primary">Get Sender</Button>
             <Button href="#tools" variant="secondary">Try the free checks</Button>
           </div>
 
-          <p className={styles.privacy}>
-            <span className={styles.privacyIcon} aria-hidden="true"><LockIcon size={16} /></span>
-            <span>{STORAGE_LINE}</span>
-          </p>
-
-          <p className={styles.terms}>
-            One payment, no monthly fee. {SENDER_REFUND_LINE}
-          </p>
+          <p className={styles.terms}>One payment, no monthly fee. {SENDER_REFUND_LINE}</p>
         </div>
 
-        <figure className={styles.visual}>
-          <div className={styles.window}>
+        <div className={styles.stage}>
+          <figure className={styles.window}>
             <div className={styles.windowBar} aria-hidden="true">
               <span className={styles.windowTitle}>Trovarcis Sender</span>
               <span className={styles.windowControls}>
@@ -51,20 +50,48 @@ export default function Hero({ priceLabel }) {
             </div>
             <img
               className={styles.shot}
-              src="/images/sender/sender-overview-1600.webp"
-              srcSet="/images/sender/sender-overview-800.webp 800w, /images/sender/sender-overview-1600.webp 1600w"
-              sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 32px)"
+              src="/images/sender/sender-report-1600.webp"
+              srcSet="/images/sender/sender-report-800.webp 800w, /images/sender/sender-report-1600.webp 1600w"
+              sizes="(min-width: 1200px) 960px, calc(100vw - 32px)"
               width="1600"
               height="1179"
-              alt="The Trovarcis Sender overview screen: getting started steps, daily sending capacity across three SMTP accounts, and the last campaign's results."
+              alt="Trovarcis Sender sending a campaign: the campaign clock at 39%, 3,180 sent, and three SMTP accounts each sending within its own daily limit."
               fetchPriority="high"
               decoding="async"
             />
+            <figcaption className={styles.caption}>
+              Sender 1.0 sending a campaign, shown with demo data.{' '}
+              <Link to="/sender#screens" className={styles.captionLink}>See every screen</Link>
+            </figcaption>
+          </figure>
+
+          <img
+            className={styles.license}
+            src="/images/sender/sender-license-card.webp"
+            width="376"
+            height="330"
+            alt="The Sender lifetime license card: every update, on up to 3 devices."
+            loading="lazy"
+            decoding="async"
+          />
+
+          <div className={styles.route}>
+            <p className={styles.routeTitle}>Where your mail goes</p>
+            <ol className={styles.routeSteps}>
+              {ROUTE.map((step) => (
+                <li key={step.name} className={styles.routeStep}>
+                  <span className={styles.routeNode} aria-hidden="true" />
+                  <span className={styles.routeName}>{step.name}</span>
+                  <span className={styles.routeNote}>{step.note}</span>
+                </li>
+              ))}
+            </ol>
+            <p className={styles.routeOff}>
+              <span className={styles.routeLock} aria-hidden="true"><LockIcon size={14} /></span>
+              <span>{STORAGE_LINE}</span>
+            </p>
           </div>
-          <figcaption className={styles.caption}>
-            Sender 1.0, shown with demo data. <Link to="/sender#screens" className={styles.captionLink}>See every screen</Link>
-          </figcaption>
-        </figure>
+        </div>
       </div>
     </section>
   );

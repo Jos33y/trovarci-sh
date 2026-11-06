@@ -25,7 +25,7 @@ const PACKS = LANDING_KEYS.map((key) => {
 
 const TOP_PACK = CREDIT_PACKAGES[CREDIT_PACKAGES.length - 1];
 
-export default function Pricing({ priceLabel, priceNote }) {
+export default function Pricing({ priceLabel }) {
   const headerRef = useReveal();
   const senderRef = useReveal();
   const cardsRef = useReveal(0.08);
@@ -62,7 +62,6 @@ export default function Pricing({ priceLabel, priceNote }) {
               <span className={styles.price}>{priceLabel}</span>
               <span className={styles.period}>one payment</span>
             </div>
-            {priceNote && <p className={styles.senderNote}>{priceNote}</p>}
             <a href="/sender" className={`${styles.cta} ${styles.ctaPrimary} ${styles.senderCta}`}>Get Sender</a>
           </div>
         </div>

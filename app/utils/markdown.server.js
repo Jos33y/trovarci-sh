@@ -5,6 +5,8 @@ import path from 'node:path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import { DEFAULT_AUTHOR } from './authors.js';
+import { currentSenderPrice } from './senderConfig.server.js';
+import { formatSenderPrice } from './senderCopy.js';
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
 
@@ -83,6 +85,16 @@ function labelTableCells(html) {
   });
 }
 
+// Posts write {{sender_price}} instead of a number, so the price shown is always today's.
+function fillPrices(markdown) {
+  return markdown.replace(/\{\{sender_price\}\}/g, () => formatSenderPrice(currentSenderPrice().cents));
+}
+
+// Marks the Trovarcis Sender row in comparison tables, so it can be picked out at a glance.
+function markOurRow(html) {
+  return html.replace(/<tr>(\s*<td[^>]*>\s*Trovarcis Sender\s*<\/td>)/g, '<tr class="ours">$1');
+}
+
 /* Returns frontmatter + rendered HTML. Null if slug not found. */
 export function getPost(slug) {
   if (!fs.existsSync(BLOG_DIR)) return null;
@@ -97,7 +109,7 @@ export function getPost(slug) {
     if (postSlug === slug) {
       return {
         ...mapFrontmatter(filename, data),
-        html: labelTableCells(marked(content)),
+        html: markOurRow(labelTableCells(marked(fillPrices(content)))),
       };
     }
   }

@@ -40,7 +40,7 @@ const STAGES = [
   },
 ];
 
-export default function Checks({ priceLabel }) {
+export default function Checks() {
   return (
     <section id="tools" className={styles.section} aria-labelledby="tools-title">
       <div className="container">
@@ -94,7 +94,7 @@ export default function Checks({ priceLabel }) {
               </p>
             </div>
             <Link to="/sender" className={styles.sendLink}>
-              Get Sender, {priceLabel}
+              Get Sender
               <span aria-hidden="true"><ArrowRightIcon size={16} /></span>
             </Link>
           </li>

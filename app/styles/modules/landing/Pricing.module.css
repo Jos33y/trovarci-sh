@@ -378,13 +378,6 @@
   margin-top: 0;
 }
 
-.senderNote {
-  margin-top: 8px;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--trov-text-secondary);
-}
-
 .senderCta {
   width: auto;
   padding: 12px 28px;

@@ -369,3 +369,96 @@
     content: none;
   }
 }
+
+/* Our product inside a comparison: the real screen, today's price and one button. */
+
+.content :global(.product-card) {
+  margin: var(--space-lg) 0 var(--space-xl);
+  overflow: hidden;
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  border-radius: var(--radius-md);
+  background: var(--trov-surface);
+}
+
+.content :global(.product-card img) {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid var(--trov-border);
+  border-radius: 0;
+}
+
+.content :global(.product-card-body) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 20px;
+}
+
+.content :global(.product-card-price) {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+}
+
+.content :global(.product-card-price span) {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--trov-text-secondary);
+}
+
+.content :global(a.product-card-cta) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 24px;
+  border-radius: var(--radius-md);
+  background: var(--trov-accent);
+  font-weight: 600;
+  color: var(--trov-text-on-accent);
+  text-decoration: none;
+  transition: background-color 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.content :global(a.product-card-cta:hover) {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+}
+
+.content :global(a.product-card-cta:active) {
+  transform: scale(0.97);
+}
+
+/* The Trovarcis Sender row in a comparison table. */
+
+.content :global(tr.ours td) {
+  background: rgba(212, 168, 67, 0.06);
+  color: var(--trov-text);
+}
+
+.content :global(tr.ours td:first-child) {
+  box-shadow: inset 2px 0 0 var(--trov-accent);
+  font-weight: 600;
+}
+
+@media (max-width: 639px) {
+  .content :global(tr.ours) {
+    border-color: rgba(212, 168, 67, 0.45);
+  }
+
+  .content :global(tr.ours td),
+  .content :global(tr.ours td:first-child) {
+    background: none;
+    box-shadow: none;
+  }
+}

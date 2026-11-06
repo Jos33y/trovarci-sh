@@ -15,7 +15,7 @@ readingTime: 5
 
 | Tool | Price | Runs on | Sends through | Your list is kept |
 |---|---|---|---|---|
-| Trovarcis Sender | $79 once (launch price), then $99 | Windows | Your own SMTP accounts | On your computer |
+| Trovarcis Sender | {{sender_price}} once, 3 computers | Windows | Your own SMTP accounts | On your computer |
 | MaxBulk Mailer | $99.95 once, per user | Mac, Windows | Your own SMTP accounts | On your computer |
 | Atomic Mail Sender | $89.90 once, per PC | Windows | Its built-in server or your SMTP | On your computer |
 | Mailmeteor | Free for 50 a day, then from $5.99 a month | Gmail, Outlook, Google Sheets | Your Gmail or Outlook account | Your Google account |
@@ -41,19 +41,25 @@ Trovarcis Sender is a Windows app you pay for once. It sends through your own SM
 - **Keeps each account inside its limits.** Set a daily cap per account and Sender spreads the campaign across your accounts, with pause, resume and sending hours.
 - **A report in the server's own words** for every recipient who didn't get the email.
 
-**Price:** $79 once until February 28, 2027, then $99. Use it on 3 computers, with every 1.x update included, and a 15-day refund if it doesn't work for you.
+**Price:** {{sender_price}} once. Use it on 3 computers, with every 1.x update included, and a 15-day refund if it doesn't work for you.
 
-**Good to know:** Windows only for now. It doesn't track opens, by design.
+**Good to know:** Windows today, with a Mac version on the way. It doesn't track opens, by design.
 
-[See Trovarcis Sender](/sender)
+<div class="product-card">
+<img src="/images/sender/sender-report-800.webp" width="800" height="589" alt="Trovarcis Sender sending a campaign across three SMTP accounts, each within its daily limit." loading="lazy">
+<div class="product-card-body">
+<p class="product-card-price">{{sender_price}} <span>one payment, 3 computers, every 1.x update</span></p>
+<a class="product-card-cta" href="/sender">Get Sender</a>
+</div>
+</div>
 
 ## 2. MaxBulk Mailer {#maxbulk-mailer}
 
-**Best for:** Mac users who want a desktop sender.
+**Best for:** Mac users who need a desktop sender today.
 
 A long-running mail merge and bulk email program for Mac and Windows. It sends through your own mail server or an SMTP service, with personalization, attachments, test messages and a send-rate limit.
 
-**Price:** $99.95 once, per user. **Good to know:** at nearly the price of SendBlaster Pro, it's the main option if you're on a Mac.
+**Price:** $99.95 once, per user. **Good to know:** priced per user, so a team pays for each person.
 
 ## 3. Atomic Mail Sender {#atomic-mail-sender}
 
@@ -89,7 +95,7 @@ A web platform with templates, automations and hosted sign-up forms. Your list l
 
 ## How to choose {#how-to-choose}
 
-- **You want what SendBlaster does, but current:** Trovarcis Sender on Windows, MaxBulk Mailer on a Mac.
+- **You want what SendBlaster does, but current:** Trovarcis Sender, on Windows today, with a Mac version on the way.
 - **You only ever send from one Gmail account, a few hundred a day:** Mailmeteor.
 - **You run cold outreach with follow-ups:** GMass.
 - **You send designed newsletters to subscribers:** Mailchimp.

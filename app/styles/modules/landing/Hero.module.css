@@ -1,12 +1,13 @@
-/* Hero: Sender first, with a real screen. Mobile first; two columns from 1024. */
+/* Hero: the headline over a staged product shot. The app window leans back on a desk,
+   the license card sits on top of it, and the route card shows where the mail goes, with
+   Trovarcis outside the path. Mobile first; the staging starts at 1024. */
 
 .hero {
   position: relative;
-  padding: 40px 0 56px;
+  padding: 48px 0 64px;
   overflow: hidden;
 }
 
-/* Faint grid behind the copy, masked so it never reaches the screenshot edge. */
 .heroGrid {
   position: absolute;
   inset: 0;
@@ -15,16 +16,13 @@
   background-image:
     repeating-linear-gradient(0deg, rgba(212, 168, 67, 0.05) 0 1px, transparent 1px 64px),
     repeating-linear-gradient(90deg, rgba(212, 168, 67, 0.05) 0 1px, transparent 1px 64px);
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 20% 30%, black 0%, transparent 70%);
-  mask-image: radial-gradient(ellipse 70% 60% at 20% 30%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 45% at 50% 18%, black 0%, transparent 72%);
+  mask-image: radial-gradient(ellipse 60% 45% at 50% 18%, black 0%, transparent 72%);
 }
 
 .inner {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
 }
 
 /* Copy */
@@ -32,35 +30,37 @@
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
+  align-items: center;
+  max-width: 46rem;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .kicker {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--trov-accent);
 }
 
 .headline {
-  margin-top: 14px;
-  max-width: 14ch;
+  margin-top: 16px;
+  max-width: 13ch;
   font-family: var(--font-display);
-  font-size: clamp(2.125rem, 8vw, 3.5rem);
+  font-size: clamp(2.375rem, 9vw, 4.5rem);
   font-weight: 900;
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+  line-height: 1;
+  letter-spacing: -0.035em;
   color: var(--trov-text);
   text-wrap: balance;
 }
 
 .sub {
-  margin-top: 18px;
-  max-width: 34rem;
-  font-size: 1rem;
+  margin-top: 20px;
+  max-width: 36rem;
+  font-size: 1.0625rem;
   line-height: 1.6;
   color: var(--trov-text-secondary);
   text-wrap: pretty;
@@ -69,68 +69,52 @@
 .ctas {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   margin-top: 28px;
+}
+
+.ctas a {
+  min-width: 168px;
+  padding: 14px 28px;
+  font-size: 0.9375rem;
 }
 
 .ctas a:active {
   transform: scale(0.97);
 }
 
-/* The privacy line is the lead promise, so it gets its own quiet panel rather than fine print. */
-.privacy {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 28px;
-  max-width: 34rem;
-  padding: 12px 14px;
-  border: 1px solid var(--trov-border);
-  border-left: 2px solid var(--trov-accent);
-  border-radius: var(--radius-sm);
-  background: rgba(212, 168, 67, 0.04);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--trov-text);
-}
-
-.privacyIcon {
-  display: inline-flex;
-  flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--trov-accent);
-}
-
 .terms {
-  margin-top: 12px;
+  margin-top: 14px;
   font-size: 0.8125rem;
   color: var(--trov-text-secondary);
 }
 
-/* Screenshot in a Windows frame, since Sender is a Windows app. */
+/* Stage */
 
-.visual {
+.stage {
   position: relative;
-  min-width: 0;
-  margin: 0;
+  max-width: 1040px;
+  margin: 48px auto 0;
 }
 
-.visual::before {
+.stage::before {
   content: '';
   position: absolute;
-  inset: 12% 6% -6% 6%;
+  inset: 8% 4% -4%;
   z-index: -1;
-  background: radial-gradient(ellipse at center, var(--trov-glow-strong), transparent 70%);
-  filter: blur(24px);
+  background: radial-gradient(ellipse at 50% 40%, var(--trov-glow-strong), transparent 68%);
+  filter: blur(32px);
   pointer-events: none;
 }
 
 .window {
+  margin: 0;
   overflow: hidden;
   border: 1px solid var(--trov-border-hover);
   border-radius: var(--radius-md);
   background: var(--trov-bg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 168, 67, 0.06);
 }
 
 .windowBar {
@@ -145,7 +129,6 @@
 }
 
 .windowTitle {
-  font-family: var(--font-body);
   font-size: 0.6875rem;
   color: var(--trov-text-secondary);
 }
@@ -167,8 +150,10 @@
 }
 
 .caption {
-  margin-top: 12px;
-  font-size: 0.8125rem;
+  padding: 10px 14px;
+  border-top: 1px solid var(--trov-border);
+  background: var(--trov-surface);
+  font-size: 0.75rem;
   color: var(--trov-text-secondary);
 }
 
@@ -184,33 +169,180 @@
   text-underline-offset: 3px;
 }
 
+/* License card: only staged on wide screens, where it has room to sit on the window's edge. */
+.license {
+  display: none;
+}
+
+/* Route card */
+
+.route {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-md);
+  background: var(--trov-surface);
+  text-align: left;
+}
+
+.routeTitle {
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+}
+
+/* Three stops joined by a line, with one dot travelling down it. */
+.routeSteps {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.routeSteps::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 30px;
+  left: 5px;
+  width: 1px;
+  background: linear-gradient(var(--trov-border-hover), var(--trov-accent));
+}
+
+.routeSteps::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--trov-accent);
+  box-shadow: 0 0 10px var(--trov-accent);
+  animation: routeTravel 3.6s linear infinite;
+}
+
+@keyframes routeTravel {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(96px); opacity: 0; }
+}
+
+.routeStep {
+  position: relative;
+  display: grid;
+  grid-template-columns: 11px minmax(0, 1fr);
+  column-gap: 14px;
+  min-height: 48px;
+}
+
+.routeNode {
+  grid-row: span 2;
+  width: 11px;
+  height: 11px;
+  margin-top: 1px;
+  border: 1px solid var(--trov-accent);
+  border-radius: 50%;
+  background: var(--trov-surface);
+}
+
+.routeName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--trov-text);
+}
+
+.routeNote {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.routeOff {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--trov-border-hover);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text);
+}
+
+.routeLock {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--trov-accent);
+}
+
 @media (min-width: 640px) {
   .hero {
-    padding: 56px 0 72px;
+    padding: 64px 0 80px;
+  }
+
+  .stage {
+    margin-top: 56px;
   }
 }
 
+/* Desktop: the window leans back, the license card and the route card sit over its edges. */
 @media (min-width: 1024px) {
   .hero {
-    padding: 72px 0 96px;
+    padding: 80px 0 112px;
   }
 
-  .inner {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: center;
-    gap: 56px;
+  .stage {
+    margin-top: 64px;
+    perspective: 2400px;
   }
 
-  .headline {
-    margin-top: 16px;
-    max-width: 15ch;
-    font-size: clamp(2.5rem, 4.4vw, 3.5rem);
+  .window {
+    transform: rotateX(8deg);
+    transform-origin: 50% 0;
+  }
+
+  .license {
+    display: block;
+    position: absolute;
+    top: 14%;
+    left: 16px;
+    width: 220px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.4);
+    transform: rotate(-6deg);
+  }
+
+  .route {
+    position: absolute;
+    right: 16px;
+    bottom: 64px;
+    width: 320px;
+    margin: 0;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
   }
 }
 
-/* Wide screens: let the screen run past the column toward the edge, like a real window would. */
+/* Wide screens have room either side, so the cards can hang past the window's edges. */
 @media (min-width: 1280px) {
-  .window {
-    width: 112%;
+  .license { left: -64px; }
+  .route { right: -56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routeSteps::after {
+    animation: none;
+    display: none;
+  }
+
+  .ctas a:active {
+    transform: none;
   }
 }

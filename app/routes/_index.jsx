@@ -2,7 +2,7 @@ import { useLoaderData } from 'react-router';
 import { getAllPosts } from '~/utils/markdown.server';
 import { getSeo } from '~/utils/seo';
 import { currentSenderPrice } from '~/utils/senderConfig.server';
-import { formatSenderPrice, senderPriceNote } from '~/utils/senderCopy';
+import { formatSenderPrice } from '~/utils/senderCopy';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import Hero from '~/components/landing/Hero';
@@ -25,7 +25,6 @@ export function loader() {
   return {
     posts,
     priceLabel: formatSenderPrice(price.cents),
-    priceNote: senderPriceNote(price),
   };
 }
 
@@ -61,7 +60,7 @@ const HOME_SCHEMA = {
 };
 
 export default function Home() {
-  const { posts, priceLabel, priceNote } = useLoaderData();
+  const { posts, priceLabel } = useLoaderData();
 
   return (
     <>
@@ -73,15 +72,15 @@ export default function Home() {
         />
 
         {/* bg */}
-        <Hero priceLabel={priceLabel} />
+        <Hero />
 
         {/* surface */}
         <div className={styles.surfaceSection}>
-          <Checks priceLabel={priceLabel} />
+          <Checks />
         </div>
 
         {/* bg */}
-        <Pricing priceLabel={priceLabel} priceNote={priceNote} />
+        <Pricing priceLabel={priceLabel} />
 
         {/* bg */}
         <FAQ priceLabel={priceLabel} />
