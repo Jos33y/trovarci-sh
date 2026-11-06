@@ -10,8 +10,8 @@ import styles from '~/styles/modules/routes/domain.module.css';
 // /domain - Domain Health Checker. F2.5: sticky strip + bracketless tool host + numbered labels.
 
 export const meta = () => getSeo({
-  title: 'Free Domain Health Checker | Email, DNS & Reputation',
-  description: "Check your domain's email authentication (SPF, DKIM, DMARC), MX and TLS health, blacklist status, SSL, and DNSSEC. 25+ tests with direct fix links. Free.",
+  title: 'Free Domain Health and Blacklist Checker',
+  description: 'Check if your domain is set up to send email: SPF, DKIM, DMARC, your mail server and blocklists. Every problem comes with its fix. Free, no signup.',
   path: '/domain',
 });
 
@@ -25,7 +25,7 @@ const SECTIONS = [
 const FAQ_ITEMS = [
   {
     q: 'What does the Domain Health Checker test?',
-    a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation across 7 blacklist zones, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
+    a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation on 6 blocklists, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
   },
   {
     q: 'Is my domain information stored or shared?',
@@ -53,11 +53,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'What blacklists does the checker query?',
-    a: 'We query 6 public DNSBL zones: Spamhaus ZEN, SpamCop, Barracuda BRBL and PSBL for IPs, plus Spamhaus DBL and SURBL for domains. We dropped SORBS after it shut down in June 2024. Each listing links directly to the blacklist\'s removal or lookup page. Some zones like Spamhaus DQS or Barracuda paid tier offer higher-volume access; we use the publicly queryable versions.',
-  },
-  {
-    q: 'How does this compare to MXToolbox?',
-    a: 'MXToolbox has the widest DNSBL coverage (90+ zones) and mature reporting for enterprise use. Trovarcis Reach has a narrower blacklist scope but adds checks MXToolbox does not: SSL certificate validation, HTTPS redirect, HSTS headers, CAA records, and Google Safe Browsing. Every finding also links to a free fix path in our DNS Record Generator. Both tools are free for individual checks.',
+    a: 'Six: Spamhaus ZEN, SpamCop, Barracuda and PSBL for your mail server\'s IP address, plus Spamhaus DBL and SURBL for your domain. If you are listed, the result links to that list\'s own removal page.',
   },
   {
     q: 'What is DNSSEC and do I need it?',
@@ -86,7 +82,7 @@ const CATEGORIES = [
     label: 'Reputation',
     title: 'Blacklists can block your email silently',
     icon: ReputationIcon,
-    text: 'If your IP or domain appears on a blacklist, receiving servers may reject your email without telling you. We check 7 blacklist zones, 5 for IPs and 2 for domains, including Spamhaus, Barracuda and SpamCop.',
+    text: 'If your IP or domain appears on a blacklist, receiving servers may reject your email without telling you. We check 6 blocklists, 4 for your mail server\'s IP and 2 for your domain, including Spamhaus, Barracuda and SpamCop.',
   },
   {
     label: 'Security',
@@ -131,25 +127,12 @@ const CHECKS_BY_CATEGORY = [
 ];
 
 const BLACKLISTS = [
-  { name: 'Spamhaus ZEN', zone: 'zen.spamhaus.org', subject: 'IP', removal: 'Manual via check.spamhaus.org, 24-48h' },
-  { name: 'Spamhaus DBL', zone: 'dbl.spamhaus.org', subject: 'Domain', removal: 'Manual, proof of ownership required' },
-  { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'IP', removal: 'Auto-expires after 24h of no complaints' },
-  { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'IP', removal: 'Removal form, typically 12-24h' },
-  { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'IP', removal: 'Self-service via psbl.surriel.com' },
-  { name: 'SURBL', zone: 'multi.surbl.org', subject: 'URI', removal: 'Manual, requires proof of remediation' },
-];
-
-const COMPARISON = [
-  { check: 'SPF, DKIM, DMARC parse', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'Yes' },
-  { check: 'BIMI', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'Yes' },
-  { check: 'MX + STARTTLS', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'Yes', dmarcian: 'No' },
-  { check: 'Blacklist zones', us: '7 zones', mxtoolbox: '90+ zones', mailtester: '8 zones', dmarcian: 'None' },
-  { check: 'SSL and HTTPS', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
-  { check: 'HSTS and CAA', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
-  { check: 'DNSSEC validation', us: 'Yes', mxtoolbox: 'Yes', mailtester: 'No', dmarcian: 'No' },
-  { check: 'Safe Browsing', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'No' },
-  { check: 'Fix links to generator', us: 'Yes', mxtoolbox: 'No', mailtester: 'No', dmarcian: 'Paid tier' },
-  { check: 'Cost', us: 'Free', mxtoolbox: 'Free basic', mailtester: 'Free', dmarcian: 'Free basic' },
+  { name: 'Spamhaus ZEN', zone: 'zen.spamhaus.org', subject: 'IP', removal: 'Free, at check.spamhaus.org' },
+  { name: 'Spamhaus DBL', zone: 'dbl.spamhaus.org', subject: 'Domain', removal: 'Free, at check.spamhaus.org' },
+  { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'IP', removal: 'On the list\'s own site' },
+  { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'IP', removal: 'On the list\'s own site' },
+  { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'IP', removal: 'On the list\'s own site' },
+  { name: 'SURBL', zone: 'multi.surbl.org', subject: 'URI', removal: 'On the list\'s own site' },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
@@ -234,7 +217,7 @@ export default function DomainPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Domain Health Checker',
-    description: 'Check domain email authentication, mail server health, blacklist status, SSL security, and DNS configuration. Free, no account required.',
+    description: 'Check if your domain is set up to send email and whether it is on a blocklist. Free, no account required.',
     url: 'https://trovarci.sh/domain',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
@@ -295,14 +278,14 @@ export default function DomainPage() {
           </div>
         </section>
 
-        {/* Reference - full check list, blacklists, comparison */}
+        {/* Reference - full check list and blocklists */}
         <section id="reference" ref={sectionRefs.reference} className={styles.referenceSection}>
           <div className={`container ${styles.container}`}>
             <SectionLabel num="03" name="REFERENCE" />
             <div ref={referenceRef} className={`${styles.referenceHead} reveal`}>
               <h2 className={styles.referenceTitle}>Reference</h2>
               <p className={styles.referenceIntro}>
-                The full list of checks by category, the blacklists we query, and where Trovarcis Reach fits alongside common alternatives.
+                The full list of checks by category, and the blocklists we check.
               </p>
             </div>
 
@@ -339,7 +322,7 @@ export default function DomainPage() {
               <div className={styles.refBlockHead}>
                 <h3 className={styles.refBlockTitle}>Blacklists we query</h3>
                 <p className={styles.refBlockDesc}>
-                  Reputable public DNSBLs covering the zones mailbox providers actually consult. Each listing links to the blacklist's own removal page.
+                  The public blocklists mail providers use most. If you are listed, your result links to that list's removal page.
                 </p>
               </div>
               <div className={styles.refTableWrap}>
@@ -366,38 +349,6 @@ export default function DomainPage() {
               </div>
             </div>
 
-            <div id="comparison" className={styles.refBlock}>
-              <div className={styles.refBlockHead}>
-                <h3 className={styles.refBlockTitle}>How this compares</h3>
-                <p className={styles.refBlockDesc}>
-                  Where Trovarcis Reach fits alongside MXToolbox, mail-tester, and dmarcian. MXToolbox wins on DNSBL depth; we cover a wider range of infrastructure checks.
-                </p>
-              </div>
-              <div className={styles.refTableWrap}>
-                <table className={styles.refTable}>
-                  <thead>
-                    <tr>
-                      <th className={styles.refColCompareCheck}>Check</th>
-                      <th className={styles.refColUs}>Trovarcis</th>
-                      <th>MXToolbox</th>
-                      <th>mail-tester</th>
-                      <th>dmarcian</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {COMPARISON.map((row, i) => (
-                      <tr key={i}>
-                        <td className={styles.refCheckCell}>{row.check}</td>
-                        <td className={styles.refUsCell}>{row.us}</td>
-                        <td className={styles.refDescCell}>{row.mxtoolbox}</td>
-                        <td className={styles.refDescCell}>{row.mailtester}</td>
-                        <td className={styles.refDescCell}>{row.dmarcian}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         </section>
 

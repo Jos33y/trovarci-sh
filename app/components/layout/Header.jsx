@@ -23,12 +23,12 @@ const NAV_LINKS = [
 ];
 
 const TOOL_LINKS = [
-  { label: "Email Scorer",    href: "/score",         desc: "AI spam-trigger scoring",      icon: GaugeIcon },
-  { label: "Domain Checker",  href: "/domain",        desc: "DNS + blacklist audit",        icon: GlobeIcon },
-  { label: "Email Verifier",  href: "/verify",        desc: "Bulk address verification",    icon: VerifyIcon },
-  { label: "SMTP Tester",     href: "/smtp-test",     desc: "Auth, TLS, MX diagnostics",    icon: TerminalIcon },
+  { label: "Domain Checker",  href: "/domain",        desc: "Setup and blocklist check",    icon: GlobeIcon },
   { label: "DNS Generator",   href: "/records",       desc: "SPF, DKIM, DMARC records",     icon: DnsIcon },
-  { label: "Number Verifier", href: "/verify-number", desc: "Real carrier + line type",     icon: PhoneIcon },
+  { label: "Email Verifier",  href: "/verify",        desc: "Find addresses that bounce",   icon: VerifyIcon },
+  { label: "Number Verifier", href: "/verify-number", desc: "Carrier and line type",        icon: PhoneIcon },
+  { label: "Email Scorer",    href: "/score",         desc: "Spam score for a draft",       icon: GaugeIcon },
+  { label: "SMTP Tester",     href: "/smtp-test",     desc: "Test your SMTP login",         icon: TerminalIcon },
 ];
 
 export default function Header() {

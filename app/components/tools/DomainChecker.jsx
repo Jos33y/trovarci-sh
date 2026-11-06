@@ -295,7 +295,7 @@ export default function DomainChecker() {
             <ShieldCheckIcon size={22} />
           </div>
           <div>
-            <h1 className={styles.toolTitle}>Domain Health Checker</h1>
+            <h1 className={styles.toolTitle}>Domain health and blacklist checker</h1>
             <p className={styles.toolDesc}>Check your domain's email, DNS, and reputation health</p>
           </div>
         </div>

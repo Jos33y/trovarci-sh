@@ -311,7 +311,7 @@ export default function SmtpTester() {
         <div className={styles.toolHeaderLeft}>
           <div className={styles.toolIcon}><TerminalIcon size={22} /></div>
           <div>
-            <h1 className={styles.toolTitle}>SMTP Tester</h1>
+            <h1 className={styles.toolTitle}>SMTP tester</h1>
             <p className={styles.toolDesc}>Test your SMTP connection step by step</p>
           </div>
         </div>

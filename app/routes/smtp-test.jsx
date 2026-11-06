@@ -10,8 +10,8 @@ import styles from '~/styles/modules/routes/smtp-test.module.css';
 // /smtp-test - SMTP Connection Tester. F2.5: sticky strip + bracketless tool host + numbered labels.
 
 export const meta = () => getSeo({
-  title: 'Free SMTP Connection Tester',
-  description: 'Test any SMTP server end to end. See the full protocol handshake, TLS status, and authentication result. SMTP port reference and error code lookup included. Free, no signup.',
+  title: 'Free SMTP Tester: Check Login, Port and TLS',
+  description: 'Test any SMTP server: connection, encryption and login, each step shown in plain words. Includes a port guide and common errors. Free, no signup.',
   path: '/smtp-test',
 });
 

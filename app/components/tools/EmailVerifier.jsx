@@ -636,7 +636,7 @@ export default function EmailVerifier({ creditCost = 1 }) {
         <div className={styles.toolHeaderLeft}>
           <span className={styles.toolIcon}><MailIcon /></span>
           <div>
-            <h1 className={styles.toolTitle}>Email Verifier</h1>
+            <h1 className={styles.toolTitle}>Email verifier</h1>
             <p className={styles.toolSubtitle}>
               {mode === 'single'
                 ? 'Check if an email address is real and deliverable'

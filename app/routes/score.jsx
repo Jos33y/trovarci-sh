@@ -22,8 +22,8 @@ export async function loader({ request }) {
 }
 
 export const meta = () => getSeo({
-  title: 'Free Email Spam Checker | Score Your Email Before Sending',
-  description: 'AI-powered email deliverability scorer. Check your subject line and email content for spam triggers, compliance issues, and formatting problems. Free, instant results.',
+  title: 'Email Spam Checker: Score Before You Send',
+  description: 'Paste your email and get a spam score from 0 to 100, with what to fix in the subject, wording, links and layout. 10 free scores when you sign up.',
   path: '/score',
 });
 
@@ -36,7 +36,7 @@ const SECTIONS = [
 const FAQ_ITEMS = [
   {
     q: 'How does the email spam checker work?',
-    a: 'The Email Scorer sends your content to Arcis, our AI analysis engine powered by Claude. Unlike keyword-based tools, Arcis reads your email the way a modern spam filter does, evaluating context, structure, links, and compliance together. It returns a 0-100 score with specific issues and fixes.',
+    a: 'Paste your subject and your email. Arcis, our scoring engine, reads it the way a modern spam filter does: wording in context, structure, links and the details mail providers require. You get a score from 0 to 100, the problems it found, and how to fix each one.',
   },
   {
     q: 'What is a good email deliverability score?',
@@ -52,7 +52,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How many links should an email have?',
-    a: 'For short emails, keep it under 3-4 links. For newsletters, under 8-10. The link-to-text ratio matters more than the absolute number. URL shorteners (bit.ly, etc.) are a strong spam signal and should be avoided in email.',
+    a: 'As few as the email needs. A short message with one or two links reads like a person wrote it, while a long run of links reads like a campaign. Avoid link shorteners such as bit.ly, which spam filters distrust.',
   },
   {
     q: 'How much does it cost to score an email?',
@@ -60,11 +60,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Does the email scorer store my email content?',
-    a: 'No. Your email content is sent to the Arcis scoring engine, processed, scored, and immediately discarded. We do not log, store, or cache any email content. Anthropic (the AI provider) does not train on API inputs.',
-  },
-  {
-    q: 'What is Arcis?',
-    a: 'Arcis is the Trovarcis Reach AI scoring engine. It uses Claude (by Anthropic) to analyze email content for deliverability issues. Think of it as a spam filter expert that reads your email before you send it and tells you what to fix.',
+    a: 'No. Your email is scored and then discarded. We do not store or log its content.',
   },
 ];
 
@@ -182,11 +178,11 @@ export default function ScorePage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Email Scorer',
-    description: 'AI-powered email deliverability scorer. Check your email content for spam triggers before sending. Free, no account required.',
+    description: 'Score an email for spam problems before you send it, with what to fix.',
     url: 'https://trovarci.sh/score',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    offers: { '@type': 'Offer', price: '0.01', priceCurrency: 'USD' },
     creator: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
   };
 

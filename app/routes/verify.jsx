@@ -33,8 +33,8 @@ export async function loader({ request }) {
 }
 
 export const meta = () => getSeo({
-  title: 'Email Verifier - Single and Bulk',
-  description: 'Verify email addresses before you send. Single check via live SMTP probe, bulk runs up to 50,000 emails per job. Credits refunded on infrastructure failure.',
+  title: 'Email Verifier: Check Emails Before You Send',
+  description: 'Find the email addresses that would bounce before you send. Check one, or a whole list of up to 50,000. 1 credit per address, 10 free when you sign up.',
   path: '/verify',
 });
 
@@ -49,14 +49,14 @@ const METHOD_CARDS = [
   {
     icon: SyntaxIcon,
     label: 'Step 1',
-    title: 'Syntax + DNS check',
-    text: 'Format validation against RFC 5321 plus MX lookup. Catches typos, missing TLDs, and domains with no mail server before we waste a probe on them.',
+    title: 'Format and domain check',
+    text: 'Catches typos, missing endings like .com, and domains that cannot receive email, before anything else.',
   },
   {
     icon: ProbeIcon,
     label: 'Step 2',
-    title: 'Live SMTP probe',
-    text: 'We open a real SMTP conversation with the destination server and ask if the mailbox exists. Connection goes through SOCKS5 proxies so our IP is not associated with verification traffic.',
+    title: 'Mailbox check',
+    text: 'We ask the address\'s own mail server whether the mailbox exists, without sending an email.',
   },
   {
     icon: TagIcon,
@@ -67,45 +67,45 @@ const METHOD_CARDS = [
   {
     icon: RetryIcon,
     label: 'Step 4',
-    title: 'Graylist retries',
-    text: 'Some servers respond with a temporary defer to slow down spammers. We schedule automatic retries at 5, 15, and 60 minute intervals before giving up.',
+    title: 'Retries slow servers',
+    text: 'Some servers ask senders to try again later. We retry automatically after 5, 15 and 60 minutes before giving a verdict.',
   },
   {
     icon: RefundIcon,
     label: 'Step 5',
     title: 'Auto-refund on failure',
-    text: 'If a verification fails because of our infrastructure (proxy down, our timeout, our error), the credit is refunded automatically. You only pay for definitive verdicts.',
+    text: 'If a check fails on our side, its credit goes back to your balance automatically. You only pay for clear answers.',
   },
 ];
 
 const FAQ_ITEMS = [
   {
     q: 'How accurate is email verification?',
-    a: 'For most addresses our SMTP probe returns a definitive answer: valid, invalid, or a clear classification. A small fraction come back as unknown - usually because the destination server uses graylisting or accepts every address (catch-all). We tag these so you can decide how to handle them.',
+    a: 'Most addresses get a clear answer: valid or invalid. A small share come back as unknown, usually because the mail server delays its answer or accepts every address. Those are marked so you can decide what to do with them.',
   },
   {
     q: 'What does each verdict mean?',
-    a: 'Valid: the mailbox exists and accepts mail. Invalid: the address has a syntax error, the domain has no mail server, or the server explicitly rejected the recipient. Risky: deliverable but flagged (role addresses, free providers, catch-all domains). Unknown: the server would not commit to a yes or no - usually graylisting or a temporary block.',
+    a: 'Valid: the mailbox exists and accepts mail. Invalid: the address has a syntax error, the domain has no mail server, or the server explicitly rejected the recipient. Risky: deliverable but flagged (role addresses, free providers, catch-all domains). Unknown: the server would not give a yes or no, usually because it delays answers or blocked the check for a while.',
   },
   {
     q: 'How does pricing work?',
-    a: 'Every address costs 1 credit, single or bulk, and a credit is a flat $0.010 at any volume. If a verification fails because of an infrastructure issue on our side the credit is refunded automatically, so you only pay for definitive verdicts.',
+    a: 'Every address costs 1 credit, single or bulk, and a credit is a flat $0.010 at any volume. If a check fails on our side, the credit goes back to your balance automatically, so you only pay for clear answers.',
   },
   {
     q: 'Can I cancel a bulk job mid-run?',
-    a: 'Yes. Click cancel on the progress panel and the worker stops claiming new items immediately. You keep credits for the rows already processed (rounded up to the nearest 5-email batch); the rest is refunded.',
+    a: 'Yes. Cancel from the progress panel. Credits for the addresses not yet checked go back to your balance.',
   },
   {
-    q: 'What happens to graylisted addresses?',
-    a: 'A graylist response means try again later. The worker schedules automatic retries at 5, 15, and 60 minute intervals. If all three retries are still met with a defer, the address ends up classified as unknown rather than being charged for a definitive verdict we did not get.',
+    q: 'What happens when a server says "try again later"?',
+    a: 'We retry automatically after 5, 15 and 60 minutes. If the server still will not answer, the address is marked unknown.',
   },
   {
     q: 'Do you store the email lists I upload?',
-    a: 'Job inputs and results are kept for 48 hours so you can re-download the CSV. After that they are deleted automatically. The verdicts are discarded along with the row data; we do not build a master list of verified emails across customers.',
+    a: 'Lists and their results are kept for 48 hours so you can download them, then deleted automatically. We never build a shared list of checked addresses.',
   },
   {
     q: 'Why is my address marked as catch-all?',
-    a: 'Some domains accept every address regardless of whether the mailbox exists. We detect this by probing a randomized control address on the same domain. If the server says yes to a random recipient, we cannot distinguish a real mailbox from a fake one - so we mark all of them as risky / catch-all.',
+    a: 'Some domains accept mail for every address, real or not. We test this with a made-up address on the same domain. If the server accepts it, real and fake mailboxes there look the same, so those addresses are marked risky (catch-all).',
   },
 ];
 
@@ -114,26 +114,26 @@ const TIERS = [
     tier: 'Single',
     title: 'Single check',
     badge: '1 CREDIT',
-    desc: 'Paste one address. We open an SMTP conversation with the destination server and ask if the mailbox exists. Verdict comes back in under 10 seconds with the full reasoning trail.',
+    desc: 'Paste one address and get a verdict in seconds, with the reason.',
     icon: MailIcon,
     checks: [
-      'Syntax + DNS check',
-      'Live SMTP probe via SOCKS5 proxy',
+      'Format and domain check',
+      'Mailbox check with the mail server',
       'Tags for role, disposable, free provider, catch-all',
-      'Refunded automatically on infrastructure failure',
+      'Refunded automatically if the check fails on our side',
     ],
   },
   {
     tier: 'Bulk',
     title: 'Bulk verify',
     badge: '1 CREDIT',
-    desc: 'Paste up to 50,000 addresses. The worker processes them in parallel and surfaces live progress. Download the full results or only the clean (valid) list when it finishes.',
+    desc: 'Paste or upload up to 50,000 addresses. Watch the progress live, then download every result or only the valid addresses.',
     icon: StackIcon,
     checks: [
-      'Live progress via Server-Sent Events',
-      'Graylist retries at 5, 15, 60 minutes',
-      'Cancel anytime, partial refund for unprocessed rows',
-      'CSV download (full results + clean list)',
+      'Live progress',
+      'Automatic retries for slow servers',
+      'Cancel anytime, unchecked addresses refunded',
+      'CSV download (all results or only valid)',
     ],
   },
 ];
@@ -220,11 +220,11 @@ export default function VerifyPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Email Verifier',
-    description: 'Verify email addresses with live SMTP probes. Single mode and bulk verification up to 50,000 addresses per job.',
+    description: 'Find the email addresses that would bounce before you send. One at a time, or up to 50,000 per list.',
     url: 'https://trovarci.sh/verify',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'Any',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    offers: { '@type': 'Offer', price: '0.01', priceCurrency: 'USD' },
     creator: { '@type': 'Organization', name: 'Trovarcis', url: 'https://trovarcis.com' },
   };
 

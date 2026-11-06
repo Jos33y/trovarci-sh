@@ -310,7 +310,7 @@ export default function DnsGenerator() {
             <DnsIcon size={18} />
           </span>
           <div>
-            <h1 className={styles.cardTitle}>DNS Record Generator</h1>
+            <h1 className={styles.cardTitle}>SPF, DKIM and DMARC record generator</h1>
             <p className={styles.cardDesc}>
               Generate SPF, DKIM, DMARC, MX, BIMI and MTA-STS records for your domain
             </p>

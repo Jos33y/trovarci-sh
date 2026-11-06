@@ -388,7 +388,7 @@ export default function EmailScorer({
             <GaugeIcon size={22} />
           </div>
           <div>
-            <h1 className={styles.toolTitle}>Email Scorer</h1>
+            <h1 className={styles.toolTitle}>Email spam checker</h1>
             <p className={styles.toolDesc}>Score your email for deliverability before you send</p>
           </div>
         </div>

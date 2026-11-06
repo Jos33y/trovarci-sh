@@ -705,7 +705,7 @@ export default function NumberVerifier({
         <div className={styles.toolHeaderLeft}>
           <span className={styles.toolIcon}><PhoneIcon /></span>
           <div>
-            <h1 className={styles.toolTitle}>Number Verifier</h1>
+            <h1 className={styles.toolTitle}>Phone number verifier</h1>
             <p className={styles.toolSubtitle}>
               Validate phone numbers and detect carrier info
             </p>

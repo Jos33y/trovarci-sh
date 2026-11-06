@@ -10,7 +10,7 @@ export function getSeo({ title, description, path = "", image, imageAlt, type = 
   const url = `${BASE_URL}${path}`;
   const ogImage = image || DEFAULT_OG_IMAGE;
   const ogImageAlt = imageAlt || DEFAULT_IMAGE_ALT;
-  const fullTitle = title ? `${title} | Trovarcis Reach` : DEFAULT_TITLE;
+  const fullTitle = title ? `${title} | Trovarcis` : DEFAULT_TITLE;
 
   const tags = [
     { title: fullTitle },

@@ -23,8 +23,8 @@ export async function loader({ request }) {
 }
 
 export const meta = () => getSeo({
-  title: 'Free Phone Number Verifier - Validate and Detect Carrier',
-  description: 'Verify phone numbers instantly. Free format validation and country detection. Carrier lookup identifies mobile, landline, and VoIP. No subscription.',
+  title: 'Phone Number Verifier and Carrier Lookup',
+  description: 'Check if a phone number is valid and see its country, carrier and line type: mobile, landline or VoIP. Format check free, carrier lookup 2 credits.',
   path: '/verify-number',
 });
 
@@ -40,13 +40,13 @@ const METHOD_CARDS = [
     icon: FormatIcon,
     label: 'Step 1',
     title: 'Format validation',
-    text: "Google's libphonenumber library validates the format, detects the country, and estimates the line type from the number's pattern. Free for every check. No signup needed.",
+    text: 'Checks the number is valid for its country, detects the country and estimates the line type. Free for every check, no signup.',
   },
   {
     icon: NormalizeIcon,
     label: 'Step 2',
     title: 'E.164 normalization',
-    text: 'Strips spaces, dashes, parentheses, and other formatting noise. Returns a clean E.164 string ready for SMS APIs and phone systems that expect the international standard.',
+    text: 'Removes spaces, dashes and brackets, and gives the number in the international format SMS services expect.',
   },
   {
     icon: CarrierIcon,
@@ -64,14 +64,14 @@ const METHOD_CARDS = [
     icon: RefundIcon,
     label: 'Step 5',
     title: 'Auto-refund on failure',
-    text: 'If a carrier lookup fails (rate limit, network issue, unknown number), the credit is refunded automatically. You only pay for definitive verdicts.',
+    text: 'If a carrier lookup fails, its credits go back to your balance automatically. You only pay for clear answers.',
   },
 ];
 
 const FAQ_ITEMS = [
   {
     q: 'How does phone number verification work?',
-    a: 'We run two tiers of checks. Tier 1 (free) uses Google\'s libphonenumber library to validate the format, detect the country, and estimate the line type based on number patterns. Tier 2 (2 Credits) performs a live carrier-network lookup to confirm the actual carrier, verified line type, and SMS capability.',
+    a: 'Two levels. The free format check confirms the number is valid for its country and estimates the line type. The carrier lookup (2 credits) asks the phone network for the current carrier, the confirmed line type and whether the number can receive SMS.',
   },
   {
     q: 'What is the difference between format check and carrier lookup?',
@@ -79,11 +79,11 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I verify phone numbers for free?',
-    a: 'Yes. Format validation (Tier 1) is always free for single numbers. This includes country detection, line type estimation, and E.164 formatting. Live carrier lookup (Tier 2) costs 2 Credits per number. New accounts get a welcome bonus that covers your first lookups - no card required.',
+    a: 'Yes. The format check is always free for single numbers, with the country, an estimated line type and the international format. The carrier lookup costs 2 credits per number, and new accounts get 10 free credits.',
   },
   {
     q: 'How do I verify international phone numbers?',
-    a: 'Select the country from the dropdown or include the country code (like +44 for UK or +234 for Nigeria). Our tool handles any format: with or without the plus sign, with or without dashes, parentheses, or spaces. Everything gets normalized to E.164.',
+    a: 'Select the country from the dropdown or include the country code (like +44 for the UK or +49 for Germany). Our tool handles any format: with or without the plus sign, with or without dashes, parentheses, or spaces. Everything gets normalized to E.164.',
   },
   {
     q: 'What is E.164 format?',
@@ -95,11 +95,11 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How many credits does phone number verification cost?',
-    a: 'Format validation is always free. Live carrier lookup costs 2 Credits per number. Credits are sold at a flat $0.010 each, with the smallest preset starting at $5 for 500 credits (250 carrier lookups). If a carrier lookup fails for any reason (rate limit, network issue, unknown number), the credit is refunded automatically.',
+    a: 'The format check is always free. The carrier lookup costs 2 credits per number. Credits are a flat $0.010 each, and the smallest pack is $5 for 500 credits, which covers 250 carrier lookups. If a lookup fails, its credits go back to your balance automatically.',
   },
   {
     q: 'Is my phone number data stored?',
-    a: 'Single verification results are returned to your browser only. Nothing is stored on our servers beyond the credit ledger entry, which records the country and E.164 of carrier lookups for audit purposes. Phone numbers are never logged in plaintext beyond that.',
+    a: 'Single checks are not saved. Bulk lists and their results are deleted 48 hours after the job is created.',
   },
 ];
 
@@ -109,7 +109,7 @@ const TIERS = [
     title: 'Format validation',
     badge: 'FREE',
     badgeVariant: 'free',
-    desc: "Powered by Google's libphonenumber library. Validates format, detects country, classifies line type by number pattern, and normalizes to E.164. Handles any format you throw at it.",
+    desc: 'Checks the format, detects the country, estimates the line type and gives the number in international format. Works however the number is written.',
     icon: ShieldCheckIcon,
     checks: [
       'Valid format for country',
@@ -137,12 +137,12 @@ const TIERS = [
     title: 'Bulk carrier lookup',
     badge: '2 CR / NUMBER',
     badgeVariant: 'paid',
-    desc: 'Upload up to 10,000 numbers at once. Same carrier-network lookup per number, runs asynchronously with live progress and a CSV download when finished. Cancel anytime, unprocessed rows refunded.',
+    desc: 'Upload up to 10,000 numbers at once. Each gets a carrier lookup, with live progress and a CSV download when it finishes.',
     icon: StackIcon,
     checks: [
       'Up to 10,000 numbers per job',
-      'Live progress via Server-Sent Events',
-      'Cancel anytime, partial refund for unprocessed rows',
+      'Live progress',
+      'Cancel anytime, unchecked numbers refunded',
       'CSV download (full results + mobile-only list)',
     ],
   },
