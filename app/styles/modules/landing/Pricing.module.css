@@ -378,6 +378,14 @@
   margin-top: 0;
 }
 
+.senderOffer {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--trov-accent);
+}
+
 .senderCta {
   width: auto;
   padding: 12px 28px;

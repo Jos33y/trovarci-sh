@@ -116,6 +116,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
         One payment.{' '}
         Lifetime license, 3 computers, every 1.x update. US dollars.
       </p>
+      <p className={styles.macOffer}>Buy today, get the Mac version free when it ships.</p>
       <h2 id="buy-title" className={styles.srOnly}>Buy Trovarcis Sender</h2>
 
       {options.length === 0 ? (

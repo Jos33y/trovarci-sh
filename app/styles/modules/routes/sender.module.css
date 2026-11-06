@@ -103,7 +103,19 @@
   font-size: 0.875rem;
   line-height: 1.55;
   color: var(--trov-text-secondary);
-  margin: 10px 0 20px;
+  margin: 10px 0 12px;
+}
+
+.macOffer {
+  margin: 0 0 20px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--trov-accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: rgba(212, 168, 67, 0.08);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--trov-text);
 }
 
 .form {

@@ -62,6 +62,7 @@ export default function Pricing({ priceLabel }) {
               <span className={styles.price}>{priceLabel}</span>
               <span className={styles.period}>one payment</span>
             </div>
+            <p className={styles.senderOffer}>Buy today, get the Mac version free when it ships.</p>
             <a href="/sender" className={`${styles.cta} ${styles.ctaPrimary} ${styles.senderCta}`}>Get Sender</a>
           </div>
         </div>
