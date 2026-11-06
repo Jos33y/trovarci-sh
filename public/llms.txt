@@ -1,40 +1,49 @@
-# Trovarcis Reach
+# Trovarcis
 
-> Email deliverability and number verification tools for anyone who sends email or verifies contacts. Six tools share one credit ledger: Email Scorer, Email Verifier, Number Verifier, Domain Checker, SMTP Tester, and DNS Record Generator. Three tools are free with no signup. New accounts get 10 free credits, no card required. Credits start at $5 with no minimum purchase and no subscription.
+> Trovarcis Sender is a Windows app for sending bulk email from your own email accounts (Gmail, Google Workspace, Zoho, Amazon SES, your own server or any other SMTP account). It costs $79 once, with no subscription. Your lists and your SMTP credentials are stored locally. Trovarcis never sees them. Alongside it, six web tools check your domain, list and message before you send. Three are free with no signup.
 
-Trovarcis Reach is built for anyone who sends email, verifies contacts, or wants to. Business owners setting up email for a new company, founders running their own outreach, marketers checking domain health before a launch, cold outreach operators verifying lists, deliverability engineers diagnosing DMARC failures, SaaS teams verifying user signups at onboarding, and developers integrating email and number verification into their apps. Three of the six tools are free with no signup required (Domain Checker, SMTP Tester, DNS Record Generator), so a business owner can check whether a new domain is correctly configured for email without creating an account. The other three run on credits. Most verification services carry a minimum purchase of $30 to $50, which puts them out of reach for someone with a few hundred addresses to check. Trovarcis starts at $5. The blog covers foundational setup guides (SPF/DKIM/DMARC configuration, choosing a business email domain, first-time deliverability), technical deep-dives (RFC-level SPF debugging, Gmail Promotions classifier signals, blacklist delisting), and operational guides (list cleaning, bulk send safety, pricing model comparison).
+## Trovarcis Sender
+
+- [Trovarcis Sender](https://trovarci.sh/sender): Bulk email software for Windows. Sends through SMTP accounts you already have, across several accounts at once. Before sending it checks the list and sets aside typos, duplicates and broken addresses. It keeps each account inside the daily and hourly limits you set and takes turns between accounts, pauses a campaign by itself if too many addresses are refused, never emails anyone on the Do not send list, and shows the mail server's own reason for every email that didn't arrive. $79 one payment, 3 computers, every 1.x update, 15-day refund. Buy today, get the Mac version free when it ships.
+- [Pay with crypto](https://trovarci.sh/pay-with-crypto): How to pay with cryptocurrency.
 
 ## Tools
 
-- [Email Scorer](https://trovarci.sh/score): Grades email content across five weighted categories using the Arcis engine: subject line, body content, structure, links, and compliance. Compliance checks CAN-SPAM requirements including unsubscribe mechanism and physical mailing address, plus GDPR and privacy-policy signals. Returns a score out of 100, a verdict, and the specific factors dragging placement with concrete fixes for each. 1 credit per scan, requires signup.
-- [Email Verifier](https://trovarci.sh/verify): Single addresses or bulk lists up to 50,000 per job. Categorizes results as valid, invalid, catch-all, disposable, or role-based. Charges 1 credit per address and refunds every address that was not billable, meaning syntax failures, domains with no MX records, catch-all cache hits, and results the verification backend does not bill for. A badly decayed list therefore costs less to clean than a healthy one. 1 credit per address, single or bulk. Requires signup.
-- [Number Verifier](https://trovarci.sh/verify-number): Phone number format validation against national numbering plans is free with no signup. Optional network lookup returns real carrier and line type (mobile, landline, VoIP, toll-free) for 2 credits per number, up to 10,000 per job. Useful for SMS campaign list cleaning, since landlines cannot receive SMS and fail silently, plus onboarding fraud prevention and voice outreach validation.
-- [Domain Checker](https://trovarci.sh/domain): 25 checks across five categories: email authentication (SPF record and lookup count, SPF policy, DKIM selectors and key size, DMARC record, policy and reporting, BIMI), mail server (MX records, MX not CNAME, SMTP reachable, STARTTLS, reverse DNS), reputation (IP blacklists, domain blacklists, Safe Browsing), security (SSL certificate, HTTPS redirect, HSTS, CAA), and DNS configuration (nameserver redundancy and diversity, SOA, DNSSEC). Blacklist checks query 7 public DNSBL zones: Spamhaus ZEN, SpamCop, Barracuda, SORBS and PSBL for IPs, plus Spamhaus DBL and SURBL for domains. Free, no signup.
-- [SMTP Tester](https://trovarci.sh/smtp-test): Diagnoses SMTP connection failures with plain-language explanations at every step of the handshake, including STARTTLS negotiation and reverse DNS. Shows exactly where a connection breaks and why. Free, no signup.
-- [DNS Record Generator](https://trovarci.sh/records): Generates SPF, DKIM, DMARC, MX, BIMI, and MTA-STS records for any domain and any major email provider. Counts DNS lookups in real time and flags SPF records approaching the RFC 7208 10-lookup limit. Free, no signup.
+- [Domain Checker](https://trovarci.sh/domain): Checks whether a domain is set up so mail providers trust its email: SPF, DKIM, DMARC, mail servers, encryption, and blocklists (Spamhaus, SpamCop, Barracuda, PSBL, SURBL and the Spamhaus domain list). 25 checks with a plain fix for each. Free, no signup.
+- [SMTP Tester](https://trovarci.sh/smtp-test): Tests an email account's server, port and password, and shows in plain words where a connection fails. Free, no signup.
+- [DNS Record Generator](https://trovarci.sh/records): Writes the SPF, DKIM, DMARC and MX records for your domain and email provider, ready to copy into your DNS. Free, no signup.
+- [Email Verifier](https://trovarci.sh/verify): Finds the addresses on a list that would bounce. One address or up to 50,000 per list. Results: valid, invalid, catch-all, disposable, role-based. 1 credit per address, and addresses that can't be billed are refunded.
+- [Phone Number Checker](https://trovarci.sh/verify-number): Format check against each country's numbering plan, free. Carrier and line type (mobile, landline, VoIP, toll-free) for 2 credits per number, up to 10,000 per list. Landlines can't receive SMS.
+- [Email Scorer](https://trovarci.sh/score): Scores an email out of 100 on subject line, content, structure, links and unsubscribe and address requirements, with the specific fixes. 1 credit per scan.
+
+Credits cost $0.010 each at any volume, from $5, with no subscription. New accounts get 10 free credits, no card required.
 
 ## Guides
 
-- [The complete guide to email deliverability in 2026](https://trovarci.sh/blog/email-deliverability-guide-2026): Broad overview of what determines inbox placement across Gmail, Outlook, and Yahoo. Covers authentication, reputation, the 2026 protocol layer (BIMI, MTA-STS, TLS-RPT), inbox placement classifiers, and infrastructure decisions. Start here if new to deliverability.
-- [Why your emails go to spam (and how to find out which reason is yours)](https://trovarci.sh/blog/why-emails-go-to-spam): A diagnostic rather than a list. Separates the spam folder from the Promotions tab from outright rejection, then narrows the cause with four questions: all recipients or some, sudden or always, does authentication align, and is it the list or the message. Ranks the causes by how often each is actually the cause.
-- [How to set up SPF, DKIM, and DMARC](https://trovarci.sh/blog/spf-dkim-dmarc-setup): Step-by-step configuration for the three email authentication protocols. Foundational setup for anyone connecting a new business domain to a mail provider.
-- [Email domain health check: the 25 tests that matter](https://trovarci.sh/blog/email-domain-health-check): What a domain health check tests, what each failure costs in inbox placement, and which to fix first. Includes the case most guides skip: hardening a domain that sends no mail with null MX (RFC 7505) and `v=spf1 -all`, and the cross-domain DMARC reporting record that most checkers never verify.
-- [Why your emails hit Gmail Promotions (and how to move them to Primary)](https://trovarci.sh/blog/gmail-promotions-tab-fix): The four signal groups Gmail uses to sort messages, why generic advice fails, and five concrete fixes ranked by impact. Covers subject-line patterns, HTML weight, List-Unsubscribe headers (RFC 8058), authentication baseline, and engagement warm-up.
-- [SPF PermError: the 10 DNS lookup limit and how to fix it](https://trovarci.sh/blog/spf-permerror-10-dns-lookups-fix): RFC 7208 section 4.6.4 in plain language, how to count hidden lookups from nested includes, plus the void-lookup cap most articles miss. Three ranked fixes: prune stale includes, subdomain delegation, SPF flattening.
-- [Is your domain blacklisted? How to check and fix it](https://trovarci.sh/blog/domain-blacklisted-check-fix): Diagnosing blacklist listings across major RBLs (Spamhaus, Barracuda, SORBS, and others) and the delisting process for each.
-- [How to send bulk email without getting blacklisted](https://trovarci.sh/blog/send-bulk-email-without-blacklist): Blacklisting is caused by who you send to, not what you write. Covers the three kinds of spam trap (pristine, recycled, typo), bounce and complaint thresholds, volume shape, a six-step pre-send checklist, and a week-by-week ramp schedule.
-- [How to clean an email list before sending](https://trovarci.sh/blog/clean-email-list-before-sending): What verification can determine and what it cannot. Includes an honest treatment of catch-all domains, where standard SMTP verification cannot resolve a mailbox because the server accepts everything, and what to do with each result category.
-- [How to check phone numbers before sending bulk SMS](https://trovarci.sh/blog/check-phone-numbers-before-bulk-sms): Written for organizations with lists collected on paper, such as churches, schools, and shops. Covers why landlines fail silently, country code and format problems, the cost arithmetic of sending to dead numbers, and cleaning a hand-collected list.
-- [What bulk email really costs](https://trovarci.sh/blog/bulk-email-cost): The four pricing models in email (per contact, per email sent, per message infrastructure, and owned software), real 2026 numbers at three list sizes, three-year totals, and where the money leaks on contact-based plans.
-- [Trovarcis Reach vs SendBlaster](https://trovarci.sh/blog/trovarcis-reach-vs-sendblaster): Feature and pricing comparison for bulk email use cases.
+- [How to send bulk email from Gmail without getting blocked](https://trovarci.sh/blog/send-bulk-email-from-gmail): Gmail's daily limits (500 personal, 2,000 Google Workspace), app password setup and SMTP settings, what to do when Gmail blocks sending, and how to reach a list bigger than one account allows.
+- [Email deliverability in 2026](https://trovarci.sh/blog/email-deliverability-guide-2026): The four things that decide where email lands, the Gmail, Yahoo and Outlook rules for bulk senders, and what to do for each problem.
+- [Why your emails go to spam](https://trovarci.sh/blog/why-emails-go-to-spam): Finds the cause by situation: everyone or some people, sudden or always, the setup, the list or the message.
+- [How to set up SPF, DKIM and DMARC](https://trovarci.sh/blog/spf-dkim-dmarc-setup): Step-by-step setup for the three records that prove email is from your domain.
+- [SPF PermError: the 10 DNS lookup limit](https://trovarci.sh/blog/spf-permerror-10-dns-lookups-fix): Why SPF breaks after 10 lookups, how to count them, and three fixes.
+- [Email domain health check](https://trovarci.sh/blog/email-domain-health-check): What each domain check result means, which to fix first, and how to protect a domain that sends no email.
+- [Is my domain blacklisted?](https://trovarci.sh/blog/domain-blacklisted-check-fix): How to check, what causes a listing, how to get removed, and whether subdomains are affected.
+- [How to send bulk email without getting blacklisted](https://trovarci.sh/blog/send-bulk-email-without-blacklist): List quality, bounce and complaint limits, volume, and a pre-send checklist.
+- [How to clean an email list before sending](https://trovarci.sh/blog/clean-email-list-before-sending): What each verification result means and what to do with it, including catch-all addresses.
+- [Gmail Promotions tab](https://trovarci.sh/blog/gmail-promotions-tab-fix): Why emails land in Promotions and how to reach Primary more often.
+- [How to check phone numbers before sending bulk SMS](https://trovarci.sh/blog/check-phone-numbers-before-bulk-sms): Formatting, landlines, and cleaning a list collected by hand.
+- [What bulk email really costs](https://trovarci.sh/blog/bulk-email-cost): Per-contact, per-email, sending-service and owned-software pricing compared at three list sizes over three years.
+
+## Comparisons
+
+- [Trovarcis Sender vs SendBlaster](https://trovarci.sh/blog/trovarcis-reach-vs-sendblaster): Desktop bulk email software compared on features and price.
+- [SendBlaster alternatives](https://trovarci.sh/blog/sendblaster-alternatives): Six options compared.
+- [MaxBulk Mailer alternatives](https://trovarci.sh/blog/maxbulk-mailer-alternatives): Six options compared.
+- [Atomic Mail Sender alternatives](https://trovarci.sh/blog/atomic-mail-sender-alternatives): Six options compared.
 
 ## Company
 
-- [Credits](https://trovarci.sh/credits): Flat $0.010 per credit at any volume, from $5. One credit is one US cent at every volume, so credits and cents are the same number. No monthly subscription and no minimum purchase. Credits expire 12 months from purchase.
-- [Contact](https://trovarci.sh/contact): Contact form. Business inquiries: hello@trovarcis.com. Product support: support@trovarcis.com.
-
-## Optional
-
-- [Privacy Policy](https://trovarci.sh/privacy): Data collection, retention, and GDPR/CCPA rights.
-- [Terms of Service](https://trovarci.sh/terms): Usage terms, acceptable use policy, liability.
-- [Refund Policy](https://trovarci.sh/refund): 15-day guarantee on credit purchases.
+- [Credits](https://trovarci.sh/credits): Pricing for the paid tools.
+- [Contact](https://trovarci.sh/contact): Business: hello@trovarcis.com. Support: support@trovarcis.com.
+- [Privacy Policy](https://trovarci.sh/privacy)
+- [Terms of Service](https://trovarci.sh/terms)
+- [Refund Policy](https://trovarci.sh/refund)

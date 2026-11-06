@@ -85,19 +85,19 @@
   line-height: 1.6;
 }
 
-.content :global(ul li) {
+.content :global(ul > li) {
   list-style-type: disc;
 }
 
-.content :global(ul li)::marker {
+.content :global(ul > li)::marker {
   color: var(--trov-text-muted);
 }
 
-.content :global(ol li) {
+.content :global(ol > li) {
   list-style-type: decimal;
 }
 
-.content :global(ol li)::marker {
+.content :global(ol > li)::marker {
   color: var(--trov-text-muted);
   font-family: var(--font-mono);
   font-size: 0.875rem;
