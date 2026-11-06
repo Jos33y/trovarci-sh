@@ -872,6 +872,30 @@ export async function adminPageEngagement({ days = 30, limit = 50 } = {}) {
   `;
 }
 
+// Which "What do you see?" answer readers picked, per page. One row per page view (pv),
+// since a page view can send several engagement records; views with no pick count as none.
+export async function adminPickerChoices({ days = 30 } = {}) {
+  const interval = `${days} days`;
+  return sql`
+    WITH per_view AS (
+      SELECT path,
+             metadata->>'pv' AS pv,
+             MAX(NULLIF(metadata->>'p', '')) AS pick
+      FROM analytics_events
+      WHERE event_type = 'page_engagement'
+        AND metadata ? 'pv'
+        AND is_bot = FALSE AND is_internal = FALSE
+        AND created_at > now() - ${interval}::interval
+      GROUP BY path, metadata->>'pv'
+    )
+    SELECT path, pick, COUNT(*)::int AS n
+    FROM per_view
+    WHERE path IN (SELECT path FROM per_view WHERE pick IS NOT NULL)
+    GROUP BY path, pick
+    ORDER BY path, n DESC
+  `;
+}
+
 // What readers said was missing, newest first.
 export async function adminHelpfulNotes({ days = 90, limit = 30 } = {}) {
   const interval = `${days} days`;

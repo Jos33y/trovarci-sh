@@ -96,7 +96,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
   ];
   var eng=null;
   function engStart(path){
-    eng={pv:Math.random().toString(36).slice(2,12),path:path,ms:0,since:document.visibilityState==='visible'?Date.now():0,depth:0,action:null,target:null};
+    eng={pv:Math.random().toString(36).slice(2,12),path:path,ms:0,since:document.visibilityState==='visible'?Date.now():0,depth:0,action:null,target:null,pick:null};
     engDepth();
   }
   function engTick(){ if(eng&&eng.since){ eng.ms+=Date.now()-eng.since; eng.since=Date.now(); } }
@@ -111,7 +111,7 @@ export const TELEMETRY_CLIENT_SOURCE = `
     if(!eng) return;
     engTick();
     var secs=Math.min(1800,Math.round(eng.ms/1000));
-    send({type:'event',eventType:'page_engagement',path:eng.path,metadata:{pv:eng.pv,s:secs,d:eng.depth,a:eng.action||'none',t:eng.target||''}});
+    send({type:'event',eventType:'page_engagement',path:eng.path,metadata:{pv:eng.pv,s:secs,d:eng.depth,a:eng.action||'none',t:eng.target||'',p:eng.pick||''}});
   }
   var scrollQueued=false;
   window.addEventListener('scroll',function(){
@@ -124,10 +124,22 @@ export const TELEMETRY_CLIENT_SOURCE = `
     else { eng.since=Date.now(); }
   });
   window.addEventListener('pagehide',function(){ engFlush(); });
+  // A link to a section of the same page (the "What do you see?" picker) is recorded as the
+  // reader's pick, not as leaving the page, so it never takes the place of the first action.
   document.addEventListener('click',function(e){
-    if(!eng||eng.action) return;
+    if(!eng) return;
     var el=e.target&&e.target.closest?e.target.closest('a[href],button[data-track]'):null;
     if(!el) return;
+    if(el.tagName==='A'){
+      try{
+        var h=new URL(el.getAttribute('href'),location.href);
+        if(h.host===location.host&&h.pathname===location.pathname&&h.hash){
+          if(!eng.pick) eng.pick=h.hash.slice(1,64);
+          return;
+        }
+      }catch(err){}
+    }
+    if(eng.action) return;
     if(el.tagName==='BUTTON'){ eng.action=String(el.getAttribute('data-track')).slice(0,32); return; }
     try{
       var u=new URL(el.getAttribute('href'),location.href);

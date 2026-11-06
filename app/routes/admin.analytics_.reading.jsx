@@ -1,7 +1,7 @@
 // Reading: per page, how long people read, how far they got, what they did next, and whether it helped.
 
 import { Link, useLoaderData } from 'react-router';
-import { requireAdmin, adminPageEngagement, adminHelpfulNotes } from '~/utils/admin.server';
+import { requireAdmin, adminPageEngagement, adminHelpfulNotes, adminPickerChoices } from '~/utils/admin.server';
 import KPICard from '~/components/admin/KPICard';
 import EmptyState from '~/components/admin/EmptyState';
 import { ShareLabel, Count, Meter, Takeaway } from '~/components/admin/MetricCells';
@@ -17,8 +17,25 @@ export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
   const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '30', 10)));
-  const [pages, notes] = await Promise.all([adminPageEngagement({ days }), adminHelpfulNotes({ days: 90 })]);
-  return { pages, notes, days };
+  const [pages, notes, pickRows] = await Promise.all([
+    adminPageEngagement({ days }),
+    adminHelpfulNotes({ days: 90 }),
+    adminPickerChoices({ days }),
+  ]);
+  return { pages, notes, picks: groupPicks(pickRows), days };
+}
+
+// One entry per page with a picker: its choices, most picked first, and views that picked nothing.
+function groupPicks(rows) {
+  const byPath = new Map();
+  for (const r of rows) {
+    const page = byPath.get(r.path) || { path: r.path, views: 0, none: 0, choices: [] };
+    page.views += r.n;
+    if (r.pick) page.choices.push({ id: r.pick, n: r.n });
+    else page.none += r.n;
+    byPath.set(r.path, page);
+  }
+  return [...byPath.values()].sort((a, b) => b.views - a.views);
 }
 
 const pct = (part, whole) => (whole > 0 ? `${Math.round((part / whole) * 100)}%` : '-');
@@ -52,7 +69,7 @@ function worstPage(pages) {
 const date = (iso) => new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(iso));
 
 export default function AdminReading() {
-  const { pages, notes, days } = useLoaderData();
+  const { pages, notes, picks, days } = useLoaderData();
   const measured = pages.reduce((n, p) => n + p.measured, 0);
   const reachedEnd = pages.reduce((n, p) => n + p.reached_end, 0);
   const acted = pages.reduce((n, p) => n + p.acted, 0);
@@ -134,6 +151,34 @@ export default function AdminReading() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </section>
+        )}
+
+        {picks.length > 0 && (
+          <section className={styles.panel}>
+            <header className={styles.panelHead}>
+              <h2 className={styles.panelTitle}>What readers picked</h2>
+              <span className={styles.panelSub}>answers chosen in "What do you see?", per page view</span>
+            </header>
+            <div className={styles.pickGrid}>
+              {picks.map((page) => (
+                <div key={page.path} className={styles.pickPage}>
+                  <p className={styles.pickPath} title={page.path}>{page.path}</p>
+                  <ul className={styles.pickList}>
+                    {page.choices.map((c) => (
+                      <li key={c.id} className={styles.pickRow}>
+                        <ShareLabel label={`#${c.id}`} value={c.n} max={page.views} mono />
+                        <span className={styles.pickCount}>{pct(c.n, page.views)} <span className={styles.muted}>({formatInt(c.n)})</span></span>
+                      </li>
+                    ))}
+                    <li className={styles.pickRow}>
+                      <ShareLabel label="Picked nothing" value={page.none} max={page.views} mono />
+                      <span className={styles.pickCount}>{pct(page.none, page.views)} <span className={styles.muted}>({formatInt(page.none)})</span></span>
+                    </li>
+                  </ul>
+                </div>
+              ))}
             </div>
           </section>
         )}
