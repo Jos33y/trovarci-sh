@@ -31,7 +31,7 @@ export default function Refund() {
         <div className={`container ${styles.inner}`}>
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.title}>Refund Policy</h1>
-            <p className={styles.updated}>Last updated: October 17, 2026</p>
+            <p className={styles.updated}>Last updated: November 6, 2026</p>
           </header>
 
           <hr className={styles.divider} />
@@ -75,19 +75,12 @@ export default function Refund() {
             </p>
 
             <h2 id="credit-refunds">Credit refunds</h2>
-            <p>
-              Credit purchases are generally non-refundable because Credits are
-              consumed as you use them. However:
-            </p>
             <ul>
-              <li><strong>Unused Credits from a recent purchase</strong> - if you bought Credits within the last 7 days and have not used any, you may request a refund.</li>
-              <li><strong>Failed verification jobs</strong> - if a bulk verification job fails because of a system error on our side, Credits charged for unprocessed items are refunded to your balance automatically.</li>
+              <li><strong>Unused Credits bought in the last 7 days</strong> - can be refunded to your original payment.</li>
+              <li><strong>Credits already used</strong> - are not refundable.</li>
+              <li><strong>Checks that fail on our side</strong> - if a check fails because of a problem on our side, its Credits go back to your balance automatically.</li>
               <li><strong>Service outages</strong> - if our tools are unavailable because of an outage and you were charged Credits, we restore them on request.</li>
             </ul>
-            <p>
-              Credit refunds are restored to your Credit balance, not paid out
-              as cash, except where the law requires otherwise.
-            </p>
 
             <h2 id="mail-refunds">Trovarcis Mail refunds</h2>
             <ul>
@@ -157,7 +150,7 @@ export default function Refund() {
               <li><strong>After the refund window</strong> - requests made after the periods stated above.</li>
               <li><strong>Acceptable Use violations</strong> - if your license is revoked, your mailboxes are suspended or your account is terminated because of a violation of our <a href="/acceptable-use">Acceptable Use Policy</a>, no refund is given for any product or balance.</li>
               <li><strong>Chargebacks</strong> - if you open a chargeback with your bank instead of contacting us, your account will be suspended. Please contact us first. We are happy to sort out problems directly.</li>
-              <li><strong>Used Credits and spent balance</strong> - Credits already used and balance already spent on mailboxes or domains are not refunded as cash.</li>
+              <li><strong>Used Credits and spent balance</strong> - Credits already used and balance already spent on mailboxes or domains are not refunded.</li>
               <li><strong>Repeated refund abuse</strong> - buying and refunding repeatedly to use our products without paying is not allowed. We may refuse refund requests that appear to abuse this policy.</li>
             </ul>
 

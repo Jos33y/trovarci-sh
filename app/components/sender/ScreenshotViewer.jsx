@@ -27,7 +27,7 @@ export default function ScreenshotViewer() {
   };
 
   return (
-    <section className={styles.viewer} aria-labelledby="shots-title">
+    <section id="screens" className={styles.viewer} aria-labelledby="shots-title">
       <h2 id="shots-title" className={styles.title}>See exactly what you get</h2>
       <p className={styles.lead}>Real screens from Sender 1.0, shown with demo data.</p>
 

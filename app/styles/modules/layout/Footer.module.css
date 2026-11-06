@@ -1,4 +1,4 @@
-/* Footer - brand + 4 link columns, gradient hairline cap */
+/* Footer - brand + 5 link columns, gradient hairline cap */
 
 .footer {
   position: relative;
@@ -30,10 +30,11 @@
 }
 
 .tagline {
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
-  max-width: 240px;
+  max-width: 280px;
+  text-wrap: pretty;
 }
 
 .column {
@@ -47,6 +48,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--trov-text);
+  line-height: 1.4;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -59,11 +61,14 @@
 }
 
 .columnLink {
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   font-size: 0.8125rem;
   font-weight: 400;
   text-decoration: none;
   transition: color var(--transition-fast);
+  display: inline-block;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .columnLink:hover {
@@ -77,7 +82,7 @@
 }
 
 .copyright {
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   font-size: 0.75rem;
 }
 
@@ -95,7 +100,7 @@
   vertical-align: middle;
 }
 
-/* Tablet - 4 columns alongside brand */
+/* Tablet - brand on its own row, links in three columns */
 
 @media (min-width: 640px) {
   .footer {
@@ -103,14 +108,12 @@
   }
 
   .grid {
-    grid-template-columns: 1.5fr repeat(4, 1fr);
-    gap: 40px;
-  }
-
-  .brand {
-    grid-column: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 32px;
   }
 }
+
+/* Desktop - brand beside five link columns */
 
 @media (min-width: 1024px) {
   .footer {
@@ -118,6 +121,11 @@
   }
 
   .grid {
-    gap: 48px;
+    grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  .brand {
+    grid-column: auto;
   }
 }

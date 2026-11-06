@@ -9,6 +9,7 @@ import Footer from '~/components/layout/Footer';
 import BlogContent from '~/components/blog/BlogContent';
 import BlogBanner from '~/components/blog/BlogBanner';
 import BlogCard from '~/components/blog/BlogCard';
+import HelpfulVote from '~/components/blog/HelpfulVote';
 import { ArrowLeftIcon, ArrowRightIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/blogPost.module.css';
 
@@ -116,6 +117,8 @@ export default function BlogPost() {
             <div ref={contentRef} className="reveal">
               <BlogContent html={post.html} />
             </div>
+
+            <HelpfulVote slug={post.slug} />
           </article>
 
           <aside className={styles.authorBox} aria-label="About the author">

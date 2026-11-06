@@ -11,8 +11,8 @@ import { currentSenderPrice, SENDER_TEST_CENTS } from '~/utils/senderConfig.serv
 import { getLatestRelease } from '~/lib/updateFeed.server';
 import { senderCheckoutAction, gatewayAvailable } from '~/actions/senderCheckout.server';
 import styles from '~/styles/modules/routes/sender.module.css';
+import { STORAGE_LINE, senderPriceNote } from '~/utils/senderCopy';
 
-const STORAGE_LINE = 'Your lists and your SMTP credentials are stored locally. Trovarcis never sees them.';
 
 export const meta = ({ loaderData, data: legacy }) => {
   const data = loaderData || legacy;
@@ -68,8 +68,6 @@ export const action = senderCheckoutAction;
 const usd = (cents) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 
-const dayAfter = (isoDate) => new Date(Date.parse(`${isoDate}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-
 const longDate = (iso) =>
   new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
 
@@ -116,11 +114,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
         <span className={styles.price}>{usd(price.cents)}</span>
       </div>
       <p className={styles.priceNote}>
-        {price.key === 'launch' && price.listCents > price.cents
-          ? (price.launchEndsAt
-              ? `Launch price until ${longDate(price.launchEndsAt)}. ${usd(price.listCents)} from ${longDate(dayAfter(price.launchEndsAt))}.`
-              : `Launch price. Then ${usd(price.listCents)}.`)
-          : 'One payment.'}{' '}
+        {senderPriceNote(price) || 'One payment.'}{' '}
         Lifetime license, 3 computers, every 1.x update. US dollars.
       </p>
       <h2 id="buy-title" className={styles.srOnly}>Buy Trovarcis Sender</h2>

@@ -844,24 +844,20 @@ function licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl
 </html>`;
 }
 
-// Sale and refund alerts to the owner. Plain text, no license key.
+// Sale and refund alerts to the owner. Amount, payment method and the admin link only: who bought,
+// the order and the license stay behind the admin sign-in.
 
-export async function sendSaleAlertEmail({ kind, amountUsd, method, buyerEmail, orderShortId, licenseShortId }) {
+export async function sendSaleAlertEmail({ kind, amountUsd, method }) {
   const to = process.env.SALES_ALERT_EMAIL || 'hello@thebrickdev.com';
   const sale = kind === 'sale';
   const subject = sale
     ? `New Sender sale: $${amountUsd} by ${method}`
-    : `Sender refund: $${amountUsd}, license revoked`;
+    : `Sender refund: $${amountUsd} by ${method}`;
   const text = [
-    sale ? 'Someone bought Trovarcis Sender.' : 'A Sender order was refunded and its license revoked.',
-    '',
     `Amount:   $${amountUsd}`,
     `Paid by:  ${method}`,
-    `Buyer:    ${buyerEmail}`,
-    `Order:    ${orderShortId}`,
-    `License:  ${licenseShortId}`,
     '',
-    `Admin: https://trovarci.sh/admin/licenses?q=${encodeURIComponent(buyerEmail)}`,
+    'Details: https://trovarci.sh/admin/payments',
   ].join('\n');
   const html = `<pre style="font-family:Menlo,Consolas,monospace;font-size:14px;line-height:1.6;color:#111;">${escapeHtml(text)}</pre>`;
   return send({ to, subject, html, text });

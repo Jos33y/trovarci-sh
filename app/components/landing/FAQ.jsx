@@ -1,42 +1,54 @@
 import { useState } from 'react';
 import useReveal from '~/utils/useReveal';
 import { ChevronDownIcon } from '~/components/icons';
+import { STORAGE_LINE, SENDER_REFUND_LINE, CREDIT_REFUND_LINE } from '~/utils/senderCopy';
 import styles from '~/styles/modules/landing/FAQ.module.css';
 
-const QUESTIONS = [
-  {
-    q: "What does a credit get me?",
-    a: "A flat $0.010 per credit at any volume. Email scoring costs 1 credit. Email verification costs 1 credit per address, single or bulk. Phone lookup costs 2 credits. Domain Checker, SMTP Tester, and DNS Generator cost zero credits.",
-  },
-  {
-    q: "Do credits expire?",
-    a: "Yes. 12 months from purchase. You'll get email reminders before expiry so nothing slips away unused.",
-  },
-  {
-    q: "What's the difference between Email Scorer and Email Verifier?",
-    a: "Scorer grades a draft email for spam triggers, formatting issues, and missing authentication elements. Verifier checks whether an email address actually exists and accepts mail. Different jobs, different tools.",
-  },
-  {
-    q: "Is bulk verification cheaper than single?",
-    a: "Same price, 1 credit per address either way. Bulk runs in the background and handles up to 50,000 addresses per job, so use it for lists and single for ad-hoc checks. Addresses we resolve without a live probe are refunded.",
-  },
-  {
-    q: "Do you store the data I upload?",
-    a: "Verification results are saved to your account so you can re-download them. You can delete a job to remove its data. We don't sell or share your data with third parties.",
-  },
-  {
-    q: "What payment methods do you accept?",
-    a: "Crypto via Cryptomus today: BTC, ETH, USDT, USDC, LTC, and more. Card payments via Stripe are coming.",
-  },
-  {
-    q: "What's your refund policy?",
-    a: "15-day money-back guarantee on unused credits. Email support@trovarcis.com and we'll process a full refund, no questions.",
-  },
-  {
-    q: "Is there a free plan?",
-    a: "Three tools cost zero credits, forever: Domain Checker, SMTP Tester, and DNS Generator. New accounts also get 10 free credits to try the paid tools.",
-  },
-];
+// Answers are also the FAQPage schema, so every line here must stay true. Price comes from the loader.
+function buildQuestions(priceLabel) {
+  return [
+    {
+      q: 'What is Trovarcis Sender?',
+      a: `A Windows app for sending bulk email. It sends your campaigns from your own computer, through your own SMTP accounts: Gmail, Zoho, Amazon SES, SendGrid, Brevo or your own server. One payment of ${priceLabel}, no monthly fee.`,
+    },
+    {
+      q: 'Do you see my lists or my SMTP passwords?',
+      a: `No. ${STORAGE_LINE} Mail goes straight from your computer to your own SMTP provider.`,
+    },
+    {
+      q: 'Do I need Sender to use the tools?',
+      a: 'No. The tools run here on trovarci.sh and work on their own. Domain Checker, SMTP Tester and DNS Generator are free and need no account.',
+    },
+    {
+      q: 'What does a credit get me?',
+      a: 'Each credit costs $0.010 at any volume. Email Verifier uses 1 credit per address, Email Scorer 1 credit per draft, and Number Verifier 2 credits per number. Domain Checker, SMTP Tester and DNS Generator use none.',
+    },
+    {
+      q: 'Do credits expire?',
+      a: 'Yes, 12 months after purchase.',
+    },
+    {
+      q: "What's the difference between Email Scorer and Email Verifier?",
+      a: 'Email Scorer reads a draft and flags what pushes mail into spam. Email Verifier checks whether an address exists and accepts mail. One checks the message, the other checks the list.',
+    },
+    {
+      q: 'Is bulk verification cheaper than single?',
+      a: 'Same price, 1 credit per address either way. Bulk runs in the background and takes up to 50,000 addresses per job, so use it for lists and single checks for one-off addresses.',
+    },
+    {
+      q: 'Do you store the data I upload to the tools?',
+      a: 'Verification results are saved to your account so you can download them again. Delete a job to remove its data. We do not sell or share your data.',
+    },
+    {
+      q: 'What payment methods do you accept?',
+      a: 'Crypto through Cryptomus: BTC, ETH, USDT, USDC, LTC and more. Card payments are coming.',
+    },
+    {
+      q: "What's your refund policy?",
+      a: `Sender: ${SENDER_REFUND_LINE} Write to support first so we can try to fix it with you. Credits: ${CREDIT_REFUND_LINE}`,
+    },
+  ];
+}
 
 function FAQItem({ question, answer, isOpen, onToggle }) {
   return (
@@ -59,7 +71,8 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
   );
 }
 
-export default function FAQ() {
+export default function FAQ({ priceLabel }) {
+  const QUESTIONS = buildQuestions(priceLabel);
   const [openIndex, setOpenIndex] = useState(null);
   const headingRef = useReveal();
   const listRef = useReveal(0.05);

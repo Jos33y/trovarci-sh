@@ -178,6 +178,11 @@ body[data-hydrated] #page-loader {
   animation: loaderSafetyFade 3s ease forwards;
 }
 
+/* Without JS there is nothing to wait for, so readers get the page at once. */
+html:not(.js) #page-loader {
+  display: none;
+}
+
 /* Hydrated body overrides the safety animation */
 body[data-hydrated] #page-loader {
   animation: none;

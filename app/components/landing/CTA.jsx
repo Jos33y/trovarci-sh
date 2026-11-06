@@ -15,7 +15,7 @@ export default function CTA() {
           Start with 10 free credits.
         </h2>
         <p className={styles.sub}>
-          Sign up, run a check, see the results. No card, no commitment.
+          Run your first checks today. Get Sender when your list is ready to go.
         </p>
 
         <form action="/signup" method="get" className={styles.formWrap}>
@@ -23,7 +23,9 @@ export default function CTA() {
             <input
               type="email"
               name="email"
-              placeholder="your@email.com"
+              autoComplete="email"
+              spellCheck="false"
+              placeholder="Your email"
               className={styles.input}
               required
               aria-label="Email address"
@@ -33,7 +35,8 @@ export default function CTA() {
             </button>
           </div>
           <p className={styles.note}>
-            Or <a href="/tools" className={styles.noteLink}>run a free tool first</a>. No account needed.
+            Or <a href="/tools" className={styles.noteLink}>run a free tool first</a>, no account needed.
+            Ready to send? <a href="/sender" className={styles.noteLink}>Get Sender</a>.
           </p>
         </form>
       </div>

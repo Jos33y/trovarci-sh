@@ -194,7 +194,7 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   text-align: left;
   padding: 12px var(--space-md);
   border-bottom: 1px solid var(--trov-border);
@@ -279,6 +279,44 @@
   }
   .table td:first-child::before { display: none; }
   .table td--right { text-align: left; justify-content: space-between; }
+}
+
+/* Report tables (analytics): the label column takes the room, number columns stay tight
+   and sit together on the right, so a row reads left to right without hunting. */
+
+.table--report th:not(:first-child),
+.table--report td:not(:first-child) {
+  width: 1%;
+  padding-left: 28px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.table--report th.cell--text,
+.table--report td.cell--text {
+  text-align: left;
+}
+
+.table--report td:first-child {
+  max-width: 0;
+  min-width: 200px;
+}
+
+.table--report td {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+@media (max-width: 640px) {
+  .table--report th:not(:first-child),
+  .table--report td:not(:first-child) {
+    width: 100%;
+    padding-left: 0;
+  }
+  .table--report td:first-child {
+    max-width: none;
+    min-width: 0;
+  }
 }
 
 /* Reference cell - truncating UUID/long ID column */

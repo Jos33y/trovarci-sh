@@ -4,6 +4,7 @@
   position: relative;
   padding: 64px 0;
   overflow: hidden;
+  scroll-margin-top: 72px;
 }
 
 /* Radial gold spotlight - centered, focuses attention on the Most Popular card */
@@ -111,7 +112,7 @@
 
 .card {
   position: relative;
-  background: var(--trov-bg);
+  background: var(--trov-surface);
   border: 1px solid var(--trov-border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -133,8 +134,8 @@
   border-color: rgba(212, 168, 67, 0.35);
   background: linear-gradient(
     180deg,
-    rgba(212, 168, 67, 0.04) 0%,
-    var(--trov-bg) 30%
+    rgba(212, 168, 67, 0.05) 0%,
+    var(--trov-surface) 30%
   );
   box-shadow: 0 4px 24px rgba(212, 168, 67, 0.08);
 }
@@ -320,6 +321,7 @@
 
 .footnote {
   margin-top: 32px;
+  max-width: 44rem;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -327,10 +329,80 @@
 }
 
 .footnote p {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Sender band: the one-payment product, above the credit packs */
+
+.sender {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.07), var(--trov-surface) 55%);
+}
+
+.senderInfo {
+  min-width: 0;
+}
+
+.senderName {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--trov-text);
+}
+
+.senderText {
+  margin-top: 8px;
+  max-width: 36rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+}
+
+.senderBuy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.senderBuy .priceRow {
+  margin-top: 0;
+}
+
+.senderNote {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.senderCta {
+  width: auto;
+  padding: 12px 28px;
+}
+
+.senderCta:active,
+.cta:active {
+  transform: scale(0.97);
+}
+
+.creditsTitle {
+  margin: 48px 0 20px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: var(--trov-text-muted);
-  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
 }
 
 /* Tablet */
@@ -352,6 +424,19 @@
 /* Desktop */
 
 @media (min-width: 1024px) {
+  .sender {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 40px;
+    max-width: none;
+    padding: 28px 32px;
+  }
+
+  .senderBuy {
+    align-items: flex-end;
+    text-align: right;
+  }
+
   .cards {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;

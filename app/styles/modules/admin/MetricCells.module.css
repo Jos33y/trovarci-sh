@@ -1,0 +1,144 @@
+/* Analytics table cells: share bars, dimmed zeros, rates with their counts. */
+
+.share {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.shareTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shareText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--trov-text);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.shareTrack {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--trov-border);
+  overflow: hidden;
+}
+
+.shareFill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--trov-accent);
+  opacity: 0.75;
+}
+
+/* Source kind next to the source name */
+
+.tag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--trov-border-hover);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--trov-text-secondary);
+}
+
+.tag_search {
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--trov-success);
+}
+
+.tag_ai {
+  border-color: rgba(212, 168, 67, 0.4);
+  color: var(--trov-accent);
+}
+
+/* Numbers */
+
+.num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--trov-text);
+  white-space: nowrap;
+}
+
+.zero {
+  color: var(--trov-text-muted);
+}
+
+.rate {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.rateOf {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--trov-text-secondary);
+}
+
+.meter {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  min-width: 56px;
+}
+
+.meterTrack {
+  display: block;
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--trov-border);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  background: var(--trov-success);
+}
+
+.meterWarn {
+  background: var(--trov-warning);
+}
+
+.takeaway {
+  margin: 0 0 var(--space-md);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+}
+
+.takeaway strong {
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+@media (max-width: 640px) {
+  .rate,
+  .meter {
+    align-items: flex-end;
+  }
+}

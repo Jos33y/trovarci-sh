@@ -2,26 +2,40 @@ import { Link } from 'react-router';
 import { TrovarcisLogo } from '~/components/shared/Logo';
 import styles from '~/styles/modules/layout/Footer.module.css';
 
+// Link text says what each page is for, in the words people search with.
+// Tools follow the order a campaign needs them, matching the homepage path.
 const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "/#features" },
-      { label: "Pricing", href: "/#pricing" },
       { label: "Trovarcis Sender", href: "/sender" },
+      { label: "Sender vs SendBlaster", href: "/blog/trovarcis-reach-vs-sendblaster" },
+      { label: "Your Sender license", href: "/account/sender" },
+      { label: "Pricing", href: "/#pricing" },
       { label: "Credits", href: "/credits" },
       { label: "Pay with crypto", href: "/pay-with-crypto" },
     ],
   },
   {
-    title: "Free Tools",
+    title: "Tools",
     links: [
-      { label: "Email Scorer", href: "/score" },
-      { label: "Domain Checker", href: "/domain" },
-      { label: "Email Verifier", href: "/verify" },
-      { label: "SMTP Tester", href: "/smtp-test" },
-      { label: "DNS Generator", href: "/records" },
-      { label: "Number Verifier", href: "/verify-number" },
+      { label: "Domain blacklist checker", href: "/domain" },
+      { label: "SPF, DKIM, DMARC generator", href: "/records" },
+      { label: "Email verifier", href: "/verify" },
+      { label: "Phone number checker", href: "/verify-number" },
+      { label: "Spam score checker", href: "/score" },
+      { label: "SMTP tester", href: "/smtp-test" },
+    ],
+  },
+  {
+    title: "Guides",
+    links: [
+      { label: "Why emails go to spam", href: "/blog/why-emails-go-to-spam" },
+      { label: "Set up SPF, DKIM, DMARC", href: "/blog/spf-dkim-dmarc-setup" },
+      { label: "Fix SPF PermError", href: "/blog/spf-permerror-10-dns-lookups-fix" },
+      { label: "Is my domain blacklisted?", href: "/blog/domain-blacklisted-check-fix" },
+      { label: "Clean an email list", href: "/blog/clean-email-list-before-sending" },
+      { label: "All guides", href: "/blog" },
     ],
   },
   {
@@ -34,13 +48,10 @@ const COLUMNS = [
     ],
   },
   {
-    title: "Connect",
+    title: "Help",
     links: [
-      { label: "Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
-      { label: "X (Twitter)", href: "https://x.com/trovarcisreach", external: true },
-      { label: "GitHub", href: "https://github.com/trovarcis", external: true },
-      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com", external: true },
+      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com" },
     ],
   },
 ];
@@ -53,13 +64,14 @@ export default function Footer() {
           <div className={styles.brand}>
             <TrovarcisLogo size={28} />
             <p className={styles.tagline}>
-              Infrastructure for businesses that move fast.
+              Send bulk email from your own computer. Check your domain, list
+              and message first.
             </p>
           </div>
 
           {COLUMNS.map((col) => (
             <div key={col.title} className={styles.column}>
-              <h4 className={styles.columnTitle}>{col.title}</h4>
+              <h2 className={styles.columnTitle}>{col.title}</h2>
               <ul className={styles.columnList}>
                 {col.links.map((link) => (
                   <li key={link.href}>
@@ -72,7 +84,7 @@ export default function Footer() {
                       >
                         {link.label}
                       </a>
-                    ) : link.href.startsWith('/#') ? (
+                    ) : link.href.startsWith('/#') || link.href.startsWith('mailto:') ? (
                       <a href={link.href} className={styles.columnLink}>
                         {link.label}
                       </a>

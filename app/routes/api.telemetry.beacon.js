@@ -118,6 +118,7 @@ export async function action({ request }) {
       'package_select', 'checkout_click', 'credits_view',
       'video_play', 'video_complete', 'scroll_depth_50', 'scroll_depth_90',
       'tool_success_dns_generate',
+      'page_engagement', 'helpful_vote',
     ]);
     if (!CLIENT_ALLOWED.has(eventType)) return new Response(null, { status: 400 });
 

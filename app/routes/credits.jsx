@@ -156,7 +156,7 @@ const FAQ_ITEMS_BASE = [
   },
   {
     q: "What's your refund policy?",
-    a: '15-day money-back guarantee on unused credits. Email support@trovarcis.com and we will process a full refund.',
+    a: 'Unused Credits bought in the last 7 days can be refunded to your original payment. Credits already used are not refundable. If a check fails on our side, its Credits go back to your balance automatically. To ask for a refund, write to support@trovarcis.com.',
   },
 ];
 

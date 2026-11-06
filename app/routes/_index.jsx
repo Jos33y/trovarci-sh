@@ -1,29 +1,32 @@
 import { useLoaderData } from 'react-router';
 import { getAllPosts } from '~/utils/markdown.server';
 import { getSeo } from '~/utils/seo';
+import { currentSenderPrice } from '~/utils/senderConfig.server';
+import { formatSenderPrice, senderPriceNote } from '~/utils/senderCopy';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import Hero from '~/components/landing/Hero';
-import ToolsStrip from '~/components/landing/ToolsStrip';
-import Features from '~/components/landing/Features';
-import HowItWorks from '~/components/landing/HowItWorks';
-import Comparison from '~/components/landing/Comparison';
+import Checks from '~/components/landing/Checks';
 import Pricing from '~/components/landing/Pricing';
-import DesktopPromo from '~/components/landing/DesktopPromo';
 import FAQ from '~/components/landing/FAQ';
 import LatestPosts from '~/components/landing/LatestPosts';
 import CTA from '~/components/landing/CTA';
 import styles from '~/styles/modules/routes/home.module.css';
 
 export const meta = () => getSeo({
-  title: "Email deliverability and number verification tools",
-  description: "Six tools for email deliverability and number verification. Verify lists, score copy, audit DNS, test SMTP. Pay as you go. 10 free credits on signup, no subscription.",
+  title: "Bulk email sender and email verification tools",
+  description: "Trovarcis Sender sends bulk email from your own computer through your own SMTP accounts, with one payment. Plus six checks for your domain, list and message.",
   path: "/",
 });
 
 export function loader() {
   const posts = getAllPosts();
-  return { posts };
+  const price = currentSenderPrice();
+  return {
+    posts,
+    priceLabel: formatSenderPrice(price.cents),
+    priceNote: senderPriceNote(price),
+  };
 }
 
 // Organization + WebSite schema in one @graph. No SearchAction: Google retired the sitelinks search box.
@@ -33,10 +36,11 @@ const HOME_SCHEMA = {
     {
       '@type': 'Organization',
       '@id': 'https://trovarci.sh/#organization',
-      name: 'Trovarcis Reach',
+      name: 'Trovarcis',
+      alternateName: 'Trovarcis Reach',
       url: 'https://trovarci.sh',
       logo: 'https://trovarci.sh/android-chrome-512x512.png',
-      description: 'Email deliverability and number verification tools for anyone who sends email or verifies contacts.',
+      description: 'Trovarcis Sender, a Windows app for sending bulk email through your own SMTP accounts, and tools for checking your domain, list and message before you send.',
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'customer support',
@@ -47,7 +51,8 @@ const HOME_SCHEMA = {
     {
       '@type': 'WebSite',
       '@id': 'https://trovarci.sh/#website',
-      name: 'Trovarcis Reach',
+      name: 'Trovarcis',
+      alternateName: 'Trovarcis Reach',
       url: 'https://trovarci.sh',
       publisher: { '@id': 'https://trovarci.sh/#organization' },
       inLanguage: 'en-US',
@@ -56,7 +61,7 @@ const HOME_SCHEMA = {
 };
 
 export default function Home() {
-  const { posts } = useLoaderData();
+  const { posts, priceLabel, priceNote } = useLoaderData();
 
   return (
     <>
@@ -68,32 +73,18 @@ export default function Home() {
         />
 
         {/* bg */}
-        <Hero />
+        <Hero priceLabel={priceLabel} />
 
         {/* surface */}
         <div className={styles.surfaceSection}>
-          <ToolsStrip />
+          <Checks priceLabel={priceLabel} />
         </div>
 
         {/* bg */}
-        <Features />
-
-        {/* surface */}
-        <div className={styles.surfaceSection}>
-          <HowItWorks />
-        </div>
+        <Pricing priceLabel={priceLabel} priceNote={priceNote} />
 
         {/* bg */}
-        <Comparison />
-
-        {/* surface */}
-        <div className={styles.surfaceSection}>
-          <Pricing />
-          <DesktopPromo />
-        </div>
-
-        {/* bg */}
-        <FAQ />
+        <FAQ priceLabel={priceLabel} />
 
         {/* surface */}
         <div className={styles.surfaceSection}>

@@ -31,5 +31,9 @@ export function customPriceCents(credits) {
 // Whole dollars render without cents so pack cards read "$5" rather than "$5.00".
 export function formatUsd(priceUsdCents) {
   const dollars = priceUsdCents / 100;
-  return Number.isInteger(dollars) ? String(dollars) : dollars.toFixed(2);
+  const whole = Number.isInteger(dollars);
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: whole ? 0 : 2,
+  }).format(dollars);
 }

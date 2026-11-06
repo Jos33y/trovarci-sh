@@ -52,9 +52,11 @@ export const TELEMETRY_CLIENT_SOURCE = `
     var p = location.pathname;
     var key = p + location.search;
     if (key === lastSent) return;
-    if (skip(p)) { lastSent = key; return; }
+    if (skip(p)) { lastSent = key; if (eng) { engFlush(); eng = null; } return; }
     var isFirst = lastSent === null;
     lastSent = key;
+    if (eng) engFlush();
+    engStart(p);
     send({type:'pageview',path:key,referrer:isFirst ? firstReferrer : null});
   }
 
@@ -81,6 +83,58 @@ export const TELEMETRY_CLIENT_SOURCE = `
     return r;
   };
   window.addEventListener('popstate',function(){ setTimeout(pageview,0); });
+
+  // Reading time, scroll depth and the first action, one record per page view. Sent when the
+  // visitor moves on, hides the tab or leaves. Visible time only, so a background tab does not count.
+  var ACTIONS=[
+    [/^\\/(score|domain|verify|smtp-test|records|verify-number)(\\/|$)/,'tool'],
+    [/^\\/sender(\\/|$)/,'sender'],
+    [/^\\/download\\/windows/,'download'],
+    [/^\\/signup/,'signup'],
+    [/^\\/credits/,'credits'],
+    [/^\\/(blog|guides)\\//,'read_more']
+  ];
+  var eng=null;
+  function engStart(path){
+    eng={pv:Math.random().toString(36).slice(2,12),path:path,ms:0,since:document.visibilityState==='visible'?Date.now():0,depth:0,action:null,target:null};
+    engDepth();
+  }
+  function engTick(){ if(eng&&eng.since){ eng.ms+=Date.now()-eng.since; eng.since=Date.now(); } }
+  function engDepth(){
+    if(!eng) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var pct=h<=0?100:Math.min(100,Math.round((window.scrollY/h)*100));
+    var b=pct>=100?100:pct>=75?75:pct>=50?50:pct>=25?25:0;
+    if(b>eng.depth) eng.depth=b;
+  }
+  function engFlush(){
+    if(!eng) return;
+    engTick();
+    var secs=Math.min(1800,Math.round(eng.ms/1000));
+    send({type:'event',eventType:'page_engagement',path:eng.path,metadata:{pv:eng.pv,s:secs,d:eng.depth,a:eng.action||'none',t:eng.target||''}});
+  }
+  var scrollQueued=false;
+  window.addEventListener('scroll',function(){
+    if(scrollQueued) return; scrollQueued=true;
+    requestAnimationFrame(function(){ scrollQueued=false; engDepth(); });
+  },{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(!eng) return;
+    if(document.visibilityState==='hidden'){ engFlush(); eng.since=0; }
+    else { eng.since=Date.now(); }
+  });
+  window.addEventListener('pagehide',function(){ engFlush(); });
+  document.addEventListener('click',function(e){
+    if(!eng||eng.action) return;
+    var el=e.target&&e.target.closest?e.target.closest('a[href],button[data-track]'):null;
+    if(!el) return;
+    if(el.tagName==='BUTTON'){ eng.action=String(el.getAttribute('data-track')).slice(0,32); return; }
+    try{
+      var u=new URL(el.getAttribute('href'),location.href);
+      if(u.host!==location.host){ eng.action='outbound'; eng.target=u.host.slice(0,120); return; }
+      for(var i=0;i<ACTIONS.length;i++){ if(ACTIONS[i][0].test(u.pathname)){ eng.action=ACTIONS[i][1]; eng.target=u.pathname.slice(0,120); return; } }
+    }catch(err){}
+  },true);
 
   // Dedupe per (message+filename+line) signature within 5s.
   function fp(msg,file,line){ return (msg||'?')+'|'+(file||'?')+'|'+(line||'?'); }

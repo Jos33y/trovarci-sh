@@ -29,3 +29,4 @@ export { default as TagIcon } from './TagIcon';
 export { default as TerminalIcon } from './TerminalIcon';
 export { default as UsersIcon } from './UsersIcon';
 export { default as VerifyIcon } from './VerifyIcon';
+export { default as ReadingIcon } from './ReadingIcon';

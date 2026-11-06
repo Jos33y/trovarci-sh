@@ -1,150 +1,70 @@
+import { Link } from 'react-router';
 import Button from '~/components/shared/Button';
+import { LockIcon } from '~/components/icons';
+import { STORAGE_LINE, SENDER_REFUND_LINE } from '~/utils/senderCopy';
 import styles from '~/styles/modules/landing/Hero.module.css';
 
-// Bulk email verification mid-run. The classification bar + bounce-prevented KPI tell the toolkit story.
-function EmailVerifierMockup() {
+// The homepage leads with Sender. The tools section below picks up the "checks" the sub mentions.
+export default function Hero({ priceLabel }) {
   return (
-    <div className={styles.mockupWrap}>
-      <div className={styles.mockup}>
-        <div className={styles.mockupBar}>
-          <div className={styles.mockupDots}>
-            <span className={styles.dotRed} />
-            <span className={styles.dotYellow} />
-            <span className={styles.dotGreen} />
-          </div>
-          <span className={styles.mockupTitle}>Email Verifier</span>
-        </div>
-
-        <div className={styles.mockupBody}>
-          <div className={styles.fileHeader}>
-            <div>
-              <div className={styles.fileName}>prospects-q3.csv</div>
-              <div className={styles.fileMeta}>12,000 addresses</div>
-            </div>
-            <span className={styles.statusBadge}>
-              <span className={styles.statusDot} />
-              Verifying
-            </span>
-          </div>
-
-          <div className={styles.progressSection}>
-            <div className={styles.progressBar}>
-              <div className={styles.progressFill}>
-                <div className={styles.progressShimmer} />
-              </div>
-            </div>
-            <div className={styles.progressLabel}>
-              <span className={styles.progressCount}>
-                <span className={styles.progressCurrent}>8,432</span> / 12,000
-              </span>
-              <span className={styles.progressPercent}>70%</span>
-            </div>
-          </div>
-
-          <div className={styles.distribution}>
-            <div className={styles.distBar}>
-              <div
-                className={`${styles.distSegment} ${styles.distValid}`}
-                style={{ width: '81.7%' }}
-                aria-label="6,891 valid"
-              />
-              <div
-                className={`${styles.distSegment} ${styles.distInvalid}`}
-                style={{ width: '11.6%' }}
-                aria-label="982 invalid"
-              />
-              <div
-                className={`${styles.distSegment} ${styles.distCatchall}`}
-                style={{ width: '3.7%' }}
-                aria-label="312 catch-all"
-              />
-              <div
-                className={`${styles.distSegment} ${styles.distDisposable}`}
-                style={{ width: '2.2%' }}
-                aria-label="184 disposable"
-              />
-              <div
-                className={`${styles.distSegment} ${styles.distRole}`}
-                style={{ width: '0.8%' }}
-                aria-label="63 role-based"
-              />
-            </div>
-
-            <div className={styles.distLegend}>
-              <div className={styles.distItem}>
-                <span className={`${styles.distDot} ${styles.distValid}`} />
-                <span className={styles.distLabel}>Valid</span>
-                <span className={styles.distCount}>6,891</span>
-              </div>
-              <div className={styles.distItem}>
-                <span className={`${styles.distDot} ${styles.distInvalid}`} />
-                <span className={styles.distLabel}>Invalid</span>
-                <span className={styles.distCount}>982</span>
-              </div>
-              <div className={styles.distItem}>
-                <span className={`${styles.distDot} ${styles.distCatchall}`} />
-                <span className={styles.distLabel}>Catch-all</span>
-                <span className={styles.distCount}>312</span>
-              </div>
-              <div className={styles.distItem}>
-                <span className={`${styles.distDot} ${styles.distDisposable}`} />
-                <span className={styles.distLabel}>Disposable</span>
-                <span className={styles.distCount}>184</span>
-              </div>
-              <div className={styles.distItem}>
-                <span className={`${styles.distDot} ${styles.distRole}`} />
-                <span className={styles.distLabel}>Role</span>
-                <span className={styles.distCount}>63</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.kpiRow}>
-            <div className={`${styles.kpiCard} ${styles.kpiCardAccent}`}>
-              <div className={styles.kpiLabel}>Bounce prevented</div>
-              <div className={styles.kpiValue}>15.3%</div>
-              <div className={styles.kpiCaption}>would have hard-bounced</div>
-            </div>
-            <div className={styles.kpiCard}>
-              <div className={styles.kpiLabel}>Throughput</div>
-              <div className={styles.kpiValueNeutral}>285<span className={styles.kpiUnit}>/min</span></div>
-              <div className={styles.kpiCaption}>live processing</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function Hero() {
-  return (
-    <section className={styles.hero}>
+    <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.heroGrid} aria-hidden="true" />
-      <div className={styles.heroNoise} aria-hidden="true" />
 
       <div className={`container ${styles.inner}`}>
         <div className={styles.content}>
-          <h1 className={styles.headline}>
-            Email deliverability, the toolkit.
+          <p className={styles.kicker}>Trovarcis Sender for Windows</p>
+
+          <h1 id="hero-title" className={styles.headline}>
+            Send bulk email that reaches the inbox.
           </h1>
 
           <p className={styles.sub}>
-            Six checks that catch what mail servers will. No subscription,
-            no surprises.
+            Sender sends your campaigns from your own computer, through your own
+            SMTP accounts. The checks on trovarci.sh make sure your domain, your
+            list and your message are ready first.
           </p>
 
           <div className={styles.ctas}>
-            <Button href="/signup" variant="primary">Start free</Button>
-            <Button href="/tools" variant="secondary">See the tools</Button>
+            <Button href="/sender" variant="primary">Get Sender, {priceLabel}</Button>
+            <Button href="#tools" variant="secondary">Try the free checks</Button>
           </div>
 
-          <p className={styles.launch}>10 free credits on signup. No card.</p>
+          <p className={styles.privacy}>
+            <span className={styles.privacyIcon} aria-hidden="true"><LockIcon size={16} /></span>
+            <span>{STORAGE_LINE}</span>
+          </p>
+
+          <p className={styles.terms}>
+            One payment, no monthly fee. {SENDER_REFUND_LINE}
+          </p>
         </div>
 
-        <div className={styles.visual}>
-          <EmailVerifierMockup />
-        </div>
+        <figure className={styles.visual}>
+          <div className={styles.window}>
+            <div className={styles.windowBar} aria-hidden="true">
+              <span className={styles.windowTitle}>Trovarcis Sender</span>
+              <span className={styles.windowControls}>
+                <svg viewBox="0 0 10 10" width="10" height="10"><path d="M1 5.5h8" stroke="currentColor" /></svg>
+                <svg viewBox="0 0 10 10" width="10" height="10"><rect x="1.5" y="1.5" width="7" height="7" fill="none" stroke="currentColor" /></svg>
+                <svg viewBox="0 0 10 10" width="10" height="10"><path d="m1.5 1.5 7 7m0-7-7 7" stroke="currentColor" /></svg>
+              </span>
+            </div>
+            <img
+              className={styles.shot}
+              src="/images/sender/sender-overview-1600.webp"
+              srcSet="/images/sender/sender-overview-800.webp 800w, /images/sender/sender-overview-1600.webp 1600w"
+              sizes="(min-width: 1280px) 720px, (min-width: 1024px) 56vw, calc(100vw - 32px)"
+              width="1600"
+              height="1179"
+              alt="The Trovarcis Sender overview screen: getting started steps, daily sending capacity across three SMTP accounts, and the last campaign's results."
+              fetchPriority="high"
+              decoding="async"
+            />
+          </div>
+          <figcaption className={styles.caption}>
+            Sender 1.0, shown with demo data. <Link to="/sender#screens" className={styles.captionLink}>See every screen</Link>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );

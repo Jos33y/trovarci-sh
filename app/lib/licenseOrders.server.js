@@ -394,11 +394,11 @@ export async function deliverLicenseKey(orderId, sendEmail) {
   }
 }
 
-// After commit: tell the owner about a sale or a refund. Never throws.
+// After commit: tell the owner about a sale or a refund, with no buyer details. Never throws.
 export async function alertOwner(orderId, kind, sendAlert) {
   try {
     const [row] = await sql`
-      SELECT o.id, o.email, o.amount_usd_cents, o.gateway, o.license_id
+      SELECT o.amount_usd_cents, o.gateway
       FROM license_orders o WHERE o.id = ${orderId}
     `;
     if (!row) return;
@@ -406,9 +406,6 @@ export async function alertOwner(orderId, kind, sendAlert) {
       kind,
       amountUsd: (row.amount_usd_cents / 100).toFixed(2),
       method: row.gateway === 'polar' ? 'card' : 'crypto',
-      buyerEmail: row.email,
-      orderShortId: row.id.slice(0, 8).toUpperCase(),
-      licenseShortId: row.license_id ? String(row.license_id).slice(0, 8).toUpperCase() : '-',
     });
   } catch (err) {
     console.error(`[license orders] owner alert failed for order ${orderId}: ${String(err?.message || err).slice(0, 200)}`);

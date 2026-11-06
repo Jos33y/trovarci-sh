@@ -1,503 +1,216 @@
-/* Hero section - landing page above-the-fold */
+/* Hero: Sender first, with a real screen. Mobile first; two columns from 1024. */
 
 .hero {
   position: relative;
-  padding: 48px 0 32px;
+  padding: 40px 0 56px;
   overflow: hidden;
 }
 
-/* Background layers */
-
+/* Faint grid behind the copy, masked so it never reaches the screenshot edge. */
 .heroGrid {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(212, 168, 67, 0.06) 0px,
-      rgba(212, 168, 67, 0.06) 1px,
-      transparent 1px,
-      transparent 64px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(212, 168, 67, 0.06) 0px,
-      rgba(212, 168, 67, 0.06) 1px,
-      transparent 1px,
-      transparent 64px
-    );
-  -webkit-mask-image: radial-gradient(ellipse 90% 50% at 50% 30%, black 0%, transparent 70%);
-  mask-image: radial-gradient(ellipse 90% 50% at 50% 30%, black 0%, transparent 70%);
+    repeating-linear-gradient(0deg, rgba(212, 168, 67, 0.05) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(90deg, rgba(212, 168, 67, 0.05) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 20% 30%, black 0%, transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 60% at 20% 30%, black 0%, transparent 70%);
 }
-
-.heroNoise {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 300px 300px;
-}
-
-/* Content layer */
 
 .inner {
   position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 40px;
 }
 
-/* Left column */
+/* Copy */
 
 .content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
-  width: 100%;
+  min-width: 0;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
 }
 
 .headline {
+  margin-top: 14px;
+  max-width: 14ch;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7.5vw, 3.25rem);
+  font-size: clamp(2.125rem, 8vw, 3.5rem);
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1.04;
   letter-spacing: -0.03em;
   color: var(--trov-text);
-  max-width: 560px;
+  text-wrap: balance;
 }
 
 .sub {
-  margin-top: 16px;
-  max-width: 480px;
-  color: var(--trov-text-secondary);
-  font-size: 0.9375rem;
+  margin-top: 18px;
+  max-width: 34rem;
+  font-size: 1rem;
   line-height: 1.6;
-  font-weight: 400;
+  color: var(--trov-text-secondary);
+  text-wrap: pretty;
 }
 
 .ctas {
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 10px;
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
-.launch {
-  margin-top: 16px;
-  color: var(--trov-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
+.ctas a:active {
+  transform: scale(0.97);
 }
 
-/* Right column */
+/* The privacy line is the lead promise, so it gets its own quiet panel rather than fine print. */
+.privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 28px;
+  max-width: 34rem;
+  padding: 12px 14px;
+  border: 1px solid var(--trov-border);
+  border-left: 2px solid var(--trov-accent);
+  border-radius: var(--radius-sm);
+  background: rgba(212, 168, 67, 0.04);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--trov-text);
+}
+
+.privacyIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--trov-accent);
+}
+
+.terms {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+/* Screenshot in a Windows frame, since Sender is a Windows app. */
 
 .visual {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-/* Mockup wrapper */
-
-.mockupWrap {
   position: relative;
-  width: 100%;
-  max-width: 480px;
-}
-
-.mockup {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  background: var(--trov-surface);
-  border: 1px solid var(--trov-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-}
-
-/* Mockup title bar */
-
-.mockupBar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--trov-border);
-  background: var(--trov-bg);
-}
-
-.mockupDots {
-  display: flex;
-  gap: 6px;
-}
-
-.dotRed,
-.dotYellow,
-.dotGreen {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  opacity: 0.5;
-}
-
-.dotRed { background: #F87171; }
-.dotYellow { background: #FB923C; }
-.dotGreen { background: #34D399; }
-
-.mockupTitle {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--trov-text-muted);
-  letter-spacing: 0.02em;
-}
-
-/* Mockup body */
-
-.mockupBody {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* File header */
-
-.fileHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.fileName {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--trov-text);
-  line-height: 1.2;
-}
-
-.fileMeta {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--trov-text-muted);
-  margin-top: 4px;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
-  background: var(--trov-glow);
-  color: var(--trov-accent);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.statusDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--trov-accent);
-  animation: statusPulse 2s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(212, 168, 67, 0); }
-}
-
-/* Progress */
-
-.progressSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.progressBar {
-  height: 6px;
-  background: var(--trov-bg);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progressFill {
-  width: 70%;
-  height: 100%;
-  background: var(--trov-accent);
-  border-radius: 3px;
-  position: relative;
-  overflow: hidden;
-  animation: progressGrow 1.2s ease-out forwards;
-}
-
-.progressShimmer {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    transparent 100%
-  );
-  animation: shimmer 2.5s ease-in-out infinite;
-  animation-delay: 1.4s;
-}
-
-@keyframes progressGrow {
-  from { width: 0%; }
-  to { width: 70%; }
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 200%; }
-}
-
-.progressLabel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.progressCount {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--trov-text-muted);
-}
-
-.progressCurrent {
-  color: var(--trov-text);
-  font-weight: 600;
-}
-
-.progressPercent {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--trov-text-secondary);
-}
-
-/* Classification distribution */
-
-.distribution {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.distBar {
-  display: flex;
-  width: 100%;
-  height: 10px;
-  border-radius: 4px;
-  overflow: hidden;
-  background: var(--trov-bg);
-}
-
-.distSegment {
-  height: 100%;
-  transition: width var(--transition-slow);
-}
-
-/* Segment + dot colors share the same modifier classes */
-
-.distValid     { background: var(--trov-success); }
-.distInvalid   { background: var(--trov-error); }
-.distCatchall  { background: var(--trov-warning); }
-.distDisposable { background: rgba(248, 113, 113, 0.55); }
-.distRole      { background: var(--trov-text-secondary); }
-
-.distLegend {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
-}
-
-.distItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   min-width: 0;
+  margin: 0;
 }
 
-.distDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  flex-shrink: 0;
+.visual::before {
+  content: '';
+  position: absolute;
+  inset: 12% 6% -6% 6%;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, var(--trov-glow-strong), transparent 70%);
+  filter: blur(24px);
+  pointer-events: none;
 }
 
-.distLabel {
-  font-family: var(--font-mono);
+.window {
+  overflow: hidden;
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-md);
+  background: var(--trov-bg);
+  box-shadow: var(--shadow-lg);
+}
+
+.windowBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 0 4px 0 12px;
+  border-bottom: 1px solid var(--trov-border);
+  background: var(--trov-surface);
+  user-select: none;
+}
+
+.windowTitle {
+  font-family: var(--font-body);
   font-size: 0.6875rem;
   color: var(--trov-text-secondary);
+}
+
+.windowControls {
+  display: flex;
+  color: var(--trov-text-secondary);
+}
+
+.windowControls svg {
+  box-sizing: content-box;
+  padding: 10px 14px;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.caption {
+  margin-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+.captionLink {
+  color: var(--trov-accent);
+  text-decoration: none;
   white-space: nowrap;
 }
 
-.distCount {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--trov-text);
-  margin-left: auto;
+.captionLink:hover {
+  color: var(--trov-accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-
-/* KPI tiles */
-
-.kpiRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.kpiCard {
-  padding: 12px 14px;
-  background: var(--trov-bg);
-  border: 1px solid var(--trov-border);
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.kpiCardAccent {
-  border-color: rgba(212, 168, 67, 0.25);
-  background: linear-gradient(180deg, rgba(212, 168, 67, 0.06) 0%, var(--trov-bg) 100%);
-}
-
-.kpiLabel {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--trov-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.kpiValue {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--trov-accent);
-}
-
-.kpiValueNeutral {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--trov-text);
-}
-
-.kpiUnit {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--trov-text-muted);
-  margin-left: 2px;
-}
-
-.kpiCaption {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--trov-text-muted);
-}
-
-/* Reduced motion */
-
-@media (prefers-reduced-motion: reduce) {
-  .statusDot,
-  .progressFill,
-  .progressShimmer,
-  .distSegment {
-    animation: none;
-    transition: none;
-  }
-
-  .progressFill {
-    width: 70%;
-  }
-}
-
-/* Tablet and up */
 
 @media (min-width: 640px) {
   .hero {
-    padding: 64px 0 48px;
-  }
-
-  .ctas {
-    gap: 12px;
-  }
-
-  .mockupBody {
-    padding: 20px;
-    gap: 18px;
-  }
-
-  .kpiCard {
-    padding: 14px 16px;
-  }
-
-  .kpiValue,
-  .kpiValueNeutral {
-    font-size: 1.625rem;
+    padding: 56px 0 72px;
   }
 }
 
-/* Desktop */
-
 @media (min-width: 1024px) {
   .hero {
-    padding: 80px 0 64px;
+    padding: 72px 0 96px;
   }
 
   .inner {
-    flex-direction: row;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     align-items: center;
     gap: 56px;
   }
 
-  .content {
-    flex: 0 0 44%;
+  .headline {
+    margin-top: 16px;
+    max-width: 15ch;
+    font-size: clamp(2.5rem, 4.4vw, 3.5rem);
   }
+}
 
-  .visual {
-    flex: 1 1 auto;
-    justify-content: flex-end;
-    min-width: 0;
-  }
-
-  .mockupWrap {
-    max-width: 520px;
-  }
-
-  .heroGrid {
-    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 70%);
-    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 70%);
+/* Wide screens: let the screen run past the column toward the edge, like a real window would. */
+@media (min-width: 1280px) {
+  .window {
+    width: 112%;
   }
 }

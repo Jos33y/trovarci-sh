@@ -811,3 +811,78 @@ export async function adminUpdateContactMessageStatus(id, { status, notes = null
   if (!updated) throw new Error(`Contact message not found: ${id}`);
   return updated;
 }
+// Reading per page: how long people actually read (visible time), how far they scrolled, what they
+// did next, and the helpful votes. One engagement record per page view; the last one sent wins.
+export async function adminPageEngagement({ days = 30, limit = 50 } = {}) {
+  const interval = `${days} days`;
+  return sql`
+    WITH views AS (
+      SELECT path, COUNT(*)::int AS views
+      FROM analytics_events
+      WHERE event_type = 'pageview' AND is_bot = FALSE AND is_internal = FALSE
+        AND created_at > now() - ${interval}::interval
+      GROUP BY path
+    ),
+    per_view AS (
+      SELECT path,
+             metadata->>'pv' AS pv,
+             MAX((metadata->>'s')::int) AS seconds,
+             MAX((metadata->>'d')::int) AS depth,
+             MAX(NULLIF(metadata->>'a', 'none')) AS action
+      FROM analytics_events
+      WHERE event_type = 'page_engagement' AND is_bot = FALSE AND is_internal = FALSE
+        AND created_at > now() - ${interval}::interval
+        AND metadata->>'pv' IS NOT NULL
+      GROUP BY path, metadata->>'pv'
+    ),
+    reading AS (
+      SELECT path,
+             COUNT(*)::int AS measured,
+             ROUND(AVG(seconds))::int AS avg_seconds,
+             ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY seconds))::int AS median_seconds,
+             COUNT(*) FILTER (WHERE depth >= 75)::int AS reached_end,
+             COUNT(*) FILTER (WHERE seconds < 10)::int AS left_fast,
+             COUNT(*) FILTER (WHERE action IS NOT NULL)::int AS acted,
+             COUNT(*) FILTER (WHERE action = 'tool')::int AS to_tool,
+             COUNT(*) FILTER (WHERE action IN ('sender', 'download'))::int AS to_sender,
+             COUNT(*) FILTER (WHERE action IN ('signup', 'credits'))::int AS to_signup
+      FROM per_view
+      GROUP BY path
+    ),
+    votes AS (
+      SELECT path,
+             COUNT(*) FILTER (WHERE metadata->>'v' = 'yes')::int AS helpful_yes,
+             COUNT(*) FILTER (WHERE metadata->>'v' = 'no')::int AS helpful_no
+      FROM analytics_events
+      WHERE event_type = 'helpful_vote' AND is_bot = FALSE AND is_internal = FALSE
+        AND created_at > now() - ${interval}::interval
+      GROUP BY path
+    )
+    SELECT v.path, v.views,
+           COALESCE(r.measured, 0) AS measured, r.avg_seconds, r.median_seconds,
+           COALESCE(r.reached_end, 0) AS reached_end, COALESCE(r.left_fast, 0) AS left_fast,
+           COALESCE(r.acted, 0) AS acted, COALESCE(r.to_tool, 0) AS to_tool,
+           COALESCE(r.to_sender, 0) AS to_sender, COALESCE(r.to_signup, 0) AS to_signup,
+           COALESCE(h.helpful_yes, 0) AS helpful_yes, COALESCE(h.helpful_no, 0) AS helpful_no
+    FROM views v
+    LEFT JOIN reading r ON r.path = v.path
+    LEFT JOIN votes h ON h.path = v.path
+    ORDER BY v.views DESC
+    LIMIT ${limit}
+  `;
+}
+
+// What readers said was missing, newest first.
+export async function adminHelpfulNotes({ days = 90, limit = 30 } = {}) {
+  const interval = `${days} days`;
+  return sql`
+    SELECT created_at, path, metadata->>'note' AS note
+    FROM analytics_events
+    WHERE event_type = 'helpful_vote' AND metadata->>'v' = 'no'
+      AND COALESCE(metadata->>'note', '') <> ''
+      AND is_bot = FALSE AND is_internal = FALSE
+      AND created_at > now() - ${interval}::interval
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+}

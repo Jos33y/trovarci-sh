@@ -47,12 +47,14 @@ export async function loader({ request }) {
 
 export function Layout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Static head tags - never overridden by route meta exports. */}
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#09090B" />
+        {/* Scroll reveals hide content only when JS can show it again, so readers without JS see the whole page. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
 
         <Meta />
         <Links />
