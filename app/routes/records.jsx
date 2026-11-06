@@ -24,56 +24,56 @@ const SECTIONS = [
 
 const FAQ_ITEMS = [
   {
-    q: 'What are SPF, DKIM, and DMARC records?',
-    a: 'SPF (Sender Policy Framework) tells receiving servers which IPs can send email for your domain. DKIM (DomainKeys Identified Mail) adds a digital signature to verify emails were not tampered with in transit. DMARC (Domain-based Message Authentication, Reporting and Conformance) tells servers what to do when SPF or DKIM checks fail.',
+    q: "What are SPF, DKIM and DMARC records?",
+    a: "Three DNS records that prove your email really comes from you. SPF lists which services may send email for your domain. DKIM signs each email so it can’t be faked or changed on the way. DMARC tells providers what to do with email that fails those checks, and sends you reports.",
   },
   {
-    q: 'Do I need all three records?',
-    a: 'Yes. SPF alone is not enough. Gmail, Yahoo, and Microsoft all require SPF, DKIM, and DMARC for reliable inbox delivery as of 2024. Missing any one of these significantly increases the chance of your emails going to spam.',
+    q: "Do I need all three records?",
+    a: "Yes. Gmail and Yahoo have required all three from bulk senders since 2024, and Microsoft since 2025. Even if you send a little, missing one makes spam more likely.",
   },
   {
-    q: 'What DMARC policy should I choose?',
-    a: 'Start with "none" if you are setting up email authentication for the first time. This monitors failures without blocking emails. After 2-4 weeks of monitoring reports, move to "quarantine" (spam folder), then eventually "reject" (block entirely) once you are confident all legitimate email passes authentication.',
+    q: "What DMARC policy should I choose?",
+    a: "Start with “none”: nothing is blocked, and the reports show who sends email as your domain. After two to four weeks, once your own email passes, move to “quarantine” (failures go to spam), then “reject” (failures are refused).",
   },
   {
-    q: 'How long do DNS changes take to propagate?',
-    a: 'Most DNS changes propagate within 1-4 hours. Some registrars and ISPs may take up to 48 hours. You can check propagation status using tools like whatsmydns.net or the Trovarcis Reach Domain Health Checker.',
+    q: "How long do DNS changes take?",
+    a: "Usually under a few hours, sometimes up to 48. Run your domain through the Domain Checker to see when the new records are live.",
   },
   {
-    q: 'Can I have multiple SPF records?',
-    a: 'No. You can only have one SPF TXT record per domain. If you use multiple email providers, combine them into a single SPF record using multiple "include:" statements. This generator handles this automatically when you select additional providers.',
+    q: "Can I have more than one SPF record?",
+    a: "No. A domain can have only one SPF record, and two break both. If you use several email services, list them all in one record. This generator does that when you pick more than one provider.",
   },
   {
-    q: 'Why does SPF have a 10-lookup limit?',
-    a: 'RFC 7208 caps SPF at 10 DNS lookups to prevent abuse and limit server load. Each include, a, mx, and redirect mechanism counts toward the limit. Large providers like Google and SendGrid each cost 3 lookups on their own, so stacking services quickly adds up. When the limit is exceeded, receivers return a PermError and SPF fails entirely. This generator counts lookups in real time and flags when you are approaching the limit.',
+    q: "Why does SPF have a 10-lookup limit?",
+    a: "SPF stops working once checking it takes more than 10 DNS lookups. Each service you add costs at least one, and some big providers cost several. Go over and receivers treat your SPF as broken (a “PermError”), even though it looks fine in your DNS panel. This generator counts the lookups as you build the record.",
   },
   {
-    q: 'What is BIMI and do I need it?',
-    a: 'BIMI (Brand Indicators for Message Identification) displays your logo next to messages in supporting inboxes like Gmail, Yahoo, and Apple Mail. It requires DMARC enforcement (p=quarantine or p=reject at pct=100) and typically a Verified Mark Certificate for Gmail coverage. BIMI is optional but useful for brand-led senders; skip it if you are still ramping DMARC.',
+    q: "What is BIMI and do I need it?",
+    a: "BIMI shows your logo next to your emails in Gmail, Yahoo and Apple Mail. It only works once DMARC is set to quarantine or reject, and Gmail also needs a paid mark certificate. It’s optional: set up the other three first.",
   },
   {
-    q: 'What is MTA-STS and who should enable it?',
-    a: 'MTA-STS (RFC 8461) tells other mail servers to require TLS when delivering mail to you, preventing downgrade attacks. Enabling it requires hosting a small policy file at a dedicated mta-sts subdomain with a valid HTTPS certificate. Enterprises, finance, and healthcare senders benefit most. Start in "testing" mode, review TLS reports for at least a week, then move to "enforce".',
+    q: "What is MTA-STS and who needs it?",
+    a: "MTA-STS tells other mail servers to always encrypt the email they deliver to you, so it can’t be read on the way. It needs a small file hosted on a subdomain of yours. It matters most for businesses that handle sensitive information. Start in testing mode for a week, then switch it on.",
   },
   {
-    q: 'Will this fix my emails going to spam?',
-    a: 'Proper DNS authentication is the foundation of email deliverability. Without SPF, DKIM, and DMARC, most providers will flag your emails. However, deliverability also depends on content quality, sender reputation, and list hygiene. Use the Trovarcis Reach Email Scorer to check your content.',
+    q: "Will this stop my emails going to spam?",
+    a: "It fixes the most common cause. Without SPF, DKIM and DMARC, most providers treat your email with suspicion. The rest depends on the list you send to and the email itself: check the email with the Email Scorer and the list with the Email Verifier.",
   },
   {
-    q: 'What is a DKIM selector?',
-    a: 'A DKIM selector is a short label like google, s1, or mte1 that identifies which public key to use when verifying a signature. It appears in DNS as {selector}._domainkey.{yourdomain}. Different services use different selector names: Google uses google._domainkey, Microsoft 365 uses selector1._domainkey and selector2._domainkey, SendGrid uses s1._domainkey and s2._domainkey. Each service picks its own selector so multiple senders can publish keys under the same domain without conflict.',
+    q: "What is a DKIM selector?",
+    a: "A short name, like google or s1, that tells providers where to find your DKIM key. It’s part of the record’s name: selector._domainkey.yourdomain.com. Each email service uses its own, so several can sign for one domain. Your email provider tells you which one to use.",
   },
   {
-    q: 'What is the difference between SPF alignment and DKIM alignment?',
-    a: 'DMARC only passes if either SPF or DKIM aligns with the From: address. SPF alignment means the domain in the Return-Path header (which SPF checks) matches the From: domain. DKIM alignment means the d= domain in the DKIM signature matches the From: domain. Relaxed alignment (the default) allows subdomains to align with the parent; strict alignment requires an exact match. Most senders should use relaxed alignment on both.',
+    q: "What is SPF alignment and DKIM alignment?",
+    a: "DMARC only passes if the domain your email is checked against matches the domain in your From address. For SPF that’s the hidden return address; for DKIM it’s the domain in the signature. Most email services line this up for you once you add their records. “Relaxed” alignment, the default, also accepts subdomains and suits most senders.",
   },
   {
-    q: 'Should I use ~all or -all in my SPF record?',
-    a: 'Start with ~all (soft fail) during setup. Receivers accept unauthorized mail but mark it as suspicious, which prevents legitimate mail from being dropped while you find every valid sender. Move to -all (hard fail) once you have watched DMARC reports for two to four weeks and all authorized senders are listed. Never use +all (allow all) or ?all (neutral); both defeat SPF entirely.',
+    q: "Should I use ~all or -all in my SPF record?",
+    a: "Start with ~all (soft fail): mail from services you haven’t listed is accepted but treated as suspicious, so nothing real is lost while you find every service you use. Move to -all (hard fail) once your DMARC reports show nothing missing, usually after two to four weeks. Never use +all or ?all, which switch SPF’s protection off.",
   },
   {
-    q: 'How do I combine multiple SPF includes without hitting the 10-lookup limit?',
-    a: 'SPF caps DNS lookups at 10 per RFC 7208. Each include, a, mx, and redirect mechanism counts. Big providers like Google (3 lookups) and SendGrid (3 lookups) burn through the limit fast. Options: (1) drop unused providers, (2) use SPF flattening services like SPF Manager or EasyDMARC that replace includes with resolved IP ranges (but you must re-flatten when providers change IPs), (3) split traffic across subdomains so each stays under 10, or (4) contact senders that offer IP-list alternatives to their include:. This generator counts your lookups in real time and flags when you cross 8.',
+    q: "How do I stay under the 10-lookup limit with many services?",
+    a: "First remove services you no longer use. If you still need too many, split your sending across subdomains, such as news.yourdomain.com for newsletters, each with its own SPF record. “SPF flattening” replaces services with their addresses, but has to be redone whenever a provider changes them. The generator warns you as you get close to 10.",
   },
 ];
 

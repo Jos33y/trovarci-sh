@@ -49,44 +49,44 @@ const EXAMPLE = {
 
 const FAQ_ITEMS = [
   {
-    q: 'What does the Domain Health Checker test?',
-    a: 'It checks five categories: email authentication (SPF, DKIM, DMARC, BIMI), mail server connectivity and reverse DNS, domain reputation on 6 blocklists, web security (SSL/TLS, HTTPS, security headers), and DNS configuration (nameservers, SOA, DNSSEC, CAA). Each check gets a pass, warning, or critical status with a plain-language explanation.',
+    q: "What does the domain checker test?",
+    a: "Whether mail providers can trust email from your domain. It checks the records that prove your email really comes from you (SPF, DKIM and DMARC), your mail servers, whether your domain or mail server is on any of 6 blocklists, your website’s security certificate, and your DNS setup. Each check gets a pass, a warning or a problem, with what to do about it.",
   },
   {
-    q: 'Is my domain information stored or shared?',
-    a: 'No. Domain checks are processed in real-time and not stored on our servers. We query public DNS records and publicly accessible services. No data is retained after your session ends.',
+    q: "Do you keep the domains I check?",
+    a: "No. The check reads public records about your domain, shows you the result, and keeps neither the domain nor the result.",
   },
   {
-    q: 'Why is my domain showing "Action Needed"?',
-    a: 'Action Needed means at least one critical issue was found. Common causes include a missing DMARC record, an IP address listed on a major blacklist like Spamhaus, or an expired SSL certificate. Expand the flagged category to see the specific issue and fix instructions.',
+    q: "Why does my domain say “Action Needed”?",
+    a: "At least one check found a problem that can send your email to spam or get it refused. The usual ones are a missing DMARC record, a listing on a major blocklist such as Spamhaus, or an expired security certificate. Open the category marked Action Needed to see the problem and the fix.",
   },
   {
-    q: 'What is the difference between SPF, DKIM, and DMARC?',
-    a: 'SPF specifies which servers can send email for your domain. DKIM adds a cryptographic signature to verify emails are unaltered. DMARC ties them together and tells receiving servers what to do when authentication fails. All three are required by Gmail, Yahoo, and Microsoft for reliable delivery.',
+    q: "What is the difference between SPF, DKIM and DMARC?",
+    a: "SPF lists which services may send email for your domain. DKIM signs each email so providers can check it really came from you and wasn’t changed. DMARC tells providers what to do with email that fails those checks, and sends you reports. Gmail, Yahoo and Microsoft require all three from anyone sending in bulk.",
   },
   {
-    q: 'How do I fix issues found by the checker?',
-    a: "Each issue includes a plain-language explanation and a fix link. For authentication issues (SPF, DKIM, DMARC), the fix links directly to our DNS Record Generator with your domain pre-loaded. For blacklist issues, we link to the blacklist's removal request page.",
+    q: "How do I fix what the checker finds?",
+    a: "Each problem comes with the fix in plain words. For SPF, DKIM and DMARC, the fix button opens the DNS Generator, which writes the record for your email provider. For a blocklist listing, it links to that list’s own page, where you can see why you were listed and ask to be removed.",
   },
   {
-    q: 'Why does the blacklist check show "Healthy" when my emails still go to spam?',
-    a: 'Blacklists are one factor in deliverability. Your domain can be clean on all blacklists but still have spam issues due to email content, engagement rates, or sending patterns. Use the Email Scorer to check your email content, and the Email Verifier to ensure your contact list is clean.',
+    q: "Why does it say “Healthy” when my emails still go to spam?",
+    a: "Your domain is only one part. A healthy domain can still land in spam because of the list you send to, the email itself, or how much you send at once. Score the email with the Email Scorer and clean the list with the Email Verifier.",
   },
   {
-    q: 'How often should I check my domain health?',
-    a: 'Check after any DNS changes, after setting up a new email provider, and periodically every 1-2 months. SSL certificates expire, blacklist statuses change, and DNS records can be accidentally modified. Regular checks catch problems before they affect your email delivery.',
+    q: "How often should I check my domain?",
+    a: "After any change to your DNS or your email provider, and every month or two otherwise. Certificates expire, blocklist listings come and go, and records get changed by accident. A quick check catches it before your email does.",
   },
   {
-    q: 'What blacklists does the checker query?',
-    a: 'Six: Spamhaus ZEN, SpamCop, Barracuda and PSBL for your mail server\'s IP address, plus Spamhaus DBL and SURBL for your domain. If you are listed, the result links to that list\'s own removal page.',
+    q: "Which blocklists does the checker use?",
+    a: "Six: Spamhaus ZEN, SpamCop, Barracuda and PSBL for your mail server, plus Spamhaus DBL and SURBL for your domain. If you are listed, the result links to that list’s own removal page.",
   },
   {
-    q: 'What is DNSSEC and do I need it?',
-    a: 'DNSSEC (RFC 4033) adds cryptographic signatures to DNS records so recipients can verify the answer came from the authoritative nameserver and was not tampered with in transit. It defends against cache poisoning and DNS hijacking. Enable it if you handle payments, healthcare data, or run a high-value domain. Most consumer sites do not require it, but the check flags whether your zone is signed and whether the chain of trust validates.',
+    q: "What is DNSSEC and do I need it?",
+    a: "DNSSEC signs your domain’s DNS records so nobody can fake them along the way, which protects against attacks that redirect your domain. It’s worth turning on, often a single switch at your domain registrar, but a missing DNSSEC won’t send your email to spam.",
   },
   {
-    q: 'What is a soft SPF fail vs hard fail?',
-    a: 'The final mechanism in your SPF record decides what receivers do with unauthorized senders. ~all (soft fail) means unauthorized mail is accepted but marked, useful during setup. -all (hard fail) means unauthorized mail is rejected, the enforcement target after monitoring. ?all (neutral) provides no protection. +all allows any sender and should never be used.',
+    q: "What is a soft SPF fail vs a hard fail?",
+    a: "Your SPF record ends with a rule for senders it doesn’t list. ~all (soft fail) means “accept, but treat as suspicious”, the right choice while you set up. -all (hard fail) means “reject”, for once you’re sure every service you use is listed. Never end with +all, which lets anyone send as you, or ?all, which protects nothing.",
   },
 ];
 

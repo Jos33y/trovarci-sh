@@ -68,36 +68,36 @@ const EXAMPLE = {
 
 const FAQ_ITEMS = [
   {
-    q: 'How does phone number verification work?',
-    a: 'Two levels. The free format check confirms the number is valid for its country and estimates the line type. The carrier lookup (2 credits) asks the phone network for the current carrier, the confirmed line type and whether the number can receive SMS.',
+    q: "How does phone number verification work?",
+    a: "Two levels. The free format check confirms the number is valid for its country and estimates the line type. The carrier lookup (2 credits, 2¢) asks the phone network for the current carrier, the confirmed line type and whether the number can receive texts.",
   },
   {
-    q: 'What is the difference between format check and carrier lookup?',
-    a: 'Format check validates whether the number matches the expected pattern for its country and gives you an estimated line type. It is free and instant. Carrier lookup contacts the actual phone network to confirm the current carrier, verified line type (mobile vs landline vs VoIP), and whether the number can receive SMS.',
+    q: "What is the difference between the format check and the carrier lookup?",
+    a: "The format check tells you whether the number matches its country’s pattern and gives an estimated line type. It’s free and instant. The carrier lookup asks the actual phone network, so it confirms the carrier, the real line type (mobile, landline or internet number) and whether the number can receive texts.",
   },
   {
-    q: 'Can I verify phone numbers for free?',
-    a: 'Yes. The format check is always free for single numbers, with the country, an estimated line type and the international format. The carrier lookup costs 2 credits per number, and new accounts get 10 free credits.',
+    q: "Can I check phone numbers for free?",
+    a: "Yes. The format check is always free for single numbers, with the country, an estimated line type and the international format. The carrier lookup costs 2 credits per number, and new accounts get 10 free credits.",
   },
   {
-    q: 'How do I verify international phone numbers?',
-    a: 'Select the country from the dropdown or include the country code (like +44 for the UK or +49 for Germany). Our tool handles any format: with or without the plus sign, with or without dashes, parentheses, or spaces. Everything gets normalized to E.164.',
+    q: "How do I check international phone numbers?",
+    a: "Pick the country from the list, or include the country code (like +44 for the UK or +49 for Germany). Write the number however you like, with or without the plus sign, dashes, brackets or spaces. Every number comes back in international format.",
   },
   {
-    q: 'What is E.164 format?',
-    a: 'E.164 is the international standard for phone number formatting. It starts with a plus sign, followed by the country code and the national number with no spaces or dashes. For example, +14155550123 for a US number or +442071234567 for a UK number. Most SMS APIs and phone systems expect numbers in this format.',
+    q: "What is E.164 format?",
+    a: "The international way of writing a phone number: a plus sign, the country code and the number, with no spaces or dashes. For example, +14155550123 for a US number or +442079460123 for a UK number. Most SMS services expect numbers in this format.",
   },
   {
-    q: 'Can landlines receive SMS?',
-    a: 'In most countries, landlines cannot receive SMS messages. Sending SMS to a landline silently fails on most carriers, meaning your message appears sent but is never delivered. Our carrier lookup flags landlines so you can remove them from SMS campaigns.',
+    q: "Can landlines receive SMS?",
+    a: "In most countries, no. A text sent to a landline usually shows as sent but never arrives, and you still pay for it. The carrier lookup marks landlines so you can move them off your SMS list.",
   },
   {
-    q: 'How many credits does phone number verification cost?',
-    a: 'The format check is always free. The carrier lookup costs 2 credits per number. Credits are a flat $0.010 each, and the smallest pack is $5 for 500 credits, which covers 250 carrier lookups. If a lookup fails, its credits go back to your balance automatically.',
+    q: "How much does the carrier lookup cost?",
+    a: "2 credits (2¢) per number. The format check is always free. The smallest pack is $5 for 500 credits, which covers 250 lookups. If a lookup fails, its credits go back to your balance automatically.",
   },
   {
-    q: 'Is my phone number data stored?',
-    a: 'Single checks are not saved. Bulk lists and their results are deleted 48 hours after the job is created.',
+    q: "Do you store the numbers I check?",
+    a: "Single checks are not saved. Lists and their results are deleted 48 hours after the list is uploaded.",
   },
 ];
 

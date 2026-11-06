@@ -115,16 +115,46 @@ const EXAMPLE = {
 };
 
 const FAQ_ITEMS = [
-  { q: 'How do I test my SMTP connection?', a: 'Enter your SMTP host, port, username, and password above. The tester connects to your server and walks through every step of the SMTP handshake: TCP connection, server greeting, EHLO, TLS upgrade, authentication, sender verification, and recipient acceptance. You see the actual protocol exchange with plain-language explanations at each step.' },
-  { q: 'What is SMTP port 587 vs 465 vs 25?', a: 'Port 587 is the standard submission port using STARTTLS (starts plain, upgrades to encrypted). Port 465 uses implicit SSL/TLS (encrypted from the start). Port 25 is the original SMTP relay port, often blocked by ISPs and cloud providers. For most users, port 587 with STARTTLS is the right choice.' },
-  { q: 'Why does my SMTP authentication fail?', a: 'The most common reasons: you are using your regular password instead of an App Password (required by Gmail, Microsoft, and most providers with 2FA enabled), SMTP AUTH is disabled in your provider settings (common with Microsoft 365), or the username format is wrong (some providers want the full email, others want just the username).' },
-  { q: 'What is STARTTLS?', a: 'STARTTLS is a command that upgrades a plain-text SMTP connection to an encrypted TLS connection. The connection starts unencrypted on port 587, then both sides negotiate encryption before any sensitive data (like your password) is sent. It is different from implicit TLS on port 465, where the entire connection is encrypted from the start.' },
-  { q: 'Is it safe to enter SMTP credentials in an online tool?', a: 'Our SMTP tester sends your credentials over HTTPS to our server, which connects to your SMTP server to run the test. Credentials are never stored, logged, or cached. The terminal output proves transparency by showing you exactly what commands were sent. We never send an actual email during the test.' },
-  { q: "Why can't I connect to SMTP on port 25?", a: 'Most residential ISPs, AWS, Google Cloud, Azure, and other cloud providers block outbound port 25 to prevent spam. Use port 587 (STARTTLS) or port 465 (SSL/TLS) instead. These ports are designed for authenticated email submission and are not blocked.' },
-  { q: 'What is the difference between HELO and EHLO?', a: 'HELO is the original SMTP greeting command from RFC 821. EHLO is the extended version from RFC 2821 that lets the server advertise capabilities like SIZE, STARTTLS, AUTH, and PIPELINING. Modern SMTP clients always start with EHLO and fall back to HELO only if the server does not understand it.' },
-  { q: 'What does an SMTP 550 error mean?', a: 'A 550 response means the recipient mailbox is unavailable. Common causes: the recipient address does not exist, the receiving server is blocking your sender IP or domain, or the message failed a policy check (SPF, DKIM, DMARC). The extended status code (like 5.1.1 or 5.7.1) tells you which category applies. Check the response codes reference above for details.' },
-  { q: 'Why is Gmail rejecting my SMTP server?', a: 'Gmail rejects incoming SMTP for three main reasons: your sending IP has a poor reputation, your domain fails SPF or DKIM alignment, or your sending volume looks like spam. Check your domain with Google Postmaster Tools and audit SPF, DKIM, and DMARC. New sending domains often need a warm-up period before Gmail trusts them.' },
-  { q: 'Does testing my SMTP send a real email?', a: 'No. The tester runs the SMTP handshake up to the RCPT TO command, verifies the server accepts a sender and recipient, then disconnects with QUIT. It never issues DATA, so no message body is ever transmitted. Your recipients see nothing.' },
+  {
+    q: "How do I test my SMTP settings?",
+    a: "Enter your server, port, username and password above and press Test. The tester connects to your server the way your email app would and shows each step: connecting, switching on encryption, logging in, and checking that the server accepts your sender and recipient. If a step fails, you see the server’s own reply and what it means.",
+  },
+  {
+    q: "Port 587, 465 or 25: which should I use?",
+    a: "Use 587 or 465. Port 587 starts plain and switches to encryption before anything private is sent (STARTTLS). Port 465 is encrypted from the first moment (SSL/TLS). Port 25 is for servers passing mail to each other, and most internet providers and cloud hosts block it. If you aren’t sure, try 587 first.",
+  },
+  {
+    q: "Why does my SMTP login fail?",
+    a: "Usually one of three things. Gmail and Microsoft accounts need an app password, not your normal one. Microsoft 365 can have SMTP sign-in turned off by whoever manages the account. Or the username is in the wrong form: most providers want your full email address.",
+  },
+  {
+    q: "What is STARTTLS?",
+    a: "A way of switching an email connection to encrypted after it starts. On port 587 the connection opens plain, then both sides agree to encrypt before your password is sent. Port 465 skips that step and is encrypted from the start. Both are safe.",
+  },
+  {
+    q: "Is it safe to enter my SMTP password here?",
+    a: "Your details go to our server over an encrypted connection, are used once to run the test, and are not saved. The steps you see on screen are exactly what was sent to your server. If you’d rather not use your main password, test with an app password and delete it afterwards.",
+  },
+  {
+    q: "Why can’t I connect on port 25?",
+    a: "Most home internet providers and cloud hosts, including AWS, Google Cloud and Azure, block port 25 to stop spam. Use 587 or 465 instead. They’re made for logging in and sending, and aren’t blocked.",
+  },
+  {
+    q: "What is the difference between HELO and EHLO?",
+    a: "Both are the first thing an email app says to a server, like a hello. EHLO is the newer version: the server answers with what it supports, such as encryption and login. Every modern email app uses EHLO.",
+  },
+  {
+    q: "What does SMTP error 550 mean?",
+    a: "The server refused the email for good. Usually the address doesn’t exist, the server is blocking your domain or server, or your email failed its checks (SPF, DKIM or DMARC). The code after it narrows it down: 5.1.1 means no such mailbox, 5.7.1 means refused by the server’s rules. The full list of codes is above.",
+  },
+  {
+    q: "Why is Gmail rejecting my email?",
+    a: "Usually one of three reasons: the server you send from has a poor reputation, your domain’s SPF or DKIM doesn’t match your From address, or you’re sending more than Gmail trusts from you yet. Check your domain with the Domain Checker and in Google Postmaster Tools, and grow a new domain’s sending slowly.",
+  },
+  {
+    q: "Does the test send a real email?",
+    a: "It can. To check that your server accepts your sender and recipient, the tester hands it a tiny message with the subject “SMTP connectivity test (no content)”. Many servers stop it there, but if yours accepts it, it is delivered to the test recipient, which is test@trovarci.sh unless you change it.",
+  },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.

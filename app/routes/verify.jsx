@@ -79,32 +79,36 @@ const EXAMPLE = {
 
 const FAQ_ITEMS = [
   {
-    q: 'How accurate is email verification?',
-    a: 'Most addresses get a clear answer: valid or invalid. A small share come back as unknown, usually because the mail server delays its answer or accepts every address. Those are marked so you can decide what to do with them.',
+    q: "How accurate is email verification?",
+    a: "Most addresses get a clear answer: valid or invalid. A small share come back as unknown, usually because the mail server delays its answer or won’t say whether a mailbox exists. Those are marked so you can decide what to do with them.",
   },
   {
-    q: 'What does each verdict mean?',
-    a: 'Valid: the mailbox exists and accepts mail. Invalid: the address has a syntax error, the domain has no mail server, or the server explicitly rejected the recipient. Risky: deliverable but flagged (role addresses, free providers, catch-all domains). Unknown: the server would not give a yes or no, usually because it delays answers or blocked the check for a while.',
+    q: "What does each result mean?",
+    a: "Valid: the mailbox exists and accepts email. Invalid: a typo, a domain that can’t receive email, or a mailbox that doesn’t exist. Risky: real, but flagged, such as shared inboxes (info@), throwaway inboxes, free email addresses in a business list, or servers that accept any address. Unknown: the server wouldn’t give a yes or no.",
   },
   {
-    q: 'How does pricing work?',
-    a: 'Every address costs 1 credit, single or bulk, and a credit is a flat $0.010 at any volume. If a check fails on our side, the credit goes back to your balance automatically, so you only pay for clear answers.',
+    q: "How much does it cost?",
+    a: "1 credit (1¢) per address, one at a time or in a list. 1,000 addresses cost $10 and 10,000 cost $100. New accounts get 10 free credits. If a check fails on our side, its credit comes back automatically.",
   },
   {
-    q: 'Can I cancel a bulk job mid-run?',
-    a: 'Yes. Cancel from the progress panel. Credits for the addresses not yet checked go back to your balance.',
+    q: "Will the person get an email when I check their address?",
+    a: "No. The check asks the mail server whether the mailbox exists and stops before any email is sent. It runs from our servers, so it can’t affect your own email’s reputation either.",
   },
   {
-    q: 'What happens when a server says "try again later"?',
-    a: 'We retry automatically after 5, 15 and 60 minutes. If the server still will not answer, the address is marked unknown.',
+    q: "Can I cancel a list part way through?",
+    a: "Yes. Cancel from the progress panel. Credits for the addresses not yet checked go back to your balance.",
   },
   {
-    q: 'Do you store the email lists I upload?',
-    a: 'Lists and their results are kept for 48 hours so you can download them, then deleted automatically. We never build a shared list of checked addresses.',
+    q: "What happens when a server says “try again later”?",
+    a: "In a list, we try again automatically after 5, 15 and 60 minutes. If the server still won’t answer, the address is marked unknown. For a single address, you see “try again later” and can check it again yourself.",
   },
   {
-    q: 'Why is my address marked as catch-all?',
-    a: 'Some domains accept mail for every address, real or not. We test this with a made-up address on the same domain. If the server accepts it, real and fake mailboxes there look the same, so those addresses are marked risky (catch-all).',
+    q: "Do you store the email lists I upload?",
+    a: "Lists and their results are kept for 48 hours so you can download them, then deleted automatically. We never build a shared list of checked addresses.",
+  },
+  {
+    q: "Why is an address marked as catch-all?",
+    a: "Some company mail servers accept email for every address, real or not. We test this with a made-up address at the same domain. If that is accepted too, real and fake mailboxes there look the same, so those addresses are marked risky.",
   },
 ];
 

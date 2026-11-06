@@ -61,32 +61,32 @@ const EXAMPLE = {
 
 const FAQ_ITEMS = [
   {
-    q: 'How does the email spam checker work?',
-    a: 'Paste your subject and your email. It is read the way a modern spam filter reads it: wording in context, structure, links and the details mail providers require. You get a score from 0 to 100, the problems it found, and how to fix each one.',
+    q: "How does the email spam checker work?",
+    a: "Paste your subject and your email. It is read the way a modern spam filter reads it: wording in context, layout, links and the details mail providers require. You get a score from 0 to 100, the problems it found, and how to fix each one.",
   },
   {
-    q: 'What is a good email deliverability score?',
-    a: 'A score of 90-100 means excellent inbox placement confidence. 70-89 is good with minor improvements possible. Below 70 means your email has issues that increase the risk of landing in spam. The score breaks down into five categories so you can see exactly where to improve.',
+    q: "What is a good email score?",
+    a: "90 to 100 is excellent. 70 to 89 is good, with small things to improve. Below 70, something in the email looks like spam to a filter, and the result shows what. The score is split into five parts so you can see where it lost points.",
   },
   {
-    q: 'Why do my emails go to spam even with SPF and DKIM?',
-    a: 'Authentication (SPF, DKIM, DMARC) is only half the equation. Modern spam filters also evaluate your email content, structure, link patterns, and compliance. A fully authenticated domain can still land in spam if the content looks like spam to a filter. This tool checks the content side.',
+    q: "Why do my emails go to spam even with SPF and DKIM?",
+    a: "Those records prove the email is from you. They don’t make it look wanted. Spam filters also read the wording, the layout, the links and whether there’s an unsubscribe link, so a well set-up domain can still land in spam. This checker covers that side.",
   },
   {
-    q: 'What words trigger spam filters?',
-    a: 'Modern spam filters do not use simple keyword lists. Context matters. "Free" is fine in "Free guide to email deliverability" but risky in "FREE MONEY NOW". The scorer evaluates phrases in context, not as isolated keywords.',
+    q: "What words trigger spam filters?",
+    a: "Spam filters don’t work from a simple list of banned words. Context matters: “Free” is fine in “Free guide to email setup” but risky in “FREE MONEY NOW”. The checker judges wording in context, not word by word.",
   },
   {
-    q: 'How many links should an email have?',
-    a: 'As few as the email needs. A short message with one or two links reads like a person wrote it, while a long run of links reads like a campaign. Avoid link shorteners such as bit.ly, which spam filters distrust.',
+    q: "How many links should an email have?",
+    a: "As few as the email needs. A short message with one or two links reads like a person wrote it, while a long run of links reads like a campaign. Avoid link shorteners such as bit.ly, which spam filters distrust.",
   },
   {
-    q: 'How much does it cost to score an email?',
-    a: 'One credit per scoring call. New accounts receive a welcome bonus of 10 credits, which covers ten scans. After that, credits are available in top-up packages at a flat rate of $0.010 per credit. If the scoring engine fails for any reason, your credit is refunded automatically.',
+    q: "How much does it cost to score an email?",
+    a: "1 credit (1¢) per email scored. New accounts get 10 free credits, enough for ten. If scoring fails on our side, the credit comes back automatically.",
   },
   {
-    q: 'Does the email scorer store my email content?',
-    a: 'No. Your email is scored and then discarded. We do not store or log its content.',
+    q: "Do you store my email?",
+    a: "No. Your email is scored and then discarded. We don’t store or log what you paste.",
   },
 ];
 
