@@ -82,7 +82,6 @@ const NEEDS = [
   'Windows 10 or 11, 64-bit',
   'About 120 MB to download',
   'An SMTP account: Gmail, Google Workspace, Zoho, Resend, SendGrid, Brevo, Mailgun, Postmark, Amazon SES, or your own server',
-  'Mac: not yet',
 ];
 
 function WindowsIcon() {

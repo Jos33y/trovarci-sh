@@ -22,8 +22,6 @@ readingTime: 5
 | GMass | From $29.95 a month | Gmail, in Chrome | Your Gmail account | Your Google account |
 | Mailchimp | Free up to 250 contacts, then monthly by contacts | Web | Mailchimp's servers | Mailchimp's servers |
 
-Prices as listed in November 2026.
-
 ## Why people look for an Atomic Mail Sender alternative {#why-switch}
 
 - **One license per PC.** Using it on a desktop and a laptop means two licenses: AtomPark lists two PCs at $152.84.
@@ -42,8 +40,6 @@ Trovarcis Sender is a Windows app you pay for once. It sends only through your o
 - **A clear report.** Each recipient who didn't get the email, with the reason in the mail server's own words.
 
 **Price:** {{sender_price}} once, for 3 computers. Every 1.x update is included, with a 15-day refund if it doesn't work for you.
-
-**Good to know:** it needs an SMTP account, which is the point. Windows today, with a Mac version on the way.
 
 <div class="product-card">
 <img src="/images/sender/sender-report-800.webp" width="800" height="589" alt="Trovarcis Sender sending a campaign across three SMTP accounts, each within its daily limit." loading="lazy">
@@ -95,7 +91,7 @@ A web platform that keeps your list and sends from its own servers.
 
 ## How to choose {#how-to-choose}
 
-- **Your own lists, more than one computer:** Trovarcis Sender, on Windows today, with a Mac version on the way.
+- **Your own lists, more than one computer:** Trovarcis Sender.
 - **Only from Gmail:** Mailmeteor for small sends, GMass for outreach.
 - **Newsletters to subscribers:** Mailchimp.
 

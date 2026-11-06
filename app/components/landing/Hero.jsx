@@ -60,7 +60,7 @@ export default function Hero() {
               decoding="async"
             />
             <figcaption className={styles.caption}>
-              Sender 1.0 sending a campaign, shown with demo data.{' '}
+              Sender 1.0, sending a campaign.{' '}
               <Link to="/sender#screens" className={styles.captionLink}>See every screen</Link>
             </figcaption>
           </figure>

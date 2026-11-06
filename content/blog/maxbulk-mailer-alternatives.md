@@ -9,7 +9,7 @@ tags: ["maxbulk mailer", "alternatives", "bulk email software", "desktop email"]
 readingTime: 5
 ---
 
-**In short:** MaxBulk Mailer costs $99.95 per user, paid once, and runs on Mac and Windows. **Trovarcis Sender** does the same job for {{sender_price}}, on 3 computers, and keeps your lists on your computer. It runs on Windows today, with a Mac version on the way. Other one-time options are **Atomic Mail Sender** and **SendBlaster**. If you'd rather send from inside Gmail, **Mailmeteor** and **GMass** charge monthly. **Mailchimp** suits newsletters.
+**In short:** MaxBulk Mailer costs $99.95 per user, paid once, and runs on Mac and Windows. **Trovarcis Sender** does the same job for {{sender_price}}, on 3 computers, and keeps your lists on your computer. Other one-time options are **Atomic Mail Sender** and **SendBlaster**. If you'd rather send from inside Gmail, **Mailmeteor** and **GMass** charge monthly. **Mailchimp** suits newsletters.
 
 ## Quick comparison {#comparison}
 
@@ -21,8 +21,6 @@ readingTime: 5
 | Mailmeteor | Free for 50 a day, then from $5.99 a month | Gmail, Outlook, Google Sheets | Your Gmail or Outlook account | Your Google account |
 | GMass | From $29.95 a month | Gmail, in Chrome | Your Gmail account | Your Google account |
 | Mailchimp | Free up to 250 contacts, then monthly by contacts | Web | Mailchimp's servers | Mailchimp's servers |
-
-Prices as listed in November 2026.
 
 ## When to look past MaxBulk Mailer {#why-switch}
 
@@ -44,8 +42,6 @@ Like MaxBulk Mailer, Trovarcis Sender is a program you pay for once that sends t
 - **Plain reports.** For every recipient who didn't get the email, the reason in the mail server's own words.
 
 **Price:** {{sender_price}} once. 3 computers, every 1.x update, and a 15-day refund if it doesn't work for you.
-
-**Good to know:** Windows today, with a Mac version on the way.
 
 <div class="product-card">
 <img src="/images/sender/sender-report-800.webp" width="800" height="589" alt="Trovarcis Sender sending a campaign across three SMTP accounts, each within its daily limit." loading="lazy">
@@ -97,7 +93,7 @@ A web platform that keeps your list and sends from its own servers, with templat
 
 ## How to choose {#how-to-choose}
 
-- **Sending your own lists through your own accounts:** Trovarcis Sender, on Windows today, with a Mac version on the way.
+- **Sending your own lists through your own accounts:** Trovarcis Sender.
 - **Only from Gmail, small volumes:** Mailmeteor. **Outreach with follow-ups:** GMass.
 - **Newsletters to subscribers:** Mailchimp.
 

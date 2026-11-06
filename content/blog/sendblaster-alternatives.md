@@ -22,8 +22,6 @@ readingTime: 5
 | GMass | From $29.95 a month | Gmail, in Chrome | Your Gmail account | Your Google account |
 | Mailchimp | Free up to 250 contacts, then monthly by contacts | Web | Mailchimp's servers | Mailchimp's servers |
 
-Prices as listed in November 2026.
-
 ## Why people look for a SendBlaster alternative {#why-switch}
 
 - **No updates since 2020.** Version 4.4.2 came out in April 2020. Mail providers have tightened their rules a lot since then.
@@ -42,8 +40,6 @@ Trovarcis Sender is a Windows app you pay for once. It sends through your own SM
 - **A report in the server's own words** for every recipient who didn't get the email.
 
 **Price:** {{sender_price}} once. Use it on 3 computers, with every 1.x update included, and a 15-day refund if it doesn't work for you.
-
-**Good to know:** Windows today, with a Mac version on the way. It doesn't track opens, by design.
 
 <div class="product-card">
 <img src="/images/sender/sender-report-800.webp" width="800" height="589" alt="Trovarcis Sender sending a campaign across three SMTP accounts, each within its daily limit." loading="lazy">
@@ -95,7 +91,7 @@ A web platform with templates, automations and hosted sign-up forms. Your list l
 
 ## How to choose {#how-to-choose}
 
-- **You want what SendBlaster does, but current:** Trovarcis Sender, on Windows today, with a Mac version on the way.
+- **You want what SendBlaster does, but current:** Trovarcis Sender.
 - **You only ever send from one Gmail account, a few hundred a day:** Mailmeteor.
 - **You run cold outreach with follow-ups:** GMass.
 - **You send designed newsletters to subscribers:** Mailchimp.

@@ -41,7 +41,7 @@ function buildQuestions(priceLabel) {
     },
     {
       q: 'What payment methods do you accept?',
-      a: 'Crypto through Cryptomus: BTC, ETH, USDT, USDC, LTC and more. Card payments are coming.',
+      a: 'Crypto through Cryptomus: BTC, ETH, USDT, USDC, LTC and more.',
     },
     {
       q: "What's your refund policy?",
