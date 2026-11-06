@@ -11,7 +11,7 @@ import { currentSenderPrice, SENDER_TEST_CENTS } from '~/utils/senderConfig.serv
 import { getLatestRelease } from '~/lib/updateFeed.server';
 import { senderCheckoutAction, gatewayAvailable } from '~/actions/senderCheckout.server';
 import styles from '~/styles/modules/routes/sender.module.css';
-import { STORAGE_LINE, senderPriceNote } from '~/utils/senderCopy';
+import { STORAGE_LINE } from '~/utils/senderCopy';
 
 
 export const meta = ({ loaderData, data: legacy }) => {
@@ -114,7 +114,7 @@ function BuyPanel({ signedIn, price, testCents, gateways }) {
         <span className={styles.price}>{usd(price.cents)}</span>
       </div>
       <p className={styles.priceNote}>
-        {senderPriceNote(price) || 'One payment.'}{' '}
+        One payment.{' '}
         Lifetime license, 3 computers, every 1.x update. US dollars.
       </p>
       <h2 id="buy-title" className={styles.srOnly}>Buy Trovarcis Sender</h2>

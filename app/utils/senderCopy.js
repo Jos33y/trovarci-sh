@@ -14,16 +14,3 @@ export function formatSenderPrice(cents) {
     minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
   }).format(cents / 100);
 }
-
-const longDate = (iso) =>
-  new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
-
-const dayAfter = (isoDate) => new Date(Date.parse(`${isoDate}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-
-// The launch note for a currentSenderPrice() result, or null once the list price applies.
-export function senderPriceNote(price) {
-  if (price.key !== 'launch') return null;
-  return price.launchEndsAt
-    ? `Launch price until ${longDate(price.launchEndsAt)}. ${formatSenderPrice(price.listCents)} from ${longDate(dayAfter(price.launchEndsAt))}.`
-    : `Launch price. Then ${formatSenderPrice(price.listCents)}.`;
-}

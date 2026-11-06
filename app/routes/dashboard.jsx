@@ -927,9 +927,6 @@ function Pager({ current, totalPages, totalItems, pageSize, pageWindow, onPageCh
 
 function SenderPanel({ sender }) {
   const { license, price } = sender;
-  const until = price.launchEndsAt
-    ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${price.launchEndsAt}T00:00:00Z`))
-    : null;
 
   return (
     <div className={styles.desktopPanel}>
@@ -953,7 +950,7 @@ function SenderPanel({ sender }) {
         <>
           <h2 className={styles.desktopHeadline}>Send bulk email from your own computer</h2>
           <p className={styles.desktopSub}>
-            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: price.cents % 100 ? 2 : 0 }).format(price.cents / 100)} {price.key === 'launch' ? (until ? `launch price until ${until}` : 'launch price') : 'once'}.
+            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: price.cents % 100 ? 2 : 0 }).format(price.cents / 100)} once.
             Lifetime license, 3 computers.
           </p>
           <div className={styles.desktopForm}>
