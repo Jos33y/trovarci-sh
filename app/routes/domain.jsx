@@ -91,39 +91,36 @@ const FAQ_ITEMS = [
 ];
 
 const CHECKS_BY_CATEGORY = [
-  { category: 'Email Auth', check: 'SPF record present', validates: 'Domain has a valid v=spf1 TXT record' },
-  { category: 'Email Auth', check: 'SPF lookup count', validates: 'Record stays within the 10-lookup RFC 7208 cap' },
-  { category: 'Email Auth', check: 'SPF policy', validates: 'Final mechanism is ~all or -all, not +all or ?all' },
-  { category: 'Email Auth', check: 'DKIM selectors', validates: 'Public keys published at common selector paths' },
-  { category: 'Email Auth', check: 'DKIM key size', validates: 'Public key is 1024 bits or larger' },
-  { category: 'Email Auth', check: 'DMARC record present', validates: 'Domain has a valid _dmarc TXT record' },
-  { category: 'Email Auth', check: 'DMARC policy', validates: 'Policy is p=quarantine or p=reject' },
-  { category: 'Email Auth', check: 'DMARC reporting', validates: 'rua= aggregate report address is set' },
-  { category: 'Email Auth', check: 'BIMI', validates: 'Optional _bimi TXT record with valid logo URL' },
-  { category: 'Mail Server', check: 'MX records present', validates: 'Domain publishes at least one MX record' },
-  { category: 'Mail Server', check: 'MX not CNAME', validates: 'MX target is a hostname, not a CNAME chain' },
-  { category: 'Mail Server', check: 'SMTP reachable', validates: 'Primary MX responds on port 25 within timeout' },
-  { category: 'Mail Server', check: 'STARTTLS supported', validates: 'Server advertises STARTTLS and completes TLS handshake' },
-  { category: 'Mail Server', check: 'Reverse DNS', validates: 'PTR record forward-confirms the hostname (FCrDNS)' },
-  { category: 'Reputation', check: 'IP blacklists', validates: 'Sending IPs checked against public DNSBLs' },
-  { category: 'Reputation', check: 'Domain blacklists', validates: 'Domain checked against Spamhaus DBL and SURBL' },
-  { category: 'Security', check: 'SSL certificate', validates: 'Certificate chain complete and not expired' },
-  { category: 'Security', check: 'HTTPS redirect', validates: 'HTTP requests redirect to HTTPS' },
-  { category: 'Security', check: 'HSTS header', validates: 'Strict-Transport-Security header is present' },
-  { category: 'Security', check: 'CAA records', validates: 'CAA restricts who can issue certificates' },
-  { category: 'DNS Config', check: 'Nameserver redundancy', validates: 'At least two authoritative nameservers' },
-  { category: 'DNS Config', check: 'Nameserver diversity', validates: 'Nameservers span multiple network prefixes' },
-  { category: 'DNS Config', check: 'SOA record', validates: 'SOA present with sensible refresh, retry, expire' },
-  { category: 'DNS Config', check: 'DNSSEC', validates: 'DS record present and chain of trust validates' },
+  { category: "Proof it’s you", check: "SPF record", validates: "Your domain lists the services allowed to send its email." },
+  { category: "Proof it’s you", check: "SPF lookups", validates: "The record stays under 10 lookups, past which it stops working." },
+  { category: "Proof it’s you", check: "SPF ending", validates: "The record ends with ~all or -all, not +all (anyone may send) or nothing." },
+  { category: "Proof it’s you", check: "DKIM", validates: "Your emails are signed. We look for the key under the names common providers use." },
+  { category: "Proof it’s you", check: "DMARC record", validates: "Your domain tells providers what to do with email that fails these checks." },
+  { category: "Proof it’s you", check: "DMARC policy", validates: "Fakes go to spam or are refused (quarantine or reject), not just watched." },
+  { category: "Proof it’s you", check: "BIMI (optional)", validates: "Your logo can show next to your emails in some inboxes." },
+  { category: "Mail server", check: "Mail servers (MX)", validates: "Email sent to your domain has somewhere to arrive." },
+  { category: "Mail server", check: "Reachable", validates: "Your main mail server answers." },
+  { category: "Mail server", check: "Encryption", validates: "Email sent to your server can be encrypted on the way (STARTTLS)." },
+  { category: "Mail server", check: "Server name", validates: "Your mail server’s address has a name that points back to it (reverse DNS)." },
+  { category: "Blocklists", check: "Mail server blocklists", validates: "Your mail server isn’t on Spamhaus ZEN, SpamCop, Barracuda or PSBL." },
+  { category: "Blocklists", check: "Domain blocklists", validates: "Your domain isn’t on Spamhaus DBL or SURBL." },
+  { category: "Website", check: "Certificate", validates: "Your website has a valid certificate that hasn’t expired." },
+  { category: "Website", check: "Secure redirect", validates: "Visitors who type http:// are sent to the secure https:// version." },
+  { category: "Website", check: "Security settings", validates: "Your website sends the settings that protect visitors, such as HSTS." },
+  { category: "Website", check: "Homepage", validates: "Your homepage loads without errors." },
+  { category: "DNS setup", check: "Nameservers", validates: "At least two, on different networks, so one outage doesn’t take you offline." },
+  { category: "DNS setup", check: "Zone settings (SOA)", validates: "Your DNS zone is set up with sensible timings." },
+  { category: "DNS setup", check: "DNSSEC (optional)", validates: "Your DNS records are signed so they can’t be faked." },
+  { category: "DNS setup", check: "Certificate rules (optional)", validates: "Only the certificate companies you choose can issue certificates for your domain (CAA)." },
 ];
 
 const BLACKLISTS = [
-  { name: 'Spamhaus ZEN', zone: 'zen.spamhaus.org', subject: 'IP', removal: 'Free, at check.spamhaus.org' },
+  { name: 'Spamhaus ZEN', zone: 'zen.spamhaus.org', subject: 'Mail server', removal: 'Free, at check.spamhaus.org' },
   { name: 'Spamhaus DBL', zone: 'dbl.spamhaus.org', subject: 'Domain', removal: 'Free, at check.spamhaus.org' },
-  { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'IP', removal: 'On the list\'s own site' },
-  { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'IP', removal: 'On the list\'s own site' },
-  { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'IP', removal: 'On the list\'s own site' },
-  { name: 'SURBL', zone: 'multi.surbl.org', subject: 'URI', removal: 'On the list\'s own site' },
+  { name: 'SpamCop', zone: 'bl.spamcop.net', subject: 'Mail server', removal: 'On the list\'s own site' },
+  { name: 'Barracuda BRBL', zone: 'b.barracudacentral.org', subject: 'Mail server', removal: 'On the list\'s own site' },
+  { name: 'PSBL', zone: 'psbl.surriel.com', subject: 'Mail server', removal: 'On the list\'s own site' },
+  { name: 'SURBL', zone: 'multi.surbl.org', subject: 'Domain', removal: 'On the list\'s own site' },
 ];
 
 // Inline section label (mobile + tablet). Hidden on desktop where strip takes over.
@@ -262,7 +259,7 @@ export default function DomainPage() {
               <div className={styles.refBlockHead}>
                 <h3 className={styles.refBlockTitle}>Every check, by category</h3>
                 <p className={styles.refBlockDesc}>
-                  Every check ships with a plain-language result: pass, warning, or critical, plus a fix path.
+                  Every check gets a pass, a warning or a problem, and the fix in plain words.
                 </p>
               </div>
               <div className={styles.refTableWrap}>
@@ -271,7 +268,7 @@ export default function DomainPage() {
                     <tr>
                       <th className={styles.refColCategory}>Category</th>
                       <th className={styles.refColCheck}>Check</th>
-                      <th>What it validates</th>
+                      <th>What it means when it passes</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -289,7 +286,7 @@ export default function DomainPage() {
 
             <div id="blacklists" className={styles.refBlock}>
               <div className={styles.refBlockHead}>
-                <h3 className={styles.refBlockTitle}>Blacklists we query</h3>
+                <h3 className={styles.refBlockTitle}>The blocklists we check</h3>
                 <p className={styles.refBlockDesc}>
                   The public blocklists mail providers use most. If you are listed, your result links to that list's removal page.
                 </p>
@@ -298,10 +295,10 @@ export default function DomainPage() {
                 <table className={styles.refTable}>
                   <thead>
                     <tr>
-                      <th className={styles.refColName}>Blacklist</th>
-                      <th className={styles.refColZone}>Zone</th>
-                      <th className={styles.refColSubject}>Subject</th>
-                      <th>Removal path</th>
+                      <th className={styles.refColName}>Blocklist</th>
+                      <th className={styles.refColZone}>Address</th>
+                      <th className={styles.refColSubject}>Lists your</th>
+                      <th>Getting removed</th>
                     </tr>
                   </thead>
                   <tbody>

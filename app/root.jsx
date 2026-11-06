@@ -164,6 +164,7 @@ export function ErrorBoundary({ error }) {
         padding: "24px",
       }}
     >
+      <title>{`${message} | Trovarcis`}</title>
       <div style={{ textAlign: "center", maxWidth: 480 }}>
         <p
           style={{
@@ -232,8 +233,9 @@ export function ErrorBoundary({ error }) {
               Try these instead
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px 24px" }}>
-              <a href="/score" style={linkStyle}>Email Scorer</a>
+              <a href="/sender" style={linkStyle}>Trovarcis Sender</a>
               <a href="/domain" style={linkStyle}>Domain Checker</a>
+              <a href="/score" style={linkStyle}>Email Scorer</a>
               <a href="/verify" style={linkStyle}>Email Verifier</a>
               <a href="/records" style={linkStyle}>DNS Generator</a>
               <a href="/smtp-test" style={linkStyle}>SMTP Tester</a>

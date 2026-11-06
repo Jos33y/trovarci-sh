@@ -21,7 +21,7 @@ import { sendPasswordChangedEmail } from '~/utils/email.server';
 import styles from '~/styles/modules/routes/signup.module.css';
 
 export const meta = () => [
-  { title: 'Reset Password | Trovarcis Reach' },
+  { title: 'Reset password | Trovarcis' },
   { name: 'robots', content: 'noindex' },
 ];
 
@@ -56,7 +56,7 @@ export async function action({ request }) {
   const errors = {};
   if (!passwordResult.ok) errors.password = passwordResult.error;
   if (passwordResult.ok && confirm !== passwordResult.value) {
-    errors.confirmPassword = 'Passwords do not match';
+    errors.confirmPassword = 'The passwords don\u2019t match';
   }
   if (Object.keys(errors).length > 0) {
     return data({ errors }, { status: 400 });

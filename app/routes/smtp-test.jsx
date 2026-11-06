@@ -26,27 +26,27 @@ const SECTIONS = [
 const PORTS = [
   {
     num: '25',
-    purpose: 'Server-to-server relay',
-    encryption: 'Optional STARTTLS',
-    use: 'Blocked by most residential ISPs and cloud providers. Only mail servers use this in practice.',
+    purpose: 'Servers passing mail to each other',
+    encryption: 'STARTTLS if offered',
+    use: 'Blocked by most home internet providers and cloud hosts. Not for sending from an app.',
   },
   {
     num: '587',
-    purpose: 'Client mail submission',
+    purpose: 'Sending from an app',
     encryption: 'STARTTLS',
-    use: 'The standard modern port for sending email from a client to your outbound server.',
+    use: 'The usual port for sending from an email app or sending software. Try this first.',
   },
   {
     num: '465',
-    purpose: 'Client submission (legacy)',
-    encryption: 'Implicit TLS',
-    use: 'Older clients that require encryption from the start. Still widely supported.',
+    purpose: 'Sending from an app',
+    encryption: 'SSL/TLS from the start',
+    use: 'Encrypted from the first moment. Gmail, Zoho and most hosts support it.',
   },
   {
     num: '2525',
-    purpose: 'Alternative submission',
+    purpose: 'Backup for sending',
     encryption: 'STARTTLS',
-    use: 'Common fallback when 587 is blocked. Not an official standard but widely accepted.',
+    use: 'Some services offer it for when 587 is blocked. Use it only if your provider lists it.',
   },
 ];
 
@@ -82,13 +82,13 @@ const RESPONSE_CODES = [
 ];
 
 const COMMON_ISSUES = [
-  { code: 'Connection timeout', title: 'Port blocked by ISP', fix: 'Port 25 is blocked by most residential ISPs and cloud providers. Switch to port 587 (STARTTLS) or 465 (SSL/TLS).' },
-  { code: '535 5.7.8', title: 'Gmail: wrong password type', fix: 'Gmail requires an App Password when 2FA is enabled. Generate one at myaccount.google.com under Security.' },
-  { code: '535 5.7.139', title: 'Microsoft 365: SMTP AUTH disabled', fix: 'SMTP AUTH is disabled by default in Exchange. Enable it in the admin center or use an App Password.' },
-  { code: 'SSL handshake failed', title: 'TLS mismatch', fix: 'Try a different port and security combo. Port 465 uses implicit TLS. Port 587 uses STARTTLS. Mixing them causes failures.' },
-  { code: '421 4.7.0', title: 'Rate limited', fix: 'Too many connection attempts in a short time. Wait 60 seconds and try again.' },
-  { code: '550 5.7.1', title: 'Blocked by policy', fix: 'Recipient server rejected the message. Check SPF, DKIM, and DMARC alignment on the sender domain, and review sender IP reputation.' },
-  { code: 'Certificate error', title: 'TLS certificate expired or invalid', fix: 'Renew the server certificate. Self-signed certificates trigger this on clients that verify the chain. Use a certificate from a trusted authority.' },
+  { code: "Connection timeout", title: "Port blocked on the way", fix: "Your internet provider, network or host blocks the port, often 25. Switch to 587 or 465." },
+  { code: "535 5.7.8", title: "Gmail: normal password used", fix: "Gmail needs an app password. Turn on 2-Step Verification, then create one at myaccount.google.com/apppasswords." },
+  { code: "535 5.7.139", title: "Microsoft 365: SMTP sign-in turned off", fix: "Microsoft 365 turns SMTP sign-in off by default. Whoever manages the account can turn it on in the Microsoft 365 admin center." },
+  { code: "SSL handshake failed", title: "Port and security don’t match", fix: "Port 465 uses SSL/TLS from the start; port 587 uses STARTTLS. Pick the security that matches the port." },
+  { code: "421 4.7.0", title: "Too many attempts", fix: "The server is slowing you down after many tries. Wait a minute and test again." },
+  { code: "550 5.7.1", title: "Refused by the server’s rules", fix: "The receiving server refused the email. Check your domain’s SPF, DKIM and DMARC with the Domain Checker." },
+  { code: "Certificate error", title: "Server certificate expired or invalid", fix: "The server’s security certificate is out of date or self-made. Your email host needs to renew it." },
 ];
 
 // The example on the page: Gmail settings with the normal password instead of an app password.
@@ -288,7 +288,7 @@ export default function SmtpTestPage() {
             <div ref={issuesRef} className={`${styles.issuesHead} reveal`}>
               <h2 className={styles.issuesTitle}>Common SMTP issues and fixes</h2>
               <p className={styles.issuesIntro}>
-                Most SMTP failures fall into a handful of patterns. Here are the ones we see the most.
+                Most failures come down to a few causes. Here they are, with the fix for each.
               </p>
             </div>
 
@@ -311,7 +311,7 @@ export default function SmtpTestPage() {
             <div ref={portsRef} className={`${styles.subsectionBlock} reveal`}>
               <h3 className={styles.subsectionTitle}>Common SMTP ports</h3>
               <p className={styles.subsectionIntro}>
-                Modern email clients pick between four ports depending on encryption expectations and provider policy.
+                The port decides how your app connects. For sending, use 587 or 465.
               </p>
               <div className={styles.portsList}>
                 {PORTS.map((p) => (
@@ -331,9 +331,8 @@ export default function SmtpTestPage() {
             <div ref={codesRef} className={`${styles.subsectionBlock} reveal`}>
               <h3 className={styles.subsectionTitle}>SMTP response codes reference</h3>
               <p className={styles.subsectionIntro}>
-                Every SMTP response starts with a three-digit code. The first digit says whether the command
-                succeeded, failed temporarily, or failed permanently. Extended status codes (like 5.7.1) narrow
-                down the specific policy or delivery reason.
+                Every server reply starts with a three-digit code. A 2 at the start means it worked, a 4 means
+                try again later, and a 5 means it was refused. The longer code after it, like 5.7.1, gives the reason.
               </p>
               <div className={styles.codesGroups}>
                 {RESPONSE_CODES.map((group) => (

@@ -1,9 +1,11 @@
 // /pay-with-crypto - buying Trovarcis Sender or Credits with crypto through Cryptomus.
 
-import { Link } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import { getSeo } from '~/utils/seo';
+import { currentSenderPrice } from '~/utils/senderConfig.server';
+import { formatSenderPrice } from '~/utils/senderCopy';
 import styles from '~/styles/modules/routes/payWithCrypto.module.css';
 
 const QUESTIONS = [
@@ -12,7 +14,8 @@ const QUESTIONS = [
   ['Do I need an account?', 'Not for Trovarcis Sender: your email is enough, and the key is sent there. Credits are added to your Trovarcis account, so sign up first.'],
   ['What if I send too little?', 'For Sender, your order page shows what is missing and lets you pay the rest on the same invoice. Nothing is lost.'],
   ['What if the invoice runs out?', 'A Sender invoice stays open for 12 hours. If it closes before you pay, reopen it from your order page.'],
-  ['Can I get a refund?', 'Trovarcis Sender has a 15-day refund if it does not work for you. Crypto refunds are sent back in crypto.'],
+  ['I have never paid with crypto. Can I still pay?', 'Yes. Buy USDT in an exchange or wallet app you trust, then send it from there to the address shown at checkout. Pick the same network on both sides, for example TRON (TRC-20), and send the exact amount.'],
+  ['Can I get a refund?', 'Trovarcis Sender has a 15-day refund if it does not work for you. Unused Credits bought in the last 7 days can be refunded too. Crypto refunds are sent back in crypto.'],
 ];
 
 export const meta = () => {
@@ -37,7 +40,12 @@ const STEPS = [
   ['Get your key or Credits', 'They appear as soon as the payment confirms. Sender keys also come by email.'],
 ];
 
+export function loader() {
+  return { priceLabel: formatSenderPrice(currentSenderPrice().cents) };
+}
+
 export default function PayWithCrypto() {
+  const { priceLabel } = useLoaderData();
   return (
     <div className={styles.page}>
       <Header />
@@ -54,12 +62,12 @@ export default function PayWithCrypto() {
           <div className={styles.products}>
             <section className={styles.product} aria-labelledby="p-sender">
               <h2 id="p-sender" className={styles.productName}>Trovarcis Sender</h2>
-              <p className={styles.productText}>Send bulk email from your own computer. $79 once, 3 computers, every 1.x update.</p>
+              <p className={styles.productText}>Send bulk email from your own computer. {priceLabel} once, 3 computers, every 1.x update.</p>
               <Link to="/sender" className={styles.primary}>Get Sender</Link>
             </section>
             <section className={styles.product} aria-labelledby="p-credits">
               <h2 id="p-credits" className={styles.productName}>Credits</h2>
-              <p className={styles.productText}>Pay for email verification, phone checks and Arcis scoring. From $5, no subscription.</p>
+              <p className={styles.productText}>Pay for email verification, phone number lookups and spam score checks. From $5, no subscription.</p>
               <Link to="/credits" className={styles.secondary}>Buy Credits</Link>
             </section>
           </div>

@@ -12,8 +12,8 @@ import styles from '~/styles/modules/routes/dashboard';
 import { formatInt } from '~/utils/format';
 
 export const meta = () => [
-  { title: 'Dashboard | Trovarcis Reach' },
-  { name: 'description', content: 'Manage your credits, view verification history, and access tools.' },
+  { title: 'Dashboard | Trovarcis' },
+  { name: 'description', content: 'Your credits, your checked lists and your Trovarcis Sender license.' },
   { name: 'robots', content: 'noindex' },
 ];
 
@@ -489,7 +489,7 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className={styles.statValue}>{stats.totalJobs}</div>
-              <div className={styles.statLabel}>Bulk jobs run</div>
+              <div className={styles.statLabel}>Lists checked</div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statTop}>
@@ -497,15 +497,15 @@ export default function DashboardPage() {
                 <span className={styles.statBadge} data-type="ok">Healthy</span>
               </div>
               <div className={styles.statValue}>{stats.avgRate}%</div>
-              <div className={styles.statLabel}>Avg valid rate</div>
+              <div className={styles.statLabel}>Valid, on average</div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statTop}>
                 <div className={styles.statIconWrap} data-color="neutral"><TotalIcon size={17} /></div>
-                <span className={styles.statSub}>across all jobs</span>
+                <span className={styles.statSub}>across all lists</span>
               </div>
               <div className={styles.statValue}>{formatInt(stats.totalVerified)}</div>
-              <div className={styles.statLabel}>Records verified</div>
+              <div className={styles.statLabel}>Addresses and numbers checked</div>
             </div>
           </div>
 
@@ -539,7 +539,7 @@ export default function DashboardPage() {
                 className={activeTab === 'jobs' ? styles.tabActive : styles.tab}
                 onClick={() => setActiveTab('jobs')}
               >
-                Bulk jobs<span className={styles.tabBadge}>{jobs.length}</span>
+                Checked lists<span className={styles.tabBadge}>{jobs.length}</span>
               </button>
               <button
                 role="tab"
@@ -674,12 +674,12 @@ export default function DashboardPage() {
                       <JobsIcon size={28} />
                     </div>
                     <p className={styles.emptyTitle}>
-                      {jobs.length === 0 ? 'No bulk jobs yet' : 'No jobs match your filters'}
+                      {jobs.length === 0 ? 'No lists checked yet' : 'No lists match your filters'}
                     </p>
                     <p className={styles.emptyHelper}>
                       {jobs.length === 0
-                        ? 'Upload a CSV on the Email Verifier or Number Verifier to start a bulk job.'
-                        : 'Clear filters to see all your jobs.'}
+                        ? 'Check a list with the Email Verifier or the phone number checker and it shows up here.'
+                        : 'Clear filters to see all your lists.'}
                     </p>
                     {jobs.length === 0 ? (
                       <div className={styles.emptyActions}>

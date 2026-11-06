@@ -10,8 +10,8 @@ import styles from '~/styles/modules/routes/receipt.module.css';
 
 export const meta = ({ data }) => [
   { title: data?.receipt
-      ? `Receipt ${data.receipt.shortId} | Trovarcis Reach`
-      : 'Receipt | Trovarcis Reach' },
+      ? `Receipt ${data.receipt.shortId} | Trovarcis`
+      : 'Receipt | Trovarcis' },
   { name: 'robots', content: 'noindex' },
 ];
 
@@ -170,7 +170,7 @@ export default function ReceiptPage() {
           <div className={styles.parties}>
             <div className={styles.partyBlock}>
               <div className={styles.partyLabel}>From</div>
-              <div className={styles.partyName}>Trovarcis Reach</div>
+              <div className={styles.partyName}>Trovarcis</div>
               <div className={styles.partyDetail}>support@trovarcis.com</div>
               <div className={styles.partyDetail}>trovarci.sh</div>
             </div>
@@ -281,7 +281,7 @@ export default function ReceiptPage() {
               Questions about this {isUsage ? 'statement' : 'receipt'}? Email support@trovarcis.com and include the reference number above.
             </p>
             <p className={styles.footerFine}>
-              Trovarcis Reach &middot; {formatDateIso(receipt.createdAt)}
+              Trovarcis &middot; {formatDateIso(receipt.createdAt)}
             </p>
           </div>
 

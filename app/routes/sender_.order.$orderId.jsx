@@ -12,7 +12,7 @@ import { senderOrderAction } from '~/actions/senderCheckout.server';
 import styles from '~/styles/modules/routes/senderOrder.module.css';
 
 export const meta = () => [
-  { title: 'Your Trovarcis Sender order | Trovarcis Reach' },
+  { title: 'Your Trovarcis Sender order | Trovarcis' },
   { name: 'robots', content: 'noindex, nofollow' },
 ];
 

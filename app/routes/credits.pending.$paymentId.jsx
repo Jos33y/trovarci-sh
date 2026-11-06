@@ -12,7 +12,7 @@ import styles from '~/styles/modules/routes/paymentPending.module.css';
 import { formatInt } from '~/utils/format';
 
 export const meta = () => [
-  { title: 'Payment Status | Trovarcis Reach' },
+  { title: 'Payment Status | Trovarcis' },
   { name: 'robots', content: 'noindex' },
 ];
 

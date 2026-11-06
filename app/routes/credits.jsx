@@ -35,14 +35,14 @@ export async function loader({ request }) {
 }
 
 export const meta = () => [
-  { title: 'Buy Verification Credits | Trovarcis Reach' },
+  { title: 'Credits: pay per check, from $5 | Trovarcis' },
   {
     name: 'description',
     content:
-      'Credits for email verification, phone lookups, and AI scoring. Flat $0.010 per credit at any volume. Start at $5 with no minimum, no subscription.',
+      'Credits pay for email verification, phone number lookups and spam score checks. 1 credit is 1 cent at any volume. From $5, no subscription.',
   },
-  { property: 'og:title', content: 'Buy Verification Credits | Trovarcis Reach' },
-  { property: 'og:description', content: 'Pay-as-you-go credits for the email deliverability toolkit. Flat $0.010 per credit. No subscription.' },
+  { property: 'og:title', content: 'Credits: pay per check, from $5 | Trovarcis' },
+  { property: 'og:description', content: 'Pay per check: 1 credit is 1 cent at any volume. From $5, no subscription.' },
   { property: 'og:url', content: 'https://trovarci.sh/credits' },
   { property: 'og:type', content: 'website' },
 ];
@@ -112,20 +112,19 @@ function packFeatures(pkg) {
   return [
     `${formatInt(pkg.credits)} email verifications`,
     `or ${formatInt(Math.floor(pkg.credits / 2))} phone lookups`,
-    `or ${formatInt(pkg.credits)} AI email scores`,
-    '12-month credit expiry',
+    `or ${formatInt(pkg.credits)} spam score checks`,
+    'Use them within 12 months',
   ];
 }
 
 const CREDIT_COSTS = [
-  { action: 'Email verification (single)', amount: '1', unit: 'credit',             free: false, note: 'Syntax + domain + SMTP check' },
-  { action: 'Email verification (bulk)',   amount: '1', unit: 'credit per email',   free: false, note: 'Same rate as single. Volume pricing sits in the packs.' },
-  { action: 'Phone number lookup',         amount: '2', unit: 'credits',            free: false, note: 'Real carrier + line type' },
-  { action: 'Phone verification (bulk)',   amount: '2', unit: 'credits per number', free: false, note: 'Per number in the list' },
-  { action: 'Email Scorer (Arcis)',        amount: '1', unit: 'credit',             free: false, note: 'AI analysis per email content check' },
-  { action: 'DNS Generator',               free: true,  note: 'Client-side, no API cost' },
-  { action: 'Domain Health Checker',       free: true,  note: 'DNS lookups, no credit needed' },
-  { action: 'SMTP Tester',                 free: true,  note: 'Tests your own SMTP connection' },
+  { action: 'Email verification',          amount: '1', unit: 'credit (1\u00a2) per address', free: false, note: 'Is the address real? One at a time or a list, same price.' },
+  { action: 'Phone number lookup',         amount: '2', unit: 'credits (2\u00a2) per number', free: false, note: 'Carrier, and whether it\u2019s a mobile that can receive texts.' },
+  { action: 'Spam score check',            amount: '1', unit: 'credit (1\u00a2) per email',   free: false, note: 'A score out of 100 and what to fix.' },
+  { action: 'Phone number format check',   free: true,  note: 'Valid for its country, and in international format.' },
+  { action: 'Domain Checker',              free: true,  note: 'Why your emails go to spam, and the fix.' },
+  { action: 'SMTP Tester',                 free: true,  note: 'Whether your email account\u2019s settings work.' },
+  { action: 'DNS Generator',               free: true,  note: 'The SPF, DKIM and DMARC records for your provider.' },
 ];
 
 const FAQ_ITEMS_BASE = [
@@ -135,8 +134,8 @@ const FAQ_ITEMS_BASE = [
   },
   // Payment-method FAQ entry slotted in dynamically based on Stripe flag.
   {
-    q: 'What happens if a verification fails?',
-    a: 'Credits are only deducted on successful API calls. If a request errors out on our end, no credit is consumed.',
+    q: 'What happens if a check fails?',
+    a: 'If a check fails on our side, its credits come back to your balance automatically. You only pay for answers.',
   },
   {
     q: 'Do larger packs cost less per credit?',
@@ -148,7 +147,7 @@ const FAQ_ITEMS_BASE = [
   },
   {
     q: 'Is there a free tier?',
-    a: 'Free tools (Domain Checker, DNS Generator, SMTP Tester) require no credits. New accounts also get 10 free credits to try the paid tools.',
+    a: 'Yes. The Domain Checker, SMTP Tester, DNS Generator and phone number format check are free, with no account. New accounts also get 10 free credits to try the paid checks.',
   },
   {
     q: 'Do I need an account to see prices?',
@@ -284,8 +283,8 @@ export default function CreditsPage() {
             </div>
             <h1 className={styles.headline}>Buy credits.</h1>
             <p className={styles.sub}>
-              Credits power the paid tools: email verification, AI scoring, and phone lookups.
-              Flat $0.010 per credit at any volume. Start at $5, no minimum, no subscription.
+              Credits pay for email verification, phone number lookups and spam score checks.
+              1 credit is 1 cent at any volume. From $5, no subscription.
             </p>
           </div>
         </section>
@@ -461,7 +460,7 @@ export default function CreditsPage() {
                 disabled={isSubmitting || !selectedPackage || customNeedsCrypto}
               >
                 {isSubmitting
-                  ? 'Redirecting...'
+                  ? 'Redirecting\u2026'
                   : !user
                   ? 'Sign in to continue'
                   : paymentMethod === 'card'

@@ -19,10 +19,10 @@ import styles from '~/styles/modules/routes/signup.module.css';
 export { signupAction as action } from '~/actions/signup.server';
 
 export const meta = () => [
-  { title: 'Create Account | Trovarcis Reach' },
+  { title: 'Create a free account | Trovarcis' },
   {
     name: 'description',
-    content: 'Create your free Trovarcis Reach account to start using the email and DNS tools.',
+    content: 'Create a free Trovarcis account. 10 free credits to try the paid checks, no card needed.',
   },
   { name: 'robots', content: 'noindex' },
 ];
@@ -216,7 +216,7 @@ export default function SignupPage() {
         {step === 1 && (
           <>
             <h1 className={styles.title}>Create your account</h1>
-            <p className={styles.subtitle}>Free to start. No credit card required.</p>
+            <p className={styles.subtitle}>10 free credits to try the paid checks. No card needed.</p>
 
             <Form method="post" className={styles.form} noValidate>
               <input type="hidden" name="intent" value="create_account" />
@@ -343,7 +343,7 @@ export default function SignupPage() {
                 type="submit"
                 disabled={isCreating}
               >
-                {isCreating ? 'Creating account...' : 'Create account'}
+                {isCreating ? 'Creating account\u2026' : 'Create account'}
               </button>
             </Form>
 

@@ -8,7 +8,7 @@ import { getOptionalUser } from '~/utils/session.server';
 import styles from '~/styles/modules/routes/contact.module.css';
 
 export const meta = () => [
-  { title: 'Contact | Trovarcis Reach' },
+  { title: 'Contact | Trovarcis' },
   { name: 'description', content: 'Get in touch with the Trovarcis team. Questions, feedback, partnerships, press.' },
 ];
 
@@ -112,7 +112,7 @@ export default function ContactPage() {
                 </div>
                 <div className={styles.infoItem}>
                   <dt className={styles.infoLabel}>Response time</dt>
-                  <dd className={styles.infoValue}>Within 24 hours</dd>
+                  <dd className={styles.infoValue}>Within one business day</dd>
                 </div>
               </dl>
             </aside>

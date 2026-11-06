@@ -15,8 +15,8 @@ import styles from '~/styles/modules/routes/login.module.css';
 export { loginAction as action } from '~/actions/login.server';
 
 export const meta = () => [
-  { title: 'Sign In | Trovarcis Reach' },
-  { name: 'description', content: 'Sign in to your Trovarcis Reach account.' },
+  { title: 'Sign in | Trovarcis' },
+  { name: 'description', content: 'Sign in to your Trovarcis account.' },
   { name: 'robots', content: 'noindex' },
 ];
 

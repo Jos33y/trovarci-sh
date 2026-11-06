@@ -13,7 +13,7 @@ import { sql } from '~/utils/db.server';
 import styles from '~/styles/modules/routes/signup.module.css';
 
 export const meta = () => [
-  { title: 'Verify your email | Trovarcis Reach' },
+  { title: 'Verify your email | Trovarcis' },
   { name: 'robots', content: 'noindex, nofollow' },
 ];
 

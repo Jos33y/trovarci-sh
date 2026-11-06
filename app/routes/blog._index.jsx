@@ -12,7 +12,7 @@ import styles from '~/styles/modules/routes/blog.module.css';
 
 export const meta = () => getSeo({
   title: 'Blog',
-  description: 'Guides, tutorials, and insights on email deliverability, SMTP configuration, and bulk email best practices.',
+  description: 'Plain answers on getting email into the inbox, sending bulk email safely, fixing SPF, DKIM and DMARC, and choosing bulk email software.',
   path: '/blog',
 });
 
@@ -140,7 +140,7 @@ export default function BlogIndex() {
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.heading}>Blog</h1>
             <p className={styles.subtitle}>
-              Guides and insights on email deliverability, SMTP configuration, and sending email at scale.
+              Plain answers on getting email into the inbox, sending in bulk, and choosing the right tools.
             </p>
           </header>
 

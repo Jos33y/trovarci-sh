@@ -10,7 +10,7 @@ import styles from '~/styles/modules/routes/accountSettings.module.css';
 import { formatInt } from '~/utils/format';
 
 export const meta = () => [
-  { title: 'Account settings | Trovarcis Reach' },
+  { title: 'Account settings | Trovarcis' },
   { name: 'robots', content: 'noindex, nofollow' },
 ];
 

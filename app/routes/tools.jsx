@@ -24,8 +24,8 @@ import styles from '~/styles/modules/routes/tools.module.css';
 // /tools - tool-page chrome: cycling hero demo + horizontal sticky strip + corner brackets.
 
 export const meta = () => getSeo({
-  title: 'Free Email Tools',
-  description: 'Free email deliverability tools. Check domain health, verify emails, test SMTP, generate DNS records, score emails for spam, and validate phone numbers.',
+  title: 'Email tools to check before you send',
+  description: 'Six email tools: check your domain, write your DNS records, test your SMTP settings, verify a list, score an email for spam and check phone numbers. Three are free with no account.',
   path: '/tools',
 });
 
@@ -223,7 +223,7 @@ function VerifyDemo() {
             </div>
           </div>
         </div>
-        <div className={styles.verifyFooter}>One pass. Clean + validate + verify.</div>
+        <div className={styles.verifyFooter}>Every address sorted, with the reason.</div>
       </div>
     </div>
   );
@@ -521,11 +521,11 @@ export default function Tools() {
             <SectionLabel num="01" name="TOOLKIT" />
             <div ref={heroRef} className={`${styles.heroCard} reveal`}>
               <div className={styles.heroLeft}>
-                <h1 className={styles.title}>Email deliverability toolkit</h1>
+                <h1 className={styles.title}>Check everything before you send</h1>
                 <p className={styles.subtitle}>
                   Six tools that help you send email that actually arrives.
                 </p>
-                <p className={styles.subtitleMicro}>Free. No account needed.</p>
+                <p className={styles.subtitleMicro}>Three are free with no account. The others cost 1 or 2 cents a check.</p>
                 <div className={styles.shareBar}>
                   <button
                     onClick={handleCopy}

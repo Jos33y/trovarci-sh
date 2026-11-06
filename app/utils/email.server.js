@@ -1,6 +1,8 @@
 // Transactional email delivery via Resend. Falls back to console output when RESEND_API_KEY is unset.
 
 import { Resend } from 'resend';
+import { currentSenderPrice } from './senderConfig.server.js';
+import { formatSenderPrice } from './senderCopy.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -119,7 +121,7 @@ export async function sendSignupCollisionEmail({ to }) {
   const subject = 'Someone tried to create a Trovarcis account with your email';
 
   const text = [
-    `Someone tried to create a new Trovarcis Reach account using ${to}.`,
+    `Someone tried to create a new Trovarcis account using ${to}.`,
     'You already have an account with this email, so we did not create a new one.',
     '',
     'If this was you trying to sign in:',
@@ -144,18 +146,21 @@ export async function sendSignupCollisionEmail({ to }) {
  * and tools. Sent once per account, immediately after markEmailVerified.
  */
 export async function sendAccountCreatedEmail({ to, welcomeCredits = 10 }) {
-  const subject = 'Welcome to Trovarcis Reach';
+  const subject = 'Welcome to Trovarcis';
+  const priceLabel = formatSenderPrice(currentSenderPrice().cents);
 
   const text = [
-    'Your Trovarcis Reach account is ready.',
+    'Your Trovarcis account is ready.',
     '',
-    `We added ${welcomeCredits} free credits to your account so you can start verifying right away.`,
+    `We added ${welcomeCredits} free credits, enough to check ${welcomeCredits} email addresses or score ${welcomeCredits} emails.`,
     '',
-    'What to do next:',
-    '  Open your dashboard:   https://trovarci.sh/dashboard',
-    '  Score an email:        https://trovarci.sh/score',
-    '  Verify a phone number: https://trovarci.sh/verify-number',
-    '  Check a domain:        https://trovarci.sh/domain',
+    'Where to start:',
+    '  Check your domain (free):  https://trovarci.sh/domain',
+    '  Verify a list:             https://trovarci.sh/verify',
+    '  Score an email for spam:   https://trovarci.sh/score',
+    '',
+    'Sending to a big list? Trovarcis Sender sends from your own computer,',
+    `through your own email accounts. ${priceLabel} once: https://trovarci.sh/sender`,
     '',
     'Need help? Reply to this email and we will get back to you.',
     '',
@@ -163,7 +168,7 @@ export async function sendAccountCreatedEmail({ to, welcomeCredits = 10 }) {
     'https://trovarci.sh',
   ].join('\n');
 
-  return send({ to, subject, html: accountCreatedHtml(welcomeCredits), text });
+  return send({ to, subject, html: accountCreatedHtml(welcomeCredits, priceLabel), text });
 }
 
 // Payment receipt email (fires after credits are granted on a confirmed payment)
@@ -234,7 +239,7 @@ export async function sendPasswordChangedEmail({ to }) {
   const subject = 'Your Trovarcis password was changed';
 
   const text = [
-    'Your Trovarcis Reach password was just changed.',
+    'Your Trovarcis password was just changed.',
     '',
     'For your security, all other active sessions on your account were also',
     'signed out. You will need to sign in again on any other devices.',
@@ -388,7 +393,7 @@ function signupCollisionHtml(email) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trovarcis Reach signup attempt</title>
+<title>Trovarcis sign-up attempt</title>
 </head>
 <body style="margin:0;padding:0;background:#09090B;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#FAFAFA;-webkit-font-smoothing:antialiased;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#09090B;">
@@ -412,7 +417,7 @@ function signupCollisionHtml(email) {
         <tr>
           <td style="padding:8px 40px 0 40px;">
             <p style="margin:0;font-size:15px;line-height:1.6;color:#A1A1AA;">
-              Someone tried to create a new Trovarcis Reach account using <strong style="color:#FAFAFA;">${email}</strong>. You already have an account with this email, so we did not create a new one.
+              Someone tried to create a new Trovarcis account using <strong style="color:#FAFAFA;">${email}</strong>. You already have an account with this email, so we did not create a new one.
             </p>
           </td>
         </tr>
@@ -455,13 +460,13 @@ function signupCollisionHtml(email) {
 </html>`;
 }
 
-function accountCreatedHtml(welcomeCredits) {
+function accountCreatedHtml(welcomeCredits, priceLabel) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Welcome to Trovarcis Reach</title>
+<title>Welcome to Trovarcis</title>
 </head>
 <body style="margin:0;padding:0;background:#09090B;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#FAFAFA;-webkit-font-smoothing:antialiased;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#09090B;">
@@ -485,7 +490,7 @@ function accountCreatedHtml(welcomeCredits) {
         <tr>
           <td style="padding:8px 40px 0 40px;">
             <p style="margin:0;font-size:15px;line-height:1.6;color:#A1A1AA;">
-              Welcome to Trovarcis Reach. Your email is verified and your account is active.
+              Your email is verified and your account is active.
             </p>
           </td>
         </tr>
@@ -499,7 +504,7 @@ function accountCreatedHtml(welcomeCredits) {
                 ${welcomeCredits} free credits
               </div>
               <div style="margin-top:4px;font-size:13px;line-height:1.5;color:#52525B;">
-                Already added to your balance.
+                Already in your balance. 1 credit checks 1 address or scores 1 email.
               </div>
             </div>
           </td>
@@ -507,20 +512,30 @@ function accountCreatedHtml(welcomeCredits) {
         <tr>
           <td align="center" style="padding:24px 40px 8px 40px;">
             <a href="https://trovarci.sh/dashboard" style="display:inline-block;background:#D4A843;color:#09090B;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;text-decoration:none;padding:14px 32px;border-radius:10px;">
-              Open Dashboard
+              Open your dashboard
             </a>
           </td>
         </tr>
         <tr>
           <td style="padding:24px 40px 0 40px;">
             <p style="margin:0 0 12px 0;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0.08em;color:#52525B;text-transform:uppercase;">
-              Or try a tool
+              Where to start
             </p>
             <ul style="margin:0;padding:0 0 0 18px;font-size:14px;line-height:1.7;color:#A1A1AA;">
-              <li><a href="https://trovarci.sh/score" style="color:#D4A843;text-decoration:none;">Score an email</a></li>
-              <li><a href="https://trovarci.sh/verify-number" style="color:#D4A843;text-decoration:none;">Verify a phone number</a></li>
-              <li><a href="https://trovarci.sh/domain" style="color:#D4A843;text-decoration:none;">Check a domain</a></li>
+              <li><a href="https://trovarci.sh/domain" style="color:#D4A843;text-decoration:none;">Check your domain</a> (free)</li>
+              <li><a href="https://trovarci.sh/verify" style="color:#D4A843;text-decoration:none;">Verify a list</a></li>
+              <li><a href="https://trovarci.sh/score" style="color:#D4A843;text-decoration:none;">Score an email for spam</a></li>
             </ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 40px 0 40px;">
+            <div style="border-top:1px solid #27272A;padding-top:20px;">
+              <p style="margin:0;font-size:14px;line-height:1.6;color:#A1A1AA;">
+                <strong style="color:#FAFAFA;">Sending to a big list?</strong> Trovarcis Sender sends from your own computer, through your own email accounts. ${priceLabel} once.
+                <a href="https://trovarci.sh/sender" style="color:#D4A843;text-decoration:none;">See Sender</a>
+              </p>
+            </div>
           </td>
         </tr>
         <tr>
@@ -571,7 +586,7 @@ function passwordChangedHtml() {
         <tr>
           <td style="padding:8px 40px 0 40px;">
             <p style="margin:0;font-size:15px;line-height:1.6;color:#A1A1AA;">
-              Your Trovarcis Reach password was just changed. For your security, all other active sessions on your account were also signed out.
+              Your Trovarcis password was just changed. For your security, all other active sessions on your account were also signed out.
             </p>
           </td>
         </tr>
@@ -714,7 +729,7 @@ function paymentReceiptHtml({ shortId, receiptUrl, packageName, creditsStr, amou
         </tr>
       </table>
       <div style="margin-top:24px;font-size:12px;color:#52525B;">
-        Trovarcis Reach &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
+        Trovarcis &middot; <a href="https://trovarci.sh" style="color:#52525B;text-decoration:underline;">trovarci.sh</a>
       </div>
     </td>
   </tr>
@@ -746,6 +761,9 @@ export async function sendLicenseKeyEmail({ to, licenseKey, licenseId, orderId, 
     downloadUrl,
     `2. Open the installer. ${INSTALL_NOTE}`,
     '3. In Sender, paste the key when it asks for your license.',
+    '',
+    'Before your first campaign, check your domain with the free Domain Checker:',
+    `${base}/domain`,
     '',
     createdAccount
       ? `Your key is also saved to a Trovarcis account for this email. To sign in, set a password here: ${accountUrl}`
@@ -821,6 +839,7 @@ function licenseKeyHtml({ licenseKey, shortId, downloadUrl, orderUrl, accountUrl
         <tr>
           <td style="padding:16px 40px 0 40px;">
             <p style="margin:0;font-size:13px;line-height:1.6;color:#A1A1AA;">${INSTALL_NOTE}</p>
+            <p style="margin:12px 0 0 0;font-size:13px;line-height:1.6;color:#A1A1AA;">Before your first campaign, check your domain with the free <a href="https://trovarci.sh/domain" style="color:#FAFAFA;">Domain Checker</a>.</p>
           </td>
         </tr>
         <tr>

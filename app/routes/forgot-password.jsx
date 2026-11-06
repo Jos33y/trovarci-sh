@@ -21,8 +21,8 @@ import { getPublicUrl } from '~/utils/paymentsConfig.server';
 import styles from '~/styles/modules/routes/login.module.css';
 
 export const meta = () => [
-  { title: 'Forgot Password | Trovarcis Reach' },
-  { name: 'description', content: 'Reset your Trovarcis Reach password.' },
+  { title: 'Forgot password | Trovarcis' },
+  { name: 'description', content: 'Reset your Trovarcis password.' },
   { name: 'robots', content: 'noindex' },
 ];
 
@@ -51,7 +51,7 @@ export async function action({ request }) {
     );
     if (!rl.allowed) {
       return data(
-        { errors: { _form: 'Too many requests. Try again shortly.' } },
+        { errors: { _form: 'Too many tries. Wait a few minutes, then try again.' } },
         { status: 429 },
       );
     }

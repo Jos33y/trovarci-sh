@@ -18,7 +18,7 @@ const TERMINAL_STATES = new Set(['complete', 'partial', 'cancelled', 'failed']);
 export const meta = ({ data }) => {
   const id = data?.job?.id ? data.job.id.slice(0, 8) : 'Job';
   return [
-    { title: `Job ${id} | Trovarcis Reach` },
+    { title: `List ${id} | Trovarcis` },
     { name: 'robots', content: 'noindex, nofollow' },
   ];
 };
@@ -164,7 +164,7 @@ export default function JobDetailPage() {
   const handleCancel = async () => {
     if (cancelling) return;
     const ok = window.confirm(
-      'Cancel this job? Unprocessed credits will be refunded automatically.',
+      'Stop checking this list? Credits for anything not yet checked come back automatically.',
     );
     if (!ok) return;
 
@@ -250,7 +250,7 @@ export default function JobDetailPage() {
             <section className={styles.runningCard}>
               <div className={styles.runningHead}>
                 <div>
-                  <div className={styles.runningTitle}>Job is processing</div>
+                  <div className={styles.runningTitle}>Checking your list…</div>
                   <p className={styles.runningSub}>
                     Safe to navigate away. Progress persists on the server and you can come
                     back to this page anytime.
@@ -324,7 +324,7 @@ export default function JobDetailPage() {
             <div className={styles.failedBanner} role="alert">
               <AlertIcon size={18} />
               <div>
-                <div className={styles.failedTitle}>This job failed before completing</div>
+                <div className={styles.failedTitle}>This list stopped before it finished</div>
                 <p className={styles.failedSub}>
                   Credits charged at submission were refunded automatically. You can retry from
                   the verifier or contact support if this keeps happening.
@@ -367,7 +367,7 @@ export function ErrorBoundary() {
         <div className="container">
           <div className={styles.errorState}>
             <AlertIcon size={28} />
-            <h1 className={styles.errorTitle}>Job not found</h1>
+            <h1 className={styles.errorTitle}>List not found</h1>
             <p className={styles.errorSub}>
               The job you're looking for doesn't exist, has been deleted, or belongs to a
               different account.
