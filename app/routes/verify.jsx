@@ -65,7 +65,7 @@ const EXAMPLE = {
     { tone: 'pass', label: 'anna.lee@northwind.example', value: 'Valid', note: 'The mailbox exists. Safe to send.' },
     { tone: 'fail', label: 'j.smiht@northwind.example', value: 'Invalid', note: 'No such mailbox. Sending to it would bounce.' },
     { tone: 'warn', label: 'info@harbor.example', value: 'Risky, shared inbox', note: 'A shared inbox like info@ or sales@. It works, but no one person reads it.' },
-    { tone: 'warn', label: 'sam@lakeside.example', value: 'Risky, accepts all', note: 'This company\u2019s server accepts any address, so this one can\u2019t be confirmed.' },
+    { tone: 'warn', label: 'sam@lakeside.example', value: 'Risky, can\u2019t confirm', note: 'This company\u2019s server accepts any address, so this one can\u2019t be confirmed.' },
     { tone: 'info', label: 'mia@quietmail.example', value: 'Unknown', note: 'The server wouldn\u2019t say yes or no. Check it again later, or leave it out.' },
   ],
   cost: 'This list costs 1,000 credits ($10.00). If a check fails on our side, its credit comes back automatically.',

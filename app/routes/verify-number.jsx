@@ -47,21 +47,21 @@ const EXAMPLE = {
   stats: [
     { label: 'Mobile', value: '412', tone: 'pass' },
     { label: 'Landline', value: '51', tone: 'warn' },
-    { label: 'VoIP', value: '14', tone: 'info' },
+    { label: 'Internet', value: '14', tone: 'info' },
     { label: 'Invalid', value: '23', tone: 'fail' },
   ],
   rowsLabel: 'A few of the numbers',
   rows: [
     { tone: 'pass', label: '+44 7700 900123', value: 'Mobile \u00b7 United Kingdom', note: 'A live mobile number. It can receive texts.' },
     { tone: 'warn', label: '+1 202 555 0143', value: 'Landline \u00b7 United States', note: 'A real number, but landlines can\u2019t receive texts. Call or email instead.' },
-    { tone: 'info', label: '+1 415 555 0199', value: 'VoIP \u00b7 United States', note: 'An internet phone number. Some receive texts, some don\u2019t. Test a few first.' },
+    { tone: 'info', label: '+1 415 555 0199', value: 'Internet number \u00b7 United States', note: 'An internet phone number (VoIP). Some receive texts, some don\u2019t. Test a few first.' },
     { tone: 'fail', label: '+33 6 12 34 5', value: 'Invalid \u00b7 France', note: 'Too short to be a French number. Fix the typo or remove it.' },
   ],
   cost: 'Format check: free. Line type and carrier: 2 credits (2\u00a2) per number, so this list costs $10.00.',
   meanings: [
     { tone: 'pass', result: 'Mobile', means: 'A real number that can receive texts.', todo: 'Send.' },
     { tone: 'warn', result: 'Landline', means: 'A real number that can\u2019t receive texts.', todo: 'Move it to your call or email list.' },
-    { tone: 'info', result: 'VoIP', means: 'An internet phone number. It may or may not receive texts.', todo: 'Test with a few before a big send.' },
+    { tone: 'info', result: 'Internet number (VoIP)', means: 'A number run over the internet, like Skype or Google Voice. It may or may not receive texts.', todo: 'Test with a few before a big send.' },
     { tone: 'fail', result: 'Invalid', means: 'Can\u2019t exist in that country.', todo: 'Fix it if the typo is obvious, otherwise remove it.' },
   ],
 };

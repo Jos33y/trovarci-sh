@@ -44,7 +44,7 @@ const EXAMPLE = {
   },
   rowsLabel: 'What it found',
   rows: [
-    { tone: 'fail', label: 'No unsubscribe link', value: 'Rules', note: 'Gmail and Yahoo expect one in bulk email. Add a link that unsubscribes in one click.' },
+    { tone: 'fail', label: 'No unsubscribe link', value: 'Unsubscribe', note: 'Gmail and Yahoo expect one in bulk email. Add a link that unsubscribes in one click.' },
     { tone: 'warn', label: 'Subject reads like an ad', value: 'Subject', note: '\u201cLast chance\u201d plus a discount is what promotions look like. Say what\u2019s inside instead.' },
     { tone: 'warn', label: 'Shortened link', value: 'Links', note: 'Short links like bit.ly hide where they go, and spam filters distrust them. Use the full address.' },
     { tone: 'pass', label: 'Text and images balanced', value: 'Layout', note: 'There\u2019s enough text that the email still reads well with images turned off.' },

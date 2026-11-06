@@ -102,8 +102,8 @@ const EXAMPLE = {
   rows: [
     { tone: 'pass', label: 'Server found', value: 'smtp.gmail.com', note: 'The address points to a working mail server.' },
     { tone: 'pass', label: 'Connected', value: 'Port 587', note: 'The port is open and the server answered.' },
-    { tone: 'pass', label: 'Encryption', value: 'STARTTLS', note: 'The connection was encrypted before your password was sent.' },
-    { tone: 'fail', label: 'Login', value: '535', note: '\u201cUsername and Password not accepted.\u201d Gmail needs an app password here, not your normal one.' },
+    { tone: 'pass', label: 'Encryption', value: 'On', note: 'The connection was protected before your password was sent.' },
+    { tone: 'fail', label: 'Login', value: 'Error 535', note: '\u201cUsername and Password not accepted.\u201d Gmail needs an app password here, not your normal one.' },
   ],
   cost: 'Free, no signup.',
   meanings: [
