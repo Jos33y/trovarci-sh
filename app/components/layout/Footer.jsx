@@ -9,7 +9,6 @@ const COLUMNS = [
     title: "Product",
     links: [
       { label: "Trovarcis Sender", href: "/sender" },
-      { label: "Sender vs SendBlaster", href: "/blog/trovarcis-reach-vs-sendblaster" },
       { label: "Your Sender license", href: "/account/sender" },
       { label: "Pricing", href: "/#pricing" },
       { label: "Credits", href: "/credits" },
@@ -39,19 +38,23 @@ const COLUMNS = [
     ],
   },
   {
-    title: "Legal",
+    title: "Compare",
     links: [
+      { label: "Sender vs SendBlaster", href: "/blog/trovarcis-reach-vs-sendblaster" },
+      { label: "SendBlaster alternatives", href: "/blog/sendblaster-alternatives" },
+      { label: "MaxBulk Mailer alternatives", href: "/blog/maxbulk-mailer-alternatives" },
+      { label: "Atomic Mail Sender alternatives", href: "/blog/atomic-mail-sender-alternatives" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "Contact", href: "/contact" },
+      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Refund Policy", href: "/refund" },
       { label: "Acceptable Use", href: "/acceptable-use" },
-    ],
-  },
-  {
-    title: "Help",
-    links: [
-      { label: "Contact", href: "/contact" },
-      { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com" },
     ],
   },
 ];

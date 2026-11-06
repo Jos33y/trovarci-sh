@@ -164,7 +164,7 @@
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--trov-text-muted);
+  color: var(--trov-text-secondary);
   text-align: left;
   padding: 8px 14px;
   border-bottom: 1px solid var(--trov-border);
@@ -303,5 +303,69 @@
 @media (prefers-reduced-motion: reduce) {
   .content :global(.picker a:active) {
     transform: none;
+  }
+}
+
+/* Phones: each table row becomes a card, every value labelled with its column, so no column
+   is cut off or crushed. Cells get their labels from the markdown renderer (data-label). */
+
+@media (max-width: 639px) {
+  .content :global(table:has(td[data-label])) {
+    display: block;
+    overflow: visible;
+  }
+
+  .content :global(table:has(td[data-label]) thead) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .content :global(table:has(td[data-label]) tbody) {
+    display: grid;
+    gap: 10px;
+  }
+
+  .content :global(table:has(td[data-label]) tr) {
+    display: block;
+    padding: 12px 14px;
+    border: 1px solid var(--trov-border);
+    border-radius: var(--radius-md);
+    background: var(--trov-surface);
+  }
+
+  .content :global(td[data-label]) {
+    display: grid;
+    grid-template-columns: minmax(0, 38%) minmax(0, 1fr);
+    gap: 12px;
+    padding: 5px 0;
+    border-bottom: none;
+    overflow-wrap: anywhere;
+  }
+
+  .content :global(td[data-label])::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--trov-text-secondary);
+    padding-top: 2px;
+  }
+
+  .content :global(td[data-label]:first-child) {
+    display: block;
+    margin-bottom: 6px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--trov-border);
+    font-weight: 600;
+    color: var(--trov-text);
+  }
+
+  .content :global(td[data-label]:first-child)::before {
+    content: none;
   }
 }

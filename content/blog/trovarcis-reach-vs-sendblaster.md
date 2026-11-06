@@ -49,3 +49,5 @@ readingTime: 4
 If you send to lists you already have, through accounts you care about, Trovarcis Sender is the better buy: your lists kept on your computer, the list cleaned, every message checked and every account kept inside its limits, on 3 computers, for $50 less than SendBlaster Pro.
 
 [Get Trovarcis Sender](/sender)
+
+Weighing more than two tools? See [SendBlaster alternatives](/blog/sendblaster-alternatives) for six options side by side.

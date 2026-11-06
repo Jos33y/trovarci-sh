@@ -66,6 +66,23 @@ export function getAllPosts() {
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
+// Gives every table cell its column name, so on a phone each row can be shown as a card
+// ("Price: $79 once") instead of a table squeezed into the screen.
+function labelTableCells(html) {
+  return html.replace(/<table>([\s\S]*?)<\/table>/g, (table, inner) => {
+    const head = inner.match(/<thead>([\s\S]*?)<\/thead>/);
+    if (!head) return table;
+    const labels = [...head[1].matchAll(/<th[^>]*>([\s\S]*?)<\/th>/g)]
+      .map((m) => m[1].replace(/<[^>]+>/g, '').replace(/"/g, '&quot;').trim());
+    const body = inner.replace(/<tr>([\s\S]*?)<\/tr>/g, (row, cells) => {
+      if (!cells.includes('<td')) return row;
+      let i = 0;
+      return `<tr>${cells.replace(/<td(\s[^>]*)?>/g, (m, attrs = '') => `<td${attrs} data-label="${labels[i++] || ''}">`)}</tr>`;
+    });
+    return `<table>${body}</table>`;
+  });
+}
+
 /* Returns frontmatter + rendered HTML. Null if slug not found. */
 export function getPost(slug) {
   if (!fs.existsSync(BLOG_DIR)) return null;
@@ -80,7 +97,7 @@ export function getPost(slug) {
     if (postSlug === slug) {
       return {
         ...mapFrontmatter(filename, data),
-        html: marked(content),
+        html: labelTableCells(marked(content)),
       };
     }
   }
