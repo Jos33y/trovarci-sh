@@ -18,7 +18,6 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  max-width: 1360px;
 }
 
 .side {

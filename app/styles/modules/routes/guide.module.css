@@ -393,8 +393,7 @@
   .layout {
     grid-template-columns: 232px minmax(0, 1fr);
     gap: 56px;
-    max-width: 1360px;
-  }
+    }
 
   .side {
     position: sticky;

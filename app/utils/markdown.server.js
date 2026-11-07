@@ -51,6 +51,10 @@ function mapFrontmatter(filename, data) {
     tags: data.tags || [],
     image: data.image || null,
     readingTime: data.readingTime || 5,
+    // Who the post is written for ("Churches", "Schools"); the blog index filters by it.
+    audience: data.audience || '',
+    // Breaks ties between posts of the same date: higher comes first.
+    priority: typeof data.priority === 'number' ? data.priority : 0,
   };
 }
 
@@ -65,7 +69,7 @@ export function getAllPosts() {
       const { data } = matter(raw);
       return mapFrontmatter(filename, data);
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => new Date(b.date) - new Date(a.date) || b.priority - a.priority || a.title.localeCompare(b.title));
 }
 
 // Gives every table cell its column name, so on a phone each row can be shown as a card

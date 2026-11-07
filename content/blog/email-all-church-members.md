@@ -6,6 +6,8 @@ date: "2026-11-07"
 author: "trovarcis-team"
 category: "Email Marketing"
 tags: ["church", "church-email", "bulk-email", "newsletter", "gmail"]
+audience: "Churches"
+priority: 1
 readingTime: 5
 ---
 

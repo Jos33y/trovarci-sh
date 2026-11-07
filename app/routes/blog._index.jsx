@@ -1,257 +1,277 @@
-import { Link, useLoaderData, useSearchParams } from 'react-router';
+// /blog - laid out like a printed front page. The lead story and the next four sit
+// side by side, then every other post in a dense grid that widens with the screen.
+// "Written for" filters by reader (churches, schools...), topics by category. Every
+// filter and search is a URL, and the page works without JavaScript.
+
+import { useEffect, useState } from 'react';
+import { Form, Link, useLoaderData, useNavigate, useSearchParams } from 'react-router';
 import { getAllPosts } from '~/utils/markdown.server';
 import { getSeo } from '~/utils/seo';
-import useReveal from '~/utils/useReveal';
 import { formatDateShort } from '~/utils/format';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
-import BlogCard from '~/components/blog/BlogCard';
 import BlogBanner from '~/components/blog/BlogBanner';
 import { ArrowRightIcon } from '~/components/icons';
 import styles from '~/styles/modules/routes/blog.module.css';
 
 export const meta = () => getSeo({
   title: 'Blog',
-  description: 'Plain answers on getting email into the inbox, sending bulk email safely, fixing SPF, DKIM and DMARC, and choosing bulk email software.',
+  description: 'Plain answers for everyone who emails a list: newsletters, churches, schools and businesses. Sending in bulk, getting into the inbox, and choosing the right tools.',
   path: '/blog',
 });
 
+const PER_PAGE = 24;
+const JUST_IN = 4;
+
 export function loader() {
-  const posts = getAllPosts();
+  const posts = getAllPosts().map(({ slug, title, description, date, category, audience, readingTime }) => ({
+    slug, title, description, date, category, audience, readingTime,
+  }));
   const categories = [...new Set(posts.map((p) => p.category).filter(Boolean))];
-  return { posts, categories };
+  const audiences = [...new Set(posts.map((p) => p.audience).filter(Boolean))];
+  return { posts, categories, audiences };
 }
 
-const PER_PAGE = 12;
-
-/* Compact page-number window. Returns [1, 2, '...', 6, '...', 12]-style array. */
-function getPageWindow(current, total) {
+function pageWindow(current, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages = new Set([1, total, current, current - 1, current + 1]);
-  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+  const pages = [...new Set([1, total, current, current - 1, current + 1])].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
   const out = [];
-  for (let i = 0; i < sorted.length; i++) {
-    out.push(sorted[i]);
-    if (i < sorted.length - 1 && sorted[i + 1] - sorted[i] > 1) out.push('gap');
-  }
+  pages.forEach((p, i) => {
+    out.push(p);
+    if (i < pages.length - 1 && pages[i + 1] - p > 1) out.push('gap');
+  });
   return out;
 }
 
 function SearchIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.75" />
-      <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
 
-function ClearIcon() {
+function Meta({ post }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
+    <span className={styles.meta}>
+      {post.date && <time dateTime={post.date}>{formatDateShort(post.date)}</time>}
+      <span className={styles.metaDot} aria-hidden="true" />
+      <span>{post.readingTime} min</span>
+    </span>
   );
 }
 
-function FeaturedCard({ post }) {
+function Kicker({ post }) {
   return (
-    <Link to={`/blog/${post.slug}`} className={styles.featuredCard}>
-      <div className={styles.featuredBanner}>
-        <BlogBanner slug={post.slug} category={post.category} height={280} variant="full" />
-      </div>
-      <div className={styles.featuredBody}>
-        <span className={styles.featuredTag}>Latest</span>
-        {post.category && <span className={styles.featuredCategory}>{post.category}</span>}
-        <h2 className={styles.featuredTitle}>{post.title}</h2>
-        {post.description && <p className={styles.featuredDescription}>{post.description}</p>}
-        <div className={styles.featuredMeta}>
-          {post.date && <time dateTime={post.date}>{formatDateShort(post.date)}</time>}
-          {post.readingTime && (
-            <>
-              <span className={styles.metaDot} aria-hidden="true" />
-              <span>{post.readingTime} min read</span>
-            </>
-          )}
-          <span className={styles.featuredRead}>
-            Read article
-            <ArrowRightIcon size={14} />
-          </span>
-        </div>
-      </div>
+    <span className={styles.kicker}>
+      {post.audience ? <>For {post.audience.toLowerCase()}</> : post.category}
+    </span>
+  );
+}
+
+function Lead({ post }) {
+  return (
+    <Link to={`/blog/${post.slug}`} className={styles.lead}>
+      <span className={styles.leadBanner}>
+        <BlogBanner slug={post.slug} category={post.category} height={220} variant="full" />
+        <span className={styles.leadStamp}>Latest</span>
+      </span>
+      <span className={styles.leadBody}>
+        <Kicker post={post} />
+        <span className={styles.leadTitle}>{post.title}</span>
+        <span className={styles.leadText}>{post.description}</span>
+        <span className={styles.leadFoot}>
+          <Meta post={post} />
+          <span className={styles.leadRead}>Read <ArrowRightIcon size={14} /></span>
+        </span>
+      </span>
     </Link>
   );
 }
 
+function Card({ post }) {
+  return (
+    <li>
+      <Link to={`/blog/${post.slug}`} className={styles.card}>
+        <span className={styles.cardBanner} aria-hidden="true">
+          <BlogBanner slug={post.slug} category={post.category} height={64} />
+        </span>
+        <span className={styles.cardBody}>
+          <Kicker post={post} />
+          <span className={styles.cardTitle}>{post.title}</span>
+          <span className={styles.cardText}>{post.description}</span>
+          <Meta post={post} />
+        </span>
+      </Link>
+    </li>
+  );
+}
+
 export default function BlogIndex() {
-  const { posts, categories } = useLoaderData();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const headerRef = useReveal();
+  const { posts, categories, audiences } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  const activeCategory = searchParams.get('category') || 'All';
-  const query = searchParams.get('q') || '';
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const category = searchParams.get('category') || '';
+  const audience = searchParams.get('for') || '';
+  const query = (searchParams.get('q') || '').trim();
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+  const [typed, setTyped] = useState(query);
+  // "Show all" and the back button change the URL without typing; keep the box in step.
+  useEffect(() => { setTyped((t) => (t.trim() === query ? t : query)); }, [query]);
 
-  /* Filter chain: category first, then text search. */
   let filtered = posts;
-  if (activeCategory !== 'All') {
-    filtered = filtered.filter((p) => p.category === activeCategory);
-  }
-  if (query.trim()) {
+  if (audience) filtered = filtered.filter((p) => p.audience === audience);
+  if (category) filtered = filtered.filter((p) => p.category === category);
+  if (query) {
     const q = query.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        (p.description || '').toLowerCase().includes(q) ||
-        (p.tags || []).some((t) => t.toLowerCase().includes(q)),
-    );
+    filtered = filtered.filter((p) => `${p.title} ${p.description} ${p.audience}`.toLowerCase().includes(q));
   }
 
-  /* Featured slot only on the default view (no filter, no search, page 1). */
-  const isDefaultView = activeCategory === 'All' && !query.trim() && page === 1;
-  const featured = isDefaultView && filtered.length > 0 ? filtered[0] : null;
-  const gridPool = featured ? filtered.slice(1) : filtered;
+  const isFront = !audience && !category && !query && page === 1;
+  const lead = isFront ? filtered[0] : null;
+  const justIn = isFront ? filtered.slice(1, 1 + JUST_IN) : [];
+  const pool = isFront ? filtered.slice(1 + JUST_IN) : filtered;
 
-  const totalPages = Math.max(1, Math.ceil(gridPool.length / PER_PAGE));
-  const safePage = Math.min(page, totalPages);
-  const pageStart = (safePage - 1) * PER_PAGE;
-  const pagePosts = gridPool.slice(pageStart, pageStart + PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(pool.length / PER_PAGE));
+  const current = Math.min(page, totalPages);
+  const shown = pool.slice((current - 1) * PER_PAGE, current * PER_PAGE);
 
-  function updateParam(key, value) {
+  const href = (changes) => {
     const next = new URLSearchParams(searchParams);
-    if (value && value !== 'All' && value !== '') next.set(key, value);
-    else next.delete(key);
-    if (key !== 'page') next.delete('page');
-    setSearchParams(next, { replace: false });
-  }
+    Object.entries(changes).forEach(([k, v]) => (v ? next.set(k, v) : next.delete(k)));
+    if (!('page' in changes)) next.delete('page');
+    const s = next.toString();
+    return s ? `/blog?${s}` : '/blog';
+  };
 
-  function resetFilters() {
-    setSearchParams(new URLSearchParams(), { replace: false });
-  }
+  const onSearch = (e) => {
+    setTyped(e.target.value);
+    navigate(href({ q: e.target.value.trim() }), { replace: true, preventScrollReset: true });
+  };
 
-  const hasActiveFilter = activeCategory !== 'All' || query.trim() !== '';
-  const pageWindow = totalPages > 1 ? getPageWindow(safePage, totalPages) : [];
+  const filtering = audience || category || query;
 
   return (
     <>
       <Header />
       <main className={styles.page}>
-        <div className="container">
-          <header ref={headerRef} className={`${styles.header} reveal`}>
-            <h1 className={styles.heading}>Blog</h1>
-            <p className={styles.subtitle}>
-              Plain answers on getting email into the inbox, sending in bulk, and choosing the right tools.
-            </p>
-          </header>
-
-          <div className={styles.toolbar}>
-            <div className={styles.searchBox}>
+        <div className={`container ${styles.wrap}`}>
+          <header className={styles.masthead}>
+            <div className={styles.mastText}>
+              <p className={styles.mastKicker}><span className={styles.mastRule} aria-hidden="true" />The Trovarcis blog &middot; {posts.length} posts</p>
+              <h1 className={styles.heading}>Blog</h1>
+              <p className={styles.subtitle}>Plain answers for everyone who emails a list: what to send from, what it costs, and how to land in the inbox.</p>
+            </div>
+            <Form method="get" action="/blog" role="search" className={styles.search} onSubmit={(e) => e.preventDefault()}>
+              <label htmlFor="blog-q" className={styles.visuallyHidden}>Search posts</label>
               <span className={styles.searchIcon}><SearchIcon /></span>
               <input
+                id="blog-q"
+                name="q"
                 type="search"
+                value={typed}
+                onChange={onSearch}
+                placeholder="Search posts…"
+                autoComplete="off"
                 className={styles.searchInput}
-                placeholder="Search posts"
-                value={query}
-                onChange={(e) => updateParam('q', e.target.value)}
-                aria-label="Search blog posts"
               />
-              {query && (
-                <button
-                  type="button"
-                  className={styles.clearBtn}
-                  onClick={() => updateParam('q', '')}
-                  aria-label="Clear search"
-                >
-                  <ClearIcon />
-                </button>
-              )}
-            </div>
+              {audience && <input type="hidden" name="for" value={audience} />}
+              {category && <input type="hidden" name="category" value={category} />}
+            </Form>
+          </header>
 
-            {categories.length > 0 && (
-              <div className={styles.filters}>
-                <button
-                  className={`${styles.filterPill} ${activeCategory === 'All' ? styles.filterActive : ''}`}
-                  onClick={() => updateParam('category', 'All')}
-                >
-                  All
-                </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    className={`${styles.filterPill} ${activeCategory === cat ? styles.filterActive : ''}`}
-                    onClick={() => updateParam('category', cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
+          <nav className={styles.filters} aria-label="Filter posts">
+            {audiences.length > 0 && (
+              <div className={styles.filterRow}>
+                <span className={styles.filterLabel}>Written for</span>
+                <ul className={styles.chips}>
+                  {audiences.map((a) => (
+                    <li key={a}>
+                      <Link to={href({ for: audience === a ? '' : a })} className={`${styles.chip} ${audience === a ? styles.chipOn : ''}`} aria-current={audience === a ? 'true' : undefined} preventScrollReset>
+                        {a}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
-          </div>
-
-          {hasActiveFilter && (
-            <div className={styles.resultsBar}>
-              <span>
-                {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}
-                {query.trim() && <> matching <strong>{query.trim()}</strong></>}
-                {activeCategory !== 'All' && <> in <strong>{activeCategory}</strong></>}
-              </span>
-              <button onClick={resetFilters} className={styles.resetFilters}>Reset</button>
+            <div className={styles.filterRow}>
+              <span className={styles.filterLabel}>Topics</span>
+              <ul className={styles.chips}>
+                {categories.map((c) => (
+                  <li key={c}>
+                    <Link to={href({ category: category === c ? '' : c })} className={`${styles.chip} ${category === c ? styles.chipOn : ''}`} aria-current={category === c ? 'true' : undefined} preventScrollReset>
+                      {c}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </nav>
+
+          {filtering && (
+            <p className={styles.results} role="status">
+              {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}
+              {audience && <> for <strong>{audience.toLowerCase()}</strong></>}
+              {category && <> in <strong>{category}</strong></>}
+              {query && <> matching <strong>{query}</strong></>}
+              <Link to="/blog" className={styles.reset}>Show all</Link>
+            </p>
           )}
 
-          {featured && <FeaturedCard post={featured} />}
-
-          {pagePosts.length > 0 ? (
-            <div className={styles.grid}>
-              {pagePosts.map((post) => (
-                <BlogCard key={post.slug} post={post} />
-              ))}
-            </div>
-          ) : (
-            <div className={styles.empty}>
-              <p className={styles.emptyTitle}>No posts match</p>
-              <p className={styles.emptyHelper}>
-                Try a different search or reset the filters.
-              </p>
-              {hasActiveFilter && (
-                <button onClick={resetFilters} className={styles.emptyAction}>
-                  Reset filters
-                </button>
+          {lead && (
+            <section className={styles.front} aria-label="Latest posts">
+              <Lead post={lead} />
+              {justIn.length > 0 && (
+                <div className={styles.justIn}>
+                  <h2 className={styles.sectionLabel}>Just in</h2>
+                  <ol className={styles.justList}>
+                    {justIn.map((p, i) => (
+                      <li key={p.slug}>
+                        <Link to={`/blog/${p.slug}`} className={styles.justItem}>
+                          <span className={styles.justNum} aria-hidden="true">{String(i + 2).padStart(2, '0')}</span>
+                          <span className={styles.justBody}>
+                            <Kicker post={p} />
+                            <span className={styles.justTitle}>{p.title}</span>
+                            <Meta post={p} />
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               )}
+            </section>
+          )}
+
+          {shown.length > 0 && (
+            <section className={styles.all} aria-labelledby="all-posts">
+              {isFront && <h2 id="all-posts" className={styles.allHead}>More posts</h2>}
+              {!isFront && <h2 id="all-posts" className={styles.visuallyHidden}>Posts</h2>}
+              <ul className={styles.grid}>
+                {shown.map((p) => <Card key={p.slug} post={p} />)}
+              </ul>
+            </section>
+          )}
+
+          {filtered.length === 0 && (
+            <div className={styles.empty}>
+              <p className={styles.emptyTitle}>No posts match that yet.</p>
+              <p className={styles.emptyText}>
+                Try other words, or ask the <Link to={`/guides?q=${encodeURIComponent(query)}`}>help desk</Link>, which answers short questions.
+              </p>
             </div>
           )}
 
           {totalPages > 1 && (
-            <nav className={styles.pager} aria-label="Pagination">
-              <button
-                className={styles.pageArrow}
-                onClick={() => updateParam('page', String(safePage - 1))}
-                disabled={safePage === 1}
-                aria-label="Previous page"
-              >
-                ←
-              </button>
-              {pageWindow.map((p, i) =>
-                p === 'gap' ? (
-                  <span key={`gap-${i}`} className={styles.pageGap}>…</span>
-                ) : (
-                  <button
-                    key={p}
-                    className={p === safePage ? styles.pageNumActive : styles.pageNum}
-                    onClick={() => updateParam('page', String(p))}
-                  >
-                    {p}
-                  </button>
-                ),
-              )}
-              <button
-                className={styles.pageArrow}
-                onClick={() => updateParam('page', String(safePage + 1))}
-                disabled={safePage === totalPages}
-                aria-label="Next page"
-              >
-                →
-              </button>
+            <nav className={styles.pager} aria-label="More pages">
+              {current > 1 && <Link to={href({ page: String(current - 1) })} className={styles.pageArrow} aria-label="Newer posts">Newer</Link>}
+              {pageWindow(current, totalPages).map((p, i) => (p === 'gap'
+                ? <span key={`g${i}`} className={styles.pageGap}>…</span>
+                : <Link key={p} to={href({ page: p === 1 ? '' : String(p) })} className={p === current ? styles.pageOn : styles.pageNum} aria-current={p === current ? 'page' : undefined}>{p}</Link>))}
+              {current < totalPages && <Link to={href({ page: String(current + 1) })} className={styles.pageArrow} aria-label="Older posts">Older</Link>}
             </nav>
           )}
         </div>

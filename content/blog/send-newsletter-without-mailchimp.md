@@ -6,6 +6,8 @@ date: "2026-11-07"
 author: "trovarcis-team"
 category: "Email Marketing"
 tags: ["newsletter", "mailchimp-alternative", "bulk-email", "amazon-ses", "one-time-payment"]
+audience: "Newsletter writers"
+priority: 3
 readingTime: 6
 ---
 
