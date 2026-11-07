@@ -75,6 +75,9 @@ export async function createSession(userId, options = {}) {
     RETURNING id, expires_at
   `;
 
+  // Kept on the user too, so admin still knows after the session is cleaned up.
+  sql`UPDATE users SET last_login_at = now(), last_active_at = now() WHERE id = ${userId}`.catch(() => {});
+
   return { token, sessionId: row.id, expiresAt: row.expires_at };
 }
 
@@ -111,6 +114,12 @@ export async function validateSession(token) {
       SET last_seen_at = now()
       WHERE id = ${row.session_id}
         AND last_seen_at < ${staleCutoff}
+    `.catch(() => {});
+    sql`
+      UPDATE users
+      SET last_active_at = now()
+      WHERE id = ${row.user_id}
+        AND (last_active_at IS NULL OR last_active_at < ${staleCutoff})
     `.catch(() => {});
   }
 

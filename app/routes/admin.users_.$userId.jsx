@@ -282,6 +282,9 @@ export default function AdminUserDetail() {
           <p className={styles.pageSubtitle}>
             <span className={styles.mono}>{user.id}</span>
           </p>
+          <p className={styles.pageSubtitle}>
+            Joined {formatDate(user.created_at)} · Last signed in {user.last_login_at ? formatDate(user.last_login_at) : 'not recorded'} · Last active {user.last_active_at ? formatDate(user.last_active_at) : 'not recorded'}
+          </p>
         </div>
         <div className={styles.pageHeaderActions}>
           {user.role === 'admin' && <span className={`${styles.badge} ${styles.badgeAccent}`}>Admin</span>}

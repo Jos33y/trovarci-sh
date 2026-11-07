@@ -27,40 +27,37 @@ export async function isAdmin(request) {
 
 // User search + profile reads
 
-// Search users by email substring or exact UUID.
-export async function adminSearchUsers({ q = '', limit = 50 } = {}) {
+// Search users by email substring or exact UUID, newest signups first, most recently
+// active first, or longest away first. `away` keeps users not active for that many days
+// (or never recorded).
+const USER_SORTS = {
+  joined: sql`created_at DESC`,
+  active: sql`last_active_at DESC NULLS LAST, created_at DESC`,
+  away: sql`last_active_at ASC NULLS FIRST, created_at ASC`,
+};
+
+export async function adminSearchUsers({ q = '', limit = 50, sort = 'joined', away = 0 } = {}) {
   const trimmed = q.trim();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed);
+  const order = USER_SORTS[sort] || USER_SORTS.joined;
+  const days = Number.isInteger(away) && away > 0 ? away : 0;
 
-  if (isUuid) {
-    return sql`
-      SELECT
-        id, email, role, credits_balance, email_verified_at,
-        created_at, deleted_at
-      FROM users
-      WHERE id = ${trimmed}
-      LIMIT 1
-    `;
-  }
-
-  if (trimmed.length === 0) {
-    return sql`
-      SELECT
-        id, email, role, credits_balance, email_verified_at,
-        created_at, deleted_at
-      FROM users
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-    `;
-  }
+  const match = isUuid
+    ? sql`id = ${trimmed}`
+    : trimmed
+      ? sql`email ILIKE ${'%' + trimmed + '%'}`
+      : sql`TRUE`;
+  const quiet = days
+    ? sql`AND deleted_at IS NULL AND (last_active_at IS NULL OR last_active_at < now() - make_interval(days => ${days}))`
+    : sql``;
 
   return sql`
     SELECT
       id, email, role, credits_balance, email_verified_at,
-      created_at, deleted_at
+      created_at, deleted_at, last_login_at, last_active_at
     FROM users
-    WHERE email ILIKE ${'%' + trimmed + '%'}
-    ORDER BY created_at DESC
+    WHERE ${match} ${quiet}
+    ORDER BY ${order}
     LIMIT ${limit}
   `;
 }
@@ -69,7 +66,7 @@ export async function adminSearchUsers({ q = '', limit = 50 } = {}) {
 export async function adminGetUserDetail(userId) {
   const [user] = await sql`
     SELECT id, email, role, credits_balance, email_verified_at,
-           created_at, deleted_at
+           created_at, deleted_at, last_login_at, last_active_at
     FROM users
     WHERE id = ${userId}
     LIMIT 1

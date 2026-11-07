@@ -10,16 +10,31 @@ export const meta = () => [
   { name: 'robots', content: 'noindex, nofollow' },
 ];
 
+const SORTS = [
+  { value: 'joined', label: 'Newest signups' },
+  { value: 'active', label: 'Recently active' },
+  { value: 'away', label: 'Longest away' },
+];
+
+const AWAY = [
+  { value: '', label: 'Anyone' },
+  { value: '7', label: 'Not seen in 7+ days' },
+  { value: '30', label: 'Not seen in 30+ days' },
+  { value: '90', label: 'Not seen in 90+ days' },
+];
+
 export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
   const q = url.searchParams.get('q') ?? '';
-  const users = await adminSearchUsers({ q, limit: 100 });
-  return { users, q };
+  const sort = SORTS.some((x) => x.value === url.searchParams.get('sort')) ? url.searchParams.get('sort') : 'joined';
+  const away = AWAY.some((x) => x.value === url.searchParams.get('away')) ? url.searchParams.get('away') : '';
+  const users = await adminSearchUsers({ q, limit: 100, sort, away: away ? Number(away) : 0 });
+  return { users, q, sort, away };
 }
 
-function timeAgo(iso) {
-  if (!iso) return '-';
+function timeAgo(iso, none = '-') {
+  if (!iso) return none;
   const ms = Date.now() - new Date(iso).getTime();
   const d = Math.floor(ms / 86_400_000);
   if (d === 0) return 'today';
@@ -29,7 +44,7 @@ function timeAgo(iso) {
 }
 
 export default function AdminUsers() {
-  const { users, q } = useLoaderData();
+  const { users, q, sort, away } = useLoaderData();
   const navigate = useNavigate();
 
   return (
@@ -53,6 +68,18 @@ export default function AdminUsers() {
             aria-label="Search users"
           />
         </div>
+        <div className={styles.filterField}>
+          <label className={styles.filterLabel} htmlFor="sort">Sort</label>
+          <select id="sort" name="sort" defaultValue={sort} className={styles.filterSelect} onChange={(e) => e.currentTarget.form.requestSubmit()}>
+            {SORTS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div className={styles.filterField}>
+          <label className={styles.filterLabel} htmlFor="away">Last seen</label>
+          <select id="away" name="away" defaultValue={away} className={styles.filterSelect} onChange={(e) => e.currentTarget.form.requestSubmit()}>
+            {AWAY.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
         <button type="submit" className={styles.formButton}>Search</button>
       </Form>
 
@@ -75,7 +102,9 @@ export default function AdminUsers() {
                 <col style={{ width: 100 }} />
                 <col style={{ width: 120 }} />
                 <col style={{ width: 110 }} />
-                <col style={{ width: 140 }} />
+                <col style={{ width: 120 }} />
+                <col style={{ width: 130 }} />
+                <col style={{ width: 120 }} />
                 <col style={{ width: 110 }} />
               </colgroup>
               <thead>
@@ -85,6 +114,8 @@ export default function AdminUsers() {
                   <th>Verified</th>
                   <th className={styles['th--right']}>Credits</th>
                   <th>Joined</th>
+                  <th>Last signed in</th>
+                  <th>Last active</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -118,6 +149,8 @@ export default function AdminUsers() {
                       {formatInt(u.credits_balance)}
                     </td>
                     <td data-label="Joined" className={styles['td--muted']}>{timeAgo(u.created_at)}</td>
+                    <td data-label="Last signed in" className={styles['td--muted']}>{timeAgo(u.last_login_at, 'Not recorded')}</td>
+                    <td data-label="Last active" className={styles['td--muted']}>{timeAgo(u.last_active_at, 'Not recorded')}</td>
                     <td data-label="Status">
                       {u.deleted_at
                         ? <span className={`${styles.badge} ${styles.badgeError}`}>Deleted</span>
