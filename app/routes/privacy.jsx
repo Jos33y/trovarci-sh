@@ -75,6 +75,7 @@ export default function Privacy() {
               <li><strong>Payment information</strong> - processed by our payment providers. We receive a transaction reference, the amount and the product purchased. We never see or store your full card number.</li>
               <li><strong>Balances and transactions</strong> - your Credit balance, your Trovarcis Mail balance and a ledger of purchases and charges, so billing is accurate.</li>
               <li><strong>Support messages</strong> - what you send us when you contact support.</li>
+              <li><strong>Affiliates</strong> - if you join the affiliate program: your referral code, the clicks and sales your link brought (amounts only), and the USDT wallet address you give us for payouts, with the transaction record of each payout.</li>
             </ul>
 
             <h2 id="reach">Trovarcis Reach and web tools</h2>
@@ -252,6 +253,7 @@ export default function Privacy() {
             </p>
             <ul>
               <li><strong>Session cookie</strong> - an encrypted, httpOnly cookie that keeps you signed in. Expires after 30 days.</li>
+              <li><strong>Referral cookie</strong> - set only when you arrive through an affiliate's link (trovarci.sh/r/...). It holds that affiliate's code for 90 days so a purchase is credited to them, and nothing about you. Affiliates see that a sale happened and its amount, never who bought.</li>
               <li><strong>No tracking cookies</strong> - we do not use Google Analytics, Facebook Pixel or any advertising trackers.</li>
               <li><strong>No third-party cookies</strong> - we do not embed social media widgets or third-party scripts that set cookies.</li>
             </ul>

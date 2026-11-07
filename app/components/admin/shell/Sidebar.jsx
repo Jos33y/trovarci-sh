@@ -21,6 +21,7 @@ const GROUPS = [
       { to: '/admin/users',    label: 'Users',    icon: UsersIcon },
       { to: '/admin/payments', label: 'Payments', icon: CardIcon },
       { to: '/admin/licenses', label: 'Licenses', icon: KeyIcon },
+      { to: '/admin/affiliates', label: 'Affiliates', icon: UsersIcon },
       { to: '/admin/jobs',     label: 'Jobs',     icon: LayersIcon },
       { to: '/admin/messages', label: 'Messages', icon: EnvelopeIcon },
     ],

@@ -6,6 +6,7 @@ import { sql } from '~/utils/db.server';
 import { issueLicense, revokeLicense } from '~/lib/licenses.server';
 import { logSystemAction } from '~/utils/adminActions.server';
 import { SENDER_MAX_DEVICES } from '~/utils/senderConfig.server';
+import { recordCommissionInTx, voidCommissionInTx } from '~/lib/affiliates.server';
 
 // Crypto lands a few cents short when the rate moves between invoice and confirmation.
 const TOLERANCE_CENTS = (() => {
@@ -39,11 +40,11 @@ function tokenMatches(token, hash) {
 // Create
 // ---------------------------------------------------------------------------
 
-export async function createOrder({ userId = null, email, priceKey, amountUsdCents, gateway }) {
+export async function createOrder({ userId = null, email, priceKey, amountUsdCents, gateway, affiliateId = null }) {
   const token = crypto.randomBytes(32).toString('base64url');
   const [order] = await sql`
-    INSERT INTO license_orders (user_id, email, price_key, amount_usd_cents, gateway, access_token_hash)
-    VALUES (${userId}, ${email}, ${priceKey}, ${amountUsdCents}, ${gateway}, ${hashToken(token)})
+    INSERT INTO license_orders (user_id, email, price_key, amount_usd_cents, gateway, access_token_hash, affiliate_id)
+    VALUES (${userId}, ${email}, ${priceKey}, ${amountUsdCents}, ${gateway}, ${hashToken(token)}, ${affiliateId})
     RETURNING *
   `;
   return { order, token };
@@ -192,6 +193,13 @@ async function fulfillInTx(tx, order, { gateway, paymentReference }) {
     WHERE id = ${order.id}
   `;
 
+  // The referring affiliate's commission, in the same transaction as the sale. In a savepoint,
+  // so a problem here is logged and never stops the buyer getting their license.
+  if (order.affiliate_id) {
+    await tx.savepoint((sp) => recordCommissionInTx(sp, order, userId))
+      .catch((err) => console.error(`[affiliates] commission failed for order ${order.id}: ${err.message}`));
+  }
+
   return { issued: true, licenseId: license.id, userId, createdAccount: created };
 }
 
@@ -209,6 +217,8 @@ async function refundInTx(tx, order, { source, reference }) {
   });
 
   await tx`UPDATE license_orders SET status = 'refunded', refunded_at = now() WHERE id = ${order.id}`;
+  await tx.savepoint((sp) => voidCommissionInTx(sp, order.id))
+    .catch((err) => console.error(`[affiliates] void failed for order ${order.id}: ${err.message}`));
   return { revoked: true };
 }
 

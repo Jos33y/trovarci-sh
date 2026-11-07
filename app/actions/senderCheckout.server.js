@@ -17,6 +17,7 @@ import {
 import { CRYPTOMUS_ENABLED, POLAR_ENABLED, getPublicUrl } from '~/utils/paymentsConfig.server';
 import { priceForKey, getPolarSenderProductId, LICENSE_INVOICE_LIFETIME_SEC } from '~/utils/senderConfig.server';
 import { readOrderTokens, orderTokenCookie } from '~/utils/orderAccess.server';
+import { affiliateForCheckout } from '~/lib/affiliates.server';
 import { recordEvent, buildEventFromRequest, getCountry, getClientIp } from '~/utils/analytics.server';
 
 const knownCountry = (code) => (/^[A-Z]{2}$/.test(code || '') && code !== 'XX' && code !== 'T1' ? code : null);
@@ -115,7 +116,9 @@ export async function senderCheckoutAction({ request }) {
     return data({ errors: { gateway: gateway === 'polar' ? 'Card payment is not available right now. Pay with crypto.' : 'Crypto payment is not available right now. Pay by card.' } }, { status: 503 });
   }
 
-  const { order, token } = await createOrder({ userId: user?.id ?? null, email, priceKey: price.key, amountUsdCents: price.cents, gateway });
+  // Credit the affiliate whose link brought the buyer (last click within 90 days), never the buyer.
+  const affiliateId = await affiliateForCheckout(request, { userId: user?.id ?? null, email }).catch(() => null);
+  const { order, token } = await createOrder({ userId: user?.id ?? null, email, priceKey: price.key, amountUsdCents: price.cents, gateway, affiliateId });
 
   recordEvent(buildEventFromRequest(request, {
     eventType: 'checkout_click',

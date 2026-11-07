@@ -75,6 +75,9 @@ export default function UserMenu({ user }) {
           <Link to="/account/sender" className={styles.item} role="menuitem">
             Trovarcis Sender
           </Link>
+          <Link to="/account/affiliate" className={styles.item} role="menuitem">
+            Affiliate
+          </Link>
           <Link to="/account/settings" className={styles.item} role="menuitem">
             Account settings
           </Link>

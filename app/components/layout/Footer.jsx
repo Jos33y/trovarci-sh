@@ -13,6 +13,7 @@ const COLUMNS = [
       { label: "Download for Windows", href: "/download" },
       { label: "Your Sender license", href: "/account/sender" },
       { label: "Pay with crypto", href: "/pay-with-crypto" },
+      { label: "Affiliate program", href: "/affiliates" },
       { label: "Bulk email cost calculator", href: "/bulk-email-cost-calculator" },
     ],
   },

@@ -1,0 +1,187 @@
+/* /account/affiliate: the pieces the shared account styles don't have. */
+
+.points {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding-left: 18px;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+}
+
+.points strong {
+  color: var(--trov-text);
+}
+
+.joinForm {
+  display: grid;
+  gap: 10px;
+}
+
+.agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.agree input {
+  margin-top: 3px;
+  accent-color: var(--trov-accent);
+}
+
+.agree a {
+  color: var(--trov-accent);
+}
+
+.linkRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.linkRow input {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+}
+
+.tileLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.tileValue {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--trov-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.tileNote {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.walletOk {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  color: var(--trov-success);
+}
+
+.walletWait {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--trov-text-secondary);
+}
+
+.walletConfirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.walletForm {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--trov-border);
+}
+
+.networks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.networks legend {
+  margin-bottom: 8px;
+}
+
+.network {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--trov-text-secondary);
+  cursor: pointer;
+}
+
+.network input {
+  accent-color: var(--trov-accent);
+}
+
+.networkOn {
+  border-color: var(--trov-accent);
+  color: var(--trov-text);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--trov-border);
+  font-size: 0.875rem;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row a {
+  color: inherit;
+}
+
+@media (min-width: 640px) {
+  .row {
+    grid-template-columns: 110px minmax(0, 1fr) 90px auto;
+    align-items: center;
+    gap: 12px;
+  }
+}

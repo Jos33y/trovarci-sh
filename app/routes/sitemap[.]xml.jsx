@@ -24,6 +24,7 @@ const STATIC_URLS = [
     '/sender',
     '/credits',
     '/pay-with-crypto',
+    '/affiliates',
     '/contact',
     '/privacy',
     '/terms',

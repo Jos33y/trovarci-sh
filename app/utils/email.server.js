@@ -881,3 +881,19 @@ export async function sendSaleAlertEmail({ kind, amountUsd, method }) {
   const html = `<pre style="font-family:Menlo,Consolas,monospace;font-size:14px;line-height:1.6;color:#111;">${escapeHtml(text)}</pre>`;
   return send({ to, subject, html, text });
 }
+
+// A payout an affiliate is waiting for: the kind and the amount only. Who and which wallet stay
+// behind the admin sign-in.
+export async function sendAffiliatePayoutAlert({ kind, amountUsd }) {
+  const to = process.env.SALES_ALERT_EMAIL || 'hello@thebrickdev.com';
+  const subject = kind === 'test'
+    ? 'Affiliate wallet to test: send $1 USDT'
+    : `Affiliate withdrawal: $${amountUsd} USDT`;
+  const text = [
+    kind === 'test' ? 'A new affiliate wallet needs its $1 test payment.' : `Amount:   $${amountUsd} USDT`,
+    '',
+    'Details: https://trovarci.sh/admin/affiliates',
+  ].join('\n');
+  const html = `<pre style="font-family:Menlo,Consolas,monospace;font-size:14px;line-height:1.6;color:#111;">${escapeHtml(text)}</pre>`;
+  return send({ to, subject, html, text });
+}
