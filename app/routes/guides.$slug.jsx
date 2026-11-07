@@ -7,15 +7,18 @@ import Footer from '~/components/layout/Footer';
 import BlogContent from '~/components/blog/BlogContent';
 import GuideNav from '~/components/guides/GuideNav';
 import HelpfulVote from '~/components/blog/HelpfulVote';
+import InterestVote from '~/components/guides/InterestVote';
+import { interestCount } from '~/utils/interest.server';
 import { getSeo } from '~/utils/seo';
 import { getGuide, getNav, ACTIONS, TOPICS } from '~/utils/guides.server';
 import styles from '~/styles/modules/routes/guide.module.css';
 
-export function loader({ params }) {
+export async function loader({ params }) {
   const guide = getGuide(params.slug);
   if (!guide) throw data(null, { status: 404, statusText: 'Guide not found' });
   const topic = TOPICS.find((t) => t.id === guide.topic);
-  return { guide, topic, nav: getNav(), action: ACTIONS[guide.action] };
+  const interest = guide.interest ? { id: guide.interest, count: await interestCount(guide.interest) } : null;
+  return { guide, topic, nav: getNav(), action: ACTIONS[guide.action], interest };
 }
 
 const longDate = (iso) => new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
@@ -56,7 +59,7 @@ export const meta = ({ data: d }) => {
 };
 
 export default function Guide() {
-  const { guide, topic, nav, action } = useLoaderData();
+  const { guide, topic, nav, action, interest } = useLoaderData();
 
   return (
     <div className={styles.page}>
@@ -113,6 +116,8 @@ export default function Guide() {
                 </div>
               </section>
             )}
+
+            {interest && <InterestVote id={interest.id} count={interest.count} />}
 
             {guide.post && (
               <Link to={`/blog/${guide.post.slug}`} className={styles.full}>

@@ -1,0 +1,89 @@
+/* The thumbs-up box: a dashed slip, set apart from the guide's own action. */
+
+.box {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px dashed var(--trov-border-hover);
+  border-radius: var(--radius-lg);
+}
+
+.kicker {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.text {
+  margin: 6px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--trov-text-secondary);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 14px;
+}
+
+.thumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid var(--trov-accent);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-accent);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.thumb:hover:not(:disabled) {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+}
+
+.thumb:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.thumb:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.on {
+  background: var(--trov-accent);
+  color: var(--trov-text-on-accent);
+  cursor: default;
+}
+
+.tally {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb {
+    transition: none;
+  }
+}

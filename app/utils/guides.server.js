@@ -26,7 +26,7 @@ export const ACTIONS = {
   verify: { label: 'Verify your list', href: '/verify', note: '1 cent per address, 10 free' },
   score: { label: 'Score your email', href: '/score', note: '1 cent per email, 10 free' },
   number: { label: 'Check phone numbers', href: '/verify-number', note: 'Format check free' },
-  sender: { label: 'Get Trovarcis Sender', href: '/sender', note: 'One payment, 3 computers' },
+  sender: { label: 'Get Sender', href: '/sender', note: 'One payment, 3 computers' },
 };
 
 const REQUIRED = ['title', 'description', 'short', 'published', 'checked', 'topic', 'action'];
@@ -83,6 +83,8 @@ function load() {
       related: data.related || [],
       post: data.post || null,
       order: typeof data.order === 'number' ? data.order : null,
+      // A service we may offer: the guide shows a thumbs-up count for it (see interest.server.js).
+      interest: /^[a-z0-9-]{1,40}$/.test(data.interest || '') ? data.interest : null,
       slow: data.slow ? fillPrices(data.slow) : null,
       minutes: readingMinutes(`${data.short} ${content}`),
       raw,
