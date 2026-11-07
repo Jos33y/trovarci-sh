@@ -1,4 +1,5 @@
-/* Footer - brand + 5 link columns, gradient hairline cap */
+/* Footer: a brand band (what Sender is, the storage promise, Get Sender) over six link
+   columns. Opens with a double rule, like the rest of the printed pages. */
 
 .footer {
   position: relative;
@@ -9,11 +10,9 @@
   content: '';
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(300px, 50%);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--trov-border-hover), transparent);
+  left: 0;
+  right: 0;
+  border-top: 3px double var(--trov-border-hover);
 }
 
 .grid {
@@ -30,11 +29,44 @@
 }
 
 .tagline {
+  margin: 0;
+  color: var(--trov-text);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  max-width: 340px;
+  text-wrap: pretty;
+}
+
+.storage {
+  margin: 0;
+  max-width: 340px;
   color: var(--trov-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
-  max-width: 280px;
-  text-wrap: pretty;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 9px 18px;
+  background: var(--trov-accent);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-text-on-accent);
+  text-decoration: none;
+  transition: background-color 150ms ease, transform 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.cta:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+}
+
+.cta:active {
+  transform: scale(0.97);
 }
 
 .column {
@@ -113,19 +145,34 @@
   }
 }
 
-/* Desktop - brand beside five link columns */
+/* Desktop: the brand band across the top, six link columns under it */
 
 @media (min-width: 1024px) {
   .footer {
-    padding: 80px 0 48px;
+    padding: 72px 0 48px;
   }
 
   .grid {
-    grid-template-columns: minmax(0, 1.4fr) repeat(5, minmax(0, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 48px 28px;
   }
 
   .brand {
-    grid-column: auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--trov-border);
+  }
+
+  .cta {
+    align-self: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
   }
 }

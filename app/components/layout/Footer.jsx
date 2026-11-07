@@ -1,40 +1,50 @@
 import { Link } from 'react-router';
 import { TrovarcisLogo } from '~/components/shared/Logo';
+import { STORAGE_LINE } from '~/utils/senderCopy';
 import styles from '~/styles/modules/layout/Footer.module.css';
 
 // Link text says what each page is for, in the words people search with.
-// Tools follow the order a campaign needs them, matching the homepage path.
+// Sender first, then the people it is written for; tools in the order a campaign needs them.
 const COLUMNS = [
   {
-    title: "Product",
+    title: "Sender",
     links: [
       { label: "Trovarcis Sender", href: "/sender" },
+      { label: "Download for Windows", href: "/download" },
       { label: "Your Sender license", href: "/account/sender" },
-      { label: "Pricing", href: "/#pricing" },
-      { label: "Credits", href: "/credits" },
       { label: "Pay with crypto", href: "/pay-with-crypto" },
+      { label: "Bulk email cost calculator", href: "/bulk-email-cost-calculator" },
     ],
   },
   {
-    title: "Tools",
+    title: "Written for",
+    links: [
+      { label: "Newsletter writers", href: "/blog/send-newsletter-without-mailchimp" },
+      { label: "Churches", href: "/blog/email-all-church-members" },
+      { label: "Schools", href: "/blog/email-all-parents-at-once" },
+      { label: "Recruiters", href: "/blog/email-candidates-in-bulk" },
+      { label: "Cold outreach", href: "/guides/cold-outreach-setup" },
+    ],
+  },
+  {
+    title: "Free tools",
     links: [
       { label: "Domain blacklist checker", href: "/domain" },
       { label: "SPF, DKIM, DMARC generator", href: "/records" },
+      { label: "SMTP tester", href: "/smtp-test" },
       { label: "Email verifier", href: "/verify" },
       { label: "Phone number checker", href: "/verify-number" },
       { label: "Spam score checker", href: "/score" },
-      { label: "SMTP tester", href: "/smtp-test" },
+      { label: "Credits", href: "/credits" },
     ],
   },
   {
-    title: "Guides",
+    title: "Help",
     links: [
-      { label: "Why emails go to spam", href: "/guides/find-why-emails-go-to-spam" },
-      { label: "Gmail SMTP settings", href: "/guides/gmail-smtp-settings" },
-      { label: "Add a DMARC record", href: "/guides/add-dmarc-record" },
-      { label: "Get off a blocklist", href: "/guides/remove-from-blocklist" },
-      { label: "Set up SPF, DKIM, DMARC", href: "/blog/spf-dkim-dmarc-setup" },
       { label: "Help desk", href: "/guides" },
+      { label: "Choose an SMTP account", href: "/guides/choose-smtp-account" },
+      { label: "Gmail SMTP settings", href: "/guides/gmail-smtp-settings" },
+      { label: "Why emails go to spam", href: "/guides/find-why-emails-go-to-spam" },
       { label: "Blog", href: "/blog" },
     ],
   },
@@ -45,12 +55,12 @@ const COLUMNS = [
       { label: "SendBlaster alternatives", href: "/blog/sendblaster-alternatives" },
       { label: "MaxBulk Mailer alternatives", href: "/blog/maxbulk-mailer-alternatives" },
       { label: "Atomic Mail Sender alternatives", href: "/blog/atomic-mail-sender-alternatives" },
-      { label: "Bulk email cost calculator", href: "/bulk-email-cost-calculator" },
     ],
   },
   {
     title: "Company",
     links: [
+      { label: "About", href: "/about/trovarcis-team" },
       { label: "Contact", href: "/contact" },
       { label: "support@trovarcis.com", href: "mailto:support@trovarcis.com" },
       { label: "Privacy Policy", href: "/privacy" },
@@ -69,9 +79,11 @@ export default function Footer() {
           <div className={styles.brand}>
             <TrovarcisLogo size={28} />
             <p className={styles.tagline}>
-              Send bulk email from your own computer. Check your domain, list
-              and message first.
+              Bulk email from your own computer, through your own accounts. One
+              payment, no monthly bill.
             </p>
+            <p className={styles.storage}>{STORAGE_LINE}</p>
+            <Link to="/sender" className={styles.cta}>Get Sender</Link>
           </div>
 
           {COLUMNS.map((col) => (
