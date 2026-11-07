@@ -48,6 +48,7 @@ Short how-to answers. Paste an SMTP error or bounce message into the search to h
 
 ## Full explanations (blog)
 
+- [Send your newsletter without a monthly bill](https://trovarci.sh/blog/send-newsletter-without-mailchimp): What Mailchimp costs as a list grows (free plan: 250 contacts, 500 emails a month), and how to send a newsletter yourself with one-time software and a sending account such as Amazon SES, Brevo or Google Workspace. Signups, clicks, opens and unsubscribes without Mailchimp, and moving a list.
 - [How to send bulk email from Gmail without getting blocked](https://trovarci.sh/blog/send-bulk-email-from-gmail): Gmail's daily limits (500 personal, 2,000 Google Workspace), app password setup and SMTP settings, what to do when Gmail blocks sending, and how to reach a list bigger than one account allows.
 - [Email deliverability in 2026](https://trovarci.sh/blog/email-deliverability-guide-2026): The four things that decide where email lands, the Gmail, Yahoo and Outlook rules for bulk senders, and what to do for each problem.
 - [Why your emails go to spam](https://trovarci.sh/blog/why-emails-go-to-spam): Finds the cause by situation: everyone or some people, sudden or always, the setup, the list or the message.
