@@ -197,7 +197,7 @@ export default function AdminReading() {
                 <li key={a.q} className={styles.noteItem}>
                   <p className={styles.noteText}>{a.q}</p>
                   <p className={styles.noteMeta}>
-                    {a.n === 1 ? 'Asked once' : `Asked ${a.n} times`} · {a.found === 0 ? 'nothing answered it' : `${a.found} answers shown`} · {date(a.last_at)}
+                    {a.n === 1 ? 'Asked once' : `Asked ${a.n} times`} · {a.found === 0 ? 'nothing answered it' : a.found == null ? 'answer opened' : `${a.found} answers shown`} · {a.opened === 0 ? 'nothing opened' : `opened ${a.opened}× · most ${a.top_go}`} · {date(a.last_at)}
                   </p>
                 </li>
               ))}

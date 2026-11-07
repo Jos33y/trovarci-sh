@@ -1,10 +1,12 @@
 ---
 title: "Gmail SMTP settings: server, port and password"
+nav: "Gmail SMTP settings"
 description: "The Gmail SMTP settings for any email app or sending software: server, port, encryption, username, the app password and the daily limit."
 short: "Server smtp.gmail.com, port 587 with STARTTLS or 465 with SSL, your full Gmail address as the username, and an app password instead of your normal password. A personal account can send to 500 people a day, Google Workspace to about 2,000."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: smtp
+order: 1
 action: smtp
 asks:
   - gmail smtp server

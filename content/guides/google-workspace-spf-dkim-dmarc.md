@@ -1,10 +1,12 @@
 ---
 title: "Set up SPF, DKIM and DMARC for Google Workspace"
+nav: "Google Workspace SPF, DKIM, DMARC"
 description: "The three DNS records Google Workspace needs, where to get the DKIM key in the Admin console, and how to check they work."
 short: "Add a TXT record v=spf1 include:_spf.google.com ~all at @. Generate a DKIM key in the Admin console under Apps, Google Workspace, Gmail, Authenticate email, and add it as a TXT record at google._domainkey. Then add a DMARC record at _dmarc, starting with p=none."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: dns
+order: 1
 action: records
 asks:
   - google workspace dkim

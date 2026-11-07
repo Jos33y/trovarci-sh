@@ -1,0 +1,115 @@
+/* Guides by topic: a sticky column from 1024, a drawer below it. */
+
+.rail {
+  display: none;
+}
+
+.drawer {
+  margin-bottom: 24px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-md);
+}
+
+.drawerSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--trov-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.drawerSummary::-webkit-details-marker {
+  display: none;
+}
+
+.drawerSummary::after {
+  content: '+';
+  font-family: var(--font-mono);
+  color: var(--trov-accent);
+}
+
+.drawer[open] .drawerSummary::after {
+  content: '\2212';
+}
+
+.drawer .nav {
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--trov-border);
+}
+
+.group + .group {
+  margin-top: 20px;
+}
+
+.drawer .group:first-child {
+  margin-top: 12px;
+}
+
+.topic {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.topicLink {
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+}
+
+.topicLink:hover {
+  color: var(--trov-accent);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: block;
+  padding: 5px 0 5px 12px;
+  border-left: 1px solid var(--trov-border);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.link:hover {
+  color: var(--trov-text);
+  border-left-color: var(--trov-border-hover);
+}
+
+.on,
+.on:hover {
+  padding-left: 11px;
+  border-left: 2px solid var(--trov-accent);
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+@media (min-width: 1024px) {
+  .drawer {
+    display: none;
+  }
+
+  .rail {
+    display: block;
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-width: thin;
+  }
+}

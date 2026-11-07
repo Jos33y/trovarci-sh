@@ -1,10 +1,12 @@
 ---
 title: "How to get your domain or server off a blocklist"
+nav: "Get off a blocklist"
 description: "Find which blocklist you're on, fix the cause, and request removal from Spamhaus, SpamCop, Barracuda and the rest, free."
 short: "Check which list you're on with the free Domain Checker, fix what caused it, then use that list's own removal page. Spamhaus removal is free at check.spamhaus.org. SpamCop listings expire on their own 24 hours after the last report. Barracuda has a removal form, usually handled within 12 hours."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: dns
+order: 3
 action: domain
 asks:
   - how to get off a blacklist

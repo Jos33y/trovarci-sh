@@ -1,10 +1,12 @@
 ---
 title: "Daily sending limit exceeded: what it means and what to do"
+nav: "Daily limit exceeded"
 description: "What 'daily sending limit exceeded' means on Gmail, Google Workspace and Amazon SES, how long it lasts, and how to finish your campaign."
 short: "Your email account has sent as much as it may in a day, so the provider refuses more until the limit resets, usually within 24 hours. Stop sending from that account, wait, and spread the rest of the campaign over more days or more accounts."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: sending
+order: 1
 action: sender
 asks:
   - 550 5.4.5 daily user sending quota exceeded

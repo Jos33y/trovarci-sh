@@ -1,10 +1,12 @@
 ---
 title: "How to verify an email list before sending"
+nav: "Verify a list before sending"
 description: "Verify an email list in four steps: export it, check it, sort the results and import the clean list back. What each result means and what it costs."
 short: "Export your list as a CSV, upload it to the Email Verifier, then keep the valid addresses, remove the invalid ones and decide on the risky ones. Download the clean list and import it back into the tool you send from. It costs 1 cent per address."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: lists
+order: 2
 action: verify
 asks:
   - how to clean an email list

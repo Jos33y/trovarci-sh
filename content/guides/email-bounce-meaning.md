@@ -1,10 +1,12 @@
 ---
 title: "What an email bounce means: hard and soft bounces"
+nav: "What a bounce means"
 description: "What a bounced email means, how to tell a hard bounce from a soft one by its code, and what to do with each address."
 short: "A bounce is a reply saying your email wasn't delivered. Codes starting with 5 are hard bounces: the address doesn't exist or the server refused it for good, so remove it. Codes starting with 4 are soft bounces, such as a full mailbox or a busy server, so it may work later."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: lists
+order: 1
 action: verify
 asks:
   - hard bounce vs soft bounce

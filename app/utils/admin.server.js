@@ -902,15 +902,17 @@ export async function adminHelpSearches({ days = 30, limit = 40 } = {}) {
   const interval = `${days} days`;
   return sql`
     SELECT lower(trim(metadata->>'q')) AS q,
-           COUNT(*)::int AS n,
+           COUNT(*) FILTER (WHERE NOT metadata ? 'go')::int AS n,
            MIN((metadata->>'n')::int) AS found,
+           COUNT(*) FILTER (WHERE metadata ? 'go')::int AS opened,
+           mode() WITHIN GROUP (ORDER BY metadata->>'go') FILTER (WHERE metadata ? 'go') AS top_go,
            MAX(created_at) AS last_at
     FROM analytics_events
     WHERE event_type = 'help_search' AND metadata ? 'q'
       AND is_bot = FALSE AND is_internal = FALSE
       AND created_at > now() - ${interval}::interval
     GROUP BY 1
-    ORDER BY (MIN((metadata->>'n')::int) = 0) DESC, n DESC, last_at DESC
+    ORDER BY (COALESCE(MIN((metadata->>'n')::int), 1) = 0) DESC, 2 DESC, last_at DESC
     LIMIT ${limit}
   `;
 }

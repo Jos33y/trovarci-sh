@@ -35,7 +35,7 @@ export default function Privacy() {
         <div className={`container ${styles.inner}`}>
           <header ref={headerRef} className={`${styles.header} reveal`}>
             <h1 className={styles.title}>Privacy Policy</h1>
-            <p className={styles.updated}>Last updated: November 6, 2026</p>
+            <p className={styles.updated}>Last updated: November 7, 2026</p>
           </header>
 
           <hr className={styles.divider} />
@@ -266,6 +266,8 @@ export default function Privacy() {
             <ul>
               <li><strong>Page views</strong> - the path you visited, the referring domain (never the full URL) and any UTM campaign parameters in the link you arrived on.</li>
               <li><strong>Tool events</strong> - which tool you ran, whether it succeeded and how many Credits it used. Not the email addresses, phone numbers or domains you submitted.</li>
+              <li><strong>Reading</strong> - how long a page was open and on screen, how far down it you scrolled, which section you jumped to, and the first thing you clicked next. Your answer to &ldquo;Did this help?&rdquo;, and any note you choose to add.</li>
+              <li><strong>Help desk questions</strong> - what you type in the help desk search at /guides, once you stop typing, with email addresses and long numbers removed, and which answer you opened. We use it to write the guides people are missing.</li>
               <li><strong>Funnel steps</strong> - whether you reached signup, completed signup, viewed pricing, started checkout and completed payment.</li>
               <li><strong>Country</strong> - a two-letter country code derived from your IP by Cloudflare. We do not store the IP itself.</li>
               <li><strong>Device class</strong> - mobile, tablet or desktop, derived from your browser&apos;s User-Agent string.</li>

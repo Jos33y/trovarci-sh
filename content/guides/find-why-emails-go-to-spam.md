@@ -1,10 +1,12 @@
 ---
 title: "Find why your emails go to spam: 4 checks in order"
+nav: "Find why email goes to spam"
 description: "Four checks, in the order that finds the cause fastest: your domain, the email's headers, your list, then the message. With the fix for each."
 short: "First check your domain's setup and blocklists with the free Domain Checker. Then open one of your emails in Gmail, choose Show original, and look for SPF, DKIM and DMARC: PASS. Then check your list for dead addresses, and last, score the email itself. Fix the first check that fails."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: deliverability
+order: 1
 action: domain
 asks:
   - why are my emails going to spam

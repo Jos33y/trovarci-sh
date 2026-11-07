@@ -5,17 +5,17 @@ import { data, Form, Link, useLoaderData } from 'react-router';
 import Header from '~/components/layout/Header';
 import Footer from '~/components/layout/Footer';
 import BlogContent from '~/components/blog/BlogContent';
+import GuideNav from '~/components/guides/GuideNav';
 import HelpfulVote from '~/components/blog/HelpfulVote';
 import { getSeo } from '~/utils/seo';
-import { getGuide, getAllGuides, ACTIONS, TOPICS } from '~/utils/guides.server';
+import { getGuide, getNav, ACTIONS, TOPICS } from '~/utils/guides.server';
 import styles from '~/styles/modules/routes/guide.module.css';
 
 export function loader({ params }) {
   const guide = getGuide(params.slug);
   if (!guide) throw data(null, { status: 404, statusText: 'Guide not found' });
   const topic = TOPICS.find((t) => t.id === guide.topic);
-  const siblings = getAllGuides().filter((g) => g.topic === guide.topic).map(({ slug, title }) => ({ slug, title }));
-  return { guide, topic, siblings, action: ACTIONS[guide.action] };
+  return { guide, topic, nav: getNav(), action: ACTIONS[guide.action] };
 }
 
 const longDate = (iso) => new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
@@ -56,38 +56,19 @@ export const meta = ({ data: d }) => {
 };
 
 export default function Guide() {
-  const { guide, topic, siblings, action } = useLoaderData();
+  const { guide, topic, nav, action } = useLoaderData();
 
   return (
     <div className={styles.page}>
       <Header />
       <main className={styles.main}>
         <div className={`container ${styles.layout}`}>
-          <aside className={styles.rail} aria-label="Guides on this topic">
-            <Form method="get" action="/guides" role="search" className={styles.railAsk}>
-              <label htmlFor="rail-ask" className={styles.visuallyHidden}>Ask another question</label>
-              <input id="rail-ask" name="q" type="search" placeholder="Ask another question" className={styles.railInput} autoComplete="off" />
+          <aside className={styles.side}>
+            <Form method="get" action="/guides" role="search" className={styles.sideAsk}>
+              <label htmlFor="side-ask" className={styles.visuallyHidden}>Ask another question</label>
+              <input id="side-ask" name="q" type="search" placeholder="Ask another question…" className={styles.sideInput} autoComplete="off" spellCheck={false} />
             </Form>
-            <p className={styles.railLabel}>{topic.label}</p>
-            <ul className={styles.railList}>
-              {siblings.map((s) => (
-                <li key={s.slug}>
-                  <Link to={`/guides/${s.slug}`} className={`${styles.railLink} ${s.slug === guide.slug ? styles.railOn : ''}`} aria-current={s.slug === guide.slug ? 'page' : undefined}>
-                    {s.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {guide.steps.length > 1 && (
-              <>
-                <p className={styles.railLabel}>On this page</p>
-                <ol className={styles.railSteps}>
-                  {guide.steps.map((s) => (
-                    <li key={s.id}><a href={`#${s.id}`} className={styles.railStep}>{s.text}</a></li>
-                  ))}
-                </ol>
-              </>
-            )}
+            <GuideNav topics={nav} current={guide.slug} />
           </aside>
 
           <article className={styles.article}>
@@ -169,6 +150,17 @@ export default function Guide() {
               </section>
             )}
           </article>
+
+          {guide.steps.length > 1 && (
+            <aside className={styles.toc} aria-label="On this page">
+              <p className={styles.tocLabel}>On this page</p>
+              <ol className={styles.tocList}>
+                {guide.steps.map((st) => (
+                  <li key={st.id}><a href={`#${st.id}`} className={styles.tocLink}>{st.text}</a></li>
+                ))}
+              </ol>
+            </aside>
+          )}
         </div>
       </main>
       <Footer />

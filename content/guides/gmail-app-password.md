@@ -1,10 +1,12 @@
 ---
 title: "How to create a Gmail app password"
+nav: "Gmail app password"
 description: "Create a Gmail app password in four steps, so an email app or sending software can send through your Gmail or Google Workspace account."
 short: "Turn on 2-Step Verification in your Google account, then open myaccount.google.com/apppasswords, type a name for the app and press Create. Google shows a 16-character code once: paste it into your app as the password, without spaces."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: smtp
+order: 2
 action: smtp
 asks:
   - gmail app password

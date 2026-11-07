@@ -16,6 +16,7 @@ export const TOPICS = [
   { id: 'smtp', label: 'Email accounts and SMTP', blurb: 'Settings, passwords and sending limits.' },
   { id: 'lists', label: 'Lists and bounces', blurb: 'Dead addresses, bounces and verification.' },
   { id: 'sending', label: 'Sending in bulk', blurb: 'Campaigns, limits and doing it safely.' },
+  { id: 'tools', label: 'Using our tools', blurb: 'Each Trovarcis tool, step by step, and how to read what it shows.' },
 ];
 
 export const ACTIONS = {
@@ -66,6 +67,7 @@ function load() {
     guides.push({
       slug,
       title: data.title,
+      nav: data.nav || null,
       description: data.description,
       short: fillPrices(data.short),
       published: String(data.published),
@@ -80,6 +82,7 @@ function load() {
       }),
       related: data.related || [],
       post: data.post || null,
+      order: typeof data.order === 'number' ? data.order : null,
       slow: data.slow ? fillPrices(data.slow) : null,
       minutes: readingMinutes(`${data.short} ${content}`),
       raw,
@@ -95,6 +98,21 @@ const summary = ({ raw, content, ...g }) => g;
 
 export function getAllGuides() {
   return load().map(summary);
+}
+
+// Topics with their guides, for the help desk's navigation. Guides keep their file order
+// inside a topic when they set `order`, otherwise alphabetical.
+export function getNav() {
+  const guides = load();
+  return TOPICS.map((t) => ({
+    id: t.id,
+    label: t.label,
+    blurb: t.blurb,
+    guides: guides
+      .filter((g) => g.topic === t.id)
+      .sort((a, b) => (a.order ?? 99) - (b.order ?? 99) || a.title.localeCompare(b.title))
+      .map(({ slug, title, nav, description }) => ({ slug, title, nav, description })),
+  })).filter((t) => t.guides.length);
 }
 
 export function getGuide(slug) {

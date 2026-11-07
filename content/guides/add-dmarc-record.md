@@ -1,10 +1,12 @@
 ---
 title: "How to add a DMARC record"
+nav: "Add a DMARC record"
 description: "Add a DMARC record to any domain in three steps: the exact name and value, where reports go, and when to move from p=none to quarantine."
 short: "In your DNS settings, add a TXT record named _dmarc with the value v=DMARC1; p=none; rua=mailto:you@yourdomain.com. Keep p=none for two to four weeks while reports arrive, then change it to p=quarantine, and later to p=reject."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: dns
+order: 2
 action: records
 asks:
   - dmarc record example

@@ -21,7 +21,7 @@ Credits cost $0.010 each at any volume, from $5, with no subscription. New accou
 
 ## Help desk guides
 
-Short how-to answers. Each is also available as Markdown at the same address plus .md. Search them all at https://trovarci.sh/guides?q=your+question
+Short how-to answers. Paste an SMTP error or bounce message into the search to have it explained. Each is also available as Markdown at the same address plus .md. Search them all at https://trovarci.sh/guides?q=your+question
 
 - [How to add a DMARC record](https://trovarci.sh/guides/add-dmarc-record): In your DNS settings, add a TXT record named _dmarc with the value v=DMARC1; p=none; rua=mailto:you@yourdomain.com. Keep p=none for two to four weeks while reports arrive, then change it to p=quarantine, and later to p=reject. Markdown: https://trovarci.sh/guides/add-dmarc-record.md
 - [Daily sending limit exceeded: what it means and what to do](https://trovarci.sh/guides/daily-sending-limit-exceeded): Your email account has sent as much as it may in a day, so the provider refuses more until the limit resets, usually within 24 hours. Stop sending from that account, wait, and spread the rest of the campaign over more days or more accounts. Markdown: https://trovarci.sh/guides/daily-sending-limit-exceeded.md
@@ -33,6 +33,18 @@ Short how-to answers. Each is also available as Markdown at the same address plu
 - [Set up SPF, DKIM and DMARC for Google Workspace](https://trovarci.sh/guides/google-workspace-spf-dkim-dmarc): Add a TXT record v=spf1 include:_spf.google.com ~all at @. Generate a DKIM key in the Admin console under Apps, Google Workspace, Gmail, Authenticate email, and add it as a TXT record at google._domainkey. Then add a DMARC record at _dmarc, starting with p=none. Markdown: https://trovarci.sh/guides/google-workspace-spf-dkim-dmarc.md
 - [How to get your domain or server off a blocklist](https://trovarci.sh/guides/remove-from-blocklist): Check which list you're on with the free Domain Checker, fix what caused it, then use that list's own removal page. Spamhaus removal is free at check.spamhaus.org. SpamCop listings expire on their own 24 hours after the last report. Barracuda has a removal form, usually handled within 12 hours. Markdown: https://trovarci.sh/guides/remove-from-blocklist.md
 - [How to verify an email list before sending](https://trovarci.sh/guides/verify-email-list-before-sending): Export your list as a CSV, upload it to the Email Verifier, then keep the valid addresses, remove the invalid ones and decide on the risky ones. Download the clean list and import it back into the tool you send from. It costs 1 cent per address. Markdown: https://trovarci.sh/guides/verify-email-list-before-sending.md
+
+- [Fix 535 5.7.139 Authentication unsuccessful in Microsoft 365](https://trovarci.sh/guides/microsoft-365-smtp-auth): The error means Microsoft 365 blocked SMTP sign-in, not a wrong password. Turn on Authenticated SMTP for the mailbox under Users, Active users, Mail, Manage email apps; check the organisation-wide setting and security defaults. Password sign-in over SMTP is off by default from the end of December 2026; admins can turn it back on. Markdown: https://trovarci.sh/guides/microsoft-365-smtp-auth.md
+- [SMTP error codes: what each one means and what to do](https://trovarci.sh/guides/smtp-error-codes): The first digit says what to do: 2 worked, 4 temporary (wait), 5 permanent (fix the cause or remove the address). Tables for 421 to 554 and the detailed codes like 5.1.1 and 5.7.1. Paste any error into https://trovarci.sh/guides to have it explained. Markdown: https://trovarci.sh/guides/smtp-error-codes.md
+
+### Using the tools
+
+- [How to check your domain's email setup](https://trovarci.sh/guides/use-domain-checker): Using the Domain Checker and reading its verdict and five sections. Markdown: https://trovarci.sh/guides/use-domain-checker.md
+- [How to generate SPF, DKIM and DMARC records](https://trovarci.sh/guides/use-dns-record-generator): Using the DNS Generator in three steps: provider, where DNS is managed, records. Markdown: https://trovarci.sh/guides/use-dns-record-generator.md
+- [How to test SMTP settings before you send](https://trovarci.sh/guides/use-smtp-tester): Using the SMTP Tester and what each failed step means. No email is sent. Markdown: https://trovarci.sh/guides/use-smtp-tester.md
+- [How to check if an email address is real](https://trovarci.sh/guides/use-email-verifier): Using the Email Verifier for one address or a list, and what Valid, Invalid, Risky and Unknown mean. Markdown: https://trovarci.sh/guides/use-email-verifier.md
+- [How to check if your email will go to spam](https://trovarci.sh/guides/use-email-scorer): Using the Email Scorer and what each score band means. Markdown: https://trovarci.sh/guides/use-email-scorer.md
+- [How to check if a phone number can receive SMS](https://trovarci.sh/guides/use-phone-number-checker): Using the Phone Number Checker: free format check, then carrier and line type. Markdown: https://trovarci.sh/guides/use-phone-number-checker.md
 
 ## Full explanations (blog)
 

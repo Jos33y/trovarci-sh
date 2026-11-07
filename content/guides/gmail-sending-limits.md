@@ -1,10 +1,12 @@
 ---
 title: "Gmail sending limits: how many emails a day"
+nav: "Gmail sending limits"
 description: "How many emails Gmail and Google Workspace let you send a day, what counts toward the limit, and what happens when you go over it."
 short: "A personal Gmail account can send to 500 people a day, and one email can have at most 500 recipients. Google Workspace allows 2,000 a day per user, or 500 on a free trial. Go over, and Gmail stops you sending for up to 24 hours."
 published: "2026-11-07"
 checked: "2026-11-07"
 topic: smtp
+order: 5
 action: sender
 asks:
   - how many emails can i send per day with gmail
