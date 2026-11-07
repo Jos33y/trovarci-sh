@@ -77,9 +77,12 @@ export const TELEMETRY_CLIENT_SOURCE = `
     return r;
   };
   var origReplace=history.replaceState;
+  // Pages that keep their inputs in the address (the help desk, the calculator) call
+  // replaceState on every keystroke. Only a change of page counts as a new page view.
   history.replaceState=function(){
+    var before=location.pathname;
     var r=origReplace.apply(this,arguments);
-    setTimeout(pageview,0);
+    if(location.pathname!==before) setTimeout(pageview,0);
     return r;
   };
   window.addEventListener('popstate',function(){ setTimeout(pageview,0); });

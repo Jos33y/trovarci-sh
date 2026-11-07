@@ -1,0 +1,415 @@
+/* /guides/:slug: a rail with the topic's guides and the steps, then the guide itself.
+   The answer comes first, in a ruled box; the steps follow; one action at the end. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--trov-bg);
+}
+
+.main {
+  flex: 1;
+  padding: 32px 0 80px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+}
+
+/* Rail (desktop only) */
+
+.rail {
+  display: none;
+}
+
+.railAsk {
+  margin-bottom: 24px;
+}
+
+.railInput {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border-hover);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--trov-text);
+}
+
+.railInput:focus-visible {
+  outline: 2px solid var(--trov-accent);
+  outline-offset: 2px;
+}
+
+.railLabel {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.railList,
+.railSteps {
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.railLink,
+.railStep {
+  display: block;
+  padding: 6px 0 6px 12px;
+  border-left: 1px solid var(--trov-border);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+}
+
+.railLink:hover,
+.railStep:hover {
+  color: var(--trov-text);
+}
+
+.railOn {
+  border-left: 2px solid var(--trov-accent);
+  padding-left: 11px;
+  color: var(--trov-text);
+  font-weight: 600;
+}
+
+/* Article */
+
+.article {
+  min-width: 0;
+  max-width: 720px;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+}
+
+.crumbs a {
+  color: var(--trov-text-secondary);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--trov-accent);
+}
+
+.title {
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 6vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--trov-text);
+  text-wrap: balance;
+}
+
+.meta {
+  margin: 12px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--trov-text-secondary);
+}
+
+.short {
+  margin-top: 24px;
+  padding: 18px 20px;
+  background: var(--trov-surface);
+  border: 1px solid var(--trov-border-hover);
+  border-left: 3px solid var(--trov-accent);
+  border-radius: 4px var(--radius-md) var(--radius-md) 4px;
+}
+
+.shortLabel {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+}
+
+.shortText {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--trov-text);
+}
+
+.needs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-top: 18px;
+}
+
+.needsLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.needsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.needsList li {
+  padding: 4px 10px;
+  border: 1px dashed var(--trov-border-hover);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+/* Steps: the shared content styles, tightened. Step headings get a numbered rule. */
+
+.body {
+  margin-top: 8px;
+}
+
+.body :global(h2) {
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--trov-border);
+  font-size: 1.25rem;
+  scroll-margin-top: 96px;
+}
+
+/* The slow part */
+
+.slow {
+  display: grid;
+  gap: 16px;
+  margin-top: 40px;
+  padding: 22px 20px;
+  border: 1px solid rgba(212, 168, 67, 0.35);
+  border-radius: var(--radius-lg);
+}
+
+.slowLabel {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-accent);
+}
+
+.slowBody {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--trov-text);
+}
+
+.slowAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 11px 20px;
+  background: var(--trov-accent);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--trov-text-on-accent);
+  text-decoration: none;
+  transition: background-color 150ms ease, transform 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.button:hover {
+  background: var(--trov-accent-hover);
+  color: var(--trov-text-on-accent);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.buttonNote {
+  font-size: 0.8125rem;
+  color: var(--trov-text-secondary);
+}
+
+.full {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--trov-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+
+.full:hover {
+  border-color: var(--trov-border-hover);
+}
+
+.fullLabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.fullTitle {
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.sources {
+  margin-top: 32px;
+}
+
+.sourcesLabel,
+.relatedLabel {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--trov-text-secondary);
+}
+
+.sourceList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--trov-text-secondary);
+}
+
+.sourceList a {
+  color: var(--trov-text-secondary);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.sourceList a:hover {
+  color: var(--trov-text);
+}
+
+.related {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 3px double var(--trov-border-hover);
+}
+
+.relatedList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.relatedLink {
+  display: grid;
+  gap: 2px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--trov-border);
+  text-decoration: none;
+}
+
+.relatedTitle {
+  font-weight: 600;
+  color: var(--trov-text);
+}
+
+.relatedLink:hover .relatedTitle {
+  color: var(--trov-accent);
+}
+
+.relatedShort {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--trov-text-secondary);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .slow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 24px 26px;
+  }
+
+  .slowAction {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main {
+    padding-top: 48px;
+  }
+
+  .layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 56px;
+  }
+
+  .rail {
+    display: block;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .full {
+    transition: none;
+  }
+}

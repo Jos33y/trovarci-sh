@@ -18,6 +18,7 @@ const STATIC_URLS = [
     '/smtp-test',
     '/records',
     '/bulk-email-cost-calculator',
+    '/guides',
     '/blog',
     '/about/trovarcis-team',
     '/sender',
@@ -57,6 +58,22 @@ async function getBlogPosts() {
     }
 }
 
+async function getGuides() {
+    try {
+        const dir = path.join(process.cwd(), 'content', 'guides');
+        const files = await fs.readdir(dir);
+        const guides = [];
+        for (const file of files) {
+            if (!file.endsWith('.md')) continue;
+            const { data } = matter(await fs.readFile(path.join(dir, file), 'utf-8'));
+            guides.push({ slug: file.replace(/\.md$/, ''), lastmod: data.checked || data.published || null });
+        }
+        return guides;
+    } catch {
+        return [];
+    }
+}
+
 function urlEntry(loc, lastmod) {
     let entry = `  <url>\n    <loc>${BASE_URL}${loc}</loc>`;
     if (lastmod) {
@@ -68,10 +85,11 @@ function urlEntry(loc, lastmod) {
 }
 
 export async function loader() {
-    const posts = await getBlogPosts();
+    const [posts, guides] = await Promise.all([getBlogPosts(), getGuides()]);
 
     const entries = [
         ...STATIC_URLS.map((u) => urlEntry(u, null)),
+        ...guides.map((g) => urlEntry(`/guides/${g.slug}`, g.lastmod)),
         ...posts.map((p) => urlEntry(`/blog/${p.slug}`, p.lastmod)),
     ];
 

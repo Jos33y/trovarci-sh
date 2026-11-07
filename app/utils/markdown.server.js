@@ -70,7 +70,7 @@ export function getAllPosts() {
 
 // Gives every table cell its column name, so on a phone each row can be shown as a card
 // ("Price: $79 once") instead of a table squeezed into the screen.
-function labelTableCells(html) {
+export function labelTableCells(html) {
   return html.replace(/<table>([\s\S]*?)<\/table>/g, (table, inner) => {
     const head = inner.match(/<thead>([\s\S]*?)<\/thead>/);
     if (!head) return table;
@@ -86,7 +86,7 @@ function labelTableCells(html) {
 }
 
 // Posts write {{sender_price}} instead of a number, so the price shown is always today's.
-function fillPrices(markdown) {
+export function fillPrices(markdown) {
   return markdown.replace(/\{\{sender_price\}\}/g, () => formatSenderPrice(currentSenderPrice().cents));
 }
 

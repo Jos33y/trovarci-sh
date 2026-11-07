@@ -896,6 +896,25 @@ export async function adminPickerChoices({ days = 30 } = {}) {
   `;
 }
 
+// Questions asked in the help desk, grouped, with whether anything answered them.
+// The ones with no answer are the next guides to write.
+export async function adminHelpSearches({ days = 30, limit = 40 } = {}) {
+  const interval = `${days} days`;
+  return sql`
+    SELECT lower(trim(metadata->>'q')) AS q,
+           COUNT(*)::int AS n,
+           MIN((metadata->>'n')::int) AS found,
+           MAX(created_at) AS last_at
+    FROM analytics_events
+    WHERE event_type = 'help_search' AND metadata ? 'q'
+      AND is_bot = FALSE AND is_internal = FALSE
+      AND created_at > now() - ${interval}::interval
+    GROUP BY 1
+    ORDER BY (MIN((metadata->>'n')::int) = 0) DESC, n DESC, last_at DESC
+    LIMIT ${limit}
+  `;
+}
+
 // "Did this check help?" answers per tool.
 export async function adminToolVotes({ days = 7 } = {}) {
   const interval = `${days} days`;

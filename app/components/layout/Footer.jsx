@@ -29,12 +29,13 @@ const COLUMNS = [
   {
     title: "Guides",
     links: [
-      { label: "Why emails go to spam", href: "/blog/why-emails-go-to-spam" },
+      { label: "Why emails go to spam", href: "/guides/find-why-emails-go-to-spam" },
+      { label: "Gmail SMTP settings", href: "/guides/gmail-smtp-settings" },
+      { label: "Add a DMARC record", href: "/guides/add-dmarc-record" },
+      { label: "Get off a blocklist", href: "/guides/remove-from-blocklist" },
       { label: "Set up SPF, DKIM, DMARC", href: "/blog/spf-dkim-dmarc-setup" },
-      { label: "Fix SPF PermError", href: "/blog/spf-permerror-10-dns-lookups-fix" },
-      { label: "Is my domain blacklisted?", href: "/blog/domain-blacklisted-check-fix" },
-      { label: "Clean an email list", href: "/blog/clean-email-list-before-sending" },
-      { label: "All guides", href: "/blog" },
+      { label: "Help desk", href: "/guides" },
+      { label: "Blog", href: "/blog" },
     ],
   },
   {

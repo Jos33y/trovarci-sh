@@ -1,7 +1,7 @@
 // Reading: per page, how long people read, how far they got, what they did next, and whether it helped.
 
 import { Link, useLoaderData } from 'react-router';
-import { requireAdmin, adminPageEngagement, adminHelpfulNotes, adminPickerChoices } from '~/utils/admin.server';
+import { requireAdmin, adminPageEngagement, adminHelpfulNotes, adminPickerChoices, adminHelpSearches } from '~/utils/admin.server';
 import KPICard from '~/components/admin/KPICard';
 import EmptyState from '~/components/admin/EmptyState';
 import { ShareLabel, Count, Meter, Takeaway } from '~/components/admin/MetricCells';
@@ -17,12 +17,13 @@ export async function loader({ request }) {
   await requireAdmin(request);
   const url = new URL(request.url);
   const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '30', 10)));
-  const [pages, notes, pickRows] = await Promise.all([
+  const [pages, notes, pickRows, asked] = await Promise.all([
     adminPageEngagement({ days }),
     adminHelpfulNotes({ days: 90 }),
     adminPickerChoices({ days }),
+    adminHelpSearches({ days }),
   ]);
-  return { pages, notes, picks: groupPicks(pickRows), days };
+  return { pages, notes, picks: groupPicks(pickRows), asked, days };
 }
 
 // One entry per page with a picker: its choices, most picked first, and views that picked nothing.
@@ -69,7 +70,7 @@ function worstPage(pages) {
 const date = (iso) => new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(new Date(iso));
 
 export default function AdminReading() {
-  const { pages, notes, picks, days } = useLoaderData();
+  const { pages, notes, picks, asked, days } = useLoaderData();
   const measured = pages.reduce((n, p) => n + p.measured, 0);
   const reachedEnd = pages.reduce((n, p) => n + p.reached_end, 0);
   const acted = pages.reduce((n, p) => n + p.acted, 0);
@@ -182,6 +183,27 @@ export default function AdminReading() {
             </div>
           </section>
         )}
+
+        <section className={styles.panel}>
+          <header className={styles.panelHead}>
+            <h2 className={styles.panelTitle}>What people asked the help desk</h2>
+            <span className={styles.panelSub}>unanswered first: those are the next guides to write</span>
+          </header>
+          {asked.length === 0 ? (
+            <EmptyState title="No questions yet" body="Questions typed into the help desk at /guides show here, once the visitor stops typing." />
+          ) : (
+            <ul className={styles.noteList}>
+              {asked.map((a) => (
+                <li key={a.q} className={styles.noteItem}>
+                  <p className={styles.noteText}>{a.q}</p>
+                  <p className={styles.noteMeta}>
+                    {a.n === 1 ? 'Asked once' : `Asked ${a.n} times`} · {a.found === 0 ? 'nothing answered it' : `${a.found} answers shown`} · {date(a.last_at)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         <section className={styles.panel}>
           <header className={styles.panelHead}>
