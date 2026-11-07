@@ -84,6 +84,61 @@ const NEEDS = [
   'An SMTP account: Gmail, Google Workspace, Zoho, Resend, SendGrid, Brevo, Mailgun, Postmark, Amazon SES, or your own server',
 ];
 
+// Who buys Sender, in their own words, each linked to the post written for them.
+const FOR = [
+  {
+    who: 'Newsletter writers',
+    job: 'Your newsletter, without the monthly bill',
+    text: 'Paste the issue from any email designer and send it to every subscriber through Amazon SES or any account. The price never grows with your list.',
+    href: '/blog/send-newsletter-without-mailchimp',
+    icon: 'paper',
+  },
+  {
+    who: 'Churches',
+    job: 'The weekly bulletin, to every member by name',
+    text: 'From the church’s own address, with last week’s bulletin ready to reuse. Nobody sees anyone else’s address.',
+    href: '/blog/email-all-church-members',
+    icon: 'bell',
+  },
+  {
+    who: 'Schools',
+    job: 'Letters to every parent, once each',
+    text: 'Each parent gets their own email with their child’s name and the form attached. A family on two class lists gets it once.',
+    href: '/blog/email-all-parents-at-once',
+    icon: 'book',
+  },
+  {
+    who: 'Recruiters',
+    job: 'Openings and interview invites, personal at scale',
+    text: 'Name, role and a line written for each candidate, sent only during working hours, from your own address.',
+    href: '/blog/email-candidates-in-bulk',
+    icon: 'case',
+  },
+  {
+    who: 'Outreach teams',
+    job: 'One campaign across many mailboxes',
+    text: 'Every Workspace mailbox sends at its own daily limit, and the campaign pauses by itself if servers start refusing.',
+    href: '/guides/cold-outreach-setup',
+    icon: 'plane',
+  },
+];
+
+const ICON_PATHS = {
+  paper: 'M5 3.5h10l4 4V20.5H5ZM15 3.5v4h4M8.5 11h7M8.5 14h7M8.5 17h4.5',
+  bell: 'M12 3v2M7 17V11a5 5 0 0 1 10 0v6M5 17h14M10.5 20a1.5 1.5 0 0 0 3 0',
+  book: 'M4 5.5c2.5-1 5-1 8 1 3-2 5.5-2 8-1V19c-2.5-1-5-1-8 1-3-2-5.5-2-8-1ZM12 6.5V20',
+  case: 'M3.5 8h17v11h-17ZM9 8V5.5h6V8M3.5 13h17M11 12v2h2v-2',
+  plane: 'M3 11.5 21 4l-6.5 16-3.5-6.5ZM11 13.5 21 4',
+};
+
+function GroupIcon({ name }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d={ICON_PATHS[name]} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function WindowsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -214,6 +269,26 @@ export default function SenderPage() {
           </div>
 
           <ScreenshotViewer />
+
+          <section className={styles.section} aria-labelledby="for-title">
+            <h2 id="for-title" className={styles.sectionTitle}>Who it’s for</h2>
+            <p className={styles.para}>Anyone who emails a list they already have, from an address they already own.</p>
+            <ul className={styles.forList}>
+              {FOR.map((f) => (
+                <li key={f.who}>
+                  <Link to={f.href} className={styles.forCard}>
+                    <span className={styles.forHead}>
+                      <span className={styles.forIcon}><GroupIcon name={f.icon} /></span>
+                      <span className={styles.forWho}>For {f.who.toLowerCase()}</span>
+                    </span>
+                    <span className={styles.forJob}>{f.job}</span>
+                    <span className={styles.forText}>{f.text}</span>
+                    <span className={styles.forMore}>How it works <span aria-hidden="true">→</span></span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <section className={styles.section} aria-labelledby="does-title">
             <h2 id="does-title" className={styles.sectionTitle}>What it does</h2>
